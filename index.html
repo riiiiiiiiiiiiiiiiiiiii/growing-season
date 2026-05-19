@@ -1381,16 +1381,28 @@ function rMy(){
     var arcBody=document.createElement('div');arcBody.className='cat-body';arcBody.style.display=arcOpen?'block':'none';
     archivedActs.forEach(function(a){
       var row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--bg2);opacity:.55;';
+      row.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--bg2);opacity:.55;';
       row.innerHTML='<span style="font-size:22px;">'+a.emoji+'</span><span style="flex:1;font-size:14px;font-weight:500;">'+a.name+'</span>';
       var restoreBtn=document.createElement('button');
-      restoreBtn.style.cssText='background:none;border:1px solid var(--grm);border-radius:14px;padding:4px 10px;font-size:11px;font-weight:600;color:var(--gr);cursor:pointer;';
+      restoreBtn.style.cssText='background:none;border:1px solid var(--grm);border-radius:14px;padding:4px 10px;font-size:11px;font-weight:600;color:var(--gr);cursor:pointer;touch-action:manipulation;';
       restoreBtn.textContent='Restore';
-      (function(act){restoreBtn.addEventListener('click',function(){
-        var ai=archivedActs.indexOf(act);
-        if(ai>-1){archivedActs.splice(ai,1);myActs.push(act);sv();rMy();}
-      });})(a);
-      row.appendChild(restoreBtn);arcBody.appendChild(row);
+      var deleteBtn=document.createElement('button');
+      deleteBtn.style.cssText='background:none;border:1px solid #FECACA;border-radius:14px;padding:4px 10px;font-size:11px;font-weight:600;color:#DC2626;cursor:pointer;touch-action:manipulation;';
+      deleteBtn.textContent='Delete';
+      (function(act){
+        restoreBtn.addEventListener('click',function(){
+          var ai=archivedActs.indexOf(act);
+          if(ai>-1){archivedActs.splice(ai,1);myActs.push(act);sv();rMy();}
+        });
+        deleteBtn.addEventListener('click',function(){
+          var ai=archivedActs.indexOf(act);
+          if(ai>-1){
+            archivedActs.splice(ai,1);sv();rMy();
+            showToast(act.emoji+' '+act.name+' deleted',function(){archivedActs.splice(ai,0,act);sv();rMy();});
+          }
+        });
+      })(a);
+      row.appendChild(restoreBtn);row.appendChild(deleteBtn);arcBody.appendChild(row);
     });
     arcHdr.addEventListener('click',function(){
       var nowOpen=arcBody.style.display==='none';
