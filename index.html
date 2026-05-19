@@ -433,7 +433,8 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     <div id="add-panel-library">
       <div class="sw" style="margin-bottom:8px;"><span class="sic">🔍</span><input class="si" id="lib-search" placeholder="Search activities..."></div>
       <div id="lib-cats" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;"></div>
-      <div id="lib-grid" style="display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow-y:auto;"></div>
+      <div id="lib-grid" style="display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow-y:auto;"></div>
+      <button class="btn btn-p" id="btn-lib-save" style="margin-top:10px;" disabled>Select seeds to plant</button>
     </div>
     <!-- Custom tab -->
     <div id="add-panel-custom" style="display:none;">
@@ -575,6 +576,10 @@ document.getElementById('ob-back-btn').addEventListener('click',function(){
 document.getElementById('btn-discard').addEventListener('click',discard);
 document.getElementById('btn-ed-cancel').addEventListener('click',closeEd);
 document.getElementById('btn-add-cancel').addEventListener('click',closeAdd);
+document.getElementById('btn-lib-save').addEventListener('click',function(){
+  libSelected.forEach(function(id){var a=ACTS.find(function(x){return x.id===id;});if(a)myActs.push(Object.assign({},a,{type:'recreational',level:'beginner'}));});
+  sv();closeAdd();rMy();
+});
 document.getElementById('btn-ed-save').addEventListener('click',saveEd);
 document.getElementById('btn-add-save').addEventListener('click',saveAdd);
 document.getElementById('ob-btn').addEventListener('click',goOQ);
@@ -1463,7 +1468,7 @@ function closeEd(){document.getElementById('ed-ov').classList.remove('on');}
 function saveEd(){var a=myActs.find(function(x){return x.id===edId;});if(a){a.type=edTmp.type;a.level=edTmp.level;}sv();closeEd();rMy();}
 
 // ── ADD SHEET ─────────────────────────────────────────
-var libCat='all', libSearch='';
+var libCat='all', libSearch='', libSelected=[];
 
 function switchAddTab(tab){
   var isLib = tab==='library';
@@ -1496,13 +1501,20 @@ function rLibGrid(){
     card.className='bp-card';
     card.style.cursor='pointer';
     var cc=CAT_COLORS[a.cat].split(',');
+    var sel=libSelected.indexOf(a.id)>-1;
+    card.style.borderColor=sel?'var(--gr)':'';
+    card.style.background=sel?'var(--grl)':'';
     card.innerHTML='<span style="font-size:22px;">'+a.emoji+'</span>'
       +'<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+a.name+'</div>'
       +'<span style="font-size:11px;padding:1px 7px;border-radius:8px;background:'+cc[0]+';color:'+cc[1]+';">'+a.cat+'</span></div>'
-      +'<span style="font-size:20px;color:var(--gr);font-weight:700;">+</span>';
+      +'<span class="lib-chk" style="font-size:18px;color:var(--gr);font-weight:700;width:24px;text-align:center;">'+(sel?'✓':'+')+'</span>';
     card.addEventListener('click',function(){
-      myActs.push(Object.assign({},a,{type:'recreational',level:'beginner'}));
-      sv(); closeAdd(); rMy();
+      var idx=libSelected.indexOf(a.id);
+      if(idx>-1){libSelected.splice(idx,1);}else{libSelected.push(a.id);}
+      rLibGrid();
+      var btn=document.getElementById('btn-lib-save');
+      btn.disabled=libSelected.length===0;
+      btn.textContent=libSelected.length===0?'Select seeds to plant':'Plant '+libSelected.length+' seed'+(libSelected.length!==1?'s':'');
     });
     grid.appendChild(card);
   });
@@ -1524,8 +1536,9 @@ function rLibCats(){
 }
 
 function openAdd(){
-  libCat='all';libSearch='';
+  libCat='all';libSearch='';libSelected=[];
   document.getElementById('an').value='';
+  var libBtn=document.getElementById('btn-lib-save');libBtn.disabled=true;libBtn.textContent='Select seeds to plant';
   switchAddTab('library');
   rLibCats();rLibGrid();
 
