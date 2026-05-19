@@ -200,7 +200,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .ac{transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
 .ac:active{transform:scale(.92);}
 .mc-wrap{position:relative;overflow:hidden;border-radius:var(--rad);margin-bottom:8px;}
-.mc-del{position:absolute;right:0;top:0;bottom:0;width:80px;background:#EF4444;display:flex;align-items:center;justify-content:center;font-size:20px;border-radius:0 var(--rad) var(--rad) 0;}
+.mc-del{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
 .mc{transition:transform .18s ease;margin-bottom:0;border-radius:var(--rad);touch-action:pan-y;}
 .mc:active{transform:scale(.98);}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;border-radius:20px;padding:10px 18px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:12px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);opacity:0;transition:opacity .2s;}
@@ -1118,7 +1118,9 @@ document.getElementById('toast-undo').addEventListener('click',function(){
 
 // ── SWIPE TO ARCHIVE ──────────────────────────────────
 function addSwipe(wrap,card,onArchive){
+  var del=wrap.querySelector('.mc-del');
   var startX,startY,dx=0,decided=false,isSwipe=false;
+  var threshold=90;
   card.addEventListener('touchstart',function(e){
     startX=e.touches[0].clientX;startY=e.touches[0].clientY;
     dx=0;decided=false;isSwipe=false;
@@ -1135,13 +1137,25 @@ function addSwipe(wrap,card,onArchive){
     }
     if(!isSwipe)return;
     e.preventDefault();
-    if(dx<0)card.style.transform='translateX('+Math.max(dx,-80)+'px)';
-    else card.style.transform='translateX(0)';
+    if(dx<0){
+      card.style.transform='translateX('+dx+'px)';
+      if(del)del.style.opacity=Math.min(Math.abs(dx)/threshold,1);
+    } else {
+      card.style.transform='translateX(0)';
+      if(del)del.style.opacity=0;
+    }
   },{passive:false});
   card.addEventListener('touchend',function(){
-    card.style.transition='';
-    if(isSwipe&&dx<-70){onArchive();}
-    else{card.style.transform='';}
+    if(isSwipe&&dx<-threshold){
+      card.style.transition='transform .25s ease-in';
+      card.style.transform='translateX(-110vw)';
+      if(del)del.style.opacity=0;
+      setTimeout(onArchive,220);
+    } else {
+      card.style.transition='';
+      card.style.transform='';
+      if(del)del.style.opacity=0;
+    }
     decided=false;isSwipe=false;dx=0;
   });
 }
