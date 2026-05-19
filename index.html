@@ -277,6 +277,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       <div id="ob-cats" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px;"></div>
       <div id="ob-grid" class="og"></div>
       <button class="btn btn-p" id="ob-btn" disabled>Next</button>
+      <button class="btn btn-s" id="ob-back-btn" style="display:none;margin-top:6px;">← Back to my plot</button>
     </div>
   </div>
 
@@ -551,7 +552,12 @@ document.getElementById('btn-term-yes').addEventListener('click',function(){
   document.getElementById('term-ov').classList.remove('on');
   document.getElementById('main-nav').classList.remove('on');
   document.getElementById('fab').style.display='none';
+  document.getElementById('ob-back-btn').style.display='block';
   show('s-ob1');rObCats();rObGrid();
+});
+document.getElementById('ob-back-btn').addEventListener('click',function(){
+  onboarded=true;sv();launch();
+  document.getElementById('ob-back-btn').style.display='none';
 });
 document.getElementById('btn-discard').addEventListener('click',discard);
 document.getElementById('btn-ed-cancel').addEventListener('click',closeEd);
@@ -780,11 +786,12 @@ function rOQ(){
     opts.appendChild(opt);
   });
   body.appendChild(opts);
-  if(oqStep>0){
-    var back=document.createElement('button');back.className='btn btn-s';back.style.marginTop='12px';back.textContent='Back';
-    back.addEventListener('click',function(){oqStep--;rOQ();});
-    body.appendChild(back);
-  }
+  var back=document.createElement('button');back.className='btn btn-s';back.style.marginTop='12px';back.textContent='← Back';
+  back.addEventListener('click',function(){
+    if(oqStep>0){oqStep--;rOQ();}
+    else{show('s-ob1');}
+  });
+  body.appendChild(back);
 }
 function pickOQ(key,val){
   profile[key]=val;
