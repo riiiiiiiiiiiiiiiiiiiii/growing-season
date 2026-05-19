@@ -163,7 +163,8 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .hc-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;}
 .hc-r{font-size:13px;color:var(--su2);font-weight:700;}
 .hc-m{font-size:12px;color:var(--tx2);display:flex;gap:9px;flex-wrap:wrap;}
-.hc-note{font-size:12px;color:var(--tx2);margin-top:6px;padding-top:6px;border-top:var(--br);}
+.hc-note{font-size:12px;color:var(--tx2);margin-top:6px;padding:6px 0 0;border-top:var(--br);}
+.hc-note[style*="border-left"]{border-top:none;border-left:3px solid;padding:5px 8px;background:var(--bg2);border-radius:0 6px 6px 0;margin-top:6px;}
 .sf{margin-bottom:13px;}
 .sl{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
 .so{display:flex;gap:6px;flex-wrap:wrap;}
@@ -347,6 +348,18 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     <div class="fl">
       <div class="fl-lbl">Field notes</div>
       <textarea class="nta" id="ln" placeholder="What did you work on? What grew today?"></textarea>
+    </div>
+    <div class="fl">
+      <div class="fl-lbl">What went well? <span style="font-weight:400;color:var(--tx3);">optional</span></div>
+      <textarea class="nta" id="ln-well" placeholder="A small win, something that clicked…" style="min-height:56px;"></textarea>
+    </div>
+    <div class="fl">
+      <div class="fl-lbl">Do differently next time? <span style="font-weight:400;color:var(--tx3);">optional</span></div>
+      <textarea class="nta" id="ln-diff" placeholder="One thing to adjust or try…" style="min-height:56px;"></textarea>
+    </div>
+    <div class="fl">
+      <div class="fl-lbl">Momentum — did this leave you wanting more?</div>
+      <div class="fr" id="momentum"></div>
     </div>
     <button class="btn btn-co" id="btn-save-log">Log the harvest</button>
     <button class="btn btn-s" style="margin-top:8px;" id="btn-discard">Discard session</button>
@@ -944,10 +957,10 @@ function showQuickLog(){
 }
 
 // ── LOG SESSION ───────────────────────────────────────
-var logId=null, logRating=0, logFeel='';
+var logId=null, logRating=0, logFeel='', logMomentum='';
 
 function setupLogScreen(id,from,startedAt){
-  backFrom=from;logId=id;logRating=0;logFeel='';
+  backFrom=from;logId=id;logRating=0;logFeel='';logMomentum='';
   var a=myActs.find(function(x){return x.id===id;});
   var cnt=sessions.filter(function(s){return s.actId===id;}).length;
   document.getElementById('le').textContent=a.emoji;
@@ -985,7 +998,15 @@ function setupLogScreen(id,from,startedAt){
       stars.appendChild(star);})(i);
   }
   document.getElementById('ln').value='';
+  document.getElementById('ln-well').value='';
+  document.getElementById('ln-diff').value='';
   document.getElementById('slbl').textContent='';
+  var mom=document.getElementById('momentum');mom.innerHTML='';
+  ['Not really','Somewhat','Definitely','Can\'t stop now'].forEach(function(m){
+    var b=document.createElement('div');b.className='fb';b.textContent=m;
+    b.addEventListener('click',function(){mom.querySelectorAll('.fb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');logMomentum=m;});
+    mom.appendChild(b);
+  });
   show('s-log');
 }
 
@@ -993,7 +1014,7 @@ function openLogDirect(id,from){setupLogScreen(id,from,null);}
 function openFinish(id,from){setupLogScreen(id,from,active?active.startedAt:null);}
 
 function saveLog(){
-  sessions.push({actId:logId,date:Date.now(),hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeel,rating:logRating,notes:document.getElementById('ln').value.trim(),startedAt:active?active.startedAt:null});
+  sessions.push({actId:logId,date:Date.now(),hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeel,rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
   active=null;sv();rHome();goBack();
 }
 function discard(){active=null;sv();goBack();}
@@ -1143,8 +1164,10 @@ function rHist(){
     var dur=s.hours>0?s.hours+'h '+s.mins+'min':s.mins+'min';
     var hc=document.createElement('div');hc.className='hc';
     hc.innerHTML='<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+'</div>'+(s.rating?'<span class="hc-r">'+s.rating+'/10</span>':'')+'</div>'
-      +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel?'<span>'+s.feel+'</span>':'')+'<span>'+new Date(s.date).toLocaleDateString()+'</span></div>'
-      +(s.notes?'<div class="hc-note">'+s.notes+'</div>':'');
+      +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel?'<span>'+s.feel+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+'<span>'+new Date(s.date).toLocaleDateString()+'</span></div>'
+      +(s.notes?'<div class="hc-note">'+s.notes+'</div>':'')
+      +(s.well?'<div class="hc-note" style="border-left-color:#56AB74;"><span style="font-size:10px;font-weight:700;color:#56AB74;display:block;margin-bottom:2px;">✓ Went well</span>'+s.well+'</div>':'')
+      +(s.diff?'<div class="hc-note" style="border-left-color:#F59E0B;"><span style="font-size:10px;font-weight:700;color:#F59E0B;display:block;margin-bottom:2px;">→ Next time</span>'+s.diff+'</div>':'');
     el.appendChild(hc);
   });
 }
