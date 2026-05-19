@@ -1064,7 +1064,7 @@ function setupLogScreen(id,from,startedAt){
   }
 
   var feels=document.getElementById('feels');feels.innerHTML='';
-  ['⚡ Energized','😌 Calm','🌟 Proud','✨ Inspired','🎯 Focused','🔥 In the zone','😊 Happy','💪 Accomplished','😴 Tired','😵 Distracted','😤 Frustrated','🪫 Drained','🤔 Rusty','😐 Meh'].forEach(function(f){
+  ['⚡ Energized','😌 Calm','🌟 Proud','✨ Inspired','🎯 Focused','😊 Happy','💪 Accomplished','😴 Tired','😵 Distracted','😤 Frustrated','🪫 Drained','🤔 Rusty','😐 Meh'].forEach(function(f){
     var b=document.createElement('div');b.className='fb';b.textContent=f;
     b.addEventListener('click',function(){
       var idx=logFeels.indexOf(f);
