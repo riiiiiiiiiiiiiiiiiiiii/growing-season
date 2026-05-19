@@ -1,4 +1,4 @@
-const CACHE = 'growing-season-v1';
+const CACHE = 'growing-season-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
