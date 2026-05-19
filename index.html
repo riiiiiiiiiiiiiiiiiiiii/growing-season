@@ -321,6 +321,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       <div id="plot-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
     </div>
     <div id="focus-banner-wrap"></div>
+    <div id="my-tabs" style="display:flex;gap:6px;margin-bottom:12px;"></div>
     <div id="my-list"></div>
     <div style="text-align:center;margin-top:24px;padding-bottom:8px;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;">
       <button id="btn-backup" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">📤 Back up my data</button>
@@ -1202,6 +1203,7 @@ function openFocus(){
 function closeFocus(){document.getElementById('foc-ov').classList.remove('on');}
 function saveFocus(){
   weeklyFocus={weekKey:getWeekKey(),actIds:focusTmp.slice()};
+  if(weeklyFocus.actIds.length>0)myTab='focus';
   sv();closeFocus();rMy();rHome();
 }
 function checkNewWeek(){
@@ -1350,9 +1352,26 @@ function initDrag(handle,wrap,actId,cat){
 
 // ── PLOT (MY LIST) ─────────────────────────────────────
 var catOpen={};
+var myTab='all';
 function rMy(){
   var el=document.getElementById('my-list');
   var pc=document.getElementById('plot-count');if(pc)pc.textContent=myActs.length+' seed'+(myActs.length!==1?'s':'')+(myActs.length?' planted':'');
+
+  // Tabs
+  var tabsEl=document.getElementById('my-tabs');
+  if(tabsEl){
+    tabsEl.innerHTML='';
+    if(hasFocusSet()){
+      [{id:'focus',label:'🎯 Focus'},{id:'all',label:'🌱 All seeds'}].forEach(function(t){
+        var btn=document.createElement('div');
+        btn.className='pill'+(myTab===t.id?'':' off');
+        btn.style.cssText='cursor:pointer;'+(myTab===t.id?'background:var(--gr);color:#fff;':'background:var(--bg2);color:var(--tx2);');
+        btn.textContent=t.label;
+        btn.addEventListener('click',function(){myTab=t.id;rMy();});
+        tabsEl.appendChild(btn);
+      });
+    }
+  }
 
   // Focus banner
   var bw=document.getElementById('focus-banner-wrap');
@@ -1374,6 +1393,51 @@ function rMy(){
   if(!myActs.length){el.innerHTML='<p style="color:var(--tx2);font-size:14px;">Nothing planted yet</p>';return;}
   var lvlL={beginner:'Just planted',intermediate:'Taking root',comfortable:'In season'};
   el.innerHTML='';
+
+  // Focus tab: flat list of focused activities only
+  if(myTab==='focus'&&hasFocusSet()){
+    var focused=myActs.filter(function(a){return isFocused(a.id);});
+    if(!focused.length){
+      el.innerHTML='<p style="color:var(--tx2);font-size:14px;text-align:center;padding:24px 0;">No activities in focus this week.<br><span style="font-size:12px;">Swipe right on a card in All seeds to add one.</span></p>';
+      return;
+    }
+    focused.forEach(function(a){
+      var isAct=active&&active.actId===a.id;
+      var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
+      var wrap=document.createElement('div');wrap.className='mc-wrap';wrap.dataset.dragId=a.id;wrap.dataset.dragCat=a.cat||'Other';
+      var del=document.createElement('div');del.className='mc-del';del.textContent='🗃️';wrap.appendChild(del);
+      var focEl=document.createElement('div');focEl.className='mc-foc';focEl.textContent='🎯';wrap.appendChild(focEl);
+      var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
+      var dragHandle=document.createElement('div');dragHandle.className='drag-handle';dragHandle.textContent='⠿';card.appendChild(dragHandle);
+      var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
+      inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
+        +'<div style="flex:1;"><div class="mc-n">'+a.name+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+'</div></div>'
+        +'<div class="mc-r">'
+        +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
+        +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
+        +(!isAct?'<span class="el">Tend</span>':'')
+        +'</div>';
+      card.appendChild(inner);
+      card.addEventListener('click',function(e){if(e.target.classList.contains('drag-handle'))return;if(isAct)resumeSess();else openLogDirect(a.id,'my');});
+      if(!isAct){var tend=inner.querySelector('.el');if(tend)tend.addEventListener('click',function(e){e.stopPropagation();openEd(a.id);});}
+      if(!isAct){(function(act){
+        addSwipe(wrap,card,function(){
+          var idx=myActs.findIndex(function(x){return x.id===act.id;});
+          if(idx>-1){myActs.splice(idx,1);archivedActs.push(act);sv();rMy();
+            showToast(act.emoji+' '+act.name+' archived',function(){archivedActs.splice(archivedActs.indexOf(act),1);myActs.splice(idx,0,act);sv();rMy();});}
+        },function(){
+          var fi=weeklyFocus.actIds.indexOf(act.id);
+          if(fi>-1){weeklyFocus.actIds.splice(fi,1);showToast(act.emoji+' '+act.name+' removed from focus',null);}
+          else{weeklyFocus.actIds.push(act.id);showToast('🎯 '+act.name+' added to focus',null);}
+          sv();rMy();rHome();
+        });
+        initDrag(dragHandle,wrap,act.id,act.cat||'Other');
+      })(a);}
+      wrap.appendChild(card);el.appendChild(wrap);
+    });
+    return;
+  }
+
   var groups={};
   myActs.forEach(function(a){var c=a.cat||'Other';if(!groups[c])groups[c]=[];groups[c].push(a);});
   Object.keys(groups).forEach(function(cat){
