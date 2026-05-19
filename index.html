@@ -312,7 +312,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       <div style="font-size:13px;color:var(--tx2);">Plants grow as you log more hours</div>
     </div>
     <div id="garden-legend" style="display:flex;gap:10px;padding:0 16px 12px;flex-wrap:wrap;"></div>
-    <div id="garden-svg-wrap" style="overflow-x:hidden;"></div>
+    <div id="garden-svg-wrap"></div>
     <div id="garden-empty" style="display:none;padding:40px 16px;text-align:center;color:var(--tx2);font-size:14px;">Add activities and log hours to see your garden grow</div>
   </div>
 
@@ -1325,38 +1325,55 @@ function rGarden(){
   if(!myActs.length){document.getElementById('garden-svg-wrap').innerHTML='';document.getElementById('garden-empty').style.display='block';return;}
   document.getElementById('garden-empty').style.display='none';
 
-  var tileW=90,tileH=130,cols=4;
-  var rows=Math.max(3,Math.ceil(myActs.length/cols));
-  var totalItems=rows*cols;
-  var totalW=tileW*cols,totalH=tileH*rows+20;
+  var tileW=90,tileH=120,cols=2;
+  var plotW=tileW*cols,plotH=tileH*cols;
   var bgEl=document.getElementById('gs-img-background');
   var bgSrc=bgEl?bgEl.src:'';
-
-  var svg='<svg viewBox="0 0 '+totalW+' '+totalH+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
-  for(var r=0;r<rows;r++){svg+='<image href="'+bgSrc+'" x="0" y="'+(r*tileH)+'" width="'+totalW+'" height="'+tileH+'" preserveAspectRatio="xMidYMid slice"/>';}
-  for(var i=0;i<totalItems;i++){
-    var ci=i%cols,ri=Math.floor(i/cols);
-    var tx=ci*tileW,ty=ri*tileH;
-    if(i<myActs.length){
-      var a=myActs[i];
-      var hrs=getHours(a.id),stage=getStage(hrs);
-      var lastSess=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
-      var overgrown=lastSess&&(Date.now()-lastSess.date>14*24*3600*1000);
-      svg+='<g transform="translate('+tx+','+ty+')" data-pid="'+a.id+'" style="cursor:pointer;">'+drawPlant(stage,tileW,tileH)+(overgrown?'<text x="'+(tileW/2)+'" y="14" text-anchor="middle" font-size="9" font-family="sans-serif">🍂</text><rect x="1" y="1" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(120,80,0,0.12)" rx="3"/>':'')+'</g>';
-      svg+='<text x="'+(tx+tileW/2)+'" y="'+(ty+tileH-4)+'" text-anchor="middle" font-size="8" font-weight="600" fill="rgba(255,255,255,0.9)" font-family="sans-serif">'+(a.name.length>10?a.name.slice(0,9)+'..':a.name)+'</text>';
-    } else {
-      svg+='<rect x="'+(tx+1)+'" y="'+(ty+1)+'" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(0,0,0,0.07)" rx="3"/>';
-    }
-  }
-  for(var c2=1;c2<cols;c2++)svg+='<line x1="'+(c2*tileW)+'" y1="0" x2="'+(c2*tileW)+'" y2="'+totalH+'" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>';
-  for(var r2=1;r2<rows;r2++)svg+='<line x1="0" y1="'+(r2*tileH)+'" x2="'+totalW+'" y2="'+(r2*tileH)+'" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>';
-  svg+='</svg>';
-
   var wrap=document.getElementById('garden-svg-wrap');
-  wrap.innerHTML=svg;
-  wrap.querySelectorAll('[data-pid]').forEach(function(el){
-    el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});
+  wrap.innerHTML='';
+
+  var grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 20px;';
+
+  var chunks=[];
+  for(var ci=0;ci<myActs.length;ci+=4)chunks.push(myActs.slice(ci,ci+4));
+
+  chunks.forEach(function(chunk,pi){
+    var plotCard=document.createElement('div');
+    plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
+
+    var lbl=document.createElement('div');
+    lbl.style.cssText='font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;padding:5px 10px;background:var(--bg2);';
+    lbl.textContent='Patch '+(pi+1);
+    plotCard.appendChild(lbl);
+
+    var items=chunk.slice();while(items.length<4)items.push(null);
+    var svg='<svg viewBox="0 0 '+plotW+' '+plotH+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
+    for(var ri=0;ri<2;ri++)svg+='<image href="'+bgSrc+'" x="0" y="'+(ri*tileH)+'" width="'+plotW+'" height="'+tileH+'" preserveAspectRatio="xMidYMid slice"/>';
+    items.forEach(function(a,idx){
+      var c=idx%2,r=Math.floor(idx/2),tx=c*tileW,ty=r*tileH;
+      if(a){
+        var hrs=getHours(a.id),stage=getStage(hrs);
+        var lastSess=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
+        var og=lastSess&&(Date.now()-lastSess.date>14*24*3600*1000);
+        svg+='<g transform="translate('+tx+','+ty+')" data-pid="'+a.id+'" style="cursor:pointer;">'+drawPlant(stage,tileW,tileH)+(og?'<text x="'+(tileW/2)+'" y="14" text-anchor="middle" font-size="9" font-family="sans-serif">🍂</text><rect x="1" y="1" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(120,80,0,0.12)" rx="3"/>':'')+'</g>';
+        svg+='<text x="'+(tx+tileW/2)+'" y="'+(ty+tileH-4)+'" text-anchor="middle" font-size="8" font-weight="600" fill="rgba(255,255,255,.9)" font-family="sans-serif">'+(a.name.length>9?a.name.slice(0,8)+'…':a.name)+'</text>';
+      } else {
+        svg+='<rect x="'+(tx+1)+'" y="'+(ty+1)+'" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(0,0,0,.07)" rx="3"/>';
+      }
+    });
+    svg+='<line x1="'+tileW+'" y1="0" x2="'+tileW+'" y2="'+plotH+'" stroke="rgba(255,255,255,.2)" stroke-width="1"/>';
+    svg+='<line x1="0" y1="'+tileH+'" x2="'+plotW+'" y2="'+tileH+'" stroke="rgba(255,255,255,.2)" stroke-width="1"/>';
+    svg+='</svg>';
+
+    var svgWrap=document.createElement('div');svgWrap.innerHTML=svg;
+    svgWrap.querySelectorAll('[data-pid]').forEach(function(el){
+      el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});
+    });
+    plotCard.appendChild(svgWrap);
+    grid.appendChild(plotCard);
   });
+  wrap.appendChild(grid);
 }
 
 function showPlantInfo(id){
