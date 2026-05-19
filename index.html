@@ -38,7 +38,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .nb.on .nb-wrap{background:var(--grl);}
 .nb-ic{font-size:20px;line-height:1;display:block;}
 .fab{position:fixed;bottom:82px;right:16px;width:50px;height:50px;border-radius:50%;background:var(--gr);color:#fff;font-size:26px;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:99;box-shadow:0 4px 16px rgba(24,131,90,.4);}
-.btn{display:block;width:100%;padding:14px;border-radius:var(--rad);border:none;font-size:15px;font-weight:600;cursor:pointer;text-align:center;margin-top:10px;transition:transform .12s cubic-bezier(.34,1.56,.64,1);user-select:none;}
+.btn{display:block;width:100%;padding:14px;border-radius:var(--rad);border:none;font-size:15px;font-weight:600;cursor:pointer;text-align:center;margin-top:10px;transition:transform .12s cubic-bezier(.34,1.56,.64,1);user-select:none;touch-action:manipulation;}
 .btn:active{transform:scale(.97);}
 .btn-p{background:var(--gr);color:#fff;box-shadow:0 3px 10px rgba(24,131,90,.28);}
 .btn-s{background:var(--bg2);color:var(--tx);border:var(--br);}
@@ -204,6 +204,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .ac:active{transform:scale(.92);}
 .mc-wrap{position:relative;overflow:hidden;border-radius:var(--rad);margin-bottom:8px;}
 .mc-del{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
+.mc-foc{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
 .mc{transition:transform .18s ease;margin-bottom:0;border-radius:var(--rad);touch-action:pan-y;}
 .mc:active{transform:scale(.98);}
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;border-radius:20px;padding:10px 18px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:12px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);opacity:0;transition:opacity .2s;}
@@ -1093,12 +1094,19 @@ function discard(){active=null;sv();goBack();}
 
 // ── WEEKLY FOCUS ──────────────────────────────────────
 var focusTmp=[];
-function openFocus(){
-  focusTmp=weeklyFocus.actIds.slice();
+function renderFocusList(query){
   var list=document.getElementById('foc-list');list.innerHTML='';
+  var q=(query||'').toLowerCase().trim();
   var groups={};
-  myActs.forEach(function(a){var c=a.cat||'Other';if(!groups[c])groups[c]=[];groups[c].push(a);});
-  Object.keys(groups).forEach(function(cat){
+  myActs.forEach(function(a){
+    if(q&&a.name.toLowerCase().indexOf(q)<0&&a.cat.toLowerCase().indexOf(q)<0)return;
+    var c=a.cat||'Other';if(!groups[c])groups[c]=[];groups[c].push(a);
+  });
+  var keys=Object.keys(groups);
+  if(!keys.length){
+    var none=document.createElement('div');none.style.cssText='text-align:center;color:var(--tx3);font-size:13px;padding:24px 0;';none.textContent='No activities found';list.appendChild(none);return;
+  }
+  keys.forEach(function(cat){
     var catLbl=document.createElement('div');
     catLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin:10px 0 6px;';
     catLbl.textContent=(CEM[cat]||'🌱')+' '+cat;
@@ -1116,6 +1124,13 @@ function openFocus(){
       list.appendChild(item);
     });
   });
+}
+function openFocus(){
+  focusTmp=weeklyFocus.actIds.slice();
+  var searchEl=document.getElementById('foc-search');
+  searchEl.value='';
+  searchEl.oninput=function(){renderFocusList(searchEl.value);};
+  renderFocusList('');
   document.getElementById('foc-ov').classList.add('on');
 }
 function closeFocus(){document.getElementById('foc-ov').classList.remove('on');}
@@ -1149,8 +1164,9 @@ document.getElementById('toast-undo').addEventListener('click',function(){
 });
 
 // ── SWIPE TO ARCHIVE ──────────────────────────────────
-function addSwipe(wrap,card,onArchive){
+function addSwipe(wrap,card,onArchive,onFocus){
   var del=wrap.querySelector('.mc-del');
+  var foc=wrap.querySelector('.mc-foc');
   var startX,startY,dx=0,decided=false,isSwipe=false;
   var threshold=90;
   card.addEventListener('touchstart',function(e){
@@ -1172,9 +1188,15 @@ function addSwipe(wrap,card,onArchive){
     if(dx<0){
       card.style.transform='translateX('+dx+'px)';
       if(del)del.style.opacity=Math.min(Math.abs(dx)/threshold,1);
+      if(foc)foc.style.opacity=0;
+    } else if(dx>0&&onFocus){
+      card.style.transform='translateX('+Math.min(dx,threshold*1.1)+'px)';
+      if(foc)foc.style.opacity=Math.min(dx/threshold,1);
+      if(del)del.style.opacity=0;
     } else {
       card.style.transform='translateX(0)';
       if(del)del.style.opacity=0;
+      if(foc)foc.style.opacity=0;
     }
   },{passive:false});
   card.addEventListener('touchend',function(){
@@ -1183,10 +1205,20 @@ function addSwipe(wrap,card,onArchive){
       card.style.transform='translateX(-110vw)';
       if(del)del.style.opacity=0;
       setTimeout(onArchive,220);
+    } else if(isSwipe&&dx>threshold&&onFocus){
+      card.style.transition='transform .18s ease-out';
+      card.style.transform='translateX(55px)';
+      if(foc)foc.style.opacity=0;
+      setTimeout(function(){
+        card.style.transition='transform .32s cubic-bezier(.34,1.56,.64,1)';
+        card.style.transform='translateX(0)';
+        onFocus();
+      },160);
     } else {
       card.style.transition='';
       card.style.transform='';
       if(del)del.style.opacity=0;
+      if(foc)foc.style.opacity=0;
     }
     decided=false;isSwipe=false;dx=0;
   });
@@ -1278,6 +1310,7 @@ function rMy(){
       var isAct=active&&active.actId===a.id;
       var wrap=document.createElement('div');wrap.className='mc-wrap'+(hasFocusSet()&&!isFocused(a.id)?' mc-unfocused':'');wrap.dataset.dragId=a.id;wrap.dataset.dragCat=cat;
       var del=document.createElement('div');del.className='mc-del';del.textContent='🗃️';wrap.appendChild(del);
+      var focEl=document.createElement('div');focEl.className='mc-foc';focEl.textContent='🎯';wrap.appendChild(focEl);
       var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
       var dragHandle=document.createElement('div');dragHandle.className='drag-handle';dragHandle.textContent='⠿';
       card.appendChild(dragHandle);
@@ -1297,6 +1330,12 @@ function rMy(){
           var idx=myActs.findIndex(function(x){return x.id===act.id;});
           if(idx>-1){myActs.splice(idx,1);archivedActs.push(act);sv();rMy();
             showToast(act.emoji+' '+act.name+' archived',function(){archivedActs.splice(archivedActs.indexOf(act),1);myActs.splice(idx,0,act);sv();rMy();});}
+        },function(){
+          if(!weeklyFocus.weekKey)weeklyFocus.weekKey=getWeekKey();
+          var fi=weeklyFocus.actIds.indexOf(act.id);
+          if(fi>-1){weeklyFocus.actIds.splice(fi,1);showToast(act.emoji+' '+act.name+' removed from focus',null);}
+          else{weeklyFocus.actIds.push(act.id);showToast('🎯 '+act.name+' added to focus',null);}
+          sv();rMy();rHome();
         });
         initDrag(dragHandle,wrap,act.id,cat);
       })(a);}
@@ -1684,11 +1723,12 @@ if('serviceWorker' in navigator){
 
 <!-- FOCUS SHEET -->
 <div class="ov" id="foc-ov">
-  <div class="sh" style="max-height:80vh;display:flex;flex-direction:column;">
+  <div class="sh" style="max-height:80vh;display:flex;flex-direction:column;overflow:hidden;">
     <div style="font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:4px;">This week's focus</div>
-    <div style="font-size:13px;color:var(--tx2);margin-bottom:14px;">Pick the activities you want to prioritise. Others stay in your plot but fade into the background.</div>
-    <div id="foc-list" style="flex:1;overflow-y:auto;"></div>
-    <div style="display:flex;gap:8px;padding-top:12px;border-top:var(--br);margin-top:4px;">
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:12px;">Pick the activities you want to prioritise. Others stay in your plot but fade into the background.</div>
+    <input type="search" id="foc-search" placeholder="Search activities…" style="width:100%;padding:9px 12px;border-radius:10px;border:var(--br);background:#fff;font-size:14px;margin-bottom:12px;outline:none;-webkit-appearance:none;touch-action:manipulation;">
+    <div id="foc-list" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
+    <div style="display:flex;gap:8px;padding-top:12px;border-top:var(--br);margin-top:4px;flex-shrink:0;">
       <button class="btn btn-s" style="flex:1;margin-top:0;" id="btn-foc-cancel">Cancel</button>
       <button class="btn btn-p" style="flex:1;margin-top:0;" id="btn-foc-save">Save focus</button>
     </div>
