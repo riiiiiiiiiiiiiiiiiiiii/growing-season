@@ -1289,14 +1289,33 @@ function rHist(){
   sessions.slice().sort(function(a,b){return b.date-a.date;}).forEach(function(s){
     var a=myActs.find(function(x){return x.id===s.actId;})||{emoji:'?',name:'Unknown'};
     var dur=s.hours>0?s.hours+'h '+s.mins+'min':s.mins+'min';
-    var hc=document.createElement('div');hc.className='hc';
-    hc.innerHTML='<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+'</div>'+(s.rating?'<span class="hc-r">'+s.rating+'/10</span>':'')+'</div>'
+    var hc=document.createElement('div');hc.className='hc';hc.style.cursor='pointer';
+    hc.innerHTML='<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">'+s.rating+'/10</span>':'')+'<span style="font-size:11px;color:var(--tx3);">›</span></div></div>'
       +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel?'<span>'+s.feel+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+'<span>'+new Date(s.date).toLocaleDateString()+'</span></div>'
-      +(s.notes?'<div class="hc-note">'+s.notes+'</div>':'')
-      +(s.well?'<div class="hc-note" style="border-left-color:#56AB74;"><span style="font-size:10px;font-weight:700;color:#56AB74;display:block;margin-bottom:2px;">✓ Went well</span>'+s.well+'</div>':'')
-      +(s.diff?'<div class="hc-note" style="border-left-color:#F59E0B;"><span style="font-size:10px;font-weight:700;color:#F59E0B;display:block;margin-bottom:2px;">→ Next time</span>'+s.diff+'</div>':'');
+      +(s.notes?'<div class="hc-note">'+s.notes+'</div>':'');
+    (function(sess,act){hc.addEventListener('click',function(){openSessionDetail(sess,act);});})(s,a);
     el.appendChild(hc);
   });
+}
+
+// ── SESSION DETAIL ────────────────────────────────────
+function openSessionDetail(s,a){
+  var dur=s.hours>0?s.hours+'h '+s.mins+'min':s.mins+'min';
+  var sh=document.getElementById('ed-sh');
+  sh.innerHTML='<div style="font-size:36px;text-align:center;margin-bottom:6px;">'+a.emoji+'</div>'
+    +'<div style="font-family:var(--serif);font-size:18px;font-weight:700;text-align:center;margin-bottom:2px;">'+a.name+'</div>'
+    +'<div style="font-size:12px;color:var(--tx2);text-align:center;margin-bottom:16px;">'+new Date(s.date).toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">'
+      +'<div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">'+dur+'</div><div style="font-size:11px;color:var(--tx3);">Time spent</div></div>'
+      +(s.rating?'<div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">'+s.rating+'/10</div><div style="font-size:11px;color:var(--tx3);">Rating</div></div>':'<div></div>')
+    +'</div>'
+    +(s.feel||s.momentum?'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">'+(s.feel?'<span class="badge badge-r" style="font-size:12px;padding:4px 10px;">'+s.feel+'</span>':'')+(s.momentum?'<span class="badge badge-r" style="font-size:12px;padding:4px 10px;">'+s.momentum+'</span>':'')+'</div>':'')
+    +(s.notes?'<div style="margin-bottom:10px;"><div style="font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:4px;">FIELD NOTES</div><div style="font-size:13px;color:var(--tx);line-height:1.5;">'+s.notes+'</div></div>':'')
+    +(s.well?'<div class="hc-note" style="border-left:3px solid #56AB74;background:var(--bg2);border-radius:0 8px 8px 0;padding:8px 10px;margin-bottom:8px;"><div style="font-size:10px;font-weight:700;color:#56AB74;margin-bottom:2px;">✓ WENT WELL</div><div style="font-size:13px;line-height:1.5;">'+s.well+'</div></div>':'')
+    +(s.diff?'<div class="hc-note" style="border-left:3px solid #F59E0B;background:var(--bg2);border-radius:0 8px 8px 0;padding:8px 10px;margin-bottom:8px;"><div style="font-size:10px;font-weight:700;color:#F59E0B;margin-bottom:2px;">→ NEXT TIME</div><div style="font-size:13px;line-height:1.5;">'+s.diff+'</div></div>':'');
+  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
+  closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
+  document.getElementById('ed-ov').classList.add('on');
 }
 
 // ── EDIT SHEET ────────────────────────────────────────
@@ -1506,8 +1525,13 @@ function rGarden(){
         var hrs=getHours(a.id),stage=getStage(hrs);
         var lastSess=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
         var og=lastSess&&(Date.now()-lastSess.date>14*24*3600*1000);
-        svg+='<g transform="translate('+tx+','+ty+')" data-pid="'+a.id+'" style="cursor:pointer;">'+drawPlant(stage,tileW,tileH)+(og?'<text x="'+(tileW/2)+'" y="14" text-anchor="middle" font-size="9" font-family="sans-serif">🍂</text><rect x="1" y="1" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(120,80,0,0.12)" rx="3"/>':'')+'</g>';
-        svg+='<text x="'+(tx+tileW/2)+'" y="'+(ty+tileH-4)+'" text-anchor="middle" font-size="8" font-weight="600" fill="rgba(255,255,255,.9)" font-family="sans-serif">'+(a.name.length>9?a.name.slice(0,8)+'…':a.name)+'</text>';
+        var dormant=hasFocusSet()&&!isFocused(a.id);
+        svg+='<g transform="translate('+tx+','+ty+')" data-pid="'+a.id+'" style="cursor:pointer;">'
+          +drawPlant(stage,tileW,tileH)
+          +(dormant?'<rect x="0" y="0" width="'+tileW+'" height="'+tileH+'" fill="rgba(200,210,220,0.55)"/><text x="'+(tileW/2)+'" y="'+(tileH/2+6)+'" text-anchor="middle" font-size="16" font-family="sans-serif">💤</text>':'')
+          +(og&&!dormant?'<text x="'+(tileW/2)+'" y="14" text-anchor="middle" font-size="9" font-family="sans-serif">🍂</text><rect x="1" y="1" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(120,80,0,0.12)" rx="3"/>':'')
+          +'</g>';
+        svg+='<text x="'+(tx+tileW/2)+'" y="'+(ty+tileH-4)+'" text-anchor="middle" font-size="8" font-weight="600" fill="'+(dormant?'rgba(150,160,170,.8)':'rgba(255,255,255,.9)')+'" font-family="sans-serif">'+(a.name.length>9?a.name.slice(0,8)+'…':a.name)+'</text>';
       } else {
         svg+='<rect x="'+(tx+1)+'" y="'+(ty+1)+'" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(0,0,0,.07)" rx="3"/>';
       }
