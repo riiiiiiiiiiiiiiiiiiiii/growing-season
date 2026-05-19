@@ -6,6 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Growing Season">
+<meta name="theme-color" content="#18835A">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
 <title>Growing Season</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -1643,6 +1646,12 @@ if(onboarded){launch();checkNewWeek();}
 else{show('s-ob1');rObCats();rObGrid();}
 
 }); // DOMContentLoaded
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js');
+  });
+}
 </script>
 <!-- TERMINATE CONFIRM -->
 <div class="ov" id="term-ov">
