@@ -1528,7 +1528,7 @@ function rGarden(){
         var dormant=hasFocusSet()&&!isFocused(a.id);
         svg+='<g transform="translate('+tx+','+ty+')" data-pid="'+a.id+'" style="cursor:pointer;">'
           +drawPlant(stage,tileW,tileH)
-          +(dormant?'<rect x="0" y="0" width="'+tileW+'" height="'+tileH+'" fill="rgba(200,210,220,0.55)"/><text x="'+(tileW/2)+'" y="'+(tileH/2+6)+'" text-anchor="middle" font-size="16" font-family="sans-serif">💤</text>':'')
+          +(dormant?'<rect x="0" y="0" width="'+tileW+'" height="'+tileH+'" fill="rgba(200,210,220,0.55)"/>':'')
           +(og&&!dormant?'<text x="'+(tileW/2)+'" y="14" text-anchor="middle" font-size="9" font-family="sans-serif">🍂</text><rect x="1" y="1" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(120,80,0,0.12)" rx="3"/>':'')
           +'</g>';
         svg+='<text x="'+(tx+tileW/2)+'" y="'+(ty+tileH-4)+'" text-anchor="middle" font-size="8" font-weight="600" fill="'+(dormant?'rgba(150,160,170,.8)':'rgba(255,255,255,.9)')+'" font-family="sans-serif">'+(a.name.length>9?a.name.slice(0,8)+'…':a.name)+'</text>';
