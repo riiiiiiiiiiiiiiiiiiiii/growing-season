@@ -316,6 +316,9 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     </div>
     <div id="focus-banner-wrap"></div>
     <div id="my-list"></div>
+    <div style="text-align:center;margin-top:24px;padding-bottom:8px;">
+      <button id="btn-terminate" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">☠️ Terminate field</button>
+    </div>
   </div>
 
   <!-- GARDEN -->
@@ -538,6 +541,15 @@ document.getElementById('btn-plant-seed').addEventListener('click',openAdd);
 document.getElementById('btn-save-log').addEventListener('click',saveLog);
 document.getElementById('btn-foc-cancel').addEventListener('click',closeFocus);
 document.getElementById('btn-foc-save').addEventListener('click',saveFocus);
+document.getElementById('btn-terminate').addEventListener('click',function(){document.getElementById('term-ov').classList.add('on');});
+document.getElementById('btn-term-no').addEventListener('click',function(){document.getElementById('term-ov').classList.remove('on');});
+document.getElementById('btn-term-yes').addEventListener('click',function(){
+  myActs.length=0;archivedActs.length=0;active=null;weeklyFocus={weekKey:'',actIds:[]};onboarded=false;sv();
+  document.getElementById('term-ov').classList.remove('on');
+  document.getElementById('main-nav').classList.remove('on');
+  document.getElementById('fab').style.display='none';
+  show('s-ob1');rObCats();rObGrid();
+});
 document.getElementById('btn-discard').addEventListener('click',discard);
 document.getElementById('btn-ed-cancel').addEventListener('click',closeEd);
 document.getElementById('btn-add-cancel').addEventListener('click',closeAdd);
@@ -1632,6 +1644,19 @@ else{show('s-ob1');rObCats();rObGrid();}
 
 }); // DOMContentLoaded
 </script>
+<!-- TERMINATE CONFIRM -->
+<div class="ov" id="term-ov">
+  <div class="sh" style="text-align:center;">
+    <div style="font-size:36px;margin-bottom:10px;">☠️</div>
+    <div style="font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:8px;">Terminate the field?</div>
+    <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:22px;">All your seeds will be destroyed and you'll start from scratch. Your harvest log will be kept.<br><br>Do you want to proceed?</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-s" style="flex:1;margin-top:0;" id="btn-term-no">No, keep it</button>
+      <button class="btn" style="flex:1;margin-top:0;background:#EF4444;color:#fff;" id="btn-term-yes">Yes, terminate</button>
+    </div>
+  </div>
+</div>
+
 <!-- FOCUS SHEET -->
 <div class="ov" id="foc-ov">
   <div class="sh" style="max-height:80vh;display:flex;flex-direction:column;">
