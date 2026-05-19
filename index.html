@@ -456,9 +456,9 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 document.addEventListener('DOMContentLoaded', function() {
 
 // ── DATA ──────────────────────────────────────────────
-var CATS = ['Creative','Active','Learning','Social','Mindfulness','Productive','Digital','Outdoor'];
-var CEM = {Creative:'🎨',Active:'💪',Learning:'📚',Social:'👯',Mindfulness:'🧘',Productive:'🔧',Digital:'💻',Outdoor:'🌿'};
-var CAT_COLORS = {Creative:'#FCE7F3,#9D174D',Active:'#FFE4D9,#9A3412',Learning:'#DBEAFE,#1E40AF',Social:'#D1FAE5,#065F46',Mindfulness:'#EDE9FE,#5B21B6',Productive:'#FEF3C7,#92400E',Digital:'#EEF2FF,#3730A3',Outdoor:'#D4F2E4,#0F6040'};
+var CATS = ['Creative','Active','Learning','Social','Mindfulness','Productive','Digital','Outdoor','Entertainment'];
+var CEM = {Creative:'🎨',Active:'💪',Learning:'📚',Social:'👯',Mindfulness:'🧘',Productive:'🔧',Digital:'💻',Outdoor:'🌿',Entertainment:'🎬'};
+var CAT_COLORS = {Creative:'#FCE7F3,#9D174D',Active:'#FFE4D9,#9A3412',Learning:'#DBEAFE,#1E40AF',Social:'#D1FAE5,#065F46',Mindfulness:'#EDE9FE,#5B21B6',Productive:'#FEF3C7,#92400E',Digital:'#EEF2FF,#3730A3',Outdoor:'#D4F2E4,#0F6040',Entertainment:'#FEF9C3,#854D0E'};
 var ACTS = [
   {id:'drawing',name:'Drawing',emoji:'✏️',cat:'Creative',tags:['solo','mental','creative','calm']},
   {id:'painting',name:'Painting',emoji:'🖌️',cat:'Creative',tags:['solo','mental','creative','calm']},
@@ -503,6 +503,15 @@ var ACTS = [
   {id:'video',name:'Video editing',emoji:'🎬',cat:'Digital',tags:['mental','solo','creative']},
   {id:'3d',name:'3D modeling',emoji:'🧊',cat:'Digital',tags:['mental','solo','creative','technical']},
   {id:'gamedev',name:'Game dev',emoji:'🕹️',cat:'Digital',tags:['mental','solo','creative','technical']},
+  {id:'movies',name:'Watching films',emoji:'🍿',cat:'Entertainment',tags:['solo','calm','fun']},
+  {id:'tvseries',name:'TV series',emoji:'📺',cat:'Entertainment',tags:['solo','calm','fun']},
+  {id:'anime',name:'Anime',emoji:'⛩️',cat:'Entertainment',tags:['solo','calm','fun']},
+  {id:'gaming',name:'Gaming',emoji:'🎮',cat:'Entertainment',tags:['solo','fun']},
+  {id:'livemusic',name:'Live music / concerts',emoji:'🎶',cat:'Entertainment',tags:['social','fun','outdoor']},
+  {id:'theatre',name:'Theatre / plays',emoji:'🎭',cat:'Entertainment',tags:['social','fun','calm']},
+  {id:'standup',name:'Stand-up comedy',emoji:'🎤',cat:'Entertainment',tags:['social','fun']},
+  {id:'karaoke',name:'Karaoke',emoji:'🎵',cat:'Entertainment',tags:['social','fun']},
+  {id:'escape',name:'Escape room',emoji:'🔐',cat:'Entertainment',tags:['social','fun']},
 ];
 
 // ── STATE ─────────────────────────────────────────────
