@@ -277,9 +277,6 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     <div class="stats" id="stats"></div>
     <div class="hs"><div class="hs-t">Your plot</div><div class="ar" id="ar"></div></div>
     <div id="home-deco" style="width:100%;overflow:hidden;pointer-events:none;margin-top:4px;"></div>
-    <div style="padding:0 16px 20px;text-align:center;">
-      <button id="btn-quick-log" style="background:none;border:none;font-size:12px;color:var(--tx2);cursor:pointer;padding:6px 10px;text-decoration:underline;text-underline-offset:2px;">Already done with an activity? Log it now.</button>
-    </div>
   </div>
 
   <!-- PLOT -->
@@ -288,14 +285,20 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       <div style="font-family:var(--serif);font-size:23px;font-weight:700;">The plot</div>
       <button id="btn-plant-seed" style="background:var(--grl);color:var(--gr2);border:1px solid var(--grm);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;">Plant a new seed</button>
     </div>
-    <div style="font-size:13px;color:var(--tx2);margin-bottom:14px;">Tap to start or log a session</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:13px;color:var(--tx2);">Tap to start or log a session</div>
+      <div id="plot-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
+    </div>
     <div id="my-list"></div>
   </div>
 
   <!-- GARDEN -->
   <div id="s-garden" class="scr" style="padding:0 0 24px;">
     <div style="padding:20px 16px 12px;">
-      <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:2px;">Your garden</div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;">
+        <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:2px;">Your garden</div>
+        <div id="garden-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
+      </div>
       <div style="font-size:13px;color:var(--tx2);">Plants grow as you log more hours</div>
     </div>
     <div id="garden-legend" style="display:flex;gap:10px;padding:0 16px 12px;flex-wrap:wrap;"></div>
@@ -489,7 +492,6 @@ document.getElementById('nb-hist').addEventListener('click',function(){nav('hist
 document.getElementById('fab').addEventListener('click',openAdd);
 document.getElementById('btn-back').addEventListener('click',goBack);
 document.getElementById('btn-plant-seed').addEventListener('click',openAdd);
-document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
 document.getElementById('btn-save-log').addEventListener('click',saveLog);
 document.getElementById('btn-discard').addEventListener('click',discard);
 document.getElementById('btn-ed-cancel').addEventListener('click',closeEd);
@@ -549,7 +551,7 @@ function rHome(){
   document.getElementById('sb-fade').style.background='linear-gradient(to bottom,transparent,var(--bg))';
   document.getElementById('sb-label').textContent=greet+' - '+sea.label;
   document.getElementById('sb-title').textContent=sea.title;
-  document.getElementById('sb-sub').textContent=myActs.length+' activities planted';
+  document.getElementById('sb-sub').textContent=sea.sub;
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
   if(active){
@@ -561,8 +563,9 @@ function rHome(){
     pcW.innerHTML='';
   } else {
     ipW.innerHTML='';
-    pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-lbl">Ready to grow?</div><div class="pc-title">What should I work on?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div>';
+    pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-lbl">Ready to grow?</div><div class="pc-title">What should I work on?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div><div style="text-align:center;margin-top:8px;"><button id="btn-quick-log" style="background:var(--bg2);border:none;border-radius:20px;padding:7px 16px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">Already done? Log it now</button></div>';
     document.getElementById('pc-card').addEventListener('click',openPicker);
+    document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
   }
 
   var tm=sessions.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
@@ -963,6 +966,7 @@ function discard(){active=null;sv();goBack();}
 var catOpen={};
 function rMy(){
   var el=document.getElementById('my-list');
+  var pc=document.getElementById('plot-count');if(pc)pc.textContent=myActs.length+' seed'+(myActs.length!==1?'s':'')+(myActs.length?' planted':'');
   if(!myActs.length){el.innerHTML='<p style="color:var(--tx2);font-size:14px;">Nothing planted yet</p>';return;}
   var lvlL={beginner:'Just planted',intermediate:'Taking root',comfortable:'In season'};
   el.innerHTML='';
@@ -1181,6 +1185,7 @@ function drawPlant(stage,w,h){
 }
 
 function rGarden(){
+  var gc=document.getElementById('garden-count');if(gc)gc.textContent=myActs.length+' seed'+(myActs.length!==1?'s':'')+(myActs.length?' planted':'');
   var legend=document.getElementById('garden-legend');
   var clrs=['#C8D8C8','#7EC8A8','#56AB74','#D4537E','#F5C842'];
   var thresh=['0h','0.5h+','2h+','5h+','10h+'];
