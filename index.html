@@ -1186,24 +1186,23 @@ document.getElementById('toast-undo').addEventListener('click',function(){
 function addSwipe(wrap,card,onArchive,onFocus){
   var del=wrap.querySelector('.mc-del');
   var foc=wrap.querySelector('.mc-foc');
-  var startX,startY,dx=0,decided=false,isSwipe=false;
+  var startX,startY,dx=0,decided=false,isSwipe=false,mouseDown=false;
   var threshold=90;
-  card.addEventListener('touchstart',function(e){
-    startX=e.touches[0].clientX;startY=e.touches[0].clientY;
-    dx=0;decided=false;isSwipe=false;
+
+  function onStart(clientX,clientY){
+    startX=clientX;startY=clientY;dx=0;decided=false;isSwipe=false;
     card.style.transition='none';
-  },{passive:true});
-  card.addEventListener('touchmove',function(e){
+  }
+  function onMove(clientX,clientY){
     if(dragState)return;
-    dx=e.touches[0].clientX-startX;
-    var dy=e.touches[0].clientY-startY;
+    dx=clientX-startX;
+    var dy=clientY-startY;
     if(!decided){
       if(Math.abs(dx)<5&&Math.abs(dy)<5)return;
       isSwipe=Math.abs(dx)>Math.abs(dy);
       decided=true;
     }
     if(!isSwipe)return;
-    e.preventDefault();
     if(dx<0){
       card.style.transform='translateX('+dx+'px)';
       if(del)del.style.opacity=Math.min(Math.abs(dx)/threshold,1);
@@ -1217,8 +1216,8 @@ function addSwipe(wrap,card,onArchive,onFocus){
       if(del)del.style.opacity=0;
       if(foc)foc.style.opacity=0;
     }
-  },{passive:false});
-  card.addEventListener('touchend',function(){
+  }
+  function onEnd(){
     if(isSwipe&&dx<-threshold){
       card.style.transition='transform .25s ease-in';
       card.style.transform='translateX(-110vw)';
@@ -1240,7 +1239,18 @@ function addSwipe(wrap,card,onArchive,onFocus){
       if(foc)foc.style.opacity=0;
     }
     decided=false;isSwipe=false;dx=0;
-  });
+  }
+
+  // Touch
+  card.addEventListener('touchstart',function(e){onStart(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+  card.addEventListener('touchmove',function(e){onMove(e.touches[0].clientX,e.touches[0].clientY);if(isSwipe)e.preventDefault();},{passive:false});
+  card.addEventListener('touchend',onEnd);
+
+  // Mouse
+  card.addEventListener('mousedown',function(e){mouseDown=true;onStart(e.clientX,e.clientY);});
+  card.addEventListener('mousemove',function(e){if(!mouseDown)return;onMove(e.clientX,e.clientY);});
+  card.addEventListener('mouseup',function(){if(!mouseDown)return;mouseDown=false;onEnd();});
+  card.addEventListener('mouseleave',function(){if(!mouseDown)return;mouseDown=false;onEnd();});
 }
 
 // ── DRAG TO REORDER ───────────────────────────────────
