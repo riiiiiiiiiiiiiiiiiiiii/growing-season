@@ -292,6 +292,25 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     </div>
   </div>
 
+  <!-- PROFILE STEP -->
+  <div id="s-ob3" class="scr">
+    <div style="padding:36px 20px 32px;">
+      <div style="text-align:center;font-size:40px;margin-bottom:16px;" id="prof-em-preview">🌱</div>
+      <div style="font-family:var(--serif);font-size:24px;font-weight:700;margin-bottom:8px;line-height:1.25;">One last thing.</div>
+      <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:26px;">What should we call you? Pick a little emblem that feels like you — it'll mark your garden.</div>
+      <div style="margin-bottom:22px;">
+        <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Your name</div>
+        <input id="prof-name" class="sinp" placeholder="e.g. Rayan" style="width:100%;font-size:16px;" maxlength="30">
+      </div>
+      <div style="margin-bottom:28px;">
+        <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Your emblem</div>
+        <div id="prof-em-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;"></div>
+      </div>
+      <button class="btn btn-p" id="btn-prof-done">Start growing 🌱</button>
+      <button class="btn btn-s" id="btn-prof-back" style="margin-top:8px;">← Back</button>
+    </div>
+  </div>
+
   <!-- HOME -->
   <div id="s-home" class="scr">
     <div class="sb" id="sb">
@@ -681,7 +700,8 @@ function rHome(){
   document.getElementById('sb-bg').style.background=sea.bg;
   document.getElementById('sb').style.color=sea.tc;
   document.getElementById('sb-fade').style.background='linear-gradient(to bottom,transparent,var(--bg))';
-  document.getElementById('sb-label').textContent=greet+' - '+sea.label;
+  var nameStr=profile&&profile.name?', '+(profile.emoji||'')+(profile.emoji?' ':'')+profile.name:'';
+  document.getElementById('sb-label').textContent=greet+nameStr+' · '+sea.label;
   document.getElementById('sb-title').textContent=sea.title;
   document.getElementById('sb-sub').textContent=sea.sub;
 
@@ -870,9 +890,40 @@ function pickOQ(key,val){
   profile[key]=val;
   setTimeout(function(){
     if(oqStep<OQ.length-1){oqStep++;rOQ();}
-    else{onboarded=true;sv();launch();}
+    else{openProfileStep();}
   },260);
 }
+
+var PROF_EMOJIS=['🌱','🌿','🍀','🌾','🌵','🌲','🌳','🌴','🎋','🌻','🌸','🌺','🌹','🌷','🌼','💐','🪴','🍃','🍁','🌊','☀️','🌙'];
+var profEmoji='🌱';
+function openProfileStep(){
+  profEmoji=profile.emoji||'🌱';
+  document.getElementById('prof-name').value=profile.name||'';
+  document.getElementById('prof-em-preview').textContent=profEmoji;
+  var grid=document.getElementById('prof-em-grid');grid.innerHTML='';
+  PROF_EMOJIS.forEach(function(em){
+    var btn=document.createElement('div');
+    btn.style.cssText='font-size:26px;text-align:center;padding:8px 4px;border-radius:12px;cursor:pointer;border:2px solid transparent;transition:all .15s;';
+    btn.textContent=em;
+    if(em===profEmoji){btn.style.borderColor='var(--gr)';btn.style.background='var(--grl)';}
+    btn.addEventListener('click',function(){
+      profEmoji=em;
+      document.getElementById('prof-em-preview').textContent=em;
+      grid.querySelectorAll('div').forEach(function(b){b.style.borderColor='transparent';b.style.background='';});
+      btn.style.borderColor='var(--gr)';btn.style.background='var(--grl)';
+    });
+    grid.appendChild(btn);
+  });
+  show('s-ob3');
+}
+document.getElementById('btn-prof-done').addEventListener('click',function(){
+  var name=document.getElementById('prof-name').value.trim();
+  profile.name=name;profile.emoji=profEmoji;
+  onboarded=true;sv();launch();
+});
+document.getElementById('btn-prof-back').addEventListener('click',function(){
+  show('s-ob2');oqStep=OQ.length-1;rOQ();
+});
 
 // ── ACTIVITY PICKER ───────────────────────────────────
 function animateIn(el){
