@@ -499,10 +499,11 @@ var ACTS = [
 ];
 
 // ── STATE ─────────────────────────────────────────────
-function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]}};}
-function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus}));}catch(e){}}
+function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[]};}
+function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs}));}catch(e){}}
 var st=ld(), myActs=st.myActs, sessions=st.sessions, onboarded=st.onboarded, profile=st.profile, active=st.active;
 var weeklyFocus=st.weeklyFocus||{weekKey:'',actIds:[]};
+var archivedActs=st.archivedActs||[];
 function getWeekKey(){var d=new Date(),y=d.getFullYear(),s=new Date(y,0,1),w=Math.ceil(((d-s)/864e5+s.getDay()+1)/7);return y+'-W'+w;}
 function isFocused(id){return weeklyFocus.actIds.length===0||weeklyFocus.actIds.indexOf(id)>-1;}
 function hasFocusSet(){return weeklyFocus.actIds.length>0;}
@@ -1263,8 +1264,8 @@ function rMy(){
       if(!isAct){(function(act){
         addSwipe(wrap,card,function(){
           var idx=myActs.findIndex(function(x){return x.id===act.id;});
-          if(idx>-1){myActs.splice(idx,1);sv();rMy();
-            showToast(act.emoji+' '+act.name+' archived',function(){myActs.splice(idx,0,act);sv();rMy();});}
+          if(idx>-1){myActs.splice(idx,1);archivedActs.push(act);sv();rMy();
+            showToast(act.emoji+' '+act.name+' archived',function(){archivedActs.splice(archivedActs.indexOf(act),1);myActs.splice(idx,0,act);sv();rMy();});}
         });
         initDrag(dragHandle,wrap,act.id,cat);
       })(a);}
@@ -1279,6 +1280,38 @@ function rMy(){
     });
     section.appendChild(hdr);section.appendChild(body);el.appendChild(section);
   });
+
+  // Archived section
+  if(archivedActs.length){
+    var arcOpen=catOpen['__archived']!==false;
+    var arcSection=document.createElement('div');arcSection.className='cat-section';arcSection.style.marginTop='8px';
+    var arcHdr=document.createElement('div');arcHdr.className='cat-hdr';arcHdr.style.opacity='.6';
+    arcHdr.innerHTML='<span class="cat-hdr-label">🗃️ Archived</span>'
+      +'<span class="cat-hdr-count">'+archivedActs.length+'</span>'
+      +'<span class="cat-arrow'+(arcOpen?' open':'')+'">›</span>';
+    var arcBody=document.createElement('div');arcBody.className='cat-body';arcBody.style.display=arcOpen?'block':'none';
+    archivedActs.forEach(function(a){
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--bg2);opacity:.55;';
+      row.innerHTML='<span style="font-size:22px;">'+a.emoji+'</span><span style="flex:1;font-size:14px;font-weight:500;">'+a.name+'</span>';
+      var restoreBtn=document.createElement('button');
+      restoreBtn.style.cssText='background:none;border:1px solid var(--grm);border-radius:14px;padding:4px 10px;font-size:11px;font-weight:600;color:var(--gr);cursor:pointer;';
+      restoreBtn.textContent='Restore';
+      (function(act){restoreBtn.addEventListener('click',function(){
+        var ai=archivedActs.indexOf(act);
+        if(ai>-1){archivedActs.splice(ai,1);myActs.push(act);sv();rMy();}
+      });})(a);
+      row.appendChild(restoreBtn);arcBody.appendChild(row);
+    });
+    arcHdr.addEventListener('click',function(){
+      var nowOpen=arcBody.style.display==='none';
+      arcBody.style.display=nowOpen?'block':'none';
+      catOpen['__archived']=nowOpen;
+      var arrow=arcHdr.querySelector('.cat-arrow');
+      if(nowOpen)arrow.classList.add('open');else arrow.classList.remove('open');
+    });
+    arcSection.appendChild(arcHdr);arcSection.appendChild(arcBody);el.appendChild(arcSection);
+  }
 }
 
 // ── HARVEST ───────────────────────────────────────────
