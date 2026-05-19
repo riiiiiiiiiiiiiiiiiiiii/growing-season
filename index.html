@@ -198,8 +198,15 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .ip:active{transform:scale(.97);}
 .ac{transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
 .ac:active{transform:scale(.92);}
-.mc{transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.mc-wrap{position:relative;overflow:hidden;border-radius:var(--rad);margin-bottom:8px;}
+.mc-del{position:absolute;right:0;top:0;bottom:0;width:80px;background:#EF4444;display:flex;align-items:center;justify-content:center;font-size:20px;border-radius:0 var(--rad) var(--rad) 0;}
+.mc{transition:transform .18s ease;margin-bottom:0;border-radius:var(--rad);}
 .mc:active{transform:scale(.98);}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;border-radius:20px;padding:10px 18px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:12px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);opacity:0;transition:opacity .2s;}
+.toast.on{opacity:1;}
+.toast-undo{background:none;border:none;color:var(--gr);font-size:13px;font-weight:700;cursor:pointer;padding:0;}
+.og-badge{position:absolute;top:8px;right:8px;font-size:10px;background:rgba(180,100,0,.15);color:#92400E;border-radius:8px;padding:2px 6px;font-weight:600;}
+.suggest-btn{display:block;width:calc(100% - 32px);margin:0 16px 0;background:var(--bg2);border:none;border-radius:20px;padding:10px 16px;font-size:13px;font-weight:600;color:var(--tx2);cursor:pointer;text-align:center;}
 .cat-section{margin-bottom:4px;}
 .cat-hdr{display:flex;align-items:center;gap:8px;padding:10px 2px 8px;cursor:pointer;user-select:none;border-bottom:1px solid var(--bg2);}
 .cat-hdr-label{font-size:14px;font-weight:700;flex:1;color:var(--tx);}
@@ -563,9 +570,10 @@ function rHome(){
     pcW.innerHTML='';
   } else {
     ipW.innerHTML='';
-    pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-lbl">Ready to grow?</div><div class="pc-title">What should I work on?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div><div style="text-align:center;margin-top:8px;"><button id="btn-quick-log" style="background:var(--bg2);border:none;border-radius:20px;padding:7px 16px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">Already done? Log it now</button></div>';
+    pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-lbl">Ready to grow?</div><div class="pc-title">What should I work on?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-quick-log" style="flex:1;background:var(--bg2);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">Already done? Log it</button><button id="btn-suggest" style="flex:1;background:var(--bg2);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">🎲 Surprise me</button></div>';
     document.getElementById('pc-card').addEventListener('click',openPicker);
     document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
+    document.getElementById('btn-suggest').addEventListener('click',suggestAct);
   }
 
   var tm=sessions.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
@@ -869,6 +877,31 @@ function showBrowse(){
 function startFrom(id){closePicker();active={actId:id,startedAt:Date.now()};sv();rHome();}
 function resumeSess(){if(!active)return;openFinish(active.actId,'home');}
 
+function suggestAct(){
+  if(!myActs.length){showToast('Plant some seeds first!',null);return;}
+  var now=Date.now();
+  var scored=myActs.map(function(a){
+    var lastS=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
+    var daysSince=lastS?(now-lastS.date)/(24*3600*1000):999;
+    return{a:a,score:daysSince+Math.random()*3};
+  });
+  scored.sort(function(a,b){return b.score-a.score;});
+  var pick=scored[0].a;
+  var body=document.getElementById('pq-body');body.innerHTML='';
+  var h=document.createElement('div');h.style.cssText='font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:4px;';h.textContent='🎲 How about this?';body.appendChild(h);
+  var card=document.createElement('div');card.style.cssText='background:var(--bg2);border-radius:16px;padding:20px;text-align:center;margin:16px 0;';
+  card.innerHTML='<div style="font-size:48px;margin-bottom:8px;">'+pick.emoji+'</div><div style="font-size:18px;font-weight:700;margin-bottom:4px;">'+pick.name+'</div><div style="font-size:12px;color:var(--tx2);">'+pick.cat+'</div>';
+  body.appendChild(card);
+  var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='Start this now';
+  startBtn.addEventListener('click',function(){closePicker();startFrom(pick.id);});body.appendChild(startBtn);
+  var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='Already done it? Log it';
+  logBtn.addEventListener('click',function(){closePicker();openLogDirect(pick.id,'home');});body.appendChild(logBtn);
+  var again=document.createElement('button');again.className='btn btn-s';again.style.marginTop='8px';again.textContent='Try another suggestion';
+  again.addEventListener('click',suggestAct);body.appendChild(again);
+  var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.marginTop='8px';cancel.textContent='Cancel';cancel.addEventListener('click',closePicker);body.appendChild(cancel);
+  document.getElementById('pq-ov').classList.add('on');
+}
+
 function showQuickLog(){
   if(!myActs.length){openAdd();return;}
   var bCat='all', bSearch='';
@@ -962,6 +995,39 @@ function saveLog(){
 }
 function discard(){active=null;sv();goBack();}
 
+// ── TOAST ─────────────────────────────────────────────
+var toastTimer=null, undoFn=null;
+function showToast(msg,onUndo){
+  var t=document.getElementById('toast'),m=document.getElementById('toast-msg'),u=document.getElementById('toast-undo');
+  m.textContent=msg; undoFn=onUndo; u.style.display=onUndo?'':'none';
+  t.classList.add('on'); clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('on');undoFn=null;},4000);
+}
+document.getElementById('toast-undo').addEventListener('click',function(){
+  if(undoFn){undoFn();undoFn=null;}
+  document.getElementById('toast').classList.remove('on');clearTimeout(toastTimer);
+});
+
+// ── SWIPE TO ARCHIVE ──────────────────────────────────
+function addSwipe(wrap,card,onArchive){
+  var startX,startY,dx=0,swiping=false,threshold=60;
+  card.addEventListener('touchstart',function(e){
+    startX=e.touches[0].clientX;startY=e.touches[0].clientY;dx=0;swiping=true;
+  },{passive:true});
+  card.addEventListener('touchmove',function(e){
+    if(!swiping)return;
+    dx=e.touches[0].clientX-startX;
+    var dy=e.touches[0].clientY-startY;
+    if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dx)<10){swiping=false;return;}
+    if(dx<0)card.style.transform='translateX('+Math.max(dx,-80)+'px)';
+    else card.style.transform='';
+  },{passive:true});
+  card.addEventListener('touchend',function(){
+    if(dx<-threshold){onArchive();}
+    else{card.style.transform='';} swiping=false;dx=0;
+  });
+}
+
 // ── PLOT (MY LIST) ─────────────────────────────────────
 var catOpen={};
 function rMy(){
@@ -984,6 +1050,8 @@ function rMy(){
     acts.forEach(function(a){
       var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
       var isAct=active&&active.actId===a.id;
+      var wrap=document.createElement('div');wrap.className='mc-wrap';
+      var del=document.createElement('div');del.className='mc-del';del.textContent='🗃️';wrap.appendChild(del);
       var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
       card.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
         +'<div style="flex:1;"><div class="mc-n">'+a.name+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+'</div></div>'
@@ -994,7 +1062,12 @@ function rMy(){
         +'</div>';
       card.addEventListener('click',function(){if(isAct)resumeSess();else openLogDirect(a.id,'my');});
       if(!isAct){var tend=card.querySelector('.el');if(tend)tend.addEventListener('click',function(e){e.stopPropagation();openEd(a.id);});}
-      body.appendChild(card);
+      if(!isAct){(function(act){addSwipe(wrap,card,function(){
+        var idx=myActs.findIndex(function(x){return x.id===act.id;});
+        if(idx>-1){myActs.splice(idx,1);sv();rMy();
+          showToast(act.emoji+' '+act.name+' archived',function(){myActs.splice(idx,0,act);sv();rMy();});}
+      });})(a);}
+      wrap.appendChild(card);body.appendChild(wrap);
     });
     hdr.addEventListener('click',function(){
       var nowOpen=body.style.display==='none';
@@ -1214,7 +1287,9 @@ function rGarden(){
     if(i<myActs.length){
       var a=myActs[i];
       var hrs=getHours(a.id),stage=getStage(hrs);
-      svg+='<g transform="translate('+tx+','+ty+')" data-pid="'+a.id+'" style="cursor:pointer;">'+drawPlant(stage,tileW,tileH)+'</g>';
+      var lastSess=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
+      var overgrown=lastSess&&(Date.now()-lastSess.date>14*24*3600*1000);
+      svg+='<g transform="translate('+tx+','+ty+')" data-pid="'+a.id+'" style="cursor:pointer;">'+drawPlant(stage,tileW,tileH)+(overgrown?'<text x="'+(tileW/2)+'" y="14" text-anchor="middle" font-size="9" font-family="sans-serif">🍂</text><rect x="1" y="1" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(120,80,0,0.12)" rx="3"/>':'')+'</g>';
       svg+='<text x="'+(tx+tileW/2)+'" y="'+(ty+tileH-4)+'" text-anchor="middle" font-size="8" font-weight="600" fill="rgba(255,255,255,0.9)" font-family="sans-serif">'+(a.name.length>10?a.name.slice(0,9)+'..':a.name)+'</text>';
     } else {
       svg+='<rect x="'+(tx+1)+'" y="'+(ty+1)+'" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(0,0,0,0.07)" rx="3"/>';
@@ -1280,5 +1355,6 @@ else{show('s-ob1');rObCats();rObGrid();}
 
 }); // DOMContentLoaded
 </script>
+<div id="toast" class="toast"><span id="toast-msg"></span><button class="toast-undo" id="toast-undo">Undo</button></div>
 </body>
 </html>
