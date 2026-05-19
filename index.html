@@ -54,7 +54,8 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .oc-em{font-size:22px;flex-shrink:0;margin-top:2px;}
 .oc-name{font-size:13px;font-weight:600;}
 .oc-cat{font-size:11px;color:var(--tx2);margin-top:1px;}
-.oc-togs{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+.oc-togs{display:flex;gap:5px;flex-wrap:wrap;max-height:0;overflow:hidden;opacity:0;transition:max-height .28s ease,opacity .2s ease,margin-top .28s ease;margin-top:0;}
+.oc.on .oc-togs{max-height:80px;opacity:1;margin-top:6px;}
 .oc-tog{font-size:11px;padding:2px 8px;border-radius:10px;border:1px solid var(--br2);background:var(--bg2);color:var(--tx2);cursor:pointer;}
 .oc-tog.t{background:var(--skl);border-color:var(--sk);color:var(--sk2);}
 .oc-tog.p{background:var(--col);border-color:var(--co);color:var(--co2);}
@@ -713,31 +714,30 @@ function rObGrid(){
     var my=myActs.find(function(m){return m.id===a.id;})||{type:'recreational',level:'beginner'};
     var card=document.createElement('div');
     card.className='oc'+(sel?' on':'');
+    card.dataset.actId=a.id;
 
     var inner=document.createElement('div');
     inner.style.cssText='display:flex;gap:10px;align-items:flex-start;flex:1;';
     inner.innerHTML='<div class="oc-em">'+a.emoji+'</div><div style="flex:1;"><div class="oc-name">'+a.name+'</div><div class="oc-cat">'+a.cat+'</div></div>';
     inner.addEventListener('click',function(){togOb(a.id);});
 
-    if(sel){
-      var togs=document.createElement('div');
-      togs.className='oc-togs';
-      togs.addEventListener('click',function(e){e.stopPropagation();});
+    var togs=document.createElement('div');
+    togs.className='oc-togs';
+    togs.addEventListener('click',function(e){e.stopPropagation();});
 
-      var typeTog=document.createElement('div');
-      typeTog.className='oc-tog'+(my.type==='serious'?' p':'');
-      typeTog.textContent=my.type==='serious'?'Seriously':'For joy';
-      typeTog.addEventListener('click',function(e){e.stopPropagation();togInline(a.id,'type',my.type==='serious'?'recreational':'serious');});
-      togs.appendChild(typeTog);
+    var typeTog=document.createElement('div');
+    typeTog.className='oc-tog'+(my.type==='serious'?' p':'');
+    typeTog.textContent=my.type==='serious'?'Seriously':'For joy';
+    typeTog.addEventListener('click',function(e){e.stopPropagation();togInline(a.id,'type',my.type==='serious'?'recreational':'serious');});
+    togs.appendChild(typeTog);
 
-      var lvlTog=document.createElement('div');
-      lvlTog.className='oc-tog'+(my.level!=='beginner'?' t':'');
-      lvlTog.textContent=lvlL[my.level]||my.level;
-      lvlTog.addEventListener('click',function(e){e.stopPropagation();cycLvl(a.id);});
-      togs.appendChild(lvlTog);
+    var lvlTog=document.createElement('div');
+    lvlTog.className='oc-tog'+(my.level!=='beginner'?' t':'');
+    lvlTog.textContent=lvlL[my.level]||my.level;
+    lvlTog.addEventListener('click',function(e){e.stopPropagation();cycLvl(a.id);});
+    togs.appendChild(lvlTog);
 
-      inner.querySelector('div[style]').appendChild(togs);
-    }
+    inner.querySelector('div[style]').appendChild(togs);
     card.appendChild(inner);
 
     var chk=document.createElement('div');
@@ -760,7 +760,15 @@ function togOb(id){
   var i=myActs.findIndex(function(a){return a.id===id;});
   if(i>-1)myActs.splice(i,1);
   else{var b=ACTS.find(function(a){return a.id===id;});myActs.push(Object.assign({},b,{type:'recreational',level:'beginner'}));}
-  sv();rObGrid();
+  sv();
+  var sel=myActs.some(function(a){return a.id===id;});
+  var card=document.querySelector('.oc[data-act-id="'+id+'"]');
+  if(card){card.classList.toggle('on',sel);}
+  var cnt=myActs.length;
+  var el=document.getElementById('ob-cnt');
+  el.style.display=cnt>0?'block':'none';
+  if(cnt>0)el.textContent=cnt+' planted';
+  document.getElementById('ob-btn').disabled=cnt<1;
 }
 function togInline(id,k,v){var a=myActs.find(function(a){return a.id===id;});if(a){a[k]=v;sv();}rObGrid();}
 function cycLvl(id){var a=myActs.find(function(a){return a.id===id;});if(!a)return;var l=['beginner','intermediate','comfortable'];a.level=l[(l.indexOf(a.level)+1)%l.length];sv();rObGrid();}
