@@ -1609,33 +1609,19 @@ function rGarden(){
   if(!myActs.length){document.getElementById('garden-svg-wrap').innerHTML='';document.getElementById('garden-empty').style.display='block';return;}
   document.getElementById('garden-empty').style.display='none';
 
-  var tileW=90,tileH=120,cols=2;
-  var plotW=tileW*cols,plotH=tileH*cols;
+  var tileW=90,tileH=120;
   var bgEl=document.getElementById('gs-img-background');
   var bgSrc=bgEl?bgEl.src:'';
   var wrap=document.getElementById('garden-svg-wrap');
   wrap.innerHTML='';
 
-  var grid=document.createElement('div');
-  grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 20px;';
-
-  var chunks=[];
-  for(var ci=0;ci<myActs.length;ci+=4)chunks.push(myActs.slice(ci,ci+4));
-
-  chunks.forEach(function(chunk,pi){
-    var plotCard=document.createElement('div');
-    plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
-
-    var lbl=document.createElement('div');
-    lbl.style.cssText='font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;padding:5px 10px;background:var(--bg2);';
-    lbl.textContent='Patch '+(pi+1);
-    plotCard.appendChild(lbl);
-
-    var items=chunk.slice();while(items.length<4)items.push(null);
+  function makePlantSVG(items,cols,tileW,tileH,bgSrc){
+    var rows=Math.ceil(items.length/cols);
+    var plotW=tileW*cols,plotH=tileH*rows;
     var svg='<svg viewBox="0 0 '+plotW+' '+plotH+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
-    for(var ri=0;ri<2;ri++)svg+='<image href="'+bgSrc+'" x="0" y="'+(ri*tileH)+'" width="'+plotW+'" height="'+tileH+'" preserveAspectRatio="xMidYMid slice"/>';
+    for(var ri=0;ri<rows;ri++)svg+='<image href="'+bgSrc+'" x="0" y="'+(ri*tileH)+'" width="'+plotW+'" height="'+tileH+'" preserveAspectRatio="xMidYMid slice"/>';
     items.forEach(function(a,idx){
-      var c=idx%2,r=Math.floor(idx/2),tx=c*tileW,ty=r*tileH;
+      var c=idx%cols,r=Math.floor(idx/cols),tx=c*tileW,ty=r*tileH;
       if(a){
         var hrs=getHours(a.id),stage=getStage(hrs);
         var lastSess=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
@@ -1651,18 +1637,40 @@ function rGarden(){
         svg+='<rect x="'+(tx+1)+'" y="'+(ty+1)+'" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(0,0,0,.07)" rx="3"/>';
       }
     });
-    svg+='<line x1="'+tileW+'" y1="0" x2="'+tileW+'" y2="'+plotH+'" stroke="rgba(255,255,255,.2)" stroke-width="1"/>';
-    svg+='<line x1="0" y1="'+tileH+'" x2="'+plotW+'" y2="'+tileH+'" stroke="rgba(255,255,255,.2)" stroke-width="1"/>';
+    for(var col=1;col<cols;col++)svg+='<line x1="'+(col*tileW)+'" y1="0" x2="'+(col*tileW)+'" y2="'+plotH+'" stroke="rgba(255,255,255,.2)" stroke-width="1"/>';
+    for(var row=1;row<rows;row++)svg+='<line x1="0" y1="'+(row*tileH)+'" x2="'+plotW+'" y2="'+(row*tileH)+'" stroke="rgba(255,255,255,.2)" stroke-width="1"/>';
     svg+='</svg>';
+    return svg;
+  }
 
-    var svgWrap=document.createElement('div');svgWrap.innerHTML=svg;
-    svgWrap.querySelectorAll('[data-pid]').forEach(function(el){
-      el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});
+  if(myActs.length<=8){
+    // Flat layout: 4 per row, full width
+    var flatCols=4;
+    var items=myActs.slice();
+    while(items.length%flatCols!==0)items.push(null);
+    var container=document.createElement('div');container.style.cssText='padding:0 16px 20px;';
+    var plotCard=document.createElement('div');plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
+    var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,flatCols,tileW,tileH,bgSrc);
+    svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
+    plotCard.appendChild(svgWrap);container.appendChild(plotCard);wrap.appendChild(container);
+  } else {
+    // Patch layout: 2×2 per patch card, 2-column grid
+    var patchCols=2;
+    var plotW=tileW*patchCols,plotH=tileH*patchCols;
+    var grid=document.createElement('div');
+    grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 20px;';
+    var chunks=[];for(var ci=0;ci<myActs.length;ci+=4)chunks.push(myActs.slice(ci,ci+4));
+    chunks.forEach(function(chunk,pi){
+      var plotCard=document.createElement('div');plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
+      var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;padding:5px 10px;background:var(--bg2);';
+      lbl.textContent='Patch '+(pi+1);plotCard.appendChild(lbl);
+      var items=chunk.slice();while(items.length<4)items.push(null);
+      var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,patchCols,tileW,tileH,bgSrc);
+      svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
+      plotCard.appendChild(svgWrap);grid.appendChild(plotCard);
     });
-    plotCard.appendChild(svgWrap);
-    grid.appendChild(plotCard);
-  });
-  wrap.appendChild(grid);
+    wrap.appendChild(grid);
+  }
 }
 
 function showPlantInfo(id){
