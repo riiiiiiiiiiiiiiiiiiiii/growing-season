@@ -1246,11 +1246,15 @@ function addSwipe(wrap,card,onArchive,onFocus){
   card.addEventListener('touchmove',function(e){onMove(e.touches[0].clientX,e.touches[0].clientY);if(isSwipe)e.preventDefault();},{passive:false});
   card.addEventListener('touchend',onEnd);
 
-  // Mouse
-  card.addEventListener('mousedown',function(e){mouseDown=true;onStart(e.clientX,e.clientY);});
-  card.addEventListener('mousemove',function(e){if(!mouseDown)return;onMove(e.clientX,e.clientY);});
-  card.addEventListener('mouseup',function(){if(!mouseDown)return;mouseDown=false;onEnd();});
-  card.addEventListener('mouseleave',function(){if(!mouseDown)return;mouseDown=false;onEnd();});
+  // Mouse — attach move/up to document so drag works even when cursor leaves the card
+  card.addEventListener('mousedown',function(e){
+    e.preventDefault();
+    onStart(e.clientX,e.clientY);
+    function onMouseMove(e){onMove(e.clientX,e.clientY);}
+    function onMouseUp(){document.removeEventListener('mousemove',onMouseMove);document.removeEventListener('mouseup',onMouseUp);onEnd();}
+    document.addEventListener('mousemove',onMouseMove);
+    document.addEventListener('mouseup',onMouseUp);
+  });
 }
 
 // ── DRAG TO REORDER ───────────────────────────────────
