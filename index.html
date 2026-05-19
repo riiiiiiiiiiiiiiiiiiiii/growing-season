@@ -322,7 +322,8 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     </div>
     <div id="focus-banner-wrap"></div>
     <div id="my-list"></div>
-    <div style="text-align:center;margin-top:24px;padding-bottom:8px;">
+    <div style="text-align:center;margin-top:24px;padding-bottom:8px;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;">
+      <button id="btn-backup" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">📤 Back up my data</button>
       <button id="btn-terminate" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">☠️ Terminate field</button>
     </div>
   </div>
@@ -559,6 +560,52 @@ document.getElementById('btn-plant-seed').addEventListener('click',openAdd);
 document.getElementById('btn-save-log').addEventListener('click',saveLog);
 document.getElementById('btn-foc-cancel').addEventListener('click',closeFocus);
 document.getElementById('btn-foc-save').addEventListener('click',saveFocus);
+// ── BACKUP / RESTORE ──────────────────────────────────
+function encodeBackup(){
+  var data=JSON.stringify({myActs:myActs,sessions:sessions,profile:profile,weeklyFocus:weeklyFocus,archivedActs:archivedActs,onboarded:onboarded});
+  return btoa(unescape(encodeURIComponent(data)));
+}
+function decodeBackup(str){return JSON.parse(decodeURIComponent(escape(atob(str))));}
+function getBackupUrl(){return location.origin+location.pathname+'#backup='+encodeBackup();}
+
+var pendingImport=null;
+document.getElementById('btn-backup').addEventListener('click',function(){
+  document.getElementById('backup-url').textContent=getBackupUrl();
+  document.getElementById('backup-ov').classList.add('on');
+});
+document.getElementById('btn-backup-close').addEventListener('click',function(){document.getElementById('backup-ov').classList.remove('on');});
+document.getElementById('btn-copy-backup').addEventListener('click',function(){
+  navigator.clipboard.writeText(getBackupUrl()).then(function(){
+    var btn=document.getElementById('btn-copy-backup');btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy link';},2000);
+  });
+});
+document.getElementById('btn-import-no').addEventListener('click',function(){
+  document.getElementById('import-ov').classList.remove('on');
+  history.replaceState(null,'',location.pathname);
+});
+document.getElementById('btn-import-yes').addEventListener('click',function(){
+  if(!pendingImport)return;
+  var d=pendingImport;
+  myActs.splice(0,myActs.length);d.myActs.forEach(function(a){myActs.push(a);});
+  sessions.splice(0,sessions.length);d.sessions.forEach(function(s){sessions.push(s);});
+  archivedActs.splice(0,archivedActs.length);(d.archivedActs||[]).forEach(function(a){archivedActs.push(a);});
+  if(d.profile)Object.assign(profile,d.profile);
+  if(d.weeklyFocus)weeklyFocus=d.weeklyFocus;
+  onboarded=d.onboarded!==undefined?d.onboarded:true;
+  sv();document.getElementById('import-ov').classList.remove('on');
+  history.replaceState(null,'',location.pathname);
+  if(onboarded){launch();}else{show('s-ob1');rObCats();rObGrid();}
+  showToast('✅ Data restored successfully',null);
+});
+(function checkBackupUrl(){
+  var hash=location.hash;
+  if(!hash.startsWith('#backup='))return;
+  try{
+    pendingImport=decodeBackup(hash.slice(8));
+    document.getElementById('import-ov').classList.add('on');
+  }catch(e){history.replaceState(null,'',location.pathname);}
+})();
+
 document.getElementById('btn-terminate').addEventListener('click',function(){document.getElementById('term-ov').classList.add('on');});
 document.getElementById('btn-term-no').addEventListener('click',function(){document.getElementById('term-ov').classList.remove('on');});
 document.getElementById('btn-term-yes').addEventListener('click',function(){
@@ -1796,5 +1843,30 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 <div id="toast" class="toast"><span id="toast-msg"></span><button class="toast-undo" id="toast-undo">Undo</button></div>
+
+<!-- BACKUP SHARE OVERLAY -->
+<div class="ov" id="backup-ov">
+  <div class="sh" style="text-align:center;">
+    <div style="font-size:32px;margin-bottom:10px;">📤</div>
+    <div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:6px;">Back up your data</div>
+    <div style="font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:16px;">Copy this link and open it on any device to restore your full garden, plot, and harvest log.</div>
+    <div id="backup-url" style="background:var(--bg2);border:var(--br);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--tx2);word-break:break-all;text-align:left;max-height:80px;overflow-y:auto;margin-bottom:14px;"></div>
+    <button class="btn btn-p" id="btn-copy-backup" style="margin-top:0;">Copy link</button>
+    <button class="btn btn-s" id="btn-backup-close" style="margin-top:8px;">Close</button>
+  </div>
+</div>
+
+<!-- IMPORT CONFIRM OVERLAY -->
+<div class="ov" id="import-ov">
+  <div class="sh" style="text-align:center;">
+    <div style="font-size:32px;margin-bottom:10px;">📥</div>
+    <div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:6px;">Restore your data?</div>
+    <div style="font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:22px;">A backup was found in this link. Restoring it will replace everything on this device.<br><br>Do you want to continue?</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-s" style="flex:1;margin-top:0;" id="btn-import-no">Cancel</button>
+      <button class="btn btn-p" style="flex:1;margin-top:0;" id="btn-import-yes">Restore</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
