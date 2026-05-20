@@ -1811,6 +1811,17 @@ function rMy(){
 }
 
 // ── HARVEST ───────────────────────────────────────────
+function getStreakAt(actId, date){
+  var dayMs=24*3600*1000;
+  var d=new Date(date);d.setHours(0,0,0,0);
+  var actDays=sessions.filter(function(s){return s.actId===actId;}).map(function(s){
+    var sd=new Date(s.date);sd.setHours(0,0,0,0);return sd.getTime();
+  });
+  actDays=actDays.filter(function(v,i){return actDays.indexOf(v)===i;});
+  var streak=0,check=d.getTime();
+  while(actDays.indexOf(check)>-1){streak++;check-=dayMs;}
+  return streak;
+}
 function rHist(){
   var el=document.getElementById('hist-list');
   if(!sessions.length){el.innerHTML='<p style="color:var(--tx2);font-size:14px;">No harvests yet</p>';return;}
@@ -1840,9 +1851,11 @@ function rHist(){
     var stageClrs=['#8FA89A','#3A9A70','#2E7D52','#B03870','#C87800'];
     var stageBgs=['#E8F0EC','#D4F2E4','#C0E8D0','#FDEAE6','#FFF3D0'];
     var stageEl='<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:9px;margin-left:6px;background:'+stageBgs[stage]+';color:'+stageClrs[stage]+';">'+STAGE_LABELS[stage]+'</span>';
+    var streak=getStreakAt(s.actId,s.date);
+    var streakEl=streak>=3?'<span style="font-size:11px;font-weight:600;color:#C05C00;">🔥 '+streak+' days</span>':'';
     var hc=document.createElement('div');hc.className='hc';hc.style.cursor='pointer';
     hc.innerHTML='<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">'+s.rating+'/10</span>':'')+'<span style="font-size:11px;color:var(--tx3);">›</span></div></div>'
-      +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+'</div>'
+      +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
       +(s.notes?'<div class="hc-note">'+s.notes+'</div>':'');
     (function(sess,act){hc.addEventListener('click',function(){openSessionDetail(sess,act);});})(s,a);
     el.appendChild(hc);
