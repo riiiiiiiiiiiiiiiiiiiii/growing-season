@@ -1312,6 +1312,12 @@ var NOTE_SECTIONS=[
   {key:'blockers',emoji:'🚧', label:'What\'s stopping me', placeholder:'Doubts, obstacles, anything getting in the way…'},
   {key:'general', emoji:'📝', label:'General',      placeholder:'Anything else — links, references, random thoughts…'},
 ];
+var PERSONAL_NOTE_SECTIONS=[
+  {key:'thoughts', emoji:'💭', label:'Thoughts',       placeholder:'What\'s on your mind right now?'},
+  {key:'intentions',emoji:'🌟',label:'Intentions',     placeholder:'What do you want to cultivate in yourself?'},
+  {key:'patterns', emoji:'🧠', label:'Patterns',       placeholder:'Things you\'re noticing about yourself, habits, energy…'},
+  {key:'freewrite',emoji:'📓', label:'Free write',     placeholder:'Open space — no structure needed…'},
+];
 var _noteSaveTimer=null;
 function openNotes(){rNotesList();document.getElementById('notes-ov').classList.add('on');}
 function closeNotes(){document.getElementById('notes-ov').classList.remove('on');}
@@ -1319,9 +1325,30 @@ function rNotesList(){
   document.getElementById('notes-title').textContent='Notes';
   document.getElementById('btn-notes-back').style.display='none';
   var body=document.getElementById('notes-body');body.innerHTML='';
+  // Personal card at top
+  var meName=(profile&&profile.name)?profile.name:'Me';
+  var meEmoji=(profile&&profile.emoji)?profile.emoji:'🌿';
+  var meAct={id:'__me__',name:meName,emoji:meEmoji,_personal:true};
+  var meN=activityNotes['__me__']||{};
+  var meHas=PERSONAL_NOTE_SECTIONS.some(function(s){return meN[s.key]&&meN[s.key].trim();});
+  var mePreview='';
+  if(meHas){var meFirst=PERSONAL_NOTE_SECTIONS.find(function(s){return meN[s.key]&&meN[s.key].trim();});if(meFirst)mePreview=meN[meFirst.key].trim().slice(0,50)+(meN[meFirst.key].trim().length>50?'…':'');}
+  var meCard=document.createElement('div');meCard.className='notes-act-card';
+  meCard.style.cssText='background:var(--grl);border-color:var(--grm);';
+  meCard.innerHTML='<div class="notes-act-em">'+meEmoji+'</div>'
+    +'<div style="flex:1;min-width:0;">'
+      +'<div class="notes-act-name">'+meName+' <span style="font-size:10px;font-weight:500;color:var(--gr);background:var(--grl);border:1px solid var(--grm);border-radius:8px;padding:1px 6px;">Personal</span></div>'
+      +(meHas?'<div class="notes-act-preview">'+mePreview+'</div>':'<div class="notes-act-preview" style="color:var(--tx3);">Your personal space</div>')
+    +'</div>'
+    +'<span style="font-size:16px;color:var(--tx3);">›</span>';
+  meCard.addEventListener('click',function(){rNoteEditor(meAct);});
+  body.appendChild(meCard);
+  // Divider
+  var div=document.createElement('div');div.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;padding:14px 0 6px;';div.textContent='Activities';
+  body.appendChild(div);
   var all=myActs.concat(archivedActs.map(function(a){return Object.assign({},a,{_archived:true});}));
   if(!all.length){
-    body.innerHTML='<p style="color:var(--tx2);font-size:14px;text-align:center;padding:24px 0;">Plant some seeds first to add notes.</p>';
+    var emp=document.createElement('p');emp.style.cssText='color:var(--tx2);font-size:14px;text-align:center;padding:16px 0;';emp.textContent='Plant some seeds first to add notes.';body.appendChild(emp);
     return;
   }
   all.forEach(function(a){
@@ -1348,8 +1375,9 @@ function rNoteEditor(a){
   document.getElementById('notes-title').textContent=a.emoji+' '+a.name;
   document.getElementById('btn-notes-back').style.display='block';
   var body=document.getElementById('notes-body');body.innerHTML='';
+  var sections=a._personal?PERSONAL_NOTE_SECTIONS:NOTE_SECTIONS;
   var n=activityNotes[a.id]||(activityNotes[a.id]={});
-  NOTE_SECTIONS.forEach(function(sec){
+  sections.forEach(function(sec){
     var wrap=document.createElement('div');wrap.className='notes-section';
     var lbl=document.createElement('div');lbl.className='notes-section-lbl';
     lbl.innerHTML='<span>'+sec.emoji+'</span><span>'+sec.label+'</span>';
