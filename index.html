@@ -29,8 +29,8 @@
 html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);overflow:hidden;-webkit-font-smoothing:antialiased;}
 #app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;}
 .scr{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(100px + env(safe-area-inset-bottom));display:none;}
-.scr.on{display:block;animation:scrIn .24s cubic-bezier(.25,.46,.45,.94) both;}
-@keyframes scrIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.scr.on{display:block;animation:scrIn .22s ease;}
+@keyframes scrIn{from{opacity:0;}to{opacity:1;}}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(244,250,246,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:var(--br);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
 .nb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--tx3);padding:6px 4px;user-select:none;}
@@ -165,6 +165,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .el{font-size:11px;color:var(--gr);cursor:pointer;}
 .hc{background:#fff;border:var(--br);border-radius:var(--rad);padding:14px;margin-bottom:8px;box-shadow:var(--sh);animation:cardIn .22s cubic-bezier(.25,.46,.45,.94) both;}
 @keyframes cardIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .hc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
 .hc-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;}
 .hc-r{font-size:13px;color:var(--su2);font-weight:700;}
@@ -208,7 +209,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .mc-wrap{position:relative;overflow:hidden;border-radius:var(--rad);margin-bottom:8px;}
 .mc-del{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
 .mc-foc{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
-.mc{transition:transform .18s cubic-bezier(.25,.46,.45,.94);margin-bottom:0;border-radius:var(--rad);touch-action:pan-y;animation:cardIn .22s cubic-bezier(.25,.46,.45,.94) both;}
+.mc{transition:transform .18s cubic-bezier(.25,.46,.45,.94);margin-bottom:0;border-radius:var(--rad);touch-action:pan-y;animation:fadeIn .22s ease;}
 .mc:active{transform:scale(.98);}
 .toast{position:fixed;bottom:90px;left:50%;transform:translate(-50%,12px);background:#1a1a1a;color:#fff;border-radius:20px;padding:10px 18px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:12px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);opacity:0;transition:opacity .22s ease,transform .28s cubic-bezier(.34,1.4,.64,1);}
 .toast.on{opacity:1;transform:translate(-50%,0);}
@@ -1665,7 +1666,6 @@ function addSwipe(wrap,card,onArchive,onFocus){
 
   function onStart(clientX,clientY){
     startX=clientX;startY=clientY;dx=0;decided=false;isSwipe=false;
-    card.style.animation='none';
     card.style.transition='none';
   }
   function onMove(clientX,clientY){
