@@ -1665,6 +1665,7 @@ function addSwipe(wrap,card,onArchive,onFocus){
 
   function onStart(clientX,clientY){
     startX=clientX;startY=clientY;dx=0;decided=false;isSwipe=false;
+    card.style.animation='none';
     card.style.transition='none';
   }
   function onMove(clientX,clientY){
