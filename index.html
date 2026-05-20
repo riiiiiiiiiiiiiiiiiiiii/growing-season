@@ -100,6 +100,9 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .sc-n{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--gr);margin-bottom:2px;}
 .sc-l{font-size:11px;color:var(--tx3);font-weight:500;}
 .hs{padding:0 16px;margin-bottom:4px;}
+.dq{margin:12px 16px 0;background:var(--grl);border:1px solid var(--grm);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
+.dq-em{font-size:15px;flex-shrink:0;margin-top:1px;}
+.dq-txt{font-size:13px;color:var(--gr2);line-height:1.5;font-style:italic;}
 .hs-t{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
 .ar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
 .ar::-webkit-scrollbar{display:none;}
@@ -370,6 +373,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     <div id="pc-wrap"></div>
     <div class="stats" id="stats"></div>
     <div class="hs"><div class="hs-t">Your plot</div><div class="ar" id="ar"></div></div>
+    <div id="daily-quote"></div>
     <div id="home-deco" style="width:100%;overflow:hidden;pointer-events:none;margin-top:4px;"></div>
   </div>
 
@@ -954,6 +958,82 @@ function homeDecoSVG(sk){
   return s;
 }
 
+// ── DAILY QUOTE ───────────────────────────────────────
+var QUOTES=[
+  'Every master was once a beginner. Keep growing.',
+  'Progress, not perfection. Your roots are deepening.',
+  'Even the slowest seed becomes a tree in time.',
+  'You planted the seed. Now trust the process.',
+  'Small steps every day build the life you want.',
+  'Consistency is quiet. Keep showing up anyway.',
+  'What you water, grows.',
+  'One session at a time, you are becoming.',
+  'Rest is part of the rhythm, not a break from it.',
+  'You are exactly where you need to be today.',
+  'Growth happens in both the doing and the resting.',
+  'Be patient with yourself. Good things take time.',
+  'Today\'s effort is tomorrow\'s harvest.',
+  'Not every day blooms. Show up anyway.',
+  'It\'s okay to grow slowly.',
+  'You are doing better than you think.',
+  'Every moment you spend growing is a gift to your future self.',
+  'Your dedication, however small, matters.',
+  'Start before you\'re ready. Adjust as you grow.',
+  'Momentum starts with a single step.',
+  'Done is better than perfect.',
+  'You don\'t find motivation, you build it by starting.',
+  'What story will your future self tell about today?',
+  'Every harvest, no matter how small, counts.',
+  'Look how far you\'ve come since you started.',
+  'The habit you build today becomes the strength you carry tomorrow.',
+  'Gardens aren\'t built in a day. Neither is mastery.',
+  'Roots grow in the dark before the flower blooms in the light.',
+  'Tend your craft the way you\'d tend something you love.',
+  'Seeds don\'t bloom on command. They bloom on commitment.',
+  'What you nurture, nurtures you back.',
+  'A tree that bends in the wind grows stronger roots.',
+  'After every winter, spring returns.',
+  'Like any garden, you need both sun and rain to grow.',
+  'Each session is proof of your commitment.',
+  'I am patient with my progress.',
+  'I grow a little more every time I show up.',
+  'My consistency is building something beautiful.',
+  'I trust the process, even when I can\'t see the results.',
+  'My effort today shapes my skill tomorrow.',
+  'I celebrate every step forward, no matter how small.',
+  'You don\'t need a perfect plan. You need a first step.',
+  'Progress is built from small, repeated actions.',
+  'Every expert was once a beginner with doubts.',
+  'Showing up is already winning.',
+  'Your future self is cheering you on.',
+  'Good things grow slowly, and then all at once.',
+  'You are one session away from momentum.',
+  'The secret to getting ahead is getting started.',
+  'You\'ve shown up before. You can show up again.',
+  'Every season of growth requires a season of effort.',
+  'The field rewards those who tend it regularly.',
+  'Your past sessions are proof that you can do this.',
+  'Discipline is choosing what you want most over what you want now.',
+  'The only bad session is the one you didn\'t show up for.',
+  'Make today count.',
+  'Small, consistent actions are the only kind that matter.',
+  'You are capable of more than you know.',
+  'The soil of practice grows the fruit of skill.',
+  'Even weeds remind us that life finds a way.',
+  'Start where you are. Use what you have. Do what you can.',
+  'The best investment you can make is in yourself.',
+  'Difficult roads often lead to beautiful destinations.',
+  'Your only competition is who you were yesterday.',
+  'A little progress each day adds up to big results.',
+  'You\'re not behind. You\'re building.',
+];
+var QUOTE_EMOJIS=['🌱','🌿','🌸','🌾','☀️','🪴','🍃','✨'];
+function getDailyQuote(){
+  var d=new Date().toDateString();
+  var h=0;for(var i=0;i<d.length;i++)h=(h*31+d.charCodeAt(i))>>>0;
+  return {text:QUOTES[h%QUOTES.length],emoji:QUOTE_EMOJIS[h%QUOTE_EMOJIS.length]};
+}
+
 // ── HOME ──────────────────────────────────────────────
 function rHome(){
   var sea=getSeason(), sk=getSeasonKey();
@@ -1021,6 +1101,8 @@ function rHome(){
   renderChips();
 
   document.getElementById('home-deco').innerHTML=homeDecoSVG(sk);
+  var q=getDailyQuote();
+  document.getElementById('daily-quote').innerHTML='<div class="dq"><span class="dq-em">'+q.emoji+'</span><span class="dq-txt">'+q.text+'</span></div>';
 }
 
 // ── ONBOARDING ────────────────────────────────────────
