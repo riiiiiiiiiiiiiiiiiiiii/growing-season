@@ -828,6 +828,7 @@ function launch(){
   document.getElementById('main-nav').classList.add('on');
   document.getElementById('fab').style.display='none';
   rHome();
+  setTimeout(function(){checkTrophies();sv();},600);
   updateCollectBadge();
 }
 
