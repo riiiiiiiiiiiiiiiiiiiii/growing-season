@@ -1824,7 +1824,7 @@ function rGarden(){
       document.getElementById('garden-focus-edit-btn').addEventListener('click',openFocus);
       if(gtabs){
         gtabs.innerHTML='';
-        [{id:'all',label:'🌸 Full garden'},{id:'focus',label:'🎯 In focus'}].forEach(function(t){
+        [{id:'focus',label:'🎯 In focus'},{id:'all',label:'🌸 Full garden'}].forEach(function(t){
           var btn=document.createElement('div');
           btn.className='pill'+(gardenTab===t.id?'':' off');
           btn.style.cssText='cursor:pointer;'+(gardenTab===t.id?'background:var(--gr);color:#fff;':'background:var(--bg2);color:var(--tx2);');
