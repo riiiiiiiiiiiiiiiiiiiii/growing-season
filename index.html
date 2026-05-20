@@ -676,11 +676,25 @@ function trophyHint(id){
     triple_bloom:[myActs.filter(function(a){return getStage(getHours(a.id))>=4;}).length,3]};
   var p=m[id];return(p&&p[0]>0)?p[0]+'/'+p[1]:null;
 }
+var _trophyQ=[],_trophyQT=null;
 function awardTrophy(id){
   if(hasTrophy(id))return;
   collection.trophies.push(id);
   var t=TROPHIES.find(function(x){return x.id===id;});
-  if(t)showToast(t.emoji+' Trophy unlocked: '+t.name,null);
+  if(!t)return;
+  _trophyQ.push(t);
+  clearTimeout(_trophyQT);
+  _trophyQT=setTimeout(function(){
+    var q=_trophyQ.splice(0);
+    if(!q.length)return;
+    haptic(18);
+    if(q.length===1){
+      showToast(q[0].emoji+' Trophy unlocked: '+q[0].name,null);
+    } else {
+      showToast('🏆 '+q.length+' trophies unlocked! Open Collections to see them.',null);
+      updateCollectBadge();
+    }
+  },80);
 }
 function checkTrophies(){
   var totalH=sessions.reduce(function(s,x){return s+(x.hours||0)+((x.mins||0)/60);},0);
