@@ -1080,18 +1080,22 @@ function showBrowse(){
 function startFrom(id){closePicker();active={actId:id,startedAt:Date.now()};sv();rHome();}
 function resumeSess(){if(!active)return;openFinish(active.actId,'home');}
 
+var _lastSuggestedId=null;
 function suggestAct(){
   if(!myActs.length){showToast('Plant some seeds first!',null);return;}
   var now=Date.now();
   var pool=hasFocusSet()?myActs.filter(function(a){return isFocused(a.id);}):myActs;
   if(!pool.length)pool=myActs;
-  var scored=pool.map(function(a){
+  var candidates=pool.filter(function(a){return a.id!==_lastSuggestedId;});
+  if(!candidates.length)candidates=pool;
+  var scored=candidates.map(function(a){
     var lastS=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
     var daysSince=lastS?(now-lastS.date)/(24*3600*1000):999;
     return{a:a,score:daysSince+Math.random()*3};
   });
   scored.sort(function(a,b){return b.score-a.score;});
   var pick=scored[0].a;
+  _lastSuggestedId=pick.id;
   var body=document.getElementById('pq-body');body.innerHTML='';
   var h=document.createElement('div');h.style.cssText='font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:4px;';h.textContent='🎲 How about this?';body.appendChild(h);
   var card=document.createElement('div');card.style.cssText='background:var(--bg2);border-radius:16px;padding:20px;text-align:center;margin:16px 0;';
@@ -1819,9 +1823,7 @@ function rGarden(){
       document.getElementById('garden-focus-new-week-cta').addEventListener('click',openFocus);
       if(gtabs)gtabs.innerHTML='';
     } else {
-      var fCount=weeklyFocus.actIds.length;
-      gbw.innerHTML='<div class="focus-banner"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>This week: '+fCount+' in focus</strong></div><button class="focus-banner-edit" id="garden-focus-edit-btn">Edit</button></div>';
-      document.getElementById('garden-focus-edit-btn').addEventListener('click',openFocus);
+      gbw.innerHTML='';
       if(gtabs){
         gtabs.innerHTML='';
         [{id:'focus',label:'🎯 In focus'},{id:'all',label:'🌸 Full garden'}].forEach(function(t){
