@@ -373,7 +373,6 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
   <div id="s-my" class="scr" style="padding:16px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
       <div style="font-family:var(--serif);font-size:23px;font-weight:700;">The plot</div>
-      <button id="btn-plant-seed" style="background:var(--grl);color:var(--gr2);border:1px solid var(--grm);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;">Plant a new seed</button>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <div style="font-size:13px;color:var(--tx2);">Tap to start or log a session</div>
@@ -428,7 +427,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
   </div>
 
   <!-- LOG -->
-  <div id="s-log" class="scr" style="padding:16px 16px 0;">
+  <div id="s-log" class="scr" style="padding:16px 16px calc(100px + env(safe-area-inset-bottom));">
     <button class="bk" id="btn-back">Back</button>
     <div class="lh"><div class="le" id="le"></div><div><div class="lt" id="lt"></div><div class="ls" id="ls"></div></div></div>
     <div id="lbadge-wrap"></div>
@@ -733,6 +732,7 @@ function show(id){document.querySelectorAll('.scr').forEach(function(s){s.classL
 function nav(v){
   show('s-'+v);
   ['home','my','garden','hist'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
+  document.getElementById('fab').style.display=(v==='my'||v==='garden')?'flex':'none';
   if(v==='home')rHome();
   if(v==='my')rMy();
   if(v==='garden')rGarden();
@@ -742,7 +742,7 @@ function goBack(){nav(backFrom);}
 function launch(){
   show('s-home');
   document.getElementById('main-nav').classList.add('on');
-  document.getElementById('fab').style.display='flex';
+  document.getElementById('fab').style.display='none';
   rHome();
   updateCollectBadge();
 }
@@ -754,7 +754,6 @@ document.getElementById('nb-garden').addEventListener('click',function(){nav('ga
 document.getElementById('nb-hist').addEventListener('click',function(){nav('hist');});
 document.getElementById('fab').addEventListener('click',openAdd);
 document.getElementById('btn-back').addEventListener('click',goBack);
-document.getElementById('btn-plant-seed').addEventListener('click',openAdd);
 document.getElementById('btn-save-log').addEventListener('click',saveLog);
 document.getElementById('btn-foc-cancel').addEventListener('click',closeFocus);
 document.getElementById('btn-foc-save').addEventListener('click',saveFocus);
@@ -1947,7 +1946,8 @@ function rHist(){
     var tW=52,tH=68;
     var plantInner=drawPlant(stage,tW,tH);
     var plantBg=['linear-gradient(180deg,#D8E8D8,#A8C8A0)','linear-gradient(180deg,#C8E8D0,#7EB890)','linear-gradient(180deg,#B0D8B8,#56A870)','linear-gradient(180deg,#F0C8D0,#C07090)','linear-gradient(180deg,#F8E8A0,#D4A830)'];
-    var plantCol=plantInner?'<div style="width:'+tW+'px;flex-shrink:0;background:'+plantBg[stage]+';display:flex;align-items:flex-end;border-radius:0 var(--rad) var(--rad) 0;overflow:hidden;"><svg viewBox="0 0 '+tW+' '+tH+'" width="'+tW+'" height="'+tH+'" xmlns="http://www.w3.org/2000/svg">'+plantInner+'</svg></div>':'';
+    var plantOff=stage===3?'margin-top:6px;':stage===4?'margin-top:10px;':'';
+    var plantCol=plantInner?'<div style="width:'+tW+'px;flex-shrink:0;background:'+plantBg[stage]+';display:flex;align-items:flex-end;border-radius:0 var(--rad) var(--rad) 0;overflow:hidden;"><svg style="'+plantOff+'" viewBox="0 0 '+tW+' '+tH+'" width="'+tW+'" height="'+tH+'" xmlns="http://www.w3.org/2000/svg">'+plantInner+'</svg></div>':'';
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;';
     hc.innerHTML='<div style="flex:1;padding:14px;min-width:0;">'
       +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">'+s.rating+'/10</span>':'')+'<span style="font-size:11px;color:var(--tx3);">›</span></div></div>'
