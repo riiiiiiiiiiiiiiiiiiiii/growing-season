@@ -219,6 +219,13 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .focus-banner-edit{background:var(--gr);color:#fff;border:none;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;}
 .focus-new-week{background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
 .focus-new-week-text{flex:1;font-size:13px;color:#92400E;}
+.notes-act-card{background:#fff;border:var(--br);border-radius:var(--rad);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer;box-shadow:var(--sh);transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.notes-act-card:active{transform:scale(.98);}
+.notes-act-em{font-size:26px;flex-shrink:0;}
+.notes-act-name{font-size:15px;font-weight:600;}
+.notes-act-preview{font-size:12px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+.notes-section{margin-bottom:18px;}
+.notes-section-lbl{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
 .hmenu{position:fixed;top:66px;left:14px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:500;min-width:180px;overflow:hidden;transition:transform .2s ease,opacity .18s ease;}
 .hmenu.off{transform:translateY(-6px);opacity:0;pointer-events:none;}
 .hmenu-row{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;font-size:14px;font-weight:500;border-bottom:.5px solid var(--bg2);}
@@ -352,6 +359,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     <div id="home-menu" class="hmenu off">
       <div class="hmenu-row" id="hmenu-profile"><span class="hmenu-em" id="hmenu-em">👤</span><span id="hmenu-name">Profile</span></div>
       <div class="hmenu-row" id="hmenu-collect"><span class="hmenu-em">🫙</span><span>Collections</span><span id="hmenu-badge" class="hmenu-dot" style="display:none;"></span></div>
+      <div class="hmenu-row" id="hmenu-notes"><span class="hmenu-em">📓</span><span>Notes</span></div>
     </div>
     <div id="home-menu-ov" style="display:none;position:fixed;inset:0;z-index:499;"></div>
     <div id="ip-wrap"></div>
@@ -469,6 +477,18 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 </div>
 
 <button class="fab" id="fab">+</button>
+
+<!-- NOTES OVERLAY -->
+<div class="ov" id="notes-ov">
+  <div class="sh" id="notes-sh">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <button id="btn-notes-back" style="display:none;background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;">‹</button>
+      <div style="flex:1;font-family:var(--serif);font-size:20px;font-weight:700;" id="notes-title">Notes</div>
+      <button id="btn-notes-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;">×</button>
+    </div>
+    <div id="notes-body"></div>
+  </div>
+</div>
 
 <!-- PICKER SHEET -->
 <div class="ov" id="pq-ov">
@@ -591,11 +611,12 @@ var ACTS = [
 ];
 
 // ── STATE ─────────────────────────────────────────────
-function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[],collection:{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[]}};}
-function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection}));}catch(e){}}
+function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[],collection:{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[]},activityNotes:{}};}
+function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes}));}catch(e){}}
 var st=ld(), myActs=st.myActs, sessions=st.sessions, onboarded=st.onboarded, profile=st.profile, active=st.active;
 var weeklyFocus=st.weeklyFocus||{weekKey:'',actIds:[]};
 var archivedActs=st.archivedActs||[];
+var activityNotes=st.activityNotes||{};
 var collection=st.collection||{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[]};
 if(!collection.counts)collection.counts={drop:0,leaf:0,petal:0,bee:0};
 function getWeekKey(){var d=new Date(),y=d.getFullYear(),s=new Date(y,0,1),w=Math.ceil(((d-s)/864e5+s.getDay()+1)/7);return y+'-W'+w;}
@@ -1118,6 +1139,73 @@ function openProfileEdit(){
   sh.appendChild(cancelBtn);
   document.getElementById('ed-ov').classList.add('on');
 }
+// ── NOTES ─────────────────────────────────────────────
+var NOTE_SECTIONS=[
+  {key:'goals',   emoji:'🎯', label:'To work on',  placeholder:'Goals, things to improve, skills to build…'},
+  {key:'ideas',   emoji:'💡', label:'Ideas',        placeholder:'Things to try, approaches, experiments…'},
+  {key:'blockers',emoji:'🚧', label:'What\'s stopping me', placeholder:'Doubts, obstacles, anything getting in the way…'},
+  {key:'general', emoji:'📝', label:'General',      placeholder:'Anything else — links, references, random thoughts…'},
+];
+var _noteSaveTimer=null;
+function openNotes(){rNotesList();document.getElementById('notes-ov').classList.add('on');}
+function closeNotes(){document.getElementById('notes-ov').classList.remove('on');}
+function rNotesList(){
+  document.getElementById('notes-title').textContent='Notes';
+  document.getElementById('btn-notes-back').style.display='none';
+  var body=document.getElementById('notes-body');body.innerHTML='';
+  var all=myActs.concat(archivedActs.map(function(a){return Object.assign({},a,{_archived:true});}));
+  if(!all.length){
+    body.innerHTML='<p style="color:var(--tx2);font-size:14px;text-align:center;padding:24px 0;">Plant some seeds first to add notes.</p>';
+    return;
+  }
+  all.forEach(function(a){
+    var n=activityNotes[a.id]||{};
+    var hasNotes=NOTE_SECTIONS.some(function(s){return n[s.key]&&n[s.key].trim();});
+    var preview='';
+    if(hasNotes){
+      var first=NOTE_SECTIONS.find(function(s){return n[s.key]&&n[s.key].trim();});
+      if(first)preview=n[first.key].trim().slice(0,50)+(n[first.key].trim().length>50?'…':'');
+    }
+    var card=document.createElement('div');card.className='notes-act-card';
+    if(a._archived)card.style.opacity='.6';
+    card.innerHTML='<div class="notes-act-em">'+a.emoji+'</div>'
+      +'<div style="flex:1;min-width:0;">'
+        +'<div class="notes-act-name">'+a.name+(a._archived?' <span style="font-size:10px;color:var(--tx3);">(archived)</span>':'')+'</div>'
+        +(hasNotes?'<div class="notes-act-preview">'+preview+'</div>':'<div class="notes-act-preview" style="color:var(--bg3);">No notes yet</div>')
+      +'</div>'
+      +'<span style="font-size:16px;color:var(--tx3);">›</span>';
+    card.addEventListener('click',function(){rNoteEditor(a);});
+    body.appendChild(card);
+  });
+}
+function rNoteEditor(a){
+  document.getElementById('notes-title').textContent=a.emoji+' '+a.name;
+  document.getElementById('btn-notes-back').style.display='block';
+  var body=document.getElementById('notes-body');body.innerHTML='';
+  var n=activityNotes[a.id]||(activityNotes[a.id]={});
+  NOTE_SECTIONS.forEach(function(sec){
+    var wrap=document.createElement('div');wrap.className='notes-section';
+    var lbl=document.createElement('div');lbl.className='notes-section-lbl';
+    lbl.innerHTML='<span>'+sec.emoji+'</span><span>'+sec.label+'</span>';
+    var ta=document.createElement('textarea');ta.className='nta';
+    ta.placeholder=sec.placeholder;
+    ta.value=n[sec.key]||'';
+    ta.style.minHeight='72px';
+    (function(key){
+      ta.addEventListener('input',function(){
+        if(!activityNotes[a.id])activityNotes[a.id]={};
+        activityNotes[a.id][key]=ta.value;
+        clearTimeout(_noteSaveTimer);
+        _noteSaveTimer=setTimeout(sv,600);
+      });
+    })(sec.key);
+    wrap.appendChild(lbl);wrap.appendChild(ta);body.appendChild(wrap);
+  });
+}
+document.getElementById('btn-notes-close').addEventListener('click',closeNotes);
+document.getElementById('btn-notes-back').addEventListener('click',rNotesList);
+document.getElementById('hmenu-notes').addEventListener('click',function(){closeHomeMenu();openNotes();});
+
 function openHomeMenu(){
   var m=document.getElementById('home-menu'),ov=document.getElementById('home-menu-ov');
   m.classList.remove('off');ov.style.display='block';
