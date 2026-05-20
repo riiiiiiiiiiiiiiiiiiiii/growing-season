@@ -357,6 +357,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       </div>
       <div style="font-size:13px;color:var(--tx2);">Plants grow as you log more hours</div>
     </div>
+    <div id="garden-focus-banner-wrap" style="padding:0 16px 4px;"></div>
     <div id="garden-legend" style="display:flex;gap:10px;padding:0 16px 12px;flex-wrap:wrap;"></div>
     <div id="garden-svg-wrap"></div>
     <div id="garden-empty" style="display:none;padding:40px 16px;text-align:center;color:var(--tx2);font-size:14px;">Add activities and log hours to see your garden grow</div>
@@ -1799,6 +1800,24 @@ function drawPlant(stage,w,h){
 
 function rGarden(){
   var gc=document.getElementById('garden-count');if(gc)gc.textContent=myActs.length+' seed'+(myActs.length!==1?'s':'')+(myActs.length?' planted':'');
+
+  // Focus banner
+  var gbw=document.getElementById('garden-focus-banner-wrap');
+  if(gbw){
+    var newWeek=weeklyFocus.weekKey&&weeklyFocus.weekKey!==getWeekKey();
+    if(!hasFocusSet()){
+      gbw.innerHTML='<div class="focus-banner" style="cursor:pointer;" id="garden-focus-set-cta"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>Set this week\'s focus</strong><br><span style="font-weight:400;">Pick a few activities to prioritise</span></div><button class="focus-banner-edit">Choose</button></div>';
+      document.getElementById('garden-focus-set-cta').addEventListener('click',openFocus);
+    } else if(newWeek){
+      gbw.innerHTML='<div class="focus-new-week" style="cursor:pointer;" id="garden-focus-new-week-cta"><span style="font-size:18px;">🗓️</span><div class="focus-new-week-text"><strong>New week!</strong> Update your focus?</div><button class="focus-banner-edit" style="background:#F59E0B;">Update</button></div>';
+      document.getElementById('garden-focus-new-week-cta').addEventListener('click',openFocus);
+    } else {
+      var fCount=weeklyFocus.actIds.length;
+      gbw.innerHTML='<div class="focus-banner"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>This week: '+fCount+' in focus</strong><br><span style="font-weight:400;font-size:12px;">Others show as dormant</span></div><button class="focus-banner-edit" id="garden-focus-edit-btn">Edit</button></div>';
+      document.getElementById('garden-focus-edit-btn').addEventListener('click',openFocus);
+    }
+  }
+
   var legend=document.getElementById('garden-legend');
   var clrs=['#C8D8C8','#7EC8A8','#56AB74','#D4537E','#F5C842'];
   var thresh=['0h','0.5h+','2h+','5h+','10h+'];
