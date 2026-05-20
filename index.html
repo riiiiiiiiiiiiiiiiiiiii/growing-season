@@ -358,6 +358,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
       <div style="font-size:13px;color:var(--tx2);">Plants grow as you log more hours</div>
     </div>
     <div id="garden-focus-banner-wrap" style="padding:0 16px 4px;"></div>
+    <div id="garden-tabs" style="display:flex;gap:6px;padding:0 16px 8px;"></div>
     <div id="garden-legend" style="display:flex;gap:10px;padding:0 16px 12px;flex-wrap:wrap;"></div>
     <div id="garden-svg-wrap"></div>
     <div id="garden-empty" style="display:none;padding:40px 16px;text-align:center;color:var(--tx2);font-size:14px;">Add activities and log hours to see your garden grow</div>
@@ -1405,6 +1406,7 @@ function initDrag(handle,wrap,actId,cat){
 // ── PLOT (MY LIST) ─────────────────────────────────────
 var catOpen={};
 var myTab='all';
+var gardenTab='all';
 function rMy(){
   var el=document.getElementById('my-list');
   var pc=document.getElementById('plot-count');if(pc)pc.textContent=myActs.length+' seed'+(myActs.length!==1?'s':'')+(myActs.length?' planted':'');
@@ -1801,20 +1803,36 @@ function drawPlant(stage,w,h){
 function rGarden(){
   var gc=document.getElementById('garden-count');if(gc)gc.textContent=myActs.length+' seed'+(myActs.length!==1?'s':'')+(myActs.length?' planted':'');
 
-  // Focus banner
+  // Focus banner + tabs
   var gbw=document.getElementById('garden-focus-banner-wrap');
+  var gtabs=document.getElementById('garden-tabs');
   if(gbw){
     var newWeek=weeklyFocus.weekKey&&weeklyFocus.weekKey!==getWeekKey();
     if(!hasFocusSet()){
+      gardenTab='all';
       gbw.innerHTML='<div class="focus-banner" style="cursor:pointer;" id="garden-focus-set-cta"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>Set this week\'s focus</strong><br><span style="font-weight:400;">Pick a few activities to prioritise</span></div><button class="focus-banner-edit">Choose</button></div>';
       document.getElementById('garden-focus-set-cta').addEventListener('click',openFocus);
+      if(gtabs)gtabs.innerHTML='';
     } else if(newWeek){
+      gardenTab='all';
       gbw.innerHTML='<div class="focus-new-week" style="cursor:pointer;" id="garden-focus-new-week-cta"><span style="font-size:18px;">🗓️</span><div class="focus-new-week-text"><strong>New week!</strong> Update your focus?</div><button class="focus-banner-edit" style="background:#F59E0B;">Update</button></div>';
       document.getElementById('garden-focus-new-week-cta').addEventListener('click',openFocus);
+      if(gtabs)gtabs.innerHTML='';
     } else {
       var fCount=weeklyFocus.actIds.length;
-      gbw.innerHTML='<div class="focus-banner"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>This week: '+fCount+' in focus</strong><br><span style="font-weight:400;font-size:12px;">Others show as dormant</span></div><button class="focus-banner-edit" id="garden-focus-edit-btn">Edit</button></div>';
+      gbw.innerHTML='<div class="focus-banner"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>This week: '+fCount+' in focus</strong></div><button class="focus-banner-edit" id="garden-focus-edit-btn">Edit</button></div>';
       document.getElementById('garden-focus-edit-btn').addEventListener('click',openFocus);
+      if(gtabs){
+        gtabs.innerHTML='';
+        [{id:'all',label:'🌸 Full garden'},{id:'focus',label:'🎯 In focus'}].forEach(function(t){
+          var btn=document.createElement('div');
+          btn.className='pill'+(gardenTab===t.id?'':' off');
+          btn.style.cssText='cursor:pointer;'+(gardenTab===t.id?'background:var(--gr);color:#fff;':'background:var(--bg2);color:var(--tx2);');
+          btn.textContent=t.label;
+          btn.addEventListener('click',function(){gardenTab=t.id;rGarden();});
+          gtabs.appendChild(btn);
+        });
+      }
     }
   }
 
@@ -1828,8 +1846,20 @@ function rGarden(){
     legend.appendChild(item);
   });
 
-  if(!myActs.length){document.getElementById('garden-svg-wrap').innerHTML='';document.getElementById('garden-empty').style.display='block';return;}
+  var visibleActs=(gardenTab==='focus'&&hasFocusSet())?myActs.filter(function(a){return isFocused(a.id);}):myActs;
+
+  if(!visibleActs.length){
+    document.getElementById('garden-svg-wrap').innerHTML='';
+    if(!myActs.length){
+      document.getElementById('garden-empty').style.display='block';
+    } else {
+      document.getElementById('garden-empty').style.display='block';
+      document.getElementById('garden-empty').textContent='No activities in focus this week.';
+    }
+    return;
+  }
   document.getElementById('garden-empty').style.display='none';
+  document.getElementById('garden-empty').textContent='Add activities and log hours to see your garden grow';
 
   var tileW=90,tileH=120;
   var bgEl=document.getElementById('gs-img-background');
@@ -1848,7 +1878,7 @@ function rGarden(){
         var hrs=getHours(a.id),stage=getStage(hrs);
         var lastSess=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
         var og=lastSess&&(Date.now()-lastSess.date>14*24*3600*1000);
-        var dormant=hasFocusSet()&&!isFocused(a.id);
+        var dormant=gardenTab==='all'&&hasFocusSet()&&!isFocused(a.id);
         svg+='<g transform="translate('+tx+','+ty+')" data-pid="'+a.id+'" style="cursor:pointer;">'
           +drawPlant(stage,tileW,tileH)
           +(dormant?'<rect x="0" y="0" width="'+tileW+'" height="'+tileH+'" fill="rgba(200,210,220,0.55)"/>':'')
@@ -1865,10 +1895,10 @@ function rGarden(){
     return svg;
   }
 
-  if(myActs.length<=8){
+  if(visibleActs.length<=8){
     // Flat layout: 4 per row, full width
     var flatCols=4;
-    var items=myActs.slice();
+    var items=visibleActs.slice();
     while(items.length%flatCols!==0)items.push(null);
     var container=document.createElement('div');container.style.cssText='padding:0 16px 20px;';
     var plotCard=document.createElement('div');plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
@@ -1881,7 +1911,7 @@ function rGarden(){
     var plotW=tileW*patchCols,plotH=tileH*patchCols;
     var grid=document.createElement('div');
     grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 20px;';
-    var chunks=[];for(var ci=0;ci<myActs.length;ci+=4)chunks.push(myActs.slice(ci,ci+4));
+    var chunks=[];for(var ci=0;ci<visibleActs.length;ci+=4)chunks.push(visibleActs.slice(ci,ci+4));
     chunks.forEach(function(chunk,pi){
       var plotCard=document.createElement('div');plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
       var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;padding:5px 10px;background:var(--bg2);';
