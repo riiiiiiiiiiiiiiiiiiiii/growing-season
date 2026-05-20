@@ -219,6 +219,13 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .focus-banner-edit{background:var(--gr);color:#fff;border:none;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;}
 .focus-new-week{background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
 .focus-new-week-text{flex:1;font-size:13px;color:#92400E;}
+.hmenu{position:fixed;top:58px;right:14px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:500;min-width:180px;overflow:hidden;transform-origin:top right;transition:transform .18s cubic-bezier(.34,1.4,.64,1),opacity .15s;}
+.hmenu.off{transform:scale(.88);opacity:0;pointer-events:none;}
+.hmenu-row{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;font-size:14px;font-weight:500;border-bottom:.5px solid var(--bg2);}
+.hmenu-row:last-child{border-bottom:none;}
+.hmenu-row:active{background:var(--bg2);}
+.hmenu-em{font-size:20px;flex-shrink:0;}
+.hmenu-dot{width:7px;height:7px;background:#E53E3E;border-radius:50%;margin-left:auto;flex-shrink:0;}
 .collect-pending-banner{background:var(--sul);border:1px solid var(--sum);border-radius:14px;padding:14px 16px;margin-bottom:18px;}
 .collect-pending-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
 .collect-item{background:#fff;border:2px solid var(--sum);border-radius:14px;padding:12px 8px;cursor:pointer;text-align:center;box-shadow:var(--sh);transition:transform .15s cubic-bezier(.34,1.56,.64,1),opacity .2s;}
@@ -339,8 +346,14 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
         <div class="sb-title" id="sb-title"></div>
         <div class="sb-sub" id="sb-sub"></div>
       </div>
-      <button id="btn-profile" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.35);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;" id="btn-profile"></button>
+      <button id="btn-menu" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.35);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;line-height:1;">☰</button>
     </div>
+    <!-- Hamburger dropdown -->
+    <div id="home-menu" class="hmenu off">
+      <div class="hmenu-row" id="hmenu-profile"><span class="hmenu-em" id="hmenu-em">👤</span><span id="hmenu-name">Profile</span></div>
+      <div class="hmenu-row" id="hmenu-collect"><span class="hmenu-em">🫙</span><span>Collections</span><span id="hmenu-badge" class="hmenu-dot" style="display:none;"></span></div>
+    </div>
+    <div id="home-menu-ov" style="display:none;position:fixed;inset:0;z-index:499;"></div>
     <div id="ip-wrap"></div>
     <div id="pc-wrap"></div>
     <div class="stats" id="stats"></div>
@@ -392,6 +405,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 
   <!-- COLLECT -->
   <div id="s-collect" class="scr" style="padding:16px;">
+    <button class="bk" id="btn-collect-back">Back</button>
     <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:2px;">Collections</div>
     <div style="font-size:13px;color:var(--tx2);margin-bottom:18px;">Rewards for growing</div>
     <div id="collect-pending-wrap"></div>
@@ -447,7 +461,6 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     <button class="nb" id="nb-my"><div class="nb-wrap"><span class="nb-ic">🌾</span></div>Plot</button>
     <button class="nb" id="nb-garden"><div class="nb-wrap"><span class="nb-ic">🌸</span></div>Garden</button>
     <button class="nb" id="nb-hist"><div class="nb-wrap"><span class="nb-ic">📋</span></div>Harvest</button>
-    <button class="nb" id="nb-collect"><div class="nb-wrap" style="position:relative;"><span class="nb-ic">🫙</span><span id="collect-badge" style="display:none;position:absolute;top:1px;right:6px;width:8px;height:8px;background:#E53E3E;border-radius:50%;border:1.5px solid var(--bg);"></span></div>Collect</button>
   </nav>
 </div>
 
@@ -630,8 +643,8 @@ function awardItem(actId, stage){
   updateCollectBadge();
 }
 function updateCollectBadge(){
-  var badge=document.getElementById('collect-badge');
-  if(badge)badge.style.display=collection.pending.length>0?'block':'none';
+  var dot=document.getElementById('hmenu-badge');
+  if(dot)dot.style.display=collection.pending.length>0?'block':'none';
 }
 function rCollect(){
   updateCollectBadge();
@@ -692,7 +705,7 @@ var backFrom = 'home';
 function show(id){document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('on');});document.getElementById(id).classList.add('on');}
 function nav(v){
   show('s-'+v);
-  ['home','my','garden','hist','collect'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
+  ['home','my','garden','hist'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
   if(v==='home')rHome();
   if(v==='my')rMy();
   if(v==='garden')rGarden();
@@ -713,7 +726,7 @@ document.getElementById('nb-home').addEventListener('click',function(){nav('home
 document.getElementById('nb-my').addEventListener('click',function(){nav('my');});
 document.getElementById('nb-garden').addEventListener('click',function(){nav('garden');});
 document.getElementById('nb-hist').addEventListener('click',function(){nav('hist');});
-document.getElementById('nb-collect').addEventListener('click',function(){nav('collect');});
+document.getElementById('btn-collect-back').addEventListener('click',function(){nav('home');});
 document.getElementById('fab').addEventListener('click',openAdd);
 document.getElementById('btn-back').addEventListener('click',goBack);
 document.getElementById('btn-plant-seed').addEventListener('click',openAdd);
@@ -844,8 +857,8 @@ function rHome(){
   document.getElementById('sb-label').textContent=greet+nameStr+' · '+sea.label;
   document.getElementById('sb-title').textContent=sea.title;
   document.getElementById('sb-sub').textContent=sea.sub;
-  var profBtn=document.getElementById('btn-profile');
-  if(profBtn)profBtn.textContent=profile&&profile.emoji?profile.emoji:'👤';
+  var hmenuEm=document.getElementById('hmenu-em');if(hmenuEm)hmenuEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
+  var hmenuName=document.getElementById('hmenu-name');if(hmenuName)hmenuName.textContent=profile&&profile.name?profile.name:'Profile';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
   if(active){
@@ -1101,7 +1114,21 @@ function openProfileEdit(){
   sh.appendChild(cancelBtn);
   document.getElementById('ed-ov').classList.add('on');
 }
-document.getElementById('btn-profile').addEventListener('click',openProfileEdit);
+function openHomeMenu(){
+  var m=document.getElementById('home-menu'),ov=document.getElementById('home-menu-ov');
+  m.classList.remove('off');ov.style.display='block';
+}
+function closeHomeMenu(){
+  var m=document.getElementById('home-menu'),ov=document.getElementById('home-menu-ov');
+  m.classList.add('off');ov.style.display='none';
+}
+document.getElementById('btn-menu').addEventListener('click',function(){
+  var m=document.getElementById('home-menu');
+  if(m.classList.contains('off'))openHomeMenu();else closeHomeMenu();
+});
+document.getElementById('home-menu-ov').addEventListener('click',closeHomeMenu);
+document.getElementById('hmenu-profile').addEventListener('click',function(){closeHomeMenu();openProfileEdit();});
+document.getElementById('hmenu-collect').addEventListener('click',function(){closeHomeMenu();nav('collect');});
 
 // ── ACTIVITY PICKER ───────────────────────────────────
 function animateIn(el){
