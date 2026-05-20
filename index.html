@@ -1632,6 +1632,7 @@ function rMy(){
   if(tabsEl){
     tabsEl.innerHTML='';
     if(hasFocusSet()){
+      tabsEl.style.display='flex';
       [{id:'focus',label:'🎯 Focus'},{id:'all',label:'🌱 All seeds'}].forEach(function(t){
         var btn=document.createElement('div');
         btn.className='pill'+(myTab===t.id?'':' off');
@@ -1640,6 +1641,8 @@ function rMy(){
         btn.addEventListener('click',function(){myTab=t.id;rMy();});
         tabsEl.appendChild(btn);
       });
+    } else {
+      tabsEl.style.display='none';
     }
   }
 
@@ -2063,16 +2066,16 @@ function rGarden(){
       gardenTab='all';
       gbw.innerHTML='<div class="focus-banner" style="cursor:pointer;" id="garden-focus-set-cta"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>Set this week\'s focus</strong><br><span style="font-weight:400;">Pick a few activities to prioritise</span></div><button class="focus-banner-edit">Choose</button></div>';
       document.getElementById('garden-focus-set-cta').addEventListener('click',openFocus);
-      if(gtabs)gtabs.innerHTML='';
+      if(gtabs){gtabs.innerHTML='';gtabs.style.display='none';}
     } else if(newWeek){
       gardenTab='all';
       gbw.innerHTML='<div class="focus-new-week" style="cursor:pointer;" id="garden-focus-new-week-cta"><span style="font-size:18px;">🗓️</span><div class="focus-new-week-text"><strong>New week!</strong> Update your focus?</div><button class="focus-banner-edit" style="background:#F59E0B;">Update</button></div>';
       document.getElementById('garden-focus-new-week-cta').addEventListener('click',openFocus);
-      if(gtabs)gtabs.innerHTML='';
+      if(gtabs){gtabs.innerHTML='';gtabs.style.display='none';}
     } else {
       gbw.innerHTML='';
       if(gtabs){
-        gtabs.innerHTML='';
+        gtabs.innerHTML='';gtabs.style.display='flex';
         [{id:'focus',label:'🎯 In focus'},{id:'all',label:'🌸 Full garden'}].forEach(function(t){
           var btn=document.createElement('div');
           btn.className='pill'+(gardenTab===t.id?'':' off');
