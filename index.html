@@ -1772,7 +1772,7 @@ function rMy(){
       var dragHandle=document.createElement('div');dragHandle.className='drag-handle';dragHandle.textContent='⠿';card.appendChild(dragHandle);
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
       inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
-        +'<div style="flex:1;"><div class="mc-n">'+a.name+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+'</div></div>'
+        +'<div style="flex:1;"><div class="mc-n">'+a.name+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
         +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
@@ -1821,7 +1821,7 @@ function rMy(){
       card.appendChild(dragHandle);
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
       inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
-        +'<div style="flex:1;"><div class="mc-n">'+a.name+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+'</div></div>'
+        +'<div style="flex:1;"><div class="mc-n">'+a.name+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
         +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
@@ -2285,6 +2285,24 @@ function showPlantInfo(id){
     +'<div class="pi-bar"><div class="pi-fill" style="width:'+pct+'%;background:'+clrs[stage]+'"></div></div>'
     +'<div class="pi-lbl"><span>'+Math.round(hrs*10)/10+'h logged</span><span>'+(next?'Next at '+next+'h':'Fully bloomed!')+'</span></div>'
     +'<div style="font-size:13px;color:var(--tx2);text-align:center;margin-bottom:14px;">'+a.cat+'</div>';
+  var recent=sessions.filter(function(s){return s.actId===id;}).sort(function(a,b){return b.date-a.date;}).slice(0,3);
+  if(recent.length){
+    var FEELS=['😔','😐','🙂','😊','🌟'];
+    var rHtml='<div style="font-size:12px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Recent sessions</div>';
+    recent.forEach(function(s){
+      var d=new Date(s.date);var now=new Date();
+      var today=now.toDateString()===d.toDateString();
+      var yest=new Date(now-86400000).toDateString()===d.toDateString();
+      var lbl=today?'Today':yest?'Yesterday':d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+      var dur=s.hours?Math.round(s.hours*10)/10+'h':(s.mins?s.mins+'m':'—');
+      var feel=s.feel!=null?FEELS[s.feel]:'';
+      rHtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--bg3);">'
+        +'<span style="color:var(--tx);font-size:13px;">'+lbl+'</span>'
+        +'<span style="color:var(--tx2);font-size:13px;">'+dur+(feel?' '+feel:'')+'</span>'
+        +'</div>';
+    });
+    sh.innerHTML+='<div style="margin-bottom:16px;">'+rHtml+'</div>';
+  }
   var logBtn=document.createElement('button');logBtn.className='btn btn-p';logBtn.textContent='Log a session';
   logBtn.addEventListener('click',function(){closeEd();nav('my');});sh.appendChild(logBtn);
   var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
