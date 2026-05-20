@@ -1802,10 +1802,14 @@ function rHist(){
       hdr.textContent=dayLabel(s.date);
       el.appendChild(hdr);
     }
-    var a=myActs.find(function(x){return x.id===s.actId;})||{emoji:'?',name:'Unknown'};
+    var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||{emoji:'?',name:'Unknown'};
     var dur=s.hours>0?s.hours+'h '+s.mins+'min':s.mins+'min';
+    var stage=getStage(getHours(s.actId));
+    var stageClrs=['#8FA89A','#3A9A70','#2E7D52','#B03870','#C87800'];
+    var stageBgs=['#E8F0EC','#D4F2E4','#C0E8D0','#FDEAE6','#FFF3D0'];
+    var stageEl='<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:9px;margin-left:6px;background:'+stageBgs[stage]+';color:'+stageClrs[stage]+';">'+STAGE_LABELS[stage]+'</span>';
     var hc=document.createElement('div');hc.className='hc';hc.style.cursor='pointer';
-    hc.innerHTML='<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">'+s.rating+'/10</span>':'')+'<span style="font-size:11px;color:var(--tx3);">›</span></div></div>'
+    hc.innerHTML='<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">'+s.rating+'/10</span>':'')+'<span style="font-size:11px;color:var(--tx3);">›</span></div></div>'
       +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+'</div>'
       +(s.notes?'<div class="hc-note">'+s.notes+'</div>':'');
     (function(sess,act){hc.addEventListener('click',function(){openSessionDetail(sess,act);});})(s,a);
