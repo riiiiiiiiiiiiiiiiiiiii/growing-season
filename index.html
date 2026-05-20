@@ -246,13 +246,14 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .shelf-item-em{font-size:28px;margin-bottom:4px;}
 .shelf-item-n{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--gr);}
 .shelf-item-l{font-size:10px;color:var(--tx3);margin-top:1px;}
-.trophy-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:8px;}
-.trophy-card{background:#fff;border:var(--br);border-radius:14px;padding:14px;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;text-align:center;}
+.trophy-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding-bottom:8px;}
+.trophy-card{background:#fff;border:var(--br);border-radius:12px;padding:11px 8px;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;text-align:center;}
 .trophy-card.earned{border-color:var(--sum);background:var(--sul);}
-.trophy-card.locked{opacity:.4;filter:grayscale(.6);}
-.trophy-em{font-size:30px;margin-bottom:6px;}
-.trophy-name{font-size:13px;font-weight:700;margin-bottom:3px;}
-.trophy-desc{font-size:11px;color:var(--tx2);line-height:1.4;}
+.trophy-card.locked{opacity:.38;filter:grayscale(.7);}
+.trophy-em{font-size:26px;margin-bottom:5px;}
+.trophy-name{font-size:11px;font-weight:700;margin-bottom:2px;}
+.trophy-desc{font-size:10px;color:var(--tx2);line-height:1.35;}
+.trophy-prog{font-size:10px;font-weight:600;color:var(--gr);margin-top:4px;}
 .mc-unfocused{opacity:0.38;}
 .foc-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;border:2px solid transparent;background:var(--bg2);margin-bottom:8px;cursor:pointer;transition:all .15s;}
 .foc-item.on{border-color:var(--gr);background:var(--grl);}
@@ -632,16 +633,48 @@ var STAGE_ITEMS=[
   {type:'bee', emoji:'🐝', label:'Bee'},
 ];
 var TROPHIES=[
+  // First steps
   {id:'first_seed',emoji:'🌱',name:'First Seed',desc:'Plant your first activity'},
-  {id:'green_thumb',emoji:'🌿',name:'Green Thumb',desc:'Grow 5 activities'},
   {id:'first_drop',emoji:'💧',name:'First Drop',desc:'Log your very first session'},
-  {id:'first_bloom',emoji:'🌸',name:'Full Bloom',desc:'A plant reaches full bloom'},
-  {id:'ten_hours',emoji:'⏱️',name:'Ten Hours',desc:'Log 10 hours of growing'},
+  {id:'first_sprout',emoji:'🪴',name:'First Sprout',desc:'A plant reaches Stage 1'},
   {id:'focused',emoji:'🎯',name:'Focused',desc:'Set a weekly focus'},
+  {id:'feeling_good',emoji:'😊',name:'Good Vibes',desc:'End a session feeling great'},
+  // Growing
+  {id:'green_thumb',emoji:'🌿',name:'Green Thumb',desc:'Grow 5 activities'},
+  {id:'busy_bee',emoji:'🐝',name:'Busy Bee',desc:'Log on 3 different days'},
   {id:'harvest_ten',emoji:'🌾',name:'Harvest Season',desc:'Log 10 sessions total'},
-  {id:'busy_bee',emoji:'🐝',name:'Busy Bee',desc:'Log sessions on 3 different days'},
+  {id:'ten_hours',emoji:'⏱️',name:'Ten Hours',desc:'Log 10 hours of growing'},
+  {id:'deep_dive',emoji:'🌊',name:'Deep Dive',desc:'Log a single 2-hour session'},
+  {id:'perfect_score',emoji:'⭐',name:'Perfect Score',desc:'Rate a session 10/10'},
+  {id:'diverse',emoji:'🗺️',name:'Explorer',desc:'Grow in 3 different categories'},
+  // Blooming
+  {id:'first_bloom',emoji:'🌸',name:'Full Bloom',desc:'A plant reaches full bloom'},
+  {id:'streak_3',emoji:'🔥',name:'On Fire',desc:'Log sessions 3 days in a row'},
+  {id:'sessions_25',emoji:'📋',name:'Steady Growth',desc:'Log 25 sessions total'},
+  {id:'ten_plants',emoji:'🏡',name:'Full Garden',desc:'Plant 10 activities'},
+  {id:'hours_25',emoji:'⏰',name:'Committed',desc:'Log 25 hours of growing'},
+  // In full bloom
+  {id:'streak_7',emoji:'🌈',name:'Week Warrior',desc:'Log sessions 7 days in a row'},
+  {id:'consistent',emoji:'📅',name:'Consistent',desc:'Log on 10 different days'},
+  {id:'triple_bloom',emoji:'🌺',name:'Trio in Bloom',desc:'3 plants reach full bloom'},
+  {id:'sessions_50',emoji:'🏅',name:'Half Century',desc:'Log 50 sessions total'},
+  {id:'hours_50',emoji:'⌛',name:'Time Keeper',desc:'Log 50 hours of growing'},
+  // Legendary
+  {id:'hundred_hours',emoji:'💫',name:'Century',desc:'Log 100 hours of growing'},
+  {id:'centurion',emoji:'🏆',name:'Centurion',desc:'Log 100 sessions total'},
 ];
 function hasTrophy(id){return collection.trophies.indexOf(id)>-1;}
+function trophyHint(id){
+  if(hasTrophy(id))return null;
+  var totalH=sessions.reduce(function(s,x){return s+(x.hours||0)+((x.mins||0)/60);},0);
+  var udays=sessions.map(function(s){return new Date(s.date).toDateString();}).filter(function(d,i,a){return a.indexOf(d)===i;}).length;
+  var m={green_thumb:[myActs.length,5],ten_plants:[myActs.length,10],
+    harvest_ten:[sessions.length,10],sessions_25:[sessions.length,25],sessions_50:[sessions.length,50],centurion:[sessions.length,100],
+    ten_hours:[Math.round(totalH),10],hours_25:[Math.round(totalH),25],hours_50:[Math.round(totalH),50],hundred_hours:[Math.round(totalH),100],
+    busy_bee:[udays,3],consistent:[udays,10],
+    triple_bloom:[myActs.filter(function(a){return getStage(getHours(a.id))>=4;}).length,3]};
+  var p=m[id];return(p&&p[0]>0)?p[0]+'/'+p[1]:null;
+}
 function awardTrophy(id){
   if(hasTrophy(id))return;
   collection.trophies.push(id);
@@ -649,18 +682,50 @@ function awardTrophy(id){
   if(t)showToast(t.emoji+' Trophy unlocked: '+t.name,null);
 }
 function checkTrophies(){
+  var totalH=sessions.reduce(function(s,x){return s+(x.hours||0)+((x.mins||0)/60);},0);
+  var udays=sessions.map(function(s){return new Date(s.date).toDateString();}).filter(function(d,i,a){return a.indexOf(d)===i;});
+  // Activities
   if(myActs.length>=1)awardTrophy('first_seed');
   if(myActs.length>=5)awardTrophy('green_thumb');
+  if(myActs.length>=10)awardTrophy('ten_plants');
+  // Sessions
   if(sessions.length>=1)awardTrophy('first_drop');
   if(sessions.length>=10)awardTrophy('harvest_ten');
-  var totalH=sessions.reduce(function(s,x){return s+(x.hours||0)+(( x.mins||0)/60);},0);
+  if(sessions.length>=25)awardTrophy('sessions_25');
+  if(sessions.length>=50)awardTrophy('sessions_50');
+  if(sessions.length>=100)awardTrophy('centurion');
+  // Hours
   if(totalH>=10)awardTrophy('ten_hours');
-  var anyBloom=myActs.some(function(a){return getStage(getHours(a.id))>=4;});
-  if(anyBloom)awardTrophy('first_bloom');
+  if(totalH>=25)awardTrophy('hours_25');
+  if(totalH>=50)awardTrophy('hours_50');
+  if(totalH>=100)awardTrophy('hundred_hours');
+  // Plant stages
+  var bloomCount=myActs.filter(function(a){return getStage(getHours(a.id))>=4;}).length;
+  if(myActs.some(function(a){return getStage(getHours(a.id))>=1;}))awardTrophy('first_sprout');
+  if(bloomCount>=1)awardTrophy('first_bloom');
+  if(bloomCount>=3)awardTrophy('triple_bloom');
+  // Focus & days
   if(hasFocusSet())awardTrophy('focused');
-  var days=sessions.map(function(s){return new Date(s.date).toDateString();});
-  var uniqueDays=days.filter(function(d,i){return days.indexOf(d)===i;});
-  if(uniqueDays.length>=3)awardTrophy('busy_bee');
+  if(udays.length>=3)awardTrophy('busy_bee');
+  if(udays.length>=10)awardTrophy('consistent');
+  // Session quality
+  if(sessions.some(function(s){return s.feel!=null&&s.feel>=3;}))awardTrophy('feeling_good');
+  if(sessions.some(function(s){return s.rating>=10;}))awardTrophy('perfect_score');
+  if(sessions.some(function(s){return (s.hours||0)>=2;}))awardTrophy('deep_dive');
+  // Category diversity
+  var cats=myActs.map(function(a){return a.cat;}).filter(function(c,i,arr){return arr.indexOf(c)===i;});
+  if(cats.length>=3)awardTrophy('diverse');
+  // Streaks (max consecutive days across all activities)
+  var dayMs=24*3600*1000;
+  var allDayTs=sessions.map(function(s){var d=new Date(s.date);d.setHours(0,0,0,0);return d.getTime();});
+  allDayTs=allDayTs.filter(function(v,i){return allDayTs.indexOf(v)===i;}).sort(function(a,b){return a-b;});
+  var maxStreak=allDayTs.length?1:0,curS=1;
+  for(var i=1;i<allDayTs.length;i++){
+    curS=allDayTs[i]-allDayTs[i-1]===dayMs?curS+1:1;
+    if(curS>maxStreak)maxStreak=curS;
+  }
+  if(maxStreak>=3)awardTrophy('streak_3');
+  if(maxStreak>=7)awardTrophy('streak_7');
 }
 function awardItem(actId, stage){
   var item=STAGE_ITEMS[stage-1];if(!item)return;
@@ -720,10 +785,12 @@ function rCollect(){
   var tg=document.getElementById('trophy-grid');tg.innerHTML='';
   TROPHIES.forEach(function(t){
     var earned=hasTrophy(t.id);
+    var hint=!earned?trophyHint(t.id):null;
     var el=document.createElement('div');el.className='trophy-card'+(earned?' earned':' locked');
     el.innerHTML='<div class="trophy-em">'+(earned?t.emoji:'🔒')+'</div>'
       +'<div class="trophy-name">'+t.name+'</div>'
-      +'<div class="trophy-desc">'+t.desc+'</div>';
+      +'<div class="trophy-desc">'+t.desc+'</div>'
+      +(hint?'<div class="trophy-prog">'+hint+'</div>':'');
     tg.appendChild(el);
   });
 }
