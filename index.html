@@ -1765,15 +1765,16 @@ document.addEventListener('touchend',function(){
 function initDrag(handle,wrap,actId,cat){
   handle.addEventListener('touchstart',function(e){
     e.stopPropagation();
+    e.preventDefault();
     var touch=e.touches[0];
     var card=wrap.querySelector('.mc');
     var rect=card.getBoundingClientRect();
     var ghost=card.cloneNode(true);
-    ghost.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;height:'+rect.height+'px;opacity:.9;z-index:9998;pointer-events:none;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.22);background:#fff;display:flex;align-items:center;gap:12px;padding:14px;';
+    ghost.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;height:'+rect.height+'px;opacity:.9;z-index:9998;pointer-events:none;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.22);background:#fff;display:flex;align-items:center;gap:12px;padding:14px;animation:none;';
     document.body.appendChild(ghost);
     wrap.classList.add('dragging');
     dragState={ghost:ghost,wrap:wrap,actId:actId,cat:cat,offsetY:touch.clientY-rect.top,targetId:null};
-  },{passive:true});
+  },{passive:false});
 }
 
 // ── PLOT (MY LIST) ─────────────────────────────────────
