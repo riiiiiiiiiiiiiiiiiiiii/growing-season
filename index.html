@@ -403,16 +403,20 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
     <div id="hist-list"></div>
   </div>
 
-  <!-- COLLECT -->
-  <div id="s-collect" class="scr" style="padding:16px;">
-    <button class="bk" id="btn-collect-back">Back</button>
-    <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:2px;">Collections</div>
-    <div style="font-size:13px;color:var(--tx2);margin-bottom:18px;">Rewards for growing</div>
-    <div id="collect-pending-wrap"></div>
-    <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Your collection</div>
-    <div class="collect-shelf" id="collect-shelf"></div>
-    <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Trophies</div>
-    <div class="trophy-grid" id="trophy-grid"></div>
+  <!-- COLLECT OVERLAY -->
+  <div class="ov" id="collect-ov">
+    <div class="sh">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-family:var(--serif);font-size:20px;font-weight:700;">Collections</div>
+        <button id="btn-collect-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;">×</button>
+      </div>
+      <div style="font-size:13px;color:var(--tx2);margin-bottom:18px;">Rewards for growing</div>
+      <div id="collect-pending-wrap"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Your collection</div>
+      <div class="collect-shelf" id="collect-shelf"></div>
+      <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Trophies</div>
+      <div class="trophy-grid" id="trophy-grid"></div>
+    </div>
   </div>
 
   <!-- LOG -->
@@ -646,6 +650,8 @@ function updateCollectBadge(){
   var dot=document.getElementById('hmenu-badge');
   if(dot)dot.style.display=collection.pending.length>0?'block':'none';
 }
+function openCollect(){rCollect();document.getElementById('collect-ov').classList.add('on');}
+function closeCollect(){document.getElementById('collect-ov').classList.remove('on');}
 function rCollect(){
   updateCollectBadge();
   // Pending
@@ -710,7 +716,6 @@ function nav(v){
   if(v==='my')rMy();
   if(v==='garden')rGarden();
   if(v==='hist')rHist();
-  if(v==='collect')rCollect();
 }
 function goBack(){nav(backFrom);}
 function launch(){
@@ -726,7 +731,6 @@ document.getElementById('nb-home').addEventListener('click',function(){nav('home
 document.getElementById('nb-my').addEventListener('click',function(){nav('my');});
 document.getElementById('nb-garden').addEventListener('click',function(){nav('garden');});
 document.getElementById('nb-hist').addEventListener('click',function(){nav('hist');});
-document.getElementById('btn-collect-back').addEventListener('click',function(){nav('home');});
 document.getElementById('fab').addEventListener('click',openAdd);
 document.getElementById('btn-back').addEventListener('click',goBack);
 document.getElementById('btn-plant-seed').addEventListener('click',openAdd);
@@ -1128,7 +1132,8 @@ document.getElementById('btn-menu').addEventListener('click',function(){
 });
 document.getElementById('home-menu-ov').addEventListener('click',closeHomeMenu);
 document.getElementById('hmenu-profile').addEventListener('click',function(){closeHomeMenu();openProfileEdit();});
-document.getElementById('hmenu-collect').addEventListener('click',function(){closeHomeMenu();nav('collect');});
+document.getElementById('hmenu-collect').addEventListener('click',function(){closeHomeMenu();openCollect();});
+document.getElementById('btn-collect-close').addEventListener('click',closeCollect);
 
 // ── ACTIVITY PICKER ───────────────────────────────────
 function animateIn(el){
