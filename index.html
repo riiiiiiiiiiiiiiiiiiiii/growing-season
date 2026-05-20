@@ -1642,12 +1642,30 @@ function rHist(){
   var el=document.getElementById('hist-list');
   if(!sessions.length){el.innerHTML='<p style="color:var(--tx2);font-size:14px;">No harvests yet</p>';return;}
   el.innerHTML='';
-  sessions.slice().sort(function(a,b){return b.date-a.date;}).forEach(function(s){
+  var sorted=sessions.slice().sort(function(a,b){return b.date-a.date;});
+  var today=new Date(),yesterday=new Date(today);yesterday.setDate(yesterday.getDate()-1);
+  function dayKey(d){return new Date(d).toDateString();}
+  function dayLabel(d){
+    var ds=new Date(d);
+    if(dayKey(ds)===dayKey(today))return'Today';
+    if(dayKey(ds)===dayKey(yesterday))return'Yesterday';
+    return ds.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  }
+  var lastKey=null;
+  sorted.forEach(function(s){
+    var key=dayKey(s.date);
+    if(key!==lastKey){
+      lastKey=key;
+      var hdr=document.createElement('div');
+      hdr.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;padding:14px 0 6px;';
+      hdr.textContent=dayLabel(s.date);
+      el.appendChild(hdr);
+    }
     var a=myActs.find(function(x){return x.id===s.actId;})||{emoji:'?',name:'Unknown'};
     var dur=s.hours>0?s.hours+'h '+s.mins+'min':s.mins+'min';
     var hc=document.createElement('div');hc.className='hc';hc.style.cursor='pointer';
     hc.innerHTML='<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">'+s.rating+'/10</span>':'')+'<span style="font-size:11px;color:var(--tx3);">›</span></div></div>'
-      +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+'<span>'+new Date(s.date).toLocaleDateString()+'</span></div>'
+      +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+'</div>'
       +(s.notes?'<div class="hc-note">'+s.notes+'</div>':'');
     (function(sess,act){hc.addEventListener('click',function(){openSessionDetail(sess,act);});})(s,a);
     el.appendChild(hc);
