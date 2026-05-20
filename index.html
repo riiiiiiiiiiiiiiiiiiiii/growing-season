@@ -321,6 +321,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
         <div class="sb-title" id="sb-title"></div>
         <div class="sb-sub" id="sb-sub"></div>
       </div>
+      <button id="btn-profile" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.35);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;" id="btn-profile"></button>
     </div>
     <div id="ip-wrap"></div>
     <div id="pc-wrap"></div>
@@ -706,6 +707,8 @@ function rHome(){
   document.getElementById('sb-label').textContent=greet+nameStr+' · '+sea.label;
   document.getElementById('sb-title').textContent=sea.title;
   document.getElementById('sb-sub').textContent=sea.sub;
+  var profBtn=document.getElementById('btn-profile');
+  if(profBtn)profBtn.textContent=profile&&profile.emoji?profile.emoji:'👤';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
   if(active){
@@ -926,6 +929,42 @@ document.getElementById('btn-prof-done').addEventListener('click',function(){
 document.getElementById('btn-prof-back').addEventListener('click',function(){
   show('s-ob2');oqStep=OQ.length-1;rOQ();
 });
+
+function openProfileEdit(){
+  var tmpEmoji=profile.emoji||'🌱';
+  var sh=document.getElementById('ed-sh');
+  sh.innerHTML='<div style="font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:16px;">Edit profile</div>'
+    +'<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Your name</div>'
+    +'<input id="pe-name" class="sinp" placeholder="e.g. Rayan" style="width:100%;font-size:16px;margin-bottom:18px;" maxlength="30">'
+    +'<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Your emblem</div>'
+    +'<div id="pe-em-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;"></div>';
+  document.getElementById('pe-name').value=profile.name||'';
+  var grid=document.getElementById('pe-em-grid');
+  PROF_EMOJIS.forEach(function(em){
+    var btn=document.createElement('div');
+    btn.style.cssText='font-size:26px;text-align:center;padding:8px 4px;border-radius:12px;cursor:pointer;border:2px solid transparent;transition:all .15s;';
+    btn.textContent=em;
+    if(em===tmpEmoji){btn.style.borderColor='var(--gr)';btn.style.background='var(--grl)';}
+    btn.addEventListener('click',function(){
+      tmpEmoji=em;
+      grid.querySelectorAll('div').forEach(function(b){b.style.borderColor='transparent';b.style.background='';});
+      btn.style.borderColor='var(--gr)';btn.style.background='var(--grl)';
+    });
+    grid.appendChild(btn);
+  });
+  var saveBtn=document.createElement('button');saveBtn.className='btn btn-p';saveBtn.textContent='Save';
+  saveBtn.addEventListener('click',function(){
+    profile.name=document.getElementById('pe-name').value.trim();
+    profile.emoji=tmpEmoji;
+    sv();closeEd();rHome();
+  });
+  sh.appendChild(saveBtn);
+  var cancelBtn=document.createElement('button');cancelBtn.className='btn btn-s';cancelBtn.style.marginTop='8px';cancelBtn.textContent='Cancel';
+  cancelBtn.addEventListener('click',closeEd);
+  sh.appendChild(cancelBtn);
+  document.getElementById('ed-ov').classList.add('on');
+}
+document.getElementById('btn-profile').addEventListener('click',openProfileEdit);
 
 // ── ACTIVITY PICKER ───────────────────────────────────
 function animateIn(el){
