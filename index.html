@@ -329,6 +329,9 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
   .nav{display:flex!important;max-width:none;left:0;transform:none;width:100%;}
   .fab{right:24px;bottom:calc(82px + env(safe-area-inset-bottom));}
   #btn-menu,#home-menu,#home-menu-ov{display:none!important;}
+  /* Clear hamburger button on non-home screens */
+  #s-my,#s-hist,#s-log{padding-top:60px;}
+  #s-garden>div:first-child{padding-top:54px;}
 }
 
 /* ── DARK MODE ──────────────────────────────────────── */
@@ -2805,9 +2808,10 @@ function rGarden(){
     return svg;
   }
 
+  var isDesktop=window.innerWidth>=768;
   if(visibleActs.length<=8){
-    // Flat layout: 4 per row, full width
-    var flatCols=4;
+    // Flat layout
+    var flatCols=isDesktop?8:4;
     var items=visibleActs.slice();
     while(items.length%flatCols!==0)items.push(null);
     var container=document.createElement('div');container.style.cssText='padding:0 16px 20px;';
@@ -2816,17 +2820,18 @@ function rGarden(){
     svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
     plotCard.appendChild(svgWrap);container.appendChild(plotCard);wrap.appendChild(container);
   } else {
-    // Patch layout: 2×2 per patch card, 2-column grid
-    var patchCols=2;
-    var plotW=tileW*patchCols,plotH=tileH*patchCols;
+    // Patch layout
+    var patchCols=isDesktop?3:2;
+    var perPatch=patchCols*patchCols;
+    var gridCols=isDesktop?3:2;
     var grid=document.createElement('div');
-    grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 20px;';
-    var chunks=[];for(var ci=0;ci<visibleActs.length;ci+=4)chunks.push(visibleActs.slice(ci,ci+4));
+    grid.style.cssText='display:grid;grid-template-columns:repeat('+gridCols+',1fr);gap:12px;padding:0 16px 20px;';
+    var chunks=[];for(var ci=0;ci<visibleActs.length;ci+=perPatch)chunks.push(visibleActs.slice(ci,ci+perPatch));
     chunks.forEach(function(chunk,pi){
       var plotCard=document.createElement('div');plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
       var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;padding:5px 10px;background:var(--bg2);';
       lbl.textContent='Patch '+(pi+1);plotCard.appendChild(lbl);
-      var items=chunk.slice();while(items.length<4)items.push(null);
+      var items=chunk.slice();while(items.length<perPatch)items.push(null);
       var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,patchCols,tileW,tileH,bgSrc);
       svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
       plotCard.appendChild(svgWrap);grid.appendChild(plotCard);
