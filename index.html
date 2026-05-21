@@ -467,28 +467,9 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
       <div id="collect-pending-wrap"></div>
       <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Your collection</div>
       <div class="collect-shelf" id="collect-shelf"></div>
+      <div id="collect-plant-note" style="font-size:12px;color:var(--tx3);line-height:1.5;margin-bottom:14px;">Each plant can earn all 4 items as it grows — one of each, collected per plant per stage.</div>
       <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Trophies</div>
       <div class="trophy-grid" id="trophy-grid"></div>
-      <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin:18px 0 10px;">How collecting works</div>
-      <div style="display:flex;flex-direction:column;gap:7px;padding-bottom:4px;">
-        <div style="display:flex;align-items:center;gap:12px;background:var(--bg2);border-radius:12px;padding:10px 13px;">
-          <span style="font-size:22px;flex-shrink:0;">💧</span>
-          <div><div style="font-size:13px;font-weight:600;">Water Drop</div><div style="font-size:12px;color:var(--tx2);margin-top:1px;">Plant reaches Stage 1 — first 30 min logged</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;background:var(--bg2);border-radius:12px;padding:10px 13px;">
-          <span style="font-size:22px;flex-shrink:0;">🍃</span>
-          <div><div style="font-size:13px;font-weight:600;">Leaf</div><div style="font-size:12px;color:var(--tx2);margin-top:1px;">Plant reaches Stage 2 — 2 hours logged</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;background:var(--bg2);border-radius:12px;padding:10px 13px;">
-          <span style="font-size:22px;flex-shrink:0;">🌸</span>
-          <div><div style="font-size:13px;font-weight:600;">Petal</div><div style="font-size:12px;color:var(--tx2);margin-top:1px;">Plant reaches Stage 3 — 5 hours logged</div></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;background:var(--bg2);border-radius:12px;padding:10px 13px;">
-          <span style="font-size:22px;flex-shrink:0;">🐝</span>
-          <div><div style="font-size:13px;font-weight:600;">Bee</div><div style="font-size:12px;color:var(--tx2);margin-top:1px;">Plant reaches Stage 4 — 10 hours logged (full bloom)</div></div>
-        </div>
-        <div style="font-size:12px;color:var(--tx3);padding:4px 2px;line-height:1.5;">Each plant can earn you all four items as it grows. Tap pending items to collect them.</div>
-      </div>
     </div>
   </div>
 
@@ -710,10 +691,10 @@ function hasFocusSet(){return weeklyFocus.actIds.length>0;}
 
 // ── COLLECTIONS ───────────────────────────────────────
 var STAGE_ITEMS=[
-  {type:'drop', emoji:'💧', label:'Water Drop'},
-  {type:'leaf', emoji:'🍃', label:'Leaf'},
-  {type:'petal', emoji:'🌸', label:'Petal'},
-  {type:'bee', emoji:'🐝', label:'Bee'},
+  {type:'drop', emoji:'💧', label:'Water Drop', desc:'Earned when a plant sprouts — log your first 30 min on any activity.'},
+  {type:'leaf', emoji:'🍃', label:'Leaf', desc:'Earned when a plant takes root — reach 2 hours on any activity.'},
+  {type:'petal', emoji:'🌸', label:'Petal', desc:'Earned when a plant flowers — reach 5 hours on any activity.'},
+  {type:'bee', emoji:'🐝', label:'Bee', desc:'Earned when a plant reaches full bloom — 10 hours on any activity.'},
 ];
 var TROPHIES=[
   // First steps
@@ -870,14 +851,27 @@ function rCollect(){
   // Shelf
   var shelf=document.getElementById('collect-shelf');
   shelf.innerHTML='';
+  var _activeShelfTip=null;
   STAGE_ITEMS.forEach(function(item){
     var n=collection.counts[item.type]||0;
-    var el=document.createElement('div');el.className='shelf-item';
+    var el=document.createElement('div');el.className='shelf-item';el.style.cursor='pointer';el.style.position='relative';
     el.innerHTML='<div class="shelf-item-em">'+item.emoji+'</div>'
       +'<div class="shelf-item-n">'+n+'</div>'
       +'<div class="shelf-item-l">'+item.label+'s</div>';
+    var tip=document.createElement('div');
+    tip.style.cssText='display:none;position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);font-size:11px;line-height:1.45;padding:7px 10px;border-radius:10px;width:160px;text-align:left;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.2);pointer-events:none;';
+    tip.textContent=item.desc;
+    el.appendChild(tip);
+    el.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(_activeShelfTip&&_activeShelfTip!==tip){_activeShelfTip.style.display='none';}
+      var isOpen=tip.style.display==='block';
+      tip.style.display=isOpen?'none':'block';
+      _activeShelfTip=isOpen?null:tip;
+    });
     shelf.appendChild(el);
   });
+  shelf.addEventListener('click',function(){if(_activeShelfTip){_activeShelfTip.style.display='none';_activeShelfTip=null;}});
   // Trophies
   var tg=document.getElementById('trophy-grid');tg.innerHTML='';
   TROPHIES.forEach(function(t){
