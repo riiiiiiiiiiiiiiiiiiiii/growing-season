@@ -296,6 +296,11 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .pill{transition:opacity .2s ease,transform .18s cubic-bezier(.34,1.4,.64,1),background .2s ease,color .2s ease;}
 .pill:active{transform:scale(.94);}
 @keyframes ripple{to{transform:scale(1);opacity:0;}}
+.hist-fp{flex-shrink:0;background:var(--bg2);border:var(--br);border-radius:20px;padding:5px 13px;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .14s;white-space:nowrap;}
+.hist-fp.on{background:var(--gr);color:#fff;border-color:var(--gr);}
+.hist-ap{flex-shrink:0;background:var(--bg2);border:var(--br);border-radius:20px;padding:5px 11px;font-size:12px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .14s;white-space:nowrap;display:flex;align-items:center;gap:5px;}
+.hist-ap.on{background:var(--grl);color:var(--gr2);border-color:var(--grm);}
+#hist-period-row::-webkit-scrollbar,#hist-act-row::-webkit-scrollbar{display:none;}
 
 /* ── DARK MODE ──────────────────────────────────────── */
 html.dark{
@@ -452,7 +457,16 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
   <!-- HARVEST -->
   <div id="s-hist" class="scr" style="padding:16px;">
     <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:2px;">Harvest log</div>
-    <div style="font-size:13px;color:var(--tx2);margin-bottom:14px;">Your logged sessions</div>
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:12px;">Your logged sessions</div>
+    <div class="sw" style="margin-bottom:8px;"><span class="sic">🔍</span><input class="si" id="hist-search" placeholder="Search by activity or notes…" autocomplete="off"></div>
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:8px;" id="hist-period-row">
+      <button class="hist-fp on" data-p="all">All</button>
+      <button class="hist-fp" data-p="week">This week</button>
+      <button class="hist-fp" data-p="month">This month</button>
+      <button class="hist-fp" data-p="rated">High rated</button>
+    </div>
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:10px;" id="hist-act-row"></div>
+    <div id="hist-count" style="font-size:12px;color:var(--tx3);margin-bottom:8px;display:none;"></div>
     <div id="hist-list"></div>
   </div>
 
@@ -936,7 +950,7 @@ function nav(v){
   if(v==='home')rHome();
   if(v==='my')rMy();
   if(v==='garden')rGarden();
-  if(v==='hist')rHist();
+  if(v==='hist'){histSearch='';histPeriod='all';histActId=null;var hs=document.getElementById('hist-search');if(hs)hs.value='';rHist();}
 }
 function goBack(){nav(backFrom);}
 function launch(){
@@ -955,6 +969,12 @@ document.getElementById('nb-my').addEventListener('click',function(){nav('my');}
 document.getElementById('nb-garden').addEventListener('click',function(){nav('garden');});
 document.getElementById('nb-hist').addEventListener('click',function(){nav('hist');});
 document.getElementById('fab').addEventListener('click',openAdd);
+// Harvest filters
+document.getElementById('hist-search').addEventListener('input',function(){histSearch=this.value;rHist();});
+document.getElementById('hist-period-row').addEventListener('click',function(e){
+  var btn=e.target.closest('.hist-fp');if(!btn)return;
+  histPeriod=btn.dataset.p;rHist();
+});
 document.getElementById('btn-back').addEventListener('click',goBack);
 document.getElementById('btn-save-log').addEventListener('click',saveLog);
 document.getElementById('btn-foc-cancel').addEventListener('click',closeFocus);
@@ -2260,11 +2280,63 @@ function getStreakAt(actId, date){
   while(actDays.indexOf(check)>-1){streak++;check-=dayMs;}
   return streak;
 }
+var histSearch='', histPeriod='all', histActId=null;
+
+function rHistActRow(){
+  var row=document.getElementById('hist-act-row');
+  if(!row)return;
+  row.innerHTML='';
+  var actIds=[...new Set(sessions.map(function(s){return s.actId;}))];
+  if(actIds.length<=1){row.style.display='none';return;}
+  row.style.display='flex';
+  actIds.forEach(function(id){
+    var a=myActs.find(function(x){return x.id===id;})||archivedActs.find(function(x){return x.id===id;});
+    if(!a)return;
+    var btn=document.createElement('button');
+    btn.className='hist-ap'+(histActId===id?' on':'');
+    btn.innerHTML='<span>'+a.emoji+'</span><span>'+a.name+'</span>';
+    btn.addEventListener('click',function(){
+      histActId=(histActId===id)?null:id;
+      rHist();
+    });
+    row.appendChild(btn);
+  });
+}
+
 function rHist(){
+  // Rebuild activity row
+  rHistActRow();
+  // Sync period pills
+  document.querySelectorAll('.hist-fp').forEach(function(b){b.classList.toggle('on',b.dataset.p===histPeriod);});
   var el=document.getElementById('hist-list');
   if(!sessions.length){el.innerHTML='<p style="color:var(--tx2);font-size:14px;">No harvests yet</p>';return;}
   el.innerHTML='';
-  var sorted=sessions.slice().sort(function(a,b){return b.date-a.date;});
+
+  var now=new Date();
+  var weekAgo=new Date(now);weekAgo.setDate(weekAgo.getDate()-7);
+  var monthAgo=new Date(now);monthAgo.setDate(1);monthAgo.setHours(0,0,0,0);
+  var q=(histSearch||'').toLowerCase().trim();
+
+  var sorted=sessions.slice().sort(function(a,b){return b.date-a.date;}).filter(function(s){
+    var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||{name:'Unknown'};
+    if(histActId&&s.actId!==histActId)return false;
+    if(histPeriod==='week'&&s.date<weekAgo.getTime())return false;
+    if(histPeriod==='month'&&s.date<monthAgo.getTime())return false;
+    if(histPeriod==='rated'&&(!s.rating||s.rating<7))return false;
+    if(q&&a.name.toLowerCase().indexOf(q)<0&&(s.notes||'').toLowerCase().indexOf(q)<0)return false;
+    return true;
+  });
+
+  var countEl=document.getElementById('hist-count');
+  var isFiltered=q||histPeriod!=='all'||histActId;
+  if(isFiltered&&countEl){countEl.style.display='block';countEl.textContent=sorted.length+' session'+(sorted.length!==1?'s':'');}
+  else if(countEl){countEl.style.display='none';}
+
+  if(!sorted.length){
+    el.innerHTML='<div style="text-align:center;padding:32px 0;color:var(--tx3);font-size:14px;">No sessions match</div>';
+    return;
+  }
+
   var today=new Date(),yesterday=new Date(today);yesterday.setDate(yesterday.getDate()-1);
   function dayKey(d){return new Date(d).toDateString();}
   function dayLabel(d){
