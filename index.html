@@ -1191,7 +1191,9 @@ function rHome(){
   var tm=sessions.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
   document.getElementById('stats').innerHTML='<div class="sc"><div class="sc-n">'+sessions.length+'</div><div class="sc-l">Sessions logged</div></div><div class="sc"><div class="sc-n">'+Math.floor(tm/60)+'h '+(tm%60)+'m</div><div class="sc-l">Time growing</div></div>';
 
-  var catChipBg={Creative:'#FCE7F3',Active:'#FFE4D9',Learning:'#DBEAFE',Social:'#D1FAE5',Mindfulness:'#EDE9FE',Productive:'#FEF3C7',Digital:'#EEF2FF',Outdoor:'#D4F2E4'};
+  var catChipBg=darkMode
+    ?{Creative:'#2A1828',Active:'#2A1A14',Learning:'#141E30',Social:'#142418',Mindfulness:'#1A1428',Productive:'#221A08',Digital:'#141828',Outdoor:'#142218'}
+    :{Creative:'#FCE7F3',Active:'#FFE4D9',Learning:'#DBEAFE',Social:'#D1FAE5',Mindfulness:'#EDE9FE',Productive:'#FEF3C7',Digital:'#EEF2FF',Outdoor:'#D4F2E4'};
   var ar=document.getElementById('ar');
   ar.innerHTML='';
   var showingAll=false;
