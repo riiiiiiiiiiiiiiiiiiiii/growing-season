@@ -867,7 +867,7 @@ function rCollect(){
   var shelfTip=document.getElementById('shelf-tip-float');
   if(!shelfTip){
     shelfTip=document.createElement('div');shelfTip.id='shelf-tip-float';
-    shelfTip.style.cssText='position:fixed;z-index:9999;width:150px;background:rgba(18,90,55,0.88);color:#d4f5e2;font-size:11px;line-height:1.5;padding:9px 11px;border-radius:12px;text-align:left;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.22);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transform:scale(.92);transition:opacity .18s ease,transform .2s cubic-bezier(.34,1.4,.64,1);border:1px solid rgba(46,200,120,.25);';
+    shelfTip.style.cssText='position:fixed;z-index:9999;background:rgba(18,90,55,0.88);color:#d4f5e2;font-size:11px;line-height:1.5;padding:12px 10px;border-radius:12px;text-align:center;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.22);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transform:scale(.92);transition:opacity .18s ease,transform .2s cubic-bezier(.34,1.4,.64,1);border:1px solid rgba(46,200,120,.25);';
     document.getElementById('collect-ov').appendChild(shelfTip);
   }
   shelfTip.style.opacity='0';shelfTip.style.pointerEvents='none';
@@ -892,13 +892,17 @@ function rCollect(){
       _activeTipEl=el;
       shelfTip.textContent=item.desc;
       var r=el.getBoundingClientRect();
-      var left=r.left+r.width/2-75;
-      left=Math.max(8,Math.min(left,window.innerWidth-158));
-      shelfTip.style.top=(r.top+r.height/2-shelfTip.offsetHeight/2)+'px';
+      var tipW=Math.round(r.width+16);
+      shelfTip.style.width=tipW+'px';
+      var left=r.left+(r.width-tipW)/2;
+      left=Math.max(6,Math.min(left,window.innerWidth-tipW-6));
       shelfTip.style.left=left+'px';
-      // Reflow then animate in
+      shelfTip.style.top='-9999px';
+      // Reflow to get height, then centre vertically
       requestAnimationFrame(function(){
-        shelfTip.style.top=(r.top+r.height/2-(shelfTip.offsetHeight||60)/2)+'px';
+        var tipH=shelfTip.offsetHeight||70;
+        var top=r.top+(r.height-tipH)/2;
+        shelfTip.style.top=top+'px';
         shelfTip.style.opacity='1';shelfTip.style.transform='scale(1)';shelfTip.style.pointerEvents='auto';
         ov.style.opacity='1';
       });
