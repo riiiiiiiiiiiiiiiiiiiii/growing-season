@@ -669,14 +669,15 @@ var ACTS = [
 ];
 
 // ── STATE ─────────────────────────────────────────────
-function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[],collection:{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[]},activityNotes:{},darkMode:false};}
+function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[],collection:{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]},activityNotes:{},darkMode:false};}
 function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,darkMode:darkMode}));}catch(e){}}
 var st=ld(), myActs=st.myActs, sessions=st.sessions, onboarded=st.onboarded, profile=st.profile, active=st.active;
 var weeklyFocus=st.weeklyFocus||{weekKey:'',actIds:[]};
 var archivedActs=st.archivedActs||[];
 var activityNotes=st.activityNotes||{};
-var collection=st.collection||{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[]};
+var collection=st.collection||{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]};
 if(!collection.counts)collection.counts={drop:0,leaf:0,petal:0,bee:0};
+if(!collection.awarded)collection.awarded=[];
 var darkMode=!!st.darkMode;
 function applyDark(){
   document.documentElement.classList.toggle('dark',darkMode);
@@ -806,10 +807,19 @@ function checkTrophies(){
   if(maxStreak>=7)awardTrophy('streak_7');
 }
 function awardItem(actId, stage){
+  var key=actId+':'+stage;
+  if(collection.awarded.indexOf(key)>-1)return;
   var item=STAGE_ITEMS[stage-1];if(!item)return;
   var act=myActs.find(function(a){return a.id===actId;})||{emoji:'🌱',name:'Unknown'};
+  collection.awarded.push(key);
   collection.pending.push({type:item.type,emoji:item.emoji,label:item.label,actId:actId,actName:act.name,actEmoji:act.emoji,earnedAt:Date.now()});
   updateCollectBadge();
+}
+function retroCheckItems(){
+  myActs.forEach(function(a){
+    var stage=getStage(getHours(a.id));
+    for(var s=1;s<=stage;s++)awardItem(a.id,s);
+  });
 }
 function updateCollectBadge(){
   var dot=document.getElementById('hmenu-badge');
@@ -905,7 +915,7 @@ function launch(){
   document.getElementById('fab').style.display='none';
   applyDark();
   rHome();
-  setTimeout(function(){checkTrophies();sv();},600);
+  setTimeout(function(){checkTrophies();retroCheckItems();sv();},600);
   updateCollectBadge();
 }
 
