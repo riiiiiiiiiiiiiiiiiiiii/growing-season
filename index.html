@@ -863,27 +863,51 @@ function rCollect(){
   // Shelf
   var shelf=document.getElementById('collect-shelf');
   shelf.innerHTML='';
-  var _activeShelfTip=null;
+  // Shared fixed tooltip — appended to collect-ov to escape the sh scroll container
+  var shelfTip=document.getElementById('shelf-tip-float');
+  if(!shelfTip){
+    shelfTip=document.createElement('div');shelfTip.id='shelf-tip-float';
+    shelfTip.style.cssText='position:fixed;z-index:9999;width:150px;background:rgba(18,90,55,0.88);color:#d4f5e2;font-size:11px;line-height:1.5;padding:9px 11px;border-radius:12px;text-align:left;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.22);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);opacity:0;transform:scale(.92);transition:opacity .18s ease,transform .2s cubic-bezier(.34,1.4,.64,1);border:1px solid rgba(46,200,120,.25);';
+    document.getElementById('collect-ov').appendChild(shelfTip);
+  }
+  shelfTip.style.opacity='0';shelfTip.style.pointerEvents='none';
+  var _activeTipEl=null;
+  function closeTip(){
+    shelfTip.style.opacity='0';shelfTip.style.transform='scale(.92)';shelfTip.style.pointerEvents='none';
+    if(_activeTipEl){_activeTipEl.querySelector('.shelf-tip-ov').style.opacity='0';_activeTipEl=null;}
+  }
   STAGE_ITEMS.forEach(function(item){
     var n=collection.counts[item.type]||0;
-    var el=document.createElement('div');el.className='shelf-item';el.style.cursor='pointer';el.style.position='relative';
+    var el=document.createElement('div');el.className='shelf-item';el.style.cssText='cursor:pointer;position:relative;overflow:hidden;';
     el.innerHTML='<div class="shelf-item-em">'+item.emoji+'</div>'
       +'<div class="shelf-item-n">'+n+'</div>'
       +'<div class="shelf-item-l">'+item.label+'s</div>';
-    var tip=document.createElement('div');
-    tip.style.cssText='display:none;position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);font-size:11px;line-height:1.45;padding:7px 10px;border-radius:10px;width:160px;text-align:left;z-index:10;box-shadow:0 4px 12px rgba(0,0,0,.2);pointer-events:none;';
-    tip.textContent=item.desc;
-    el.appendChild(tip);
+    var ov=document.createElement('div');ov.className='shelf-tip-ov';
+    ov.style.cssText='position:absolute;inset:0;background:rgba(18,90,55,0.18);border-radius:14px;opacity:0;transition:opacity .18s ease;pointer-events:none;';
+    el.appendChild(ov);
     el.addEventListener('click',function(e){
       e.stopPropagation();
-      if(_activeShelfTip&&_activeShelfTip!==tip){_activeShelfTip.style.display='none';}
-      var isOpen=tip.style.display==='block';
-      tip.style.display=isOpen?'none':'block';
-      _activeShelfTip=isOpen?null:tip;
+      if(_activeTipEl===el){closeTip();return;}
+      if(_activeTipEl)closeTip();
+      _activeTipEl=el;
+      shelfTip.textContent=item.desc;
+      var r=el.getBoundingClientRect();
+      var left=r.left+r.width/2-75;
+      left=Math.max(8,Math.min(left,window.innerWidth-158));
+      shelfTip.style.top=(r.top+r.height/2-shelfTip.offsetHeight/2)+'px';
+      shelfTip.style.left=left+'px';
+      // Reflow then animate in
+      requestAnimationFrame(function(){
+        shelfTip.style.top=(r.top+r.height/2-(shelfTip.offsetHeight||60)/2)+'px';
+        shelfTip.style.opacity='1';shelfTip.style.transform='scale(1)';shelfTip.style.pointerEvents='auto';
+        ov.style.opacity='1';
+      });
     });
     shelf.appendChild(el);
   });
-  shelf.addEventListener('click',function(){if(_activeShelfTip){_activeShelfTip.style.display='none';_activeShelfTip=null;}});
+  document.getElementById('collect-ov').addEventListener('click',function(e){
+    if(_activeTipEl&&!_activeTipEl.contains(e.target))closeTip();
+  });
   // Trophies
   var tg=document.getElementById('trophy-grid');tg.innerHTML='';
   TROPHIES.forEach(function(t){
