@@ -1918,7 +1918,8 @@ function openFinish(id,from){setupLogScreen(id,from,active?active.startedAt:null
 
 function saveLog(){
   var stageBefore=getStage(getHours(logId));
-  sessions.push({actId:logId,date:Date.now(),hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
+  var _logAct=myActs.find(function(x){return x.id===logId;})||{};
+  sessions.push({actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:Date.now(),hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
   var stageAfter=getStage(getHours(logId));
   for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(logId,s);
   checkTrophies();
@@ -2360,7 +2361,8 @@ function rHistActRow(){
   if(actIds.length<=1){row.style.display='none';return;}
   row.style.display='flex';
   actIds.forEach(function(id){
-    var a=myActs.find(function(x){return x.id===id;})||archivedActs.find(function(x){return x.id===id;});
+    var _s=sessions.find(function(x){return x.actId===id;});
+    var a=myActs.find(function(x){return x.id===id;})||archivedActs.find(function(x){return x.id===id;})||(_s&&_s.actName?{emoji:_s.actEmoji||'📋',name:_s.actName}:null);
     if(!a)return;
     var btn=document.createElement('button');
     btn.className='hist-ap'+(histActId===id?' on':'');
@@ -2388,7 +2390,7 @@ function rHist(){
   var q=(histSearch||'').toLowerCase().trim();
 
   var sorted=sessions.slice().sort(function(a,b){return b.date-a.date;}).filter(function(s){
-    var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||{name:'Unknown'};
+    var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||(s.actName?{name:s.actName}:{name:'Deleted activity'});
     if(histActId&&s.actId!==histActId)return false;
     if(histPeriod==='week'&&s.date<weekAgo.getTime())return false;
     if(histPeriod==='month'&&s.date<monthAgo.getTime())return false;
@@ -2425,7 +2427,7 @@ function rHist(){
       hdr.textContent=dayLabel(s.date);
       el.appendChild(hdr);
     }
-    var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||{emoji:'?',name:'Unknown'};
+    var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||(s.actName?{emoji:s.actEmoji||'📋',name:s.actName}:{emoji:'📋',name:'Deleted activity'});
     var dur=s.hours>0?s.hours+'h '+s.mins+'min':s.mins+'min';
     var stage=getStage(getHours(s.actId));
     var stageClrs=['#8FA89A','#3A9A70','#2E7D52','#B03870','#C87800'];
@@ -2535,7 +2537,7 @@ function openSessionEdit(s,a){
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-top:8px;';
   var saveBtn=document.createElement('button');saveBtn.className='btn btn-p';saveBtn.style.cssText='flex:1;margin-top:0;';saveBtn.textContent='Save changes';
   saveBtn.addEventListener('click',function(){
-    var idx=sessions.findIndex(function(x){return x.date===_editSessionDate&&x.actId===a.id;});
+    var idx=sessions.findIndex(function(x){return x.date===_editSessionDate&&x.actId===(a.id||s.actId);});
     if(idx>-1){
       sessions[idx].hours=parseInt(sh.querySelector('#ses-edit-h').value)||0;
       sessions[idx].mins=parseInt(sh.querySelector('#ses-edit-m').value)||0;
