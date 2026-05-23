@@ -480,15 +480,14 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <div style="font-size:13px;color:var(--tx2);">Tap to start or log a session</div>
-      <div id="plot-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
+      <div style="display:flex;align-items:center;gap:2px;">
+        <button id="btn-backup" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:4px 8px;">📤</button>
+        <button id="btn-terminate" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:4px 8px;">☠️</button>
+      </div>
     </div>
     <div id="focus-banner-wrap"></div>
     <div id="my-tabs" style="display:flex;gap:6px;margin-bottom:12px;"></div>
     <div id="my-list"></div>
-    <div style="text-align:center;margin-top:24px;padding-bottom:8px;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;">
-      <button id="btn-backup" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">📤 Back up my data</button>
-      <button id="btn-terminate" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">☠️ Terminate field</button>
-    </div>
   </div>
 
   <!-- GARDEN -->
