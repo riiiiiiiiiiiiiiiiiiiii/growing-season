@@ -1094,7 +1094,8 @@ document.getElementById('btn-import-yes').addEventListener('click',function(){
 document.getElementById('btn-terminate').addEventListener('click',function(){document.getElementById('term-ov').classList.add('on');});
 document.getElementById('btn-term-no').addEventListener('click',function(){document.getElementById('term-ov').classList.remove('on');});
 document.getElementById('btn-term-yes').addEventListener('click',function(){
-  myActs.length=0;archivedActs.length=0;active=null;weeklyFocus={weekKey:'',actIds:[]};onboarded=false;sv();
+  myActs.forEach(function(a){archivedActs.push(Object.assign({},a,{_terminated:true}));});
+  myActs.length=0;active=null;weeklyFocus={weekKey:'',actIds:[]};onboarded=false;sv();
   document.getElementById('term-ov').classList.remove('on');
   document.getElementById('main-nav').classList.remove('on');
   document.getElementById('fab').style.display='none';
@@ -2291,16 +2292,17 @@ function rMy(){
     section.appendChild(hdr);section.appendChild(body);el.appendChild(section);
   });
 
-  // Archived section
-  if(archivedActs.length){
+  // Archived section (hide _terminated acts — kept only for harvest log name lookup)
+  var visibleArchived=archivedActs.filter(function(a){return !a._terminated;});
+  if(visibleArchived.length){
     var arcOpen=catOpen['__archived']!==false;
     var arcSection=document.createElement('div');arcSection.className='cat-section';arcSection.style.marginTop='8px';
     var arcHdr=document.createElement('div');arcHdr.className='cat-hdr';arcHdr.style.opacity='.6';
     arcHdr.innerHTML='<span class="cat-hdr-label">🗃️ Archived</span>'
-      +'<span class="cat-hdr-count">'+archivedActs.length+'</span>'
+      +'<span class="cat-hdr-count">'+visibleArchived.length+'</span>'
       +'<span class="cat-arrow'+(arcOpen?' open':'')+'">›</span>';
     var arcBody=document.createElement('div');arcBody.className='cat-body';arcBody.style.display=arcOpen?'block':'none';
-    archivedActs.forEach(function(a){
+    visibleArchived.forEach(function(a){
       var row=document.createElement('div');
       row.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--bg2);opacity:.55;';
       row.innerHTML='<span style="font-size:22px;">'+a.emoji+'</span><span style="flex:1;font-size:14px;font-weight:500;">'+a.name+'</span>';
@@ -2469,6 +2471,12 @@ function openSessionDetail(s,a){
   var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.cssText='flex:1;margin-top:0;';closeBtn.textContent='Close';
   closeBtn.addEventListener('click',closeEd);
   row.appendChild(editBtn);row.appendChild(closeBtn);sh.appendChild(row);
+  var deleteBtn=document.createElement('button');deleteBtn.className='btn btn-s';deleteBtn.style.cssText='width:100%;margin-top:6px;color:var(--co);border-color:var(--co);';deleteBtn.textContent='Remove this session';
+  deleteBtn.addEventListener('click',function(){
+    var idx=sessions.findIndex(function(x){return x.date===s.date&&x.actId===s.actId;});
+    if(idx>-1){var removed=sessions.splice(idx,1)[0];sv();rHist();closeEd();showToast('Session removed',function(){sessions.splice(idx,0,removed);sv();rHist();});}
+  });
+  sh.appendChild(deleteBtn);
   document.getElementById('ed-ov').classList.add('on');
 }
 
@@ -2542,7 +2550,9 @@ function openSessionEdit(s,a){
   });
   var cancelBtn=document.createElement('button');cancelBtn.className='btn btn-s';cancelBtn.style.cssText='flex:1;margin-top:0;';cancelBtn.textContent='Cancel';
   cancelBtn.addEventListener('click',function(){closeEd();openSessionDetail(s,a);});
-  row.appendChild(saveBtn);row.appendChild(cancelBtn);sh.appendChild(row);
+  row.appendChild(saveBtn);row.appendChild(cancelBtn);
+  row.style.cssText='display:flex;gap:8px;position:sticky;bottom:-26px;background:var(--bg);padding:12px 22px 26px;margin:8px -22px -26px;border-top:0.5px solid var(--bg3);';
+  sh.appendChild(row);
   document.getElementById('ed-ov').classList.add('on');
 }
 
