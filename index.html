@@ -1618,14 +1618,13 @@ function rNoteEditor(a){
   var body=document.getElementById('notes-body');body.innerHTML='';
   var sections=a._personal?PERSONAL_NOTE_SECTIONS:NOTE_SECTIONS;
   var data=_getNoteData(a.id);
-  var latest=data.entries.length?data.entries[0]:{};
   var tas={};
   sections.forEach(function(sec){
     var wrap=document.createElement('div');wrap.className='notes-section';
     var lbl=document.createElement('div');lbl.className='notes-section-lbl';
     lbl.innerHTML='<span>'+sec.emoji+'</span><span>'+sec.label+'</span>';
     var ta=document.createElement('textarea');ta.className='nta';ta.placeholder=sec.placeholder;
-    ta.value=latest[sec.key]||'';ta.style.minHeight='64px';
+    ta.value='';ta.style.minHeight='64px';
     tas[sec.key]=ta;wrap.appendChild(lbl);wrap.appendChild(ta);body.appendChild(wrap);
   });
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;position:sticky;bottom:-26px;background:var(--bg);padding:12px 22px 26px;margin:16px -22px -26px;border-top:0.5px solid var(--bg3);';
