@@ -557,7 +557,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
       <div class="fr" id="feels"></div>
     </div>
     <div class="fl">
-      <div class="fl-lbl">Rate this session (1-10)</div>
+      <div class="fl-lbl">Rate this session</div>
       <div class="stars" id="stars"></div>
       <div class="slbl" id="slbl"></div>
     </div>
@@ -862,7 +862,7 @@ function checkTrophies(){
   if(udays.length>=10)awardTrophy('consistent');
   // Session quality
   if(sessions.some(function(s){return s.feel!=null&&s.feel>=3;}))awardTrophy('feeling_good');
-  if(sessions.some(function(s){return s.rating>=10;}))awardTrophy('perfect_score');
+  if(sessions.some(function(s){return normRating(s.rating)>=5;}))awardTrophy('perfect_score');
   if(sessions.some(function(s){return (s.hours||0)>=2;}))awardTrophy('deep_dive');
   // Category diversity
   var cats=myActs.map(function(a){return a.cat;}).filter(function(c,i,arr){return arr.indexOf(c)===i;});
@@ -1929,6 +1929,30 @@ function showQuickLog(){
 
 // ── LOG SESSION ───────────────────────────────────────
 var logId=null, logRating=0, logFeels=[], logMomentum='';
+var STAR_LBLS={0.5:'Rough session',1:'Not great',1.5:'Okay-ish',2:'Decent',2.5:'Pretty good',3:'Good session',3.5:'Really good',4:'Great session',4.5:'Excellent',5:'Perfect ⭐'};
+function normRating(r){if(!r)return 0;return r>5?Math.round(r/2*2)/2:r;}
+function makeStarRating(wrap,initVal,onChg){
+  wrap.innerHTML='';wrap.style.cssText='display:flex;gap:8px;';
+  var cur=initVal||0,sEls=[];
+  function apply(val){
+    sEls.forEach(function(s,i){
+      var n=i+1;
+      if(val>=n){s.style.cssText='font-size:28px;cursor:pointer;line-height:1;user-select:none;color:var(--su);';}
+      else if(val>=n-0.5){s.style.cssText='font-size:28px;cursor:pointer;line-height:1;user-select:none;background:linear-gradient(to right,var(--su) 50%,var(--bg3) 50%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;';}
+      else{s.style.cssText='font-size:28px;cursor:pointer;line-height:1;user-select:none;color:var(--bg3);';}
+    });
+  }
+  for(var i=1;i<=5;i++){(function(n){
+    var s=document.createElement('span');s.textContent='★';
+    function hit(clientX){var r=s.getBoundingClientRect();return clientX-r.left<r.width/2?n-0.5:n;}
+    s.addEventListener('click',function(e){cur=hit(e.clientX);apply(cur);onChg(cur,STAR_LBLS[cur]||'');});
+    s.addEventListener('mousemove',function(e){apply(hit(e.clientX));});
+    s.addEventListener('touchstart',function(e){e.preventDefault();cur=hit(e.touches[0].clientX);apply(cur);onChg(cur,STAR_LBLS[cur]||'');},{passive:false});
+    wrap.appendChild(s);sEls.push(s);
+  })(i);}
+  wrap.addEventListener('mouseleave',function(){apply(cur);});
+  apply(cur);
+}
 
 function setupLogScreen(id,from,startedAt){
   backFrom=from;logId=id;logRating=0;logFeels=[];logMomentum='';
@@ -1964,14 +1988,8 @@ function setupLogScreen(id,from,startedAt){
     feels.appendChild(b);
   });
 
-  var stars=document.getElementById('stars');stars.innerHTML='';
-  for(var i=1;i<=10;i++){
-    (function(n){var star=document.createElement('span');star.className='star';star.textContent='★';
-      star.addEventListener('click',function(){logRating=n;document.querySelectorAll('.star').forEach(function(s,j){s.classList.toggle('on',j<n);});
-        var lbls=['','Poor','Poor','Okay','Okay','Good','Good','Thriving','Thriving','Abundant','Record harvest'];
-        document.getElementById('slbl').textContent=lbls[n]||'';});
-      stars.appendChild(star);})(i);
-  }
+  logRating=0;
+  makeStarRating(document.getElementById('stars'),0,function(val,lbl){logRating=val;document.getElementById('slbl').textContent=lbl;});
   document.getElementById('ln').value='';
   document.getElementById('ln-well').value='';
   document.getElementById('ln-diff').value='';
@@ -2495,7 +2513,7 @@ function rHist(){
     if(histActId&&s.actId!==histActId)return false;
     if(histPeriod==='week'&&s.date<weekAgo.getTime())return false;
     if(histPeriod==='month'&&s.date<monthAgo.getTime())return false;
-    if(histPeriod==='rated'&&(!s.rating||s.rating<7))return false;
+    if(histPeriod==='rated'&&(!s.rating||normRating(s.rating)<3.5))return false;
     if(q&&a.name.toLowerCase().indexOf(q)<0&&(s.notes||'').toLowerCase().indexOf(q)<0)return false;
     return true;
   });
@@ -2543,7 +2561,7 @@ function rHist(){
     var plantCol=plantInner?'<div style="width:'+tW+'px;flex-shrink:0;background:'+plantBg[stage]+';display:flex;align-items:flex-end;border-radius:0 var(--rad) var(--rad) 0;overflow:hidden;"><svg style="'+plantOff+'" viewBox="0 0 '+tW+' '+tH+'" width="'+tW+'" height="'+tH+'" xmlns="http://www.w3.org/2000/svg">'+plantInner+'</svg></div>':'';
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms';_hi++;
     hc.innerHTML='<div style="flex:1;padding:14px;min-width:0;">'
-      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">'+s.rating+'/10</span>':'')+'<span style="font-size:11px;color:var(--tx3);">›</span></div></div>'
+      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+'<span style="font-size:11px;color:var(--tx3);">›</span></div></div>'
       +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
       +(s.notes?'<div class="hc-note">'+s.notes+'</div>':'')
       +'</div>'
@@ -2562,7 +2580,7 @@ function openSessionDetail(s,a){
     +'<div style="font-size:12px;color:var(--tx2);text-align:center;margin-bottom:16px;">'+new Date(s.date).toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">'
       +'<div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">'+dur+'</div><div style="font-size:11px;color:var(--tx3);">Time spent</div></div>'
-      +(s.rating?'<div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">'+s.rating+'/10</div><div style="font-size:11px;color:var(--tx3);">Rating</div></div>':'<div></div>')
+      +(s.rating?'<div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">★ '+normRating(s.rating)+'</div><div style="font-size:11px;color:var(--tx3);">Rating</div></div>':'<div></div>')
     +'</div>'
     +(function(){var feels=Array.isArray(s.feel)?s.feel:(s.feel?[s.feel]:[]);var hasFeels=feels.length>0;if(!hasFeels&&!s.momentum)return '';return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">'+feels.map(function(f){return '<span class="badge badge-r" style="font-size:12px;padding:4px 10px;">'+f+'</span>';}).join('')+(s.momentum?'<span class="badge badge-r" style="font-size:12px;padding:4px 10px;">'+s.momentum+'</span>':'')+'</div>';})()
     +(s.notes?'<div style="margin-bottom:10px;"><div style="font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:4px;">FIELD NOTES</div><div style="font-size:13px;color:var(--tx);line-height:1.5;">'+s.notes+'</div></div>':'')
@@ -2596,7 +2614,7 @@ function openSessionEdit(s,a){
     +'<div class="fl"><div class="fl-lbl">Time spent</div>'
       +'<div class="dr"><input type="number" class="di" id="ses-edit-h" min="0" max="24" value="'+(s.hours||0)+'"><span class="du">h</span><input type="number" class="di" id="ses-edit-m" min="0" max="59" value="'+(s.mins||0)+'"><span class="du">min</span></div></div>'
     +'<div class="fl"><div class="fl-lbl">Feeling after</div><div class="fr" id="ses-edit-feels"></div></div>'
-    +'<div class="fl"><div class="fl-lbl">Rate this session (1-10)</div><div class="stars" id="ses-edit-stars"></div><div class="slbl" id="ses-edit-slbl"></div></div>'
+    +'<div class="fl"><div class="fl-lbl">Rate this session</div><div class="stars" id="ses-edit-stars"></div><div class="slbl" id="ses-edit-slbl"></div></div>'
     +'<div class="fl"><div class="fl-lbl">Momentum</div><div class="fr" id="ses-edit-momentum"></div></div>'
     +'<div class="fl"><div class="fl-lbl">Field notes</div><textarea class="nta" id="ses-edit-notes" placeholder="What did you work on?">'+(s.notes||'')+'</textarea></div>'
     +'<div class="fl"><div class="fl-lbl">What went well? <span style="font-weight:400;color:var(--tx3);">optional</span></div><textarea class="nta" id="ses-edit-well" style="min-height:56px;" placeholder="A small win…">'+(s.well||'')+'</textarea></div>'
@@ -2615,17 +2633,10 @@ function openSessionEdit(s,a){
   });
 
   // stars
-  var RATE_LBLS=['','Just started','Getting there','Making progress','Solid session','Good work','Great session','Really good','Excellent','Outstanding','Perfect ⭐'];
   var starsWrap=sh.querySelector('#ses-edit-stars');
   var slbl=sh.querySelector('#ses-edit-slbl');
-  for(var i=1;i<=10;i++){
-    (function(n){
-      var st=document.createElement('span');st.className='star'+(n<=_editSessionRating?' on':'');st.textContent=n<=5?'★':'◆';
-      st.addEventListener('click',function(){_editSessionRating=n;starsWrap.querySelectorAll('.star').forEach(function(x,xi){x.classList.toggle('on',xi<n);});slbl.textContent=RATE_LBLS[n]||'';});
-      starsWrap.appendChild(st);
-    })(i);
-  }
-  slbl.textContent=RATE_LBLS[_editSessionRating]||'';
+  makeStarRating(starsWrap,normRating(_editSessionRating),function(val,lbl){_editSessionRating=val;slbl.textContent=lbl;});
+  slbl.textContent=STAR_LBLS[normRating(_editSessionRating)]||'';
 
   // momentum
   var momWrap=sh.querySelector('#ses-edit-momentum');
