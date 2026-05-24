@@ -1555,9 +1555,10 @@ function rNotesList(){
   var meEmoji=(profile&&profile.emoji)?profile.emoji:'🌿';
   var meAct={id:'__me__',name:meName,emoji:meEmoji,_personal:true};
   var meN=activityNotes['__me__']||{};
-  var meHas=PERSONAL_NOTE_SECTIONS.some(function(s){return meN[s.key]&&meN[s.key].trim();});
-  var mePreview='';
-  if(meHas){var meFirst=PERSONAL_NOTE_SECTIONS.find(function(s){return meN[s.key]&&meN[s.key].trim();});if(meFirst)mePreview=meN[meFirst.key].trim().slice(0,50)+(meN[meFirst.key].trim().length>50?'…':'');}
+  function _noteHas(n,sections){return sections.some(function(s){var v=n[s.key];return Array.isArray(v)?v.length>0:(v&&v.trim());});}
+  function _notePreview(n,sections){var first=sections.find(function(s){var v=n[s.key];return Array.isArray(v)?v.length>0:(v&&v.trim());});if(!first)return '';var v=n[first.key];var txt=Array.isArray(v)?v[0].text:(v||'');return txt.slice(0,50)+(txt.length>50?'…':'');}
+  var meHas=_noteHas(meN,PERSONAL_NOTE_SECTIONS);
+  var mePreview=_notePreview(meN,PERSONAL_NOTE_SECTIONS);
   var meCard=document.createElement('div');meCard.className='notes-act-card';
   meCard.style.cssText='background:var(--grl);border-color:var(--grm);';
   meCard.innerHTML='<div class="notes-act-em">'+meEmoji+'</div>'
@@ -1578,12 +1579,8 @@ function rNotesList(){
   }
   all.forEach(function(a){
     var n=activityNotes[a.id]||{};
-    var hasNotes=NOTE_SECTIONS.some(function(s){return n[s.key]&&n[s.key].trim();});
-    var preview='';
-    if(hasNotes){
-      var first=NOTE_SECTIONS.find(function(s){return n[s.key]&&n[s.key].trim();});
-      if(first)preview=n[first.key].trim().slice(0,50)+(n[first.key].trim().length>50?'…':'');
-    }
+    var hasNotes=_noteHas(n,NOTE_SECTIONS);
+    var preview=_notePreview(n,NOTE_SECTIONS);
     var card=document.createElement('div');card.className='notes-act-card';
     if(a._archived)card.style.opacity='.6';
     card.innerHTML='<div class="notes-act-em">'+a.emoji+'</div>'
@@ -1596,29 +1593,60 @@ function rNotesList(){
     body.appendChild(card);
   });
 }
+function _noteEntries(actId,key){
+  if(!activityNotes[actId])activityNotes[actId]={};
+  var v=activityNotes[actId][key];
+  if(typeof v==='string'){
+    var migrated=v.trim()?[{text:v.trim(),date:Date.now()}]:[];
+    activityNotes[actId][key]=migrated;sv();
+    return migrated;
+  }
+  if(!Array.isArray(v)){activityNotes[actId][key]=[];return activityNotes[actId][key];}
+  return v;
+}
 function rNoteEditor(a){
   document.getElementById('notes-title').textContent=a.emoji+' '+a.name;
   document.getElementById('btn-notes-back').style.display='block';
   var body=document.getElementById('notes-body');body.innerHTML='';
   var sections=a._personal?PERSONAL_NOTE_SECTIONS:NOTE_SECTIONS;
-  var n=activityNotes[a.id]||(activityNotes[a.id]={});
+  if(!activityNotes[a.id])activityNotes[a.id]={};
   sections.forEach(function(sec){
+    var entries=_noteEntries(a.id,sec.key);
     var wrap=document.createElement('div');wrap.className='notes-section';
     var lbl=document.createElement('div');lbl.className='notes-section-lbl';
     lbl.innerHTML='<span>'+sec.emoji+'</span><span>'+sec.label+'</span>';
-    var ta=document.createElement('textarea');ta.className='nta';
-    ta.placeholder=sec.placeholder;
-    ta.value=n[sec.key]||'';
-    ta.style.minHeight='72px';
-    (function(key){
-      ta.addEventListener('input',function(){
-        if(!activityNotes[a.id])activityNotes[a.id]={};
-        activityNotes[a.id][key]=ta.value;
-        clearTimeout(_noteSaveTimer);
-        _noteSaveTimer=setTimeout(sv,600);
+    wrap.appendChild(lbl);
+    var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;align-items:flex-end;';
+    var ta=document.createElement('textarea');ta.className='nta';ta.placeholder=sec.placeholder;ta.style.cssText='flex:1;min-height:64px;resize:none;margin:0;';
+    var saveBtn=document.createElement('button');saveBtn.type='button';
+    saveBtn.style.cssText='padding:8px 14px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;align-self:flex-end;';
+    saveBtn.textContent='Save';
+    (function(key,textarea){
+      saveBtn.addEventListener('click',function(){
+        var text=textarea.value.trim();if(!text)return;
+        var arr=_noteEntries(a.id,key);
+        arr.unshift({text:text,date:Date.now()});
+        sv();textarea.value='';rEntries(arr);showToast('Note saved',null);
       });
-    })(sec.key);
-    wrap.appendChild(lbl);wrap.appendChild(ta);body.appendChild(wrap);
+      var eWrap=document.createElement('div');eWrap.style.cssText='margin-top:8px;display:flex;flex-direction:column;gap:6px;';
+      function rEntries(list){
+        eWrap.innerHTML='';
+        list.forEach(function(entry,idx){
+          var e=document.createElement('div');e.style.cssText='background:var(--bg2);border-radius:12px;padding:10px 12px 10px 14px;display:flex;gap:8px;align-items:flex-start;';
+          var dateStr=new Date(entry.date).toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'});
+          var inner=document.createElement('div');inner.style.cssText='flex:1;min-width:0;';
+          inner.innerHTML='<div style="font-size:11px;color:var(--tx3);margin-bottom:3px;">'+dateStr+'</div><div style="font-size:13px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">'+entry.text.replace(/</g,'&lt;')+'</div>';
+          var del=document.createElement('button');del.type='button';del.style.cssText='background:none;border:none;font-size:15px;color:var(--tx3);cursor:pointer;padding:0;flex-shrink:0;line-height:1;margin-top:1px;';del.textContent='×';
+          (function(i){del.addEventListener('click',function(){
+            var arr2=_noteEntries(a.id,key);arr2.splice(i,1);sv();rEntries(arr2);
+          });})(idx);
+          e.appendChild(inner);e.appendChild(del);eWrap.appendChild(e);
+        });
+      }
+      rEntries(entries);
+      row.appendChild(textarea);row.appendChild(saveBtn);wrap.appendChild(row);wrap.appendChild(eWrap);
+    })(sec.key,ta);
+    body.appendChild(wrap);
   });
 }
 document.getElementById('btn-notes-close').addEventListener('click',closeNotes);
