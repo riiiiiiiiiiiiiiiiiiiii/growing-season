@@ -35,6 +35,8 @@
 html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);overflow:hidden;-webkit-font-smoothing:antialiased;}
 #app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;}
 .scr{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(100px + env(safe-area-inset-bottom));display:none;}
+#s-my,#s-hist,#s-log{padding-top:20px;padding-left:16px;padding-right:16px;}
+#s-garden{padding-top:0;padding-left:0;padding-right:0;}
 .scr.on{display:block;animation:scrIn .22s ease;}
 @keyframes scrIn{from{opacity:0;}to{opacity:1;}}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(244,250,246,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:var(--br);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
@@ -335,9 +337,9 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
   .nav{display:flex!important;max-width:none;left:0;transform:none;width:100%;}
   .fab{right:24px;bottom:calc(82px + env(safe-area-inset-bottom));}
   #btn-menu,#home-menu,#home-menu-ov{display:none!important;}
-  /* Clear hamburger button on non-home screens */
-  #s-my,#s-hist,#s-log{padding-top:64px!important;}
-  #s-garden{padding-top:44px!important;padding-bottom:calc(100px + env(safe-area-inset-bottom))!important;}
+  /* Offset sidebar toggle button (36px @ top:14px = 50px, +20px breathing) */
+  #s-my,#s-hist,#s-log{padding-top:70px;}
+  #s-garden{padding-top:50px;}/* inner header div adds 20px, totals 70px */
 }
 
 /* ── DARK MODE ──────────────────────────────────────── */
@@ -500,28 +502,28 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
   </div>
 
   <!-- PLOT -->
-  <div id="s-my" class="scr" style="padding:16px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+  <div id="s-my" class="scr">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
       <div style="font-family:var(--serif);font-size:23px;font-weight:700;">The plot</div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-size:13px;color:var(--tx2);">Tap to start or log a session</div>
       <div id="plot-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
     </div>
     <div id="focus-banner-wrap"></div>
     <div id="my-tabs" style="display:flex;gap:6px;margin-bottom:12px;"></div>
     <div id="my-list"></div>
-    <div style="text-align:center;margin-top:24px;padding-bottom:calc(90px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:4px;flex-wrap:wrap;">
+    <div style="text-align:center;margin-top:24px;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;">
       <button id="btn-backup" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">📤 Back up my data</button>
       <button id="btn-terminate" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">☠️ Terminate field</button>
     </div>
   </div>
 
   <!-- GARDEN -->
-  <div id="s-garden" class="scr" style="padding:0 0 24px;">
-    <div style="padding:20px 16px 12px;">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;">
-        <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:2px;">Your garden</div>
+  <div id="s-garden" class="scr">
+    <div style="padding:20px 16px 14px;">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;">
+        <div style="font-family:var(--serif);font-size:23px;font-weight:700;">Your garden</div>
         <div id="garden-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
       </div>
       <div style="font-size:13px;color:var(--tx2);">Plants grow as you log more hours</div>
@@ -534,9 +536,9 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
   </div>
 
   <!-- HARVEST -->
-  <div id="s-hist" class="scr" style="padding:16px;">
-    <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:2px;">Harvest log</div>
-    <div style="font-size:13px;color:var(--tx2);margin-bottom:12px;">Your logged sessions</div>
+  <div id="s-hist" class="scr">
+    <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:4px;">Harvest log</div>
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:16px;">Your logged sessions</div>
     <div class="sw" style="margin-bottom:8px;"><span class="sic">🔍</span><input class="si" id="hist-search" placeholder="Search by activity or notes…" autocomplete="off"></div>
     <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:8px;" id="hist-period-row">
       <button class="hist-fp on" data-p="all">All</button>
@@ -567,7 +569,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
   </div>
 
   <!-- LOG -->
-  <div id="s-log" class="scr" style="padding:16px 16px calc(100px + env(safe-area-inset-bottom));">
+  <div id="s-log" class="scr">
     <button class="bk" id="btn-back">Back</button>
     <div class="lh"><div class="le" id="le"></div><div><div class="lt" id="lt"></div><div class="ls" id="ls"></div></div></div>
     <div id="lbadge-wrap"></div>
