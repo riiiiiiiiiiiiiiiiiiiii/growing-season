@@ -157,7 +157,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .fb.on{background:var(--skl);border-color:var(--sk);color:var(--sk2);font-weight:500;}
 .stars{display:flex;gap:3px;}
 .star{font-size:24px;cursor:pointer;color:var(--bg3);line-height:1;user-select:none;}
-.star.on{color:var(--su);}
+.star.on{color:var(--gr);}
 .slbl{font-size:12px;color:var(--tx2);margin-top:4px;}
 .nta{width:100%;padding:10px 12px;border-radius:var(--rad);border:var(--br2);background:var(--bg2);color:var(--tx);font-size:14px;min-height:76px;resize:vertical;font-family:inherit;}
 .bk{background:none;border:none;cursor:pointer;font-size:13px;color:var(--tx2);padding:0 0 14px;display:block;}
@@ -177,7 +177,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .hc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
 .hc-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;}
-.hc-r{font-size:13px;color:var(--su2);font-weight:700;}
+.hc-r{font-size:13px;color:var(--gr);font-weight:700;}
 .hc-m{font-size:12px;color:var(--tx2);display:flex;gap:9px;flex-wrap:wrap;}
 .hc-note{font-size:12px;color:var(--tx2);margin-top:6px;padding:6px 0 0;border-top:var(--br);}
 .hc-note[style*="border-left"]{border-top:none;border-left:3px solid;padding:5px 8px;background:var(--bg2);border-radius:0 6px 6px 0;margin-top:6px;}
@@ -191,7 +191,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .cat-Creative{background:#FCE7F3;color:#9D174D;}.cat-Active{background:#FFE4D9;color:#9A3412;}
 .cat-Learning{background:#DBEAFE;color:#1E40AF;}.cat-Social{background:#D1FAE5;color:#065F46;}
 .cat-Mindfulness{background:#EDE9FE;color:#5B21B6;}.cat-Productive{background:#FEF3C7;color:#92400E;}
-.cat-Digital{background:#EEF2FF;color:#3730A3;}.cat-Outdoor{background:#D4F2E4;color:#0F6040;}
+.cat-Digital{background:#EEF2FF;color:#3730A3;}.cat-Outdoor{background:var(--grl);color:var(--gr2);}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2);}
 .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 .pi-name{font-family:var(--serif);font-size:18px;font-weight:700;text-align:center;margin-bottom:4px;}
@@ -493,6 +493,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
     <div id="ip-wrap"></div>
     <div id="pc-wrap"></div>
     <div class="stats" id="stats"></div>
+    <div id="today-glance" style="margin:0 16px 14px;"></div>
     <div class="hs"><div class="hs-t">Your plot</div><div class="ar" id="ar"></div></div>
     <div id="daily-quote"></div>
     <div id="home-deco" style="width:100%;overflow:hidden;pointer-events:none;margin-top:4px;"></div>
@@ -603,7 +604,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
       <div class="fr" id="momentum"></div>
     </div>
     <button class="btn btn-co" id="btn-save-log">Log the harvest</button>
-    <button class="btn btn-s" style="margin-top:8px;" id="btn-discard">Discard session</button>
+    <button class="btn" style="margin-top:8px;background:#F07820;color:#fff;box-shadow:0 3px 10px rgba(240,120,32,.2);" id="btn-discard">Cancel</button>
   </div>
 
   </div><!-- /screen-wrap -->
@@ -654,6 +655,14 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 <div class="ov" id="ed-ov">
   <div class="sh" id="ed-sh">
     <div style="font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:13px;" id="ed-title">Edit</div>
+    <div class="sf">
+      <div class="sl">Name</div>
+      <div style="display:flex;gap:8px;">
+        <input class="sinp" id="ed-emoji" style="width:52px;text-align:center;flex-shrink:0;" maxlength="2" placeholder="🌱">
+        <input class="sinp" id="ed-name" style="flex:1;" placeholder="Activity name">
+      </div>
+    </div>
+    <div class="sf"><div class="sl">Category</div><div class="so" id="ed-cat"></div></div>
     <div class="sf"><div class="sl">Commitment</div><div class="so" id="ed-type"></div></div>
     <div class="sf"><div class="sl">Level</div><div class="so" id="ed-level"></div></div>
     <div class="srow">
@@ -688,7 +697,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
       <div class="sf"><div class="sl">Level</div><div class="so" id="add-level"></div></div>
       <button class="btn btn-p" id="btn-add-save" style="margin-top:4px;">Plant it</button>
     </div>
-    <button class="btn btn-s" style="margin-top:8px;" id="btn-add-cancel">Cancel</button>
+    <div style="position:sticky;bottom:-26px;background:var(--bg);padding:10px 0 0;margin-top:8px;"><button class="btn btn-s" style="width:100%;" id="btn-add-cancel">Cancel</button></div>
   </div>
 </div>
 
@@ -796,8 +805,8 @@ function applyPalette(){
   document.querySelectorAll('.pal-dot').forEach(function(d){
     d.style.boxShadow=d.dataset.pal===colorPalette?'0 0 0 2.5px #fff,0 0 0 4.5px '+p.gr:'none';
   });
-  var deco=document.getElementById('home-deco');
-  if(deco&&deco.innerHTML)rHome();
+  CAT_COLORS.Outdoor=p.grl+','+p.gr2;
+  if(document.getElementById('s-home').classList.contains('on'))rHome();
 }
 function applyDark(){
   document.documentElement.classList.toggle('dark',darkMode);
@@ -1314,6 +1323,29 @@ function getDailyQuote(){
 }
 
 // ── HOME ──────────────────────────────────────────────
+function showTodayDetail(todaySess){
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
+  var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:4px;';title.textContent='Today';sh.appendChild(title);
+  var todayMins=todaySess.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
+  var sub=document.createElement('div');sub.style.cssText='font-size:13px;color:var(--tx2);margin-bottom:16px;';sub.textContent=todaySess.length+' session'+(todaySess.length!==1?'s':'')+' · '+(todayMins>=60?Math.floor(todayMins/60)+'h '+(todayMins%60)+'m':todayMins+'m');sh.appendChild(sub);
+  var list=document.createElement('div');list.style.cssText='display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow-y:auto;';
+  todaySess.slice().reverse().forEach(function(s){
+    var act=myActs.find(function(a){return a.id===s.actId;})||{emoji:'?',name:'Unknown'};
+    var mins=(s.hours||0)*60+(s.mins||0);
+    var card=document.createElement('div');card.style.cssText='background:var(--bg2);border:var(--br);border-radius:var(--rsm);padding:10px 12px;';
+    var top=document.createElement('div');top.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:4px;';
+    top.innerHTML='<span style="font-size:20px;">'+act.emoji+'</span><div style="flex:1;font-size:14px;font-weight:600;">'+act.name+'</div><div style="font-size:12px;color:var(--gr);font-weight:600;">'+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m')+'</div>';
+    card.appendChild(top);
+    if(s.note){var note=document.createElement('div');note.style.cssText='font-size:12px;color:var(--tx2);padding-left:28px;';note.textContent=s.note;card.appendChild(note);}
+    list.appendChild(card);
+  });
+  sh.appendChild(list);
+  var row=document.createElement('div');row.style.cssText='position:sticky;bottom:-26px;background:var(--bg);padding:12px 22px 26px;margin:12px -22px -26px;border-top:0.5px solid var(--bg3);';
+  var close=document.createElement('button');close.className='btn btn-s';close.style.width='100%';close.textContent='Close';close.addEventListener('click',closeEd);row.appendChild(close);
+  sh.appendChild(row);
+  document.getElementById('ed-ov').classList.add('on');
+}
+
 function rHome(){
   var sea=getSeason(), sk=getSeasonKey();
   var pal=PALETTES[colorPalette]||PALETTES.green;
@@ -1350,6 +1382,19 @@ function rHome(){
   var tm=sessions.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
   document.getElementById('stats').innerHTML='<div class="sc"><div class="sc-n">'+sessions.length+'</div><div class="sc-l">Sessions logged</div></div><div class="sc"><div class="sc-n">'+Math.floor(tm/60)+'h '+(tm%60)+'m</div><div class="sc-l">Time growing</div></div>';
 
+  var todayStart=new Date();todayStart.setHours(0,0,0,0);
+  var todaySess=sessions.filter(function(s){return new Date(s.date).setHours(0,0,0,0)>=todayStart.getTime();});
+  var todayMins=todaySess.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
+  var tgEl=document.getElementById('today-glance');
+  if(tgEl){
+    if(todaySess.length===0){
+      tgEl.innerHTML='';
+    } else {
+      tgEl.innerHTML='<div style="background:var(--bg2);border:var(--br);border-radius:var(--rad);padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;" id="tg-card"><div><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;">Today at a glance</div><div style="font-size:14px;font-weight:600;color:var(--tx);">'+todaySess.length+' session'+(todaySess.length!==1?'s':'')+' · '+(todayMins>=60?Math.floor(todayMins/60)+'h '+(todayMins%60)+'m':todayMins+'m')+'</div></div><div style="font-size:18px;color:var(--gr);">›</div></div>';
+      document.getElementById('tg-card').addEventListener('click',function(){showTodayDetail(todaySess);});
+    }
+  }
+
   var catChipBg=darkMode
     ?{Creative:'#2A1828',Active:'#2A1A14',Learning:'#141E30',Social:'#142418',Mindfulness:'#1A1428',Productive:'#221A08',Digital:'#141828',Outdoor:'#142218'}
     :{Creative:'#FCE7F3',Active:'#FFE4D9',Learning:'#DBEAFE',Social:'#D1FAE5',Mindfulness:'#EDE9FE',Productive:'#FEF3C7',Digital:'#EEF2FF',Outdoor:'#D4F2E4'};
@@ -1370,7 +1415,8 @@ function rHome(){
       chip.style.background=isAct?'var(--col)':(catChipBg[a.cat]||'#fff');
       chip.style.opacity=dim?'0.4':'1';
       if(isAct)chip.style.border='2px solid var(--co)';
-      chip.innerHTML='<div class="ac-em">'+a.emoji+'</div><div class="ac-n">'+a.name+'</div><div class="ac-c">'+(isAct?'active':cnt>0?cnt+'x':'new')+'</div>';
+      var chipStreak=getStreakAt(a.id,Date.now());
+      chip.innerHTML='<div class="ac-em">'+a.emoji+'</div><div class="ac-n">'+a.name+(chipStreak>=2?'<span style="margin-left:4px;font-size:10px;background:var(--grm);color:#fff;border-radius:7px;padding:1px 5px;font-weight:600;">🔥'+chipStreak+'</span>':'')+'</div><div class="ac-c">'+(isAct?'active':cnt>0?cnt+'x':'new')+'</div>';
       chip.addEventListener('click',function(){if(isAct)resumeSess();else openLogDirect(a.id,'home');});
       ar.appendChild(chip);
     });
@@ -2004,8 +2050,8 @@ function makeStarRating(wrap,initVal,onChg){
   function apply(val){
     sEls.forEach(function(s,i){
       var n=i+1;
-      if(val>=n){s.style.cssText='font-size:28px;cursor:pointer;line-height:1;user-select:none;color:var(--su);';}
-      else if(val>=n-0.5){s.style.cssText='font-size:28px;cursor:pointer;line-height:1;user-select:none;background:linear-gradient(to right,var(--su) 50%,var(--bg3) 50%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;';}
+      if(val>=n){s.style.cssText='font-size:28px;cursor:pointer;line-height:1;user-select:none;color:var(--gr);';}
+      else if(val>=n-0.5){s.style.cssText='font-size:28px;cursor:pointer;line-height:1;user-select:none;background:linear-gradient(to right,var(--gr) 50%,var(--bg3) 50%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;';}
       else{s.style.cssText='font-size:28px;cursor:pointer;line-height:1;user-select:none;color:var(--bg3);';}
     });
   }
@@ -2386,8 +2432,9 @@ function rMy(){
       card.style.animationDelay=(_fi*38)+'ms';
       var dragHandle=document.createElement('div');dragHandle.className='drag-handle';dragHandle.textContent='⠿';card.appendChild(dragHandle);
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
+      var streak=getStreakAt(a.id,Date.now());
       inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
-        +'<div style="flex:1;"><div class="mc-n">'+a.name+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
+        +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
         +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
@@ -2443,8 +2490,9 @@ function rMy(){
       var dragHandle=document.createElement('div');dragHandle.className='drag-handle';dragHandle.textContent='⠿';
       card.appendChild(dragHandle);
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
+      var streak=getStreakAt(a.id,Date.now());
       inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
-        +'<div style="flex:1;"><div class="mc-n">'+a.name+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
+        +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
         +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
@@ -2743,7 +2791,23 @@ function openEd(id){
   edId=id;
   var a=myActs.find(function(x){return x.id===id;});
   document.getElementById('ed-title').textContent='Tend: '+a.name;
-  edTmp={type:a.type||'recreational',level:a.level||'beginner'};
+  edTmp={name:a.name,emoji:a.emoji,cat:a.cat||CATS[0],type:a.type||'recreational',level:a.level||'beginner'};
+
+  document.getElementById('ed-name').value=a.name;
+  document.getElementById('ed-emoji').value=a.emoji;
+
+  var catWrap=document.getElementById('ed-cat');catWrap.innerHTML='';
+  CATS.forEach(function(cat){
+    var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg2)','var(--tx)'];
+    var b=document.createElement('div');b.className='sop'+(edTmp.cat===cat?' on':'');b.textContent=CEM[cat]+' '+cat;
+    if(edTmp.cat===cat){b.style.background=cc[0];b.style.color=cc[1];b.style.borderColor=cc[1];}
+    b.addEventListener('click',function(){
+      edTmp.cat=cat;
+      catWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');x.style.background='';x.style.color='';x.style.borderColor='';});
+      b.classList.add('on');b.style.background=cc[0];b.style.color=cc[1];b.style.borderColor=cc[1];
+    });
+    catWrap.appendChild(b);
+  });
 
   var typeWrap=document.getElementById('ed-type');typeWrap.innerHTML='';
   [{v:'recreational',lbl:'Growing for joy'},{v:'serious',lbl:'Growing seriously'}].forEach(function(opt){
@@ -2803,7 +2867,17 @@ function openHarvestQuickLog(){
   document.getElementById('ed-ov').classList.add('on');
 }
 function closeEd(){document.getElementById('ed-ov').classList.remove('on');}
-function saveEd(){var a=myActs.find(function(x){return x.id===edId;});if(a){a.type=edTmp.type;a.level=edTmp.level;}sv();closeEd();rMy();}
+function saveEd(){
+  var a=myActs.find(function(x){return x.id===edId;});
+  if(a){
+    var newName=document.getElementById('ed-name').value.trim();
+    var newEmoji=document.getElementById('ed-emoji').value.trim();
+    if(newName)a.name=newName;
+    if(newEmoji)a.emoji=newEmoji;
+    a.cat=edTmp.cat;a.type=edTmp.type;a.level=edTmp.level;
+  }
+  sv();closeEd();rMy();rHome();
+}
 
 // ── ADD SHEET ─────────────────────────────────────────
 var libCat='all', libSearch='', libSelected=[], _renderCats=null;
