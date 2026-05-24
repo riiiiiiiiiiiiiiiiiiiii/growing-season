@@ -400,7 +400,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
         <div style="display:flex;gap:7px;margin-left:auto;">
           <div class="pal-dot" data-pal="green" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
           <div class="pal-dot" data-pal="blue" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="pink" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#D05095,#A01860);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="pink" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#E080B0,#C05880);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
           <div class="pal-dot" data-pal="yellow" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#D8A840,#A07010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
         </div>
       </div>
@@ -482,7 +482,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
         <div style="display:flex;gap:7px;">
           <div class="pal-dot" data-pal="green" style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
           <div class="pal-dot" data-pal="blue" style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="pink" style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#D05095,#A01860);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="pink" style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#E080B0,#C05880);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
           <div class="pal-dot" data-pal="yellow" style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#D8A840,#A07010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
         </div>
       </div>
@@ -776,10 +776,10 @@ if(!collection.awarded)collection.awarded=[];
 var darkMode=!!st.darkMode;
 var colorPalette=st.colorPalette||'green';
 var PALETTES={
-  green:{gr:'#18835A',gr2:'#0F6040',grl:'#D4F2E4',grm:'#50C898',bg:'#F4FAF6',bg2:'#E6F5EC',bg3:'#C8E8D6',tx:'#0A1F14',tx2:'#2D6045',tx3:'#68A882',brC:'#BCDECE',br2C:'#9CCAB8',sh:'0 1px 4px rgba(22,36,24,.08)',pcGrad:'linear-gradient(150deg,#18835A,#0F6040,#074028)',mfGrad:'linear-gradient(90deg,#18835A,#50C898)',fabSh:'0 4px 16px rgba(24,131,90,.4)',btnSh:'0 3px 10px rgba(24,131,90,.28)',fabActSh:'0 1px 6px rgba(24,131,90,.25)',pcSh:'0 4px 18px rgba(24,131,90,.3)'},
-  blue:{gr:'#1870B0',gr2:'#0D4E80',grl:'#D0E8F4',grm:'#50A8D8',bg:'#F4F8FC',bg2:'#E4EEF8',bg3:'#C4D8EC',tx:'#0A1520',tx2:'#284870',tx3:'#6088A8',brC:'#B0CCDE',br2C:'#90AECA',sh:'0 1px 4px rgba(20,32,42,.08)',pcGrad:'linear-gradient(150deg,#1870B0,#0D4E80,#072840)',mfGrad:'linear-gradient(90deg,#1870B0,#50A8D8)',fabSh:'0 4px 16px rgba(24,112,176,.4)',btnSh:'0 3px 10px rgba(24,112,176,.28)',fabActSh:'0 1px 6px rgba(24,112,176,.25)',pcSh:'0 4px 18px rgba(24,112,176,.3)'},
-  pink:{gr:'#A01860',gr2:'#780D45',grl:'#F4D0E4',grm:'#D05095',bg:'#FAF4F7',bg2:'#F5E4EE',bg3:'#EAC8D8',tx:'#200A14',tx2:'#681840',tx3:'#A06078',brC:'#DDB0CC',br2C:'#C895B5',sh:'0 1px 4px rgba(40,10,28,.08)',pcGrad:'linear-gradient(150deg,#A01860,#780D45,#480020)',mfGrad:'linear-gradient(90deg,#A01860,#D05095)',fabSh:'0 4px 16px rgba(160,24,96,.4)',btnSh:'0 3px 10px rgba(160,24,96,.28)',fabActSh:'0 1px 6px rgba(160,24,96,.25)',pcSh:'0 4px 18px rgba(160,24,96,.3)'},
-  yellow:{gr:'#A07010',gr2:'#784800',grl:'#F8EAC0',grm:'#D8A840',bg:'#FAF7F0',bg2:'#F5EDD8',bg3:'#EAD8A0',tx:'#201408',tx2:'#604820',tx3:'#A08040',brC:'#D8C090',br2C:'#C0A870',sh:'0 1px 4px rgba(42,32,14,.08)',pcGrad:'linear-gradient(150deg,#A07010,#784800,#502800)',mfGrad:'linear-gradient(90deg,#A07010,#D8A840)',fabSh:'0 4px 16px rgba(160,112,16,.4)',btnSh:'0 3px 10px rgba(160,112,16,.28)',fabActSh:'0 1px 6px rgba(160,112,16,.25)',pcSh:'0 4px 18px rgba(160,112,16,.3)'}
+  green:{gr:'#18835A',gr2:'#0F6040',grl:'#D4F2E4',grm:'#50C898',bg:'#F4FAF6',bg2:'#E6F5EC',bg3:'#C8E8D6',tx:'#0A1F14',tx2:'#2D6045',tx3:'#68A882',brC:'#BCDECE',br2C:'#9CCAB8',sh:'0 1px 4px rgba(22,36,24,.08)',pcGrad:'linear-gradient(150deg,#18835A,#0F6040,#074028)',mfGrad:'linear-gradient(90deg,#18835A,#50C898)',fabSh:'0 4px 16px rgba(24,131,90,.4)',btnSh:'0 3px 10px rgba(24,131,90,.28)',fabActSh:'0 1px 6px rgba(24,131,90,.25)',pcSh:'0 4px 18px rgba(24,131,90,.3)',homeBg:null,homeTc:null,decoGround:'#4A8A40',decoGrass1:'#2D7A2A',decoGrass2:'#3D9A3A',decoStem:'#3A7A30'},
+  blue:{gr:'#1870B0',gr2:'#0D4E80',grl:'#D0E8F4',grm:'#50A8D8',bg:'#F4F8FC',bg2:'#E4EEF8',bg3:'#C4D8EC',tx:'#0A1520',tx2:'#284870',tx3:'#6088A8',brC:'#B0CCDE',br2C:'#90AECA',sh:'0 1px 4px rgba(20,32,42,.08)',pcGrad:'linear-gradient(150deg,#1870B0,#0D4E80,#072840)',mfGrad:'linear-gradient(90deg,#1870B0,#50A8D8)',fabSh:'0 4px 16px rgba(24,112,176,.4)',btnSh:'0 3px 10px rgba(24,112,176,.28)',fabActSh:'0 1px 6px rgba(24,112,176,.25)',pcSh:'0 4px 18px rgba(24,112,176,.3)',homeBg:'linear-gradient(135deg,#A8CCEC,#1870B0)',homeTc:'#08182E',decoGround:'#3A6A8A',decoGrass1:'#2A5A7A',decoGrass2:'#3A789A',decoStem:'#2A608A'},
+  pink:{gr:'#C05880',gr2:'#904060',grl:'#FDE4EE',grm:'#E080B0',bg:'#FDF7FA',bg2:'#FAE8F0',bg3:'#F2D8E5',tx:'#200814',tx2:'#7A3558',tx3:'#B07898',brC:'#ECC0D8',br2C:'#DCA8C4',sh:'0 1px 4px rgba(40,10,28,.08)',pcGrad:'linear-gradient(150deg,#C05880,#904060,#600030)',mfGrad:'linear-gradient(90deg,#C05880,#E080B0)',fabSh:'0 4px 16px rgba(192,88,128,.4)',btnSh:'0 3px 10px rgba(192,88,128,.28)',fabActSh:'0 1px 6px rgba(192,88,128,.25)',pcSh:'0 4px 18px rgba(192,88,128,.3)',homeBg:'linear-gradient(135deg,#F5CCDE,#C05880)',homeTc:'#38081A',decoGround:'#8A5068',decoGrass1:'#7A3858',decoGrass2:'#9A5878',decoStem:'#7A4868'},
+  yellow:{gr:'#A07010',gr2:'#784800',grl:'#F8EAC0',grm:'#D8A840',bg:'#FAF7F0',bg2:'#F5EDD8',bg3:'#EAD8A0',tx:'#201408',tx2:'#604820',tx3:'#A08040',brC:'#D8C090',br2C:'#C0A870',sh:'0 1px 4px rgba(42,32,14,.08)',pcGrad:'linear-gradient(150deg,#A07010,#784800,#502800)',mfGrad:'linear-gradient(90deg,#A07010,#D8A840)',fabSh:'0 4px 16px rgba(160,112,16,.4)',btnSh:'0 3px 10px rgba(160,112,16,.28)',fabActSh:'0 1px 6px rgba(160,112,16,.25)',pcSh:'0 4px 18px rgba(160,112,16,.3)',homeBg:'linear-gradient(135deg,#F5E8A8,#A07010)',homeTc:'#2E1800',decoGround:'#8A7830',decoGrass1:'#786018',decoGrass2:'#988838',decoStem:'#887028'}
 };
 function applyPalette(){
   var p=PALETTES[colorPalette]||PALETTES.green;
@@ -795,6 +795,8 @@ function applyPalette(){
   document.querySelectorAll('.pal-dot').forEach(function(d){
     d.style.boxShadow=d.dataset.pal===colorPalette?'0 0 0 2.5px #fff,0 0 0 4.5px '+p.gr:'none';
   });
+  var deco=document.getElementById('home-deco');
+  if(deco&&deco.innerHTML)rHome();
 }
 function applyDark(){
   document.documentElement.classList.toggle('dark',darkMode);
@@ -1196,13 +1198,14 @@ function getSeasonKey(){var m=new Date().getMonth();return Object.keys(SEAS).fin
 // ── HOME DECORATION ───────────────────────────────────
 function homeDecoSVG(sk){
   var dark=document.documentElement.classList.contains('dark');
+  var dp=PALETTES[colorPalette]||PALETTES.green;
   var w=400,h=108;
   var s='<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;pointer-events:none;">';
-  var groundFill=dark?'#1A4028':'#4A8A40';
+  var groundFill=dark?'#1A4028':dp.decoGround;
   var groundOp=dark?'0.35':'0.22';
-  var grass1=dark?'#1A5828':'#2D7A2A';
-  var grass2=dark?'#246835':'#3D9A3A';
-  var stem=dark?'#1A5020':'#3A7A30';
+  var grass1=dark?'#1A5828':dp.decoGrass1;
+  var grass2=dark?'#246835':dp.decoGrass2;
+  var stem=dark?'#1A5020':dp.decoStem;
   s+='<rect x="0" y="72" width="'+w+'" height="36" fill="'+groundFill+'" opacity="'+groundOp+'"/>';
   for(var i=0;i<w;i+=8){var h1=9+(i%7),h2=6+(i%5),jit=(i*7)%4-2;
     s+='<line x1="'+(i+jit)+'" y1="72" x2="'+(i+jit-2)+'" y2="'+(72-h1)+'" stroke="'+grass1+'" stroke-width="1.6" stroke-linecap="round" opacity="'+(dark?'0.9':'0.65')+'"/>';
@@ -1312,10 +1315,11 @@ function getDailyQuote(){
 // ── HOME ──────────────────────────────────────────────
 function rHome(){
   var sea=getSeason(), sk=getSeasonKey();
+  var pal=PALETTES[colorPalette]||PALETTES.green;
   var h=new Date().getHours();
   var greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  document.getElementById('sb-bg').style.background=sea.bg;
-  document.getElementById('sb').style.color=sea.tc;
+  document.getElementById('sb-bg').style.background=pal.homeBg||sea.bg;
+  document.getElementById('sb').style.color=pal.homeTc||sea.tc;
   document.getElementById('sb-fade').style.background='linear-gradient(to bottom,transparent,var(--bg))';
   var nameStr=profile&&profile.name?', '+(profile.emoji||'')+(profile.emoji?' ':'')+profile.name:'';
   document.getElementById('sb-label').textContent=greet+nameStr+' · '+sea.label;
