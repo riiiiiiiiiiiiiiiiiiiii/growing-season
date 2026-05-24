@@ -395,14 +395,15 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
       <button class="sb-mr" id="sb-collect-btn"><span class="sb-mr-em">🫙</span><span>Collections</span><span id="sb-collect-dot" style="display:none;width:7px;height:7px;background:#E53E3E;border-radius:50%;margin-left:auto;flex-shrink:0;"></span></button>
       <button class="sb-mr" id="sb-notes-btn"><span class="sb-mr-em">📓</span><span>Notes</span></button>
       <button class="sb-mr" id="sb-dark-btn"><span class="sb-mr-em" id="sb-dark-em">🌙</span><span id="sb-dark-lbl">Dark mode</span></button>
-      <div id="sb-palette" style="display:flex;align-items:center;gap:10px;width:100%;border-radius:10px;padding:10px 10px;cursor:default;">
-        <span style="font-size:14px;font-weight:500;color:var(--tx2);">Theme</span>
-        <div style="display:flex;gap:7px;margin-left:auto;">
-          <div class="pal-dot" data-pal="green" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="blue" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="pink" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#E080B0,#C05880);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="yellow" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#D8A840,#A07010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-        </div>
+    </div>
+    <div id="sb-palette" style="margin-top:auto;padding:14px 10px 6px;">
+      <div style="height:.5px;background:var(--bg3);margin-bottom:14px;"></div>
+      <div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Theme</div>
+      <div style="display:flex;gap:10px;">
+        <div class="pal-dot" data-pal="green" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+        <div class="pal-dot" data-pal="blue" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+        <div class="pal-dot" data-pal="pink" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#E080B0,#C05880);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+        <div class="pal-dot" data-pal="yellow" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#D8A840,#A07010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
       </div>
     </div>
   </div>
@@ -477,13 +478,13 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
       <div class="hmenu-row" id="hmenu-profile"><span class="hmenu-em" id="hmenu-em">👤</span><span id="hmenu-name">Profile</span></div>
       <div class="hmenu-row" id="hmenu-collect"><span class="hmenu-em">🫙</span><span>Collections</span><span id="hmenu-badge" class="hmenu-dot" style="display:none;"></span></div>
       <div class="hmenu-row" id="hmenu-notes"><span class="hmenu-em">📓</span><span>Notes</span></div>
-      <div class="hmenu-row" id="hmenu-palette" style="justify-content:space-between;">
-        <span style="font-size:14px;font-weight:500;">Theme</span>
-        <div style="display:flex;gap:7px;">
-          <div class="pal-dot" data-pal="green" style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="blue" style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="pink" style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#E080B0,#C05880);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="yellow" style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#D8A840,#A07010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+      <div class="hmenu-row" id="hmenu-palette" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;">Theme</span>
+        <div style="display:flex;gap:9px;">
+          <div class="pal-dot" data-pal="green" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="blue" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="pink" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#E080B0,#C05880);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="yellow" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#D8A840,#A07010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
         </div>
       </div>
       <div class="hmenu-row" id="hmenu-dark"><span class="hmenu-em" id="hmenu-dark-em">🌙</span><span id="hmenu-dark-lbl">Dark mode</span></div>
