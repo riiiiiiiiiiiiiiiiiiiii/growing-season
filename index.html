@@ -2237,7 +2237,14 @@ function rMy(){
 
   var groups={};
   myActs.forEach(function(a){var c=a.cat||'Other';if(!groups[c])groups[c]=[];groups[c].push(a);});
-  Object.keys(groups).forEach(function(cat){
+  var _cats=Object.keys(groups);
+  var _allOpen=_cats.every(function(c){return catOpen[c]!==false;});
+  var _toggleAllBtn=document.createElement('button');
+  _toggleAllBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:0 0 10px;display:block;text-align:left;';
+  _toggleAllBtn.textContent=_allOpen?'Collapse all':'Expand all';
+  _toggleAllBtn.addEventListener('click',function(){_cats.forEach(function(c){catOpen[c]=!_allOpen;});rMy();});
+  el.appendChild(_toggleAllBtn);
+  _cats.forEach(function(cat){
     var acts=groups[cat];
     var isOpen=catOpen[cat]!==false;
     var section=document.createElement('div');section.className='cat-section';
