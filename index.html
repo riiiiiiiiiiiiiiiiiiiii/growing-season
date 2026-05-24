@@ -658,7 +658,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
     <div id="add-panel-custom" style="display:none;">
       <div class="sf"><div class="sl">Name</div><input class="sinp" id="an" placeholder="e.g. Pottery, Archery..."></div>
       <div class="sf"><div class="sl">Category</div><div class="so" id="ac-opts"></div></div>
-      <div class="sf" id="ac-custom-wrap" style="display:none;"><div class="sl">Category name</div><input class="sinp" id="ac-custom-name" placeholder="e.g. Gaming, Cooking..."></div>
+      <div class="sf" id="ac-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:center;"><input class="sinp" id="ac-custom-name" placeholder="e.g. Gaming, Cooking..." style="flex:1;"><button class="btn btn-s" id="btn-add-cat" style="white-space:nowrap;flex-shrink:0;">Add</button></div></div>
       <div class="sf"><div class="sl">Commitment</div><div class="so" id="add-type"></div></div>
       <div class="sf"><div class="sl">Level</div><div class="so" id="add-level"></div></div>
       <button class="btn btn-p" id="btn-add-save" style="margin-top:4px;">Plant it</button>
@@ -739,12 +739,13 @@ var ACTS = [
 ];
 
 // ── STATE ─────────────────────────────────────────────
-function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[],collection:{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]},activityNotes:{},darkMode:false};}
-function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,darkMode:darkMode}));}catch(e){}}
+function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[],collection:{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]},activityNotes:{},darkMode:false,customCats:[]};}
+function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,darkMode:darkMode,customCats:customCats}));}catch(e){}}
 var st=ld(), myActs=st.myActs, sessions=st.sessions, onboarded=st.onboarded, profile=st.profile, active=st.active;
 var weeklyFocus=st.weeklyFocus||{weekKey:'',actIds:[]};
 var archivedActs=st.archivedActs||[];
 var activityNotes=st.activityNotes||{};
+var customCats=st.customCats||[];
 var collection=st.collection||{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]};
 if(!collection.counts)collection.counts={drop:0,leaf:0,petal:0,bee:0};
 if(!collection.awarded)collection.awarded=[];
@@ -2763,22 +2764,39 @@ function openAdd(){
   document.getElementById('tab-custom').onclick=function(){switchAddTab('custom');};
 
   // Custom tab options
-  var catWrap=document.getElementById('ac-opts');catWrap.innerHTML='';
-  var acCustomWrap=document.getElementById('ac-custom-wrap');acCustomWrap.style.display='none';
+  var catWrap=document.getElementById('ac-opts');
+  var acCustomWrap=document.getElementById('ac-custom-wrap');
   document.getElementById('ac-custom-name').value='';
-  CATS.forEach(function(cat){
-    var cc=CAT_COLORS[cat].split(',');
-    var b=document.createElement('div');b.className='sop';b.dataset.cat=cat;
-    b.style.background=cc[0];b.style.color=cc[1];
-    b.textContent=CEM[cat]+' '+cat;
-    b.addEventListener('click',function(){catWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');acCustomWrap.style.display='none';});
-    catWrap.appendChild(b);
-  });
-  var customPill=document.createElement('div');customPill.className='sop';customPill.dataset.cat='__custom__';
-  customPill.style.background='var(--bg3)';customPill.style.color='var(--tx)';
-  customPill.textContent='✏️ Custom';
-  customPill.addEventListener('click',function(){catWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});customPill.classList.add('on');acCustomWrap.style.display='';});
-  catWrap.appendChild(customPill);
+  function renderCats(selected){
+    catWrap.innerHTML='';acCustomWrap.style.display='none';
+    function addCatPill(cat,label,bg,fg){
+      var b=document.createElement('div');b.className='sop';b.dataset.cat=cat;
+      b.style.background=bg;b.style.color=fg;
+      b.textContent=label;
+      if(cat===selected)b.classList.add('on');
+      b.addEventListener('click',function(){catWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');acCustomWrap.style.display='none';});
+      catWrap.appendChild(b);return b;
+    }
+    CATS.forEach(function(cat){var cc=CAT_COLORS[cat].split(',');addCatPill(cat,CEM[cat]+' '+cat,cc[0],cc[1]);});
+    customCats.forEach(function(cat){addCatPill(cat,'🌱 '+cat,'var(--bg3)','var(--tx)');});
+    var newPill=document.createElement('div');newPill.className='sop';newPill.dataset.cat='__new__';
+    newPill.style.background='var(--bg2)';newPill.style.color='var(--tx2)';
+    newPill.textContent='＋ New';
+    newPill.addEventListener('click',function(){
+      catWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});
+      newPill.classList.add('on');acCustomWrap.style.display='';
+      document.getElementById('ac-custom-name').value='';
+      document.getElementById('ac-custom-name').focus();
+    });
+    catWrap.appendChild(newPill);
+  }
+  renderCats(null);
+  document.getElementById('btn-add-cat').onclick=function(){
+    var name=document.getElementById('ac-custom-name').value.trim();
+    if(!name)return;
+    if(!customCats.includes(name))customCats.push(name);
+    sv();renderCats(name);showToast('Category saved',null);
+  };
   var typeWrap=document.getElementById('add-type');typeWrap.innerHTML='';
   [{v:'recreational',lbl:'Growing for joy'},{v:'serious',lbl:'Growing seriously'}].forEach(function(opt){
     var b=document.createElement('div');b.className='sop';b.dataset.type=opt.v;b.textContent=opt.lbl;
@@ -2802,9 +2820,10 @@ function saveAdd(){
   var lvlEl=document.querySelector('#add-level .sop.on');
   if(!name||!catEl)return;
   var cat,emoji;
-  if(catEl.dataset.cat==='__custom__'){
+  if(catEl.dataset.cat==='__new__'||catEl.dataset.cat==='__custom__'){
     cat=document.getElementById('ac-custom-name').value.trim()||'Other';
     emoji='🌱';
+    if(cat&&!customCats.includes(cat))customCats.push(cat);
   }else{
     cat=catEl.dataset.cat;
     emoji=CEM[cat]||'🌱';
