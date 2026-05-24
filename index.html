@@ -395,6 +395,15 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
       <button class="sb-mr" id="sb-collect-btn"><span class="sb-mr-em">🫙</span><span>Collections</span><span id="sb-collect-dot" style="display:none;width:7px;height:7px;background:#E53E3E;border-radius:50%;margin-left:auto;flex-shrink:0;"></span></button>
       <button class="sb-mr" id="sb-notes-btn"><span class="sb-mr-em">📓</span><span>Notes</span></button>
       <button class="sb-mr" id="sb-dark-btn"><span class="sb-mr-em" id="sb-dark-em">🌙</span><span id="sb-dark-lbl">Dark mode</span></button>
+      <div id="sb-palette" style="display:flex;align-items:center;gap:10px;width:100%;border-radius:10px;padding:10px 10px;cursor:default;">
+        <span style="font-size:14px;font-weight:500;color:var(--tx2);">Theme</span>
+        <div style="display:flex;gap:7px;margin-left:auto;">
+          <div class="pal-dot" data-pal="green" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="blue" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="pink" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#D05095,#A01860);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="yellow" style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#D8A840,#A07010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+        </div>
+      </div>
     </div>
   </div>
   <div id="sb-backdrop"></div>
@@ -1074,6 +1083,13 @@ document.getElementById('sb-profile-btn').addEventListener('click',function(){cl
 document.getElementById('sb-collect-btn').addEventListener('click',function(){closeSidebar();openCollect();});
 document.getElementById('sb-notes-btn').addEventListener('click',function(){closeSidebar();openNotes();});
 document.getElementById('sb-dark-btn').addEventListener('click',function(){darkMode=!darkMode;applyDark();sv();});
+document.getElementById('sb-palette').addEventListener('click',function(e){
+  var dot=e.target.closest('.pal-dot');
+  if(!dot)return;
+  colorPalette=dot.dataset.pal;
+  applyPalette();
+  sv();
+});
 document.getElementById('fab').addEventListener('click',function(){
   var onHist=document.getElementById('s-hist').classList.contains('on');
   if(onHist)openHarvestQuickLog();else openAdd();
@@ -3111,7 +3127,7 @@ function showPlantInfo(id){
     sh.innerHTML+='<div style="margin-bottom:16px;">'+rHtml+'</div>';
   }
   var logBtn=document.createElement('button');logBtn.className='btn btn-p';logBtn.textContent='Log a session';
-  logBtn.addEventListener('click',function(){closeEd();nav('my');});sh.appendChild(logBtn);
+  logBtn.addEventListener('click',function(){closeEd();openLogDirect(id,'garden');});sh.appendChild(logBtn);
   var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
   closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
   document.getElementById('ed-ov').classList.add('on');
