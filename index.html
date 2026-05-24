@@ -658,6 +658,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
     <div id="add-panel-custom" style="display:none;">
       <div class="sf"><div class="sl">Name</div><input class="sinp" id="an" placeholder="e.g. Pottery, Archery..."></div>
       <div class="sf"><div class="sl">Category</div><div class="so" id="ac-opts"></div></div>
+      <div class="sf" id="ac-custom-wrap" style="display:none;"><div class="sl">Category name</div><input class="sinp" id="ac-custom-name" placeholder="e.g. Gaming, Cooking..."></div>
       <div class="sf"><div class="sl">Commitment</div><div class="so" id="add-type"></div></div>
       <div class="sf"><div class="sl">Level</div><div class="so" id="add-level"></div></div>
       <button class="btn btn-p" id="btn-add-save" style="margin-top:4px;">Plant it</button>
@@ -1002,7 +1003,7 @@ function show(id){document.querySelectorAll('.scr').forEach(function(s){s.classL
 function nav(v){
   show('s-'+v);
   ['home','my','garden','hist'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
-  document.getElementById('fab').style.display=(v==='my'||v==='garden')?'flex':'none';
+  document.getElementById('fab').style.display=(v==='my'||v==='garden'||v==='hist')?'flex':'none';
   if(v==='home')rHome();
   if(v==='my')rMy();
   if(v==='garden')rGarden();
@@ -1034,7 +1035,10 @@ document.getElementById('sb-profile-btn').addEventListener('click',function(){cl
 document.getElementById('sb-collect-btn').addEventListener('click',function(){closeSidebar();openCollect();});
 document.getElementById('sb-notes-btn').addEventListener('click',function(){closeSidebar();openNotes();});
 document.getElementById('sb-dark-btn').addEventListener('click',function(){darkMode=!darkMode;applyDark();sv();});
-document.getElementById('fab').addEventListener('click',openAdd);
+document.getElementById('fab').addEventListener('click',function(){
+  var onHist=document.getElementById('s-hist').classList.contains('on');
+  if(onHist)openHarvestQuickLog();else openAdd();
+});
 // Harvest filters
 document.getElementById('hist-search').addEventListener('input',function(){histSearch=this.value;rHist();});
 document.getElementById('hist-period-row').addEventListener('click',function(e){
@@ -2589,6 +2593,89 @@ function openEd(id){
 
   document.getElementById('ed-ov').classList.add('on');
 }
+function openHarvestQuickLog(){
+  if(!myActs.length){openAdd();return;}
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
+  var qlAct=null,qlRating=0,qlCat='all',qlSearch='';
+  function renderStep1(){
+    sh.innerHTML='';
+    var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:4px;';title.textContent='Log a session';sh.appendChild(title);
+    var sub=document.createElement('div');sub.style.cssText='font-size:13px;color:var(--tx2);margin-bottom:12px;';sub.textContent='Which activity?';sh.appendChild(sub);
+    var sw=document.createElement('div');sw.className='sw';sw.style.marginBottom='8px';
+    var sic=document.createElement('span');sic.className='sic';sic.textContent='🔍';sw.appendChild(sic);
+    var inp=document.createElement('input');inp.className='si';inp.placeholder='Search...';inp.value=qlSearch;
+    inp.addEventListener('input',function(){qlSearch=this.value.toLowerCase();renderStep1();});
+    sw.appendChild(inp);sh.appendChild(sw);
+    var pills=document.createElement('div');pills.style.cssText='display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;';
+    function mkPill(label,cat){
+      var p=document.createElement('div');p.className='pill'+(qlCat===cat?'':' off');
+      if(cat==='all'){p.style.background='var(--gr)';p.style.color='#fff';}
+      else{var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg3)','var(--tx)'];p.style.background=cc[0];p.style.color=cc[1];}
+      p.textContent=label;p.addEventListener('click',function(){qlCat=cat;renderStep1();});pills.appendChild(p);
+    }
+    mkPill('All','all');CATS.forEach(function(c){mkPill(CEM[c],c);});
+    sh.appendChild(pills);
+    var list=myActs.filter(function(a){return(qlCat==='all'||a.cat===qlCat)&&(!qlSearch||a.name.toLowerCase().includes(qlSearch));});
+    var grid=document.createElement('div');grid.style.cssText='display:flex;flex-direction:column;gap:7px;max-height:40vh;overflow-y:auto;';
+    list.forEach(function(a){
+      var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
+      var card=document.createElement('div');card.className='bp-card';
+      card.innerHTML='<span style="font-size:22px;">'+a.emoji+'</span><div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+a.name+'</div><div style="font-size:11px;color:var(--tx2);">'+a.cat+'</div></div><span style="font-size:11px;color:var(--tx3);">'+cnt+'x</span>';
+      card.addEventListener('click',function(){qlAct=a;renderStep2();});
+      grid.appendChild(card);
+    });
+    if(!list.length){var empty=document.createElement('div');empty.style.cssText='font-size:13px;color:var(--tx2);padding:12px 0;';empty.textContent='No activities found';grid.appendChild(empty);}
+    sh.appendChild(grid);
+    var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;position:sticky;bottom:-26px;background:var(--bg);padding:12px 22px 26px;margin:8px -22px -26px;border-top:0.5px solid var(--bg3);';
+    var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.flex='1';cancel.textContent='Cancel';cancel.addEventListener('click',closeEd);row.appendChild(cancel);
+    sh.appendChild(row);
+    setTimeout(function(){if(inp)inp.focus();},80);
+  }
+  function renderStep2(){
+    sh.innerHTML='';
+    var back=document.createElement('button');back.style.cssText='background:none;border:none;color:var(--tx2);font-size:13px;cursor:pointer;padding:0 0 10px;';back.textContent='← Back';back.addEventListener('click',renderStep1);sh.appendChild(back);
+    var hdr=document.createElement('div');hdr.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:16px;';
+    hdr.innerHTML='<span style="font-size:28px;">'+qlAct.emoji+'</span><div style="font-family:var(--serif);font-size:18px;font-weight:700;">'+qlAct.name+'</div>';sh.appendChild(hdr);
+    // Time inputs
+    var tf=document.createElement('div');tf.className='sf';
+    var tl=document.createElement('div');tl.className='sl';tl.textContent='Time';tf.appendChild(tl);
+    var ti=document.createElement('div');ti.style.cssText='display:flex;gap:8px;align-items:center;';
+    var qlH=document.createElement('input');qlH.type='number';qlH.min='0';qlH.value='0';qlH.style.cssText='width:56px;padding:6px 8px;border:1.5px solid var(--bg3);border-radius:10px;background:var(--bg);color:var(--tx);font-size:15px;text-align:center;';
+    var hl=document.createElement('span');hl.style.cssText='font-size:13px;color:var(--tx2);';hl.textContent='h';
+    var qlM=document.createElement('input');qlM.type='number';qlM.min='0';qlM.max='59';qlM.value='30';qlM.style.cssText='width:56px;padding:6px 8px;border:1.5px solid var(--bg3);border-radius:10px;background:var(--bg);color:var(--tx);font-size:15px;text-align:center;';
+    var ml=document.createElement('span');ml.style.cssText='font-size:13px;color:var(--tx2);';ml.textContent='min';
+    ti.appendChild(qlH);ti.appendChild(hl);ti.appendChild(qlM);ti.appendChild(ml);tf.appendChild(ti);sh.appendChild(tf);
+    // Rating (optional)
+    var rf=document.createElement('div');rf.className='sf';
+    var rl=document.createElement('div');rl.className='sl';rl.textContent='Rating (optional)';rf.appendChild(rl);
+    var stars=document.createElement('div');stars.style.cssText='display:flex;gap:3px;flex-wrap:wrap;';
+    var lbls=['','Poor','Poor','Okay','Okay','Good','Good','Thriving','Thriving','Abundant','Record harvest'];
+    for(var i=1;i<=10;i++){(function(n){var s=document.createElement('span');s.className='star';s.textContent='★';s.style.cursor='pointer';
+      s.addEventListener('click',function(){qlRating=n;stars.querySelectorAll('.star').forEach(function(x,j){x.classList.toggle('on',j<n);});});
+      stars.appendChild(s);})(i);}
+    rf.appendChild(stars);sh.appendChild(rf);
+    // Notes (optional)
+    var nf=document.createElement('div');nf.className='sf';
+    var nl=document.createElement('div');nl.className='sl';nl.textContent='Notes (optional)';nf.appendChild(nl);
+    var qlNotes=document.createElement('textarea');qlNotes.className='sinp';qlNotes.rows=3;qlNotes.placeholder='How did it go?';qlNotes.style.resize='none';nf.appendChild(qlNotes);sh.appendChild(nf);
+    // Sticky row
+    var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;position:sticky;bottom:-26px;background:var(--bg);padding:12px 22px 26px;margin:8px -22px -26px;border-top:0.5px solid var(--bg3);';
+    var logBtn=document.createElement('button');logBtn.className='btn btn-p';logBtn.style.flex='1';logBtn.textContent='Log it';
+    logBtn.addEventListener('click',function(){
+      var h=parseInt(qlH.value)||0,m=parseInt(qlM.value)||0;
+      if(!h&&!m){qlM.focus();return;}
+      var stageBefore=getStage(getHours(qlAct.id));
+      sessions.push({actId:qlAct.id,actName:qlAct.name,actEmoji:qlAct.emoji,date:Date.now(),hours:h,mins:m,feel:[],rating:qlRating,notes:qlNotes.value.trim(),well:'',diff:'',momentum:'',startedAt:null});
+      var stageAfter=getStage(getHours(qlAct.id));
+      for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(qlAct.id,s);
+      checkTrophies();sv();closeEd();rHist();showToast('Session logged',null);
+    });
+    var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.flex='1';cancel.textContent='Cancel';cancel.addEventListener('click',closeEd);
+    row.appendChild(logBtn);row.appendChild(cancel);sh.appendChild(row);
+  }
+  renderStep1();
+  document.getElementById('ed-ov').classList.add('on');
+}
 function closeEd(){document.getElementById('ed-ov').classList.remove('on');}
 function saveEd(){var a=myActs.find(function(x){return x.id===edId;});if(a){a.type=edTmp.type;a.level=edTmp.level;}sv();closeEd();rMy();}
 
@@ -2677,14 +2764,21 @@ function openAdd(){
 
   // Custom tab options
   var catWrap=document.getElementById('ac-opts');catWrap.innerHTML='';
+  var acCustomWrap=document.getElementById('ac-custom-wrap');acCustomWrap.style.display='none';
+  document.getElementById('ac-custom-name').value='';
   CATS.forEach(function(cat){
     var cc=CAT_COLORS[cat].split(',');
     var b=document.createElement('div');b.className='sop';b.dataset.cat=cat;
     b.style.background=cc[0];b.style.color=cc[1];
     b.textContent=CEM[cat]+' '+cat;
-    b.addEventListener('click',function(){catWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
+    b.addEventListener('click',function(){catWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');acCustomWrap.style.display='none';});
     catWrap.appendChild(b);
   });
+  var customPill=document.createElement('div');customPill.className='sop';customPill.dataset.cat='__custom__';
+  customPill.style.background='var(--bg3)';customPill.style.color='var(--tx)';
+  customPill.textContent='✏️ Custom';
+  customPill.addEventListener('click',function(){catWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});customPill.classList.add('on');acCustomWrap.style.display='';});
+  catWrap.appendChild(customPill);
   var typeWrap=document.getElementById('add-type');typeWrap.innerHTML='';
   [{v:'recreational',lbl:'Growing for joy'},{v:'serious',lbl:'Growing seriously'}].forEach(function(opt){
     var b=document.createElement('div');b.className='sop';b.dataset.type=opt.v;b.textContent=opt.lbl;
@@ -2707,7 +2801,15 @@ function saveAdd(){
   var typeEl=document.querySelector('#add-type .sop.on');
   var lvlEl=document.querySelector('#add-level .sop.on');
   if(!name||!catEl)return;
-  myActs.push({id:'c'+Date.now(),name:name,emoji:CEM[catEl.dataset.cat]||'🌱',cat:catEl.dataset.cat,type:typeEl?typeEl.dataset.type:'recreational',level:lvlEl?lvlEl.dataset.level:'beginner',tags:[]});
+  var cat,emoji;
+  if(catEl.dataset.cat==='__custom__'){
+    cat=document.getElementById('ac-custom-name').value.trim()||'Other';
+    emoji='🌱';
+  }else{
+    cat=catEl.dataset.cat;
+    emoji=CEM[cat]||'🌱';
+  }
+  myActs.push({id:'c'+Date.now(),name:name,emoji:emoji,cat:cat,type:typeEl?typeEl.dataset.type:'recreational',level:lvlEl?lvlEl.dataset.level:'beginner',tags:[]});
   checkTrophies();sv();closeAdd();rMy();
 }
 
