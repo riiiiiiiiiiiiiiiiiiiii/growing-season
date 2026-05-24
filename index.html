@@ -2054,7 +2054,6 @@ function addSwipe(wrap,card,onArchive,onFocus){
 
   function onStart(clientX,clientY){
     startX=clientX;startY=clientY;dx=0;decided=false;isSwipe=false;
-    card.style.transition='none';
   }
   function onMove(clientX,clientY){
     if(dragState)return;
@@ -2064,6 +2063,7 @@ function addSwipe(wrap,card,onArchive,onFocus){
       if(Math.abs(dx)<5&&Math.abs(dy)<5)return;
       isSwipe=Math.abs(dx)>Math.abs(dy);
       decided=true;
+      if(isSwipe)card.style.transition='none';
     }
     if(!isSwipe)return;
     if(dx<0){
@@ -2096,8 +2096,10 @@ function addSwipe(wrap,card,onArchive,onFocus){
         onFocus();
       },160);
     } else {
-      card.style.transition='';
-      card.style.transform='';
+      if(isSwipe){
+        card.style.transition='';
+        card.style.transform='';
+      }
       if(del)del.style.opacity=0;
       if(foc)foc.style.opacity=0;
     }
