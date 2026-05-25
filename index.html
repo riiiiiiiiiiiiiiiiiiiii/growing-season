@@ -193,6 +193,8 @@ body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode
 .sop{background:var(--bg2);border:var(--br);border-radius:var(--rsm);padding:6px 13px;font-size:13px;cursor:pointer;transition:all .12s;user-select:none;}
 .sop.on{background:var(--grl);border-color:var(--gr);color:var(--gr2);font-weight:500;}
 .sinp{width:100%;padding:9px 11px;border-radius:var(--rsm);border:var(--br2);background:var(--bg2);color:var(--tx);font-size:14px;font-family:inherit;-webkit-appearance:none;}
+.pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;opacity:.5;padding:2px;line-height:1;transition:opacity .15s;}
+.pw-eye:hover{opacity:1;}
 .srow{display:flex;gap:8px;margin-top:4px;}
 .cat-Creative{background:#FCE7F3;color:#9D174D;}.cat-Active{background:#FFE4D9;color:#9A3412;}
 .cat-Learning{background:#DBEAFE;color:#1E40AF;}.cat-Social{background:#D1FAE5;color:#065F46;}
@@ -467,7 +469,10 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
         <div class="sl" style="margin-bottom:6px;">Email or username</div>
         <input id="auth-email" type="text" class="sinp" placeholder="you@example.com or @rayan" style="width:100%;margin-bottom:10px;" autocomplete="username" inputmode="email">
         <div class="sl" style="margin-bottom:6px;">Password</div>
-        <input id="auth-password" type="password" class="sinp" placeholder="••••••••" style="width:100%;margin-bottom:14px;" autocomplete="current-password">
+        <div style="position:relative;margin-bottom:14px;">
+          <input id="auth-password" type="password" class="sinp" placeholder="••••••••" style="width:100%;padding-right:40px;" autocomplete="current-password">
+          <button type="button" class="pw-eye" onclick="togglePw('auth-password',this)">👁</button>
+        </div>
         <button id="btn-auth" class="btn btn-p" style="width:100%;">Sign in</button>
         <div id="auth-err" style="font-size:13px;font-weight:500;padding:8px 12px;border-radius:8px;margin-top:10px;text-align:center;display:none;"></div>
         <button id="btn-forgot" style="background:none;border:none;color:var(--tx3);font-size:12px;cursor:pointer;margin-top:10px;display:block;width:100%;text-align:center;">Forgot password?</button>
@@ -497,8 +502,14 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
         <div style="font-size:44px;margin-bottom:14px;">🔑</div>
         <div style="font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:8px;">Set new password</div>
         <div style="font-size:13px;color:var(--tx2);margin-bottom:20px;">Choose a new password for your account.</div>
-        <input id="new-pw" type="password" class="sinp" placeholder="New password" style="width:100%;margin-bottom:10px;" autocomplete="new-password">
-        <input id="new-pw2" type="password" class="sinp" placeholder="Confirm password" style="width:100%;margin-bottom:14px;" autocomplete="new-password">
+        <div style="position:relative;margin-bottom:10px;">
+          <input id="new-pw" type="password" class="sinp" placeholder="New password" style="width:100%;padding-right:40px;" autocomplete="new-password">
+          <button type="button" class="pw-eye" onclick="togglePw('new-pw',this)">👁</button>
+        </div>
+        <div style="position:relative;margin-bottom:14px;">
+          <input id="new-pw2" type="password" class="sinp" placeholder="Confirm password" style="width:100%;padding-right:40px;" autocomplete="new-password">
+          <button type="button" class="pw-eye" onclick="togglePw('new-pw2',this)">👁</button>
+        </div>
         <button id="btn-set-pw" class="btn btn-p" style="width:100%;">Save password</button>
         <div id="new-pw-err" style="font-size:12px;color:var(--co);margin-top:8px;display:none;"></div>
       </div>
@@ -3927,6 +3938,7 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
   supaUser=res.data.user;
   try{await checkProfile();}catch(e){showAuthErr('Sign in failed. Please try again.');console.error('checkProfile error:',e);}
 });
+function togglePw(id,btn){var inp=document.getElementById(id);var show=inp.type==='password';inp.type=show?'text':'password';btn.style.opacity=show?'1':'.5';}
 function showAuthErr(msg,isSuccess){
   var el=document.getElementById('auth-err');
   el.textContent=msg;el.style.display='block';
