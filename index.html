@@ -427,6 +427,13 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
         <input id="auth-email" type="email" class="sinp" placeholder="you@example.com" style="width:100%;margin-bottom:12px;">
         <button id="btn-auth" class="btn btn-p" style="width:100%;">Continue</button>
         <div id="auth-err" style="font-size:12px;color:var(--co);margin-top:8px;text-align:center;display:none;"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin:18px 0;">
+          <div style="flex:1;height:.5px;background:var(--bg3);"></div>
+          <span style="font-size:12px;color:var(--tx3);">or</span>
+          <div style="flex:1;height:.5px;background:var(--bg3);"></div>
+        </div>
+        <button id="btn-guest" class="btn btn-s" style="width:100%;">Continue as guest</button>
+        <div style="font-size:11px;color:var(--tx3);text-align:center;margin-top:8px;line-height:1.5;">Guest data is saved on this device only.<br>Sign in to sync across devices and add friends.</div>
       </div>
       <div id="auth-sent" style="width:100%;max-width:340px;text-align:center;display:none;">
         <div style="font-size:44px;margin-bottom:14px;">📬</div>
@@ -3391,6 +3398,11 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
   document.getElementById('auth-sent-to').textContent=email;
 });
 function showAuthErr(msg){var el=document.getElementById('auth-err');el.textContent=msg;el.style.display='block';}
+
+document.getElementById('btn-guest').addEventListener('click',function(){
+  _authHandled=true;
+  bootApp();
+});
 
 // ── PROFILE CREATION HANDLER ──────────────────────────
 document.getElementById('btn-prof-save').addEventListener('click',async function(){
