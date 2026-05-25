@@ -3399,28 +3399,30 @@ document.getElementById('btn-prof-save').addEventListener('click',async function
   this.disabled=true;this.textContent='Saving…';
   var res=await _supa.from('profiles').insert({id:supaUser.id,username:username,display_name:displayName,emoji:emoji});
   if(res.error){showProfErr(res.error.code==='23505'?'That username is taken.':res.error.message);this.disabled=false;this.textContent='Start growing';return;}
-  // Set local profile
   profile=Object.assign(profile||{},{name:displayName,emoji:emoji});
+  sv(); // sync existing local data up to Supabase
   bootApp();
 });
 function showProfErr(msg){var el=document.getElementById('prof-err');el.textContent=msg;el.style.display='block';}
 
 // ── BOOT ──────────────────────────────────────────────
+var _authHandled=false;
 _supa.auth.onAuthStateChange(async function(event,session){
   supaUser=session?session.user:null;
-  if(event==='SIGNED_IN'){await checkProfile();}
-  else if(event==='SIGNED_OUT'){show('s-auth');document.getElementById('main-nav').classList.remove('on');}
-});
-
-// Check for existing session on load
-_supa.auth.getSession().then(async function(res){
-  if(res.data&&res.data.session){
-    supaUser=res.data.session.user;
+  if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_authHandled){
+    _authHandled=true;
     await checkProfile();
-  } else {
+  } else if(event==='SIGNED_OUT'){
+    _authHandled=false;
     show('s-auth');
+    document.getElementById('main-nav').classList.remove('on');
   }
 });
+
+// Fallback: show auth if no session after 3s
+setTimeout(function(){
+  if(!_authHandled)show('s-auth');
+},3000);
 
 }); // DOMContentLoaded
 
