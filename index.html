@@ -467,10 +467,13 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       </div>
       <div id="auth-sent" style="width:100%;max-width:340px;text-align:center;display:none;">
         <div style="font-size:44px;margin-bottom:14px;">📬</div>
-        <div style="font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:10px;">Check your email</div>
-        <div style="font-size:13px;color:var(--tx2);line-height:1.7;">We sent a magic link to<br><strong id="auth-sent-to"></strong><br>Click it to sign in — no password needed.</div>
-        <button id="btn-resend" class="btn btn-s" style="width:100%;margin-top:22px;">Resend link</button>
-        <div id="resend-msg" style="font-size:12px;color:var(--tx3);margin-top:8px;display:none;"></div>
+        <div style="font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:8px;">Enter your code</div>
+        <div style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:20px;">We sent a 6-digit code to<br><strong id="auth-sent-to"></strong></div>
+        <input id="auth-otp" type="number" inputmode="numeric" class="sinp" placeholder="000000" style="width:100%;font-size:28px;text-align:center;letter-spacing:8px;margin-bottom:12px;">
+        <button id="btn-verify" class="btn btn-p" style="width:100%;">Verify</button>
+        <div id="otp-err" style="font-size:12px;color:var(--co);margin-top:8px;display:none;"></div>
+        <button id="btn-resend" class="btn btn-s" style="width:100%;margin-top:10px;">Resend code</button>
+        <div id="resend-msg" style="font-size:12px;color:var(--tx3);margin-top:6px;display:none;"></div>
       </div>
     </div>
   </div>
@@ -3814,34 +3817,48 @@ function bootApp(){
 }
 
 // ── AUTH SCREEN HANDLERS ──────────────────────────────
+var _lastAuthEmail='';
+async function sendOtp(email){
+  return _supa.auth.signInWithOtp({email:email});
+}
 document.getElementById('btn-auth').addEventListener('click',async function(){
   var email=document.getElementById('auth-email').value.trim();
   if(!email){showAuthErr('Please enter your email.');return;}
   this.disabled=true;this.textContent='Sending…';
-  var res=await _supa.auth.signInWithOtp({email:email,options:{emailRedirectTo:location.href}});
+  var res=await sendOtp(email);
   if(res.error){showAuthErr(res.error.message);this.disabled=false;this.textContent='Continue';return;}
+  _lastAuthEmail=email;
   document.getElementById('auth-form').style.display='none';
   document.getElementById('auth-sent').style.display='block';
   document.getElementById('auth-sent-to').textContent=email;
+  document.getElementById('auth-otp').value='';
+  document.getElementById('otp-err').style.display='none';
+  document.getElementById('auth-otp').focus();
+  this.disabled=false;this.textContent='Continue';
 });
 function showAuthErr(msg){var el=document.getElementById('auth-err');el.textContent=msg;el.style.display='block';}
 
-var _lastAuthEmail='';
-document.getElementById('btn-auth').addEventListener('click',async function(){
-  // store email for resend
-  _lastAuthEmail=document.getElementById('auth-email').value.trim();
-},{capture:true});
+document.getElementById('btn-verify').addEventListener('click',async function(){
+  var code=(document.getElementById('auth-otp').value||'').trim();
+  if(!code){showOtpErr('Please enter the 6-digit code.');return;}
+  this.disabled=true;this.textContent='Verifying…';
+  var res=await _supa.auth.verifyOtp({email:_lastAuthEmail,token:code,type:'email'});
+  if(res.error){showOtpErr(res.error.message);this.disabled=false;this.textContent='Verify';return;}
+  this.disabled=false;this.textContent='Verify';
+});
+function showOtpErr(msg){var el=document.getElementById('otp-err');el.textContent=msg;el.style.display='block';}
+document.getElementById('auth-otp').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btn-verify').click();});
 
 document.getElementById('btn-resend').addEventListener('click',async function(){
   var btn=this;
   if(!_lastAuthEmail)return;
   btn.disabled=true;btn.textContent='Sending…';
-  var res=await _supa.auth.signInWithOtp({email:_lastAuthEmail,options:{emailRedirectTo:location.href}});
+  var res=await sendOtp(_lastAuthEmail);
   var msg=document.getElementById('resend-msg');
   msg.style.display='block';
   if(res.error){msg.textContent='Error: '+res.error.message;msg.style.color='var(--co)';}
-  else{msg.textContent='Link resent!';msg.style.color='var(--gr)';}
-  btn.textContent='Resend link';
+  else{msg.textContent='New code sent!';msg.style.color='var(--gr)';}
+  btn.textContent='Resend code';
   setTimeout(function(){btn.disabled=false;msg.style.display='none';},4000);
 });
 
