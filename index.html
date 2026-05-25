@@ -2332,11 +2332,14 @@ async function searchUser(username){
       addBtn.addEventListener('click',async function(){
         addBtn.disabled=true;addBtn.textContent='…';
         if(isAccept){
-          await _supa.from('friendships').update({status:'accepted'}).eq('id',fr.data.id);
+          var upd=await _supa.from('friendships').update({status:'accepted'}).eq('id',fr.data.id);
+          if(upd.error){addBtn.disabled=false;addBtn.textContent='Error: '+upd.error.message;console.error('accept error',upd.error);return;}
           addBtn.textContent='Friends ✓';
         } else {
           var ins=await _supa.from('friendships').insert({requester_id:supaUser.id,addressee_id:p.id,status:'pending'});
-          addBtn.textContent=ins.error?'Error':'Sent!';
+          if(ins.error){addBtn.disabled=false;addBtn.textContent='Error';console.error('add friend error',ins.error);
+            res.innerHTML+='<div style="font-size:11px;color:var(--co);margin-top:6px;">'+ins.error.message+'</div>';return;}
+          addBtn.textContent='Sent!';
         }
       });
     }
