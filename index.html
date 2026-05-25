@@ -3944,9 +3944,16 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
   }
   // Set flags before the async call so onAuthStateChange SIGNED_IN doesn't race
   _authHandled=true;_guestMode=false;
-  var res=_authIsSignup
-    ?await _supa.auth.signUp({email:email,password:password})
-    :await _supa.auth.signInWithPassword({email:email,password:password});
+  var res;
+  try{
+    res=_authIsSignup
+      ?await _supa.auth.signUp({email:email,password:password})
+      :await _supa.auth.signInWithPassword({email:email,password:password});
+  }catch(e){
+    _authHandled=false;
+    showAuthErr('Connection error — your Supabase project may be paused. Visit supabase.com to resume it.');
+    this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';return;
+  }
   if(res.error){
     _authHandled=false;
     var msg=res.error.message;
@@ -3978,9 +3985,15 @@ document.getElementById('btn-magic').addEventListener('click',async function(){
     email=await resolveEmail(input);
     if(!email){showAuthErr('No account found for that username.');this.disabled=false;this.textContent='✉️ Send sign-in link';return;}
   }
-  var res=await _supa.auth.signInWithOtp({email:email,options:{emailRedirectTo:location.href}});
+  var res;
+  try{res=await _supa.auth.signInWithOtp({email:email,options:{emailRedirectTo:location.href}});}
+  catch(e){this.disabled=false;this.textContent='✉️ Send sign-in link';showAuthErr('Connection error — your Supabase project may be paused. Visit supabase.com to resume it.');return;}
   this.disabled=false;this.textContent='✉️ Send sign-in link';
-  if(res.error){showAuthErr(res.error.message);return;}
+  if(res.error){
+    var m=res.error.message;
+    if(/load fail|fetch|network/i.test(m))m='Connection error — your Supabase project may be paused. Visit supabase.com to resume it.';
+    showAuthErr(m);return;
+  }
   showAuthErr('✓ Check your email — your sign-in link is on the way!',true);
 });
 
