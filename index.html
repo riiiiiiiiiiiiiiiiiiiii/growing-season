@@ -3403,14 +3403,9 @@ document.getElementById('btn-guest').addEventListener('click',async function(){
   _authHandled=true;
   try{
     var gid=localStorage.getItem('gs-guest-id');
-    if(!gid){
-      gid=crypto.randomUUID();
-      localStorage.setItem('gs-guest-id',gid);
-      await _supa.from('guests').insert({id:gid});
-    } else {
-      await _supa.from('guests').update({last_seen:new Date().toISOString()}).eq('id',gid);
-    }
-  }catch(e){}
+    if(!gid){gid=crypto.randomUUID();localStorage.setItem('gs-guest-id',gid);}
+    await _supa.from('guests').upsert({id:gid,last_seen:new Date().toISOString()},{onConflict:'id'});
+  }catch(e){console.warn('Guest track error:',e);}
   bootApp();
 });
 
