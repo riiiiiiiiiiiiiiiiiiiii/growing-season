@@ -457,8 +457,8 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
           <button id="tab-signin" style="flex:1;padding:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--gr);color:#fff;transition:all .15s;">Sign in</button>
           <button id="tab-signup" style="flex:1;padding:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--tx2);transition:all .15s;">Create account</button>
         </div>
-        <div class="sl" style="margin-bottom:6px;">Email</div>
-        <input id="auth-email" type="email" class="sinp" placeholder="you@example.com" style="width:100%;margin-bottom:10px;" autocomplete="email">
+        <div class="sl" style="margin-bottom:6px;">Email or username</div>
+        <input id="auth-email" type="text" class="sinp" placeholder="you@example.com or @rayan" style="width:100%;margin-bottom:10px;" autocomplete="username" inputmode="email">
         <div class="sl" style="margin-bottom:6px;">Password</div>
         <input id="auth-password" type="password" class="sinp" placeholder="••••••••" style="width:100%;margin-bottom:14px;" autocomplete="current-password">
         <button id="btn-auth" class="btn btn-p" style="width:100%;">Sign in</button>
@@ -3866,14 +3866,29 @@ document.getElementById('tab-signup').addEventListener('click',function(){
   document.getElementById('auth-password').autocomplete='new-password';
 });
 
+// Resolve email or username → email
+async function resolveEmail(input){
+  input=input.trim();
+  if(input.includes('@')&&input.indexOf('@')!==0)return input; // looks like an email
+  var username=input.replace(/^@/,'').toLowerCase();
+  var r=await _supa.from('profiles').select('email').eq('username',username).maybeSingle();
+  if(r.error||!r.data||!r.data.email)return null;
+  return r.data.email;
+}
+
 // Password sign in / sign up
 document.getElementById('btn-auth').addEventListener('click',async function(){
-  var email=document.getElementById('auth-email').value.trim();
+  var input=document.getElementById('auth-email').value.trim();
   var password=document.getElementById('auth-password').value;
-  if(!email){showAuthErr('Please enter your email.');return;}
+  if(!input){showAuthErr('Please enter your email or username.');return;}
   if(!password){showAuthErr('Please enter your password.');return;}
   if(_authIsSignup&&password.length<6){showAuthErr('Password must be at least 6 characters.');return;}
   this.disabled=true;this.textContent=_authIsSignup?'Creating…':'Signing in…';
+  var email=input;
+  if(!_authIsSignup){
+    email=await resolveEmail(input);
+    if(!email){showAuthErr('No account found for that username.');this.disabled=false;this.textContent='Sign in';return;}
+  }
   var res=_authIsSignup
     ?await _supa.auth.signUp({email:email,password:password})
     :await _supa.auth.signInWithPassword({email:email,password:password});
@@ -3903,9 +3918,11 @@ document.getElementById('btn-send-reset').addEventListener('click',async functio
 
 // Email code flow
 document.getElementById('btn-use-code').addEventListener('click',async function(){
-  var email=document.getElementById('auth-email').value.trim();
-  if(!email){showAuthErr('Enter your email first.');return;}
+  var input=document.getElementById('auth-email').value.trim();
+  if(!input){showAuthErr('Enter your email or username first.');return;}
   this.disabled=true;this.textContent='Sending…';
+  var email=await resolveEmail(input);
+  if(!email){showAuthErr('No account found for that username.');this.disabled=false;this.textContent='Sign in with email code';return;}
   var res=await _supa.auth.signInWithOtp({email:email});
   if(res.error){showAuthErr(res.error.message);this.disabled=false;this.textContent='Sign in with email code';return;}
   _lastAuthEmail=email;
@@ -3962,7 +3979,7 @@ document.getElementById('btn-prof-save').addEventListener('click',async function
   if(!/^[a-z0-9_]+$/.test(username)){showProfErr('Letters, numbers and underscores only.');return;}
   if(!displayName){showProfErr('Please enter a display name.');return;}
   this.disabled=true;this.textContent='Saving…';
-  var res=await _supa.from('profiles').insert({id:supaUser.id,username:username,display_name:displayName,emoji:emoji});
+  var res=await _supa.from('profiles').insert({id:supaUser.id,username:username,display_name:displayName,emoji:emoji,email:supaUser.email});
   if(res.error){showProfErr(res.error.code==='23505'?'That username is taken.':res.error.message);this.disabled=false;this.textContent='Start growing';return;}
   profile=Object.assign(profile||{},{name:displayName,emoji:emoji});
   sv(); // sync existing local data up to Supabase
