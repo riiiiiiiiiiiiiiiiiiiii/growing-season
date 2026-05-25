@@ -3900,6 +3900,10 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
     :await _supa.auth.signInWithPassword({email:email,password:password});
   if(res.error){showAuthErr(res.error.message);this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';return;}
   this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';
+  supaUser=res.data.user;
+  _authHandled=true;
+  _guestMode=false;
+  await checkProfile();
 });
 function showAuthErr(msg){var el=document.getElementById('auth-err');el.textContent=msg;el.style.display='block';}
 document.getElementById('auth-password').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btn-auth').click();});
