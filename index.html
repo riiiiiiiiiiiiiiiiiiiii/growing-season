@@ -866,7 +866,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
 
 // Lock UI until auth resolves
 document.body.classList.add('auth-mode');
@@ -4062,8 +4062,10 @@ _supa.auth.onAuthStateChange(async function(event,session){
 setTimeout(function(){
   if(!_authHandled&&!_guestMode){_showAuth();}
 },3000);
+// Hard fallback: loading screen must always clear
+setTimeout(function(){_hideLoading();},6000);
 
-}); // DOMContentLoaded
+})();
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
