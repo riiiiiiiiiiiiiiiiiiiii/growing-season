@@ -40,6 +40,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 #s-garden{padding-top:0;padding-left:0;padding-right:0;}
 .scr.on{display:block;animation:scrIn .22s ease;}
 @keyframes scrIn{from{opacity:0;}to{opacity:1;}}
+body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode #sidebar,body.auth-mode #sb-backdrop{display:none!important;}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(244,250,246,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:var(--br);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
 .nb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--tx3);padding:6px 4px;user-select:none;}
@@ -759,6 +760,9 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+// Lock UI until auth resolves
+document.body.classList.add('auth-mode');
 
 // ── SUPABASE ──────────────────────────────────────────
 var _supa = window.supabase.createClient(
@@ -3359,16 +3363,16 @@ async function loadFromSupabase(){
 async function checkProfile(){
   var res=await _supa.from('profiles').select('*').eq('id',supaUser.id).single();
   if(res.data){
-    // Profile exists — load all data then boot
     await loadFromSupabase();
     bootApp();
   } else {
-    // New user — show profile creation
+    document.body.classList.remove('auth-mode');
     show('s-profile');
   }
 }
 
 function bootApp(){
+  document.body.classList.remove('auth-mode');
   document.getElementById('main-nav').classList.add('on');
   applyDark();applyPalette();
   if(onboarded){launch();checkNewWeek();}
@@ -3414,6 +3418,7 @@ _supa.auth.onAuthStateChange(async function(event,session){
     await checkProfile();
   } else if(event==='SIGNED_OUT'){
     _authHandled=false;
+    document.body.classList.add('auth-mode');
     show('s-auth');
     document.getElementById('main-nav').classList.remove('on');
   }
@@ -3421,7 +3426,7 @@ _supa.auth.onAuthStateChange(async function(event,session){
 
 // Fallback: show auth if no session after 3s
 setTimeout(function(){
-  if(!_authHandled)show('s-auth');
+  if(!_authHandled){document.body.classList.remove('auth-mode');show('s-auth');}
 },3000);
 
 }); // DOMContentLoaded
