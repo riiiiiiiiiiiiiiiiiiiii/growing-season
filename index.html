@@ -3403,9 +3403,14 @@ document.getElementById('btn-guest').addEventListener('click',async function(){
   _authHandled=true;
   try{
     var gid=localStorage.getItem('gs-guest-id');
-    if(!gid){gid=crypto.randomUUID();localStorage.setItem('gs-guest-id',gid);}
-    await _supa.from('guests').upsert({id:gid,last_seen:new Date().toISOString()},{onConflict:'id'});
-  }catch(e){console.warn('Guest track error:',e);}
+    if(!gid){
+      gid='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);});
+      localStorage.setItem('gs-guest-id',gid);
+    }
+    var res=await _supa.from('guests').upsert({id:gid,last_seen:new Date().toISOString()},{onConflict:'id'});
+    if(res.error)console.warn('Guest upsert error:',res.error.message,res.error.code);
+    else console.log('Guest tracked:',gid);
+  }catch(e){console.warn('Guest track exception:',e.message);}
   bootApp();
 });
 
