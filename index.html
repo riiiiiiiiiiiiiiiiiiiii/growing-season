@@ -474,7 +474,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
           <button type="button" class="pw-eye" onclick="togglePw('auth-password',this)">👁</button>
         </div>
         <button id="btn-auth" class="btn btn-p" style="width:100%;">Sign in</button>
-        <div id="auth-err" style="font-size:13px;font-weight:500;padding:8px 12px;border-radius:8px;margin-top:10px;text-align:center;display:none;"></div>
+        <div id="auth-err" style="font-size:14px;font-weight:600;padding:10px 14px;border-radius:8px;margin-top:10px;text-align:center;display:none;border:1.5px solid currentColor;"></div>
         <button id="btn-forgot" style="background:none;border:none;color:var(--tx3);font-size:12px;cursor:pointer;margin-top:10px;display:block;width:100%;text-align:center;">Forgot password?</button>
         <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;">
           <div style="flex:1;height:.5px;background:var(--bg3);"></div>
@@ -879,6 +879,16 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
 <script>
 function togglePw(id,btn){var inp=document.getElementById(id);var show=inp.type==='password';inp.type=show?'text':'password';btn.style.opacity=show?'1':'.5';}
 document.addEventListener('DOMContentLoaded', function() {
+
+// Guard: if Supabase CDN failed to load, show a visible error instead of crashing silently
+if (!window.supabase) {
+  var loadEl = document.getElementById('gs-load');
+  if (loadEl) {
+    loadEl.style.pointerEvents = 'auto';
+    loadEl.innerHTML = '<div style="font-family:Georgia,serif;font-size:16px;font-weight:600;color:#c0392b;text-align:center;padding:24px;">Could not load app.<br><span style="font-size:13px;font-weight:400;color:#666;">Check your internet connection.</span><br><br><button onclick="location.reload()" style="background:#D44870;color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;">Refresh</button></div>';
+  }
+  return;
+}
 
 // Lock UI until auth resolves
 document.body.classList.add('auth-mode');
@@ -4010,17 +4020,18 @@ document.getElementById('btn-set-pw').addEventListener('click',async function(){
 });
 document.getElementById('new-pw2').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btn-set-pw').click();});
 
-document.getElementById('btn-guest').addEventListener('click',async function(){
+document.getElementById('btn-guest').addEventListener('click',function(){
   _authHandled=true;_guestMode=true;
+  // Track guest in background — don't await, boot immediately
   try{
     var gid=localStorage.getItem('gs-guest-id');
     if(!gid){
       gid='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);});
       localStorage.setItem('gs-guest-id',gid);
     }
-    var res=await _supa.from('guests').upsert({id:gid,last_seen:new Date().toISOString(),name:(profile&&profile.name)||null,emoji:(profile&&profile.emoji)||null},{onConflict:'id'});
-    if(res.error)console.warn('Guest upsert error:',res.error.message,res.error.code);
-    else console.log('Guest tracked:',gid);
+    _supa.from('guests').upsert({id:gid,last_seen:new Date().toISOString(),name:(profile&&profile.name)||null,emoji:(profile&&profile.emoji)||null},{onConflict:'id'})
+      .then(function(res){if(res.error)console.warn('Guest upsert error:',res.error.message);else console.log('Guest tracked:',gid);})
+      .catch(function(e){console.warn('Guest track exception:',e.message);});
   }catch(e){console.warn('Guest track exception:',e.message);}
   bootApp();
 });
