@@ -1676,15 +1676,9 @@ async function openProfileEdit(){
   var accountSection='';
   if(supaProfile){
     accountSection='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Account</div>'
-      +'<div style="display:flex;gap:10px;align-items:center;background:var(--bg2);border-radius:12px;padding:10px 12px;margin-bottom:16px;">'
-        +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:11px;color:var(--tx3);margin-bottom:2px;">Username</div>'
-          +'<div style="font-size:15px;font-weight:600;color:var(--tx);">@'+(supaProfile.username||'')+'</div>'
-        +'</div>'
-        +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:11px;color:var(--tx3);margin-bottom:2px;">Display name</div>'
-          +'<input id="pe-display" class="sinp" placeholder="Your display name" style="width:100%;font-size:14px;padding:6px 10px;margin:0;" maxlength="40" value="'+((supaProfile.display_name||'').replace(/"/g,'&quot;'))+'">'
-        +'</div>'
+      +'<div style="background:var(--bg2);border-radius:12px;padding:10px 12px;margin-bottom:16px;">'
+        +'<div style="font-size:11px;color:var(--tx3);margin-bottom:2px;">Username</div>'
+        +'<div style="font-size:15px;font-weight:600;color:var(--tx);">@'+(supaProfile.username||'')+'</div>'
       +'</div>';
   }
   sh.innerHTML='<div style="font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:16px;">Edit profile</div>'
@@ -1712,8 +1706,7 @@ async function openProfileEdit(){
     profile.name=document.getElementById('pe-name').value.trim();
     profile.emoji=tmpEmoji;
     if(supaUser&&supaProfile){
-      var dn=(document.getElementById('pe-display').value||'').trim();
-      await _supa.from('profiles').update({display_name:dn}).eq('id',supaUser.id);
+      await _supa.from('profiles').update({display_name:profile.name}).eq('id',supaUser.id);
     }
     sv();closeEd();rHome();
   });
