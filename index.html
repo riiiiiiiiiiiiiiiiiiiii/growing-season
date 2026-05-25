@@ -424,6 +424,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     </div>
     <div class="sb-divider"></div>
     <div class="sb-menu">
+      <button class="sb-mr" id="sb-signin-btn" style="display:none;color:var(--gr);font-weight:600;"><span class="sb-mr-em">🔑</span><span>Sign in / Sign up</span></button>
       <button class="sb-mr" id="sb-profile-btn"><span class="sb-mr-em" id="sb-prof-em">👤</span><span id="sb-prof-name">Profile</span></button>
       <button class="sb-mr" id="sb-collect-btn"><span class="sb-mr-em">🫙</span><span>Collections</span><span id="sb-collect-dot" style="display:none;width:7px;height:7px;background:#E53E3E;border-radius:50%;margin-left:auto;flex-shrink:0;"></span></button>
       <button class="sb-mr" id="sb-notes-btn"><span class="sb-mr-em">📓</span><span>Notes</span></button>
@@ -479,6 +480,15 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
         <input id="reset-email" type="email" class="sinp" placeholder="you@example.com" style="width:100%;margin-bottom:12px;">
         <button id="btn-send-reset" class="btn btn-p" style="width:100%;">Send reset link</button>
         <div id="reset-msg" style="font-size:12px;margin-top:8px;text-align:center;display:none;"></div>
+      </div>
+      <div id="auth-new-pw" style="width:100%;max-width:340px;display:none;text-align:center;">
+        <div style="font-size:44px;margin-bottom:14px;">🔑</div>
+        <div style="font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:8px;">Set new password</div>
+        <div style="font-size:13px;color:var(--tx2);margin-bottom:20px;">Choose a new password for your account.</div>
+        <input id="new-pw" type="password" class="sinp" placeholder="New password" style="width:100%;margin-bottom:10px;" autocomplete="new-password">
+        <input id="new-pw2" type="password" class="sinp" placeholder="Confirm password" style="width:100%;margin-bottom:14px;" autocomplete="new-password">
+        <button id="btn-set-pw" class="btn btn-p" style="width:100%;">Save password</button>
+        <div id="new-pw-err" style="font-size:12px;color:var(--co);margin-top:8px;display:none;"></div>
       </div>
     </div>
   </div>
@@ -568,6 +578,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     </div>
     <!-- Hamburger dropdown -->
     <div id="home-menu" class="hmenu off">
+      <div class="hmenu-row" id="hmenu-signin" style="display:none;color:var(--gr);font-weight:600;"><span class="hmenu-em">🔑</span><span>Sign in / Sign up</span></div>
       <div class="hmenu-row" id="hmenu-profile"><span class="hmenu-em" id="hmenu-em">👤</span><span id="hmenu-name">Profile</span></div>
       <div class="hmenu-row" id="hmenu-collect"><span class="hmenu-em">🫙</span><span>Collections</span><span id="hmenu-badge" class="hmenu-dot" style="display:none;"></span></div>
       <div class="hmenu-row" id="hmenu-notes"><span class="hmenu-em">📓</span><span>Notes</span></div>
@@ -1217,11 +1228,21 @@ function launch(){
   document.getElementById('main-nav').classList.add('on');
   document.getElementById('fab').style.display='none';
   document.getElementById('friends-btn').style.display='flex';
+  var isGuest=!supaUser;
+  document.getElementById('sb-signin-btn').style.display=isGuest?'flex':'none';
+  document.getElementById('hmenu-signin').style.display=isGuest?'flex':'none';
   applyDark();
   applyPalette();
   rHome();
   setTimeout(function(){checkTrophies();retroCheckItems();sv();},600);
   updateCollectBadge();
+}
+function goToSignIn(){
+  document.body.classList.add('auth-mode');
+  show('s-auth');
+  showAuthPanel('auth-form');
+  document.getElementById('main-nav').classList.remove('on');
+  document.getElementById('friends-btn').style.display='none';
 }
 
 // Nav buttons
@@ -1235,6 +1256,7 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
 document.getElementById('sb-toggle').addEventListener('click',function(){document.getElementById('sidebar').classList.contains('open')?closeSidebar():openSidebar();});
 document.getElementById('sb-backdrop').addEventListener('click',closeSidebar);
 // Sidebar menu
+document.getElementById('sb-signin-btn').addEventListener('click',function(){closeSidebar();goToSignIn();});
 document.getElementById('sb-profile-btn').addEventListener('click',function(){closeSidebar();openProfileEdit();});
 document.getElementById('sb-collect-btn').addEventListener('click',function(){closeSidebar();openCollect();});
 document.getElementById('sb-notes-btn').addEventListener('click',function(){closeSidebar();openNotes();});
@@ -1953,6 +1975,7 @@ document.getElementById('btn-menu').addEventListener('click',function(){
   if(m.classList.contains('off'))openHomeMenu();else closeHomeMenu();
 });
 document.getElementById('home-menu-ov').addEventListener('click',closeHomeMenu);
+document.getElementById('hmenu-signin').addEventListener('click',function(){closeHomeMenu();goToSignIn();});
 document.getElementById('hmenu-profile').addEventListener('click',function(){closeHomeMenu();openProfileEdit();});
 document.getElementById('hmenu-collect').addEventListener('click',function(){closeHomeMenu();openCollect();});
 document.getElementById('hmenu-dark').addEventListener('click',function(){closeHomeMenu();darkMode=!darkMode;applyDark();sv();});
@@ -3825,7 +3848,7 @@ function bootApp(){
 var _authIsSignup=false;
 
 function showAuthPanel(panel){
-  ['auth-form','auth-reset'].forEach(function(id){
+  ['auth-form','auth-reset','auth-new-pw'].forEach(function(id){
     document.getElementById(id).style.display=id===panel?'block':'none';
   });
 }
@@ -3898,6 +3921,21 @@ document.getElementById('btn-send-reset').addEventListener('click',async functio
   this.disabled=false;this.textContent='Send reset link';
 });
 
+document.getElementById('btn-set-pw').addEventListener('click',async function(){
+  var pw=document.getElementById('new-pw').value;
+  var pw2=document.getElementById('new-pw2').value;
+  var err=document.getElementById('new-pw-err');
+  err.style.display='none';
+  if(pw.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+  if(pw!==pw2){err.textContent='Passwords don\'t match.';err.style.display='block';return;}
+  this.disabled=true;this.textContent='Saving…';
+  var res=await _supa.auth.updateUser({password:pw});
+  if(res.error){err.textContent=res.error.message;err.style.display='block';this.disabled=false;this.textContent='Save password';return;}
+  this.disabled=false;this.textContent='Save password';
+  _authHandled=false;
+  await checkProfile();
+});
+document.getElementById('new-pw2').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btn-set-pw').click();});
 
 document.getElementById('btn-guest').addEventListener('click',async function(){
   _authHandled=true;
@@ -3935,7 +3973,16 @@ function showProfErr(msg){var el=document.getElementById('prof-err');el.textCont
 var _authHandled=false;
 _supa.auth.onAuthStateChange(async function(event,session){
   supaUser=session?session.user:null;
-  if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_authHandled){
+  if(event==='PASSWORD_RECOVERY'){
+    // User clicked a reset link — show the set-new-password form
+    _authHandled=true;
+    document.body.classList.remove('auth-mode');
+    show('s-auth');
+    showAuthPanel('auth-new-pw');
+    document.getElementById('new-pw').value='';
+    document.getElementById('new-pw2').value='';
+    document.getElementById('new-pw-err').style.display='none';
+  } else if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_authHandled){
     _authHandled=true;
     await checkProfile();
   } else if(event==='SIGNED_OUT'){
