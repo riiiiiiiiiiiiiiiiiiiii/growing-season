@@ -453,11 +453,24 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div style="font-family:var(--serif);font-size:28px;font-weight:700;color:var(--gr);margin-bottom:6px;">Growing Season</div>
       <div style="font-size:14px;color:var(--tx2);margin-bottom:44px;text-align:center;line-height:1.6;">Track your growth,<br>share your journey</div>
       <div id="auth-form" style="width:100%;max-width:340px;">
+        <div style="display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--bg3);margin-bottom:20px;">
+          <button id="tab-signin" style="flex:1;padding:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--gr);color:#fff;transition:all .15s;">Sign in</button>
+          <button id="tab-signup" style="flex:1;padding:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--tx2);transition:all .15s;">Create account</button>
+        </div>
         <div class="sl" style="margin-bottom:6px;">Email</div>
-        <input id="auth-email" type="email" class="sinp" placeholder="you@example.com" style="width:100%;margin-bottom:12px;">
-        <button id="btn-auth" class="btn btn-p" style="width:100%;">Continue</button>
+        <input id="auth-email" type="email" class="sinp" placeholder="you@example.com" style="width:100%;margin-bottom:10px;" autocomplete="email">
+        <div class="sl" style="margin-bottom:6px;">Password</div>
+        <input id="auth-password" type="password" class="sinp" placeholder="••••••••" style="width:100%;margin-bottom:14px;" autocomplete="current-password">
+        <button id="btn-auth" class="btn btn-p" style="width:100%;">Sign in</button>
         <div id="auth-err" style="font-size:12px;color:var(--co);margin-top:8px;text-align:center;display:none;"></div>
-        <div style="display:flex;align-items:center;gap:10px;margin:18px 0;">
+        <button id="btn-forgot" style="background:none;border:none;color:var(--tx3);font-size:12px;cursor:pointer;margin-top:10px;display:block;width:100%;text-align:center;">Forgot password?</button>
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0;">
+          <div style="flex:1;height:.5px;background:var(--bg3);"></div>
+          <span style="font-size:12px;color:var(--tx3);">or</span>
+          <div style="flex:1;height:.5px;background:var(--bg3);"></div>
+        </div>
+        <button id="btn-use-code" class="btn btn-s" style="width:100%;">Sign in with email code</button>
+        <div style="display:flex;align-items:center;gap:10px;margin:10px 0;">
           <div style="flex:1;height:.5px;background:var(--bg3);"></div>
           <span style="font-size:12px;color:var(--tx3);">or</span>
           <div style="flex:1;height:.5px;background:var(--bg3);"></div>
@@ -466,6 +479,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
         <div style="font-size:11px;color:var(--tx3);text-align:center;margin-top:8px;line-height:1.5;">Guest data is saved on this device only.<br>Sign in to sync across devices and add friends.</div>
       </div>
       <div id="auth-sent" style="width:100%;max-width:340px;text-align:center;display:none;">
+        <button id="btn-code-back" style="background:none;border:none;color:var(--tx3);font-size:13px;cursor:pointer;padding:0;margin-bottom:18px;display:block;text-align:left;">← Back</button>
         <div style="font-size:44px;margin-bottom:14px;">📬</div>
         <div style="font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:8px;">Enter your code</div>
         <div style="font-size:13px;color:var(--tx2);line-height:1.7;margin-bottom:20px;">We sent a 6-digit code to<br><strong id="auth-sent-to"></strong></div>
@@ -474,6 +488,14 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
         <div id="otp-err" style="font-size:12px;color:var(--co);margin-top:8px;display:none;"></div>
         <button id="btn-resend" class="btn btn-s" style="width:100%;margin-top:10px;">Resend code</button>
         <div id="resend-msg" style="font-size:12px;color:var(--tx3);margin-top:6px;display:none;"></div>
+      </div>
+      <div id="auth-reset" style="width:100%;max-width:340px;display:none;">
+        <button id="btn-reset-back" style="background:none;border:none;color:var(--tx3);font-size:13px;cursor:pointer;padding:0;margin-bottom:18px;display:block;">← Back</button>
+        <div style="font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:8px;">Reset password</div>
+        <div style="font-size:13px;color:var(--tx2);margin-bottom:18px;">Enter your email and we'll send a reset link.</div>
+        <input id="reset-email" type="email" class="sinp" placeholder="you@example.com" style="width:100%;margin-bottom:12px;">
+        <button id="btn-send-reset" class="btn btn-p" style="width:100%;">Send reset link</button>
+        <div id="reset-msg" style="font-size:12px;margin-top:8px;text-align:center;display:none;"></div>
       </div>
     </div>
   </div>
@@ -3817,27 +3839,84 @@ function bootApp(){
 }
 
 // ── AUTH SCREEN HANDLERS ──────────────────────────────
+var _authIsSignup=false;
 var _lastAuthEmail='';
-async function sendOtp(email){
-  return _supa.auth.signInWithOtp({email:email});
+
+function showAuthPanel(panel){
+  ['auth-form','auth-sent','auth-reset'].forEach(function(id){
+    document.getElementById(id).style.display=id===panel?'block':'none';
+  });
 }
+
+// Sign in / Create account tabs
+document.getElementById('tab-signin').addEventListener('click',function(){
+  _authIsSignup=false;
+  this.style.background='var(--gr)';this.style.color='#fff';
+  document.getElementById('tab-signup').style.background='var(--bg2)';document.getElementById('tab-signup').style.color='var(--tx2)';
+  document.getElementById('btn-auth').textContent='Sign in';
+  document.getElementById('btn-forgot').style.display='block';
+  document.getElementById('auth-password').autocomplete='current-password';
+});
+document.getElementById('tab-signup').addEventListener('click',function(){
+  _authIsSignup=true;
+  this.style.background='var(--gr)';this.style.color='#fff';
+  document.getElementById('tab-signin').style.background='var(--bg2)';document.getElementById('tab-signin').style.color='var(--tx2)';
+  document.getElementById('btn-auth').textContent='Create account';
+  document.getElementById('btn-forgot').style.display='none';
+  document.getElementById('auth-password').autocomplete='new-password';
+});
+
+// Password sign in / sign up
 document.getElementById('btn-auth').addEventListener('click',async function(){
   var email=document.getElementById('auth-email').value.trim();
+  var password=document.getElementById('auth-password').value;
   if(!email){showAuthErr('Please enter your email.');return;}
+  if(!password){showAuthErr('Please enter your password.');return;}
+  if(_authIsSignup&&password.length<6){showAuthErr('Password must be at least 6 characters.');return;}
+  this.disabled=true;this.textContent=_authIsSignup?'Creating…':'Signing in…';
+  var res=_authIsSignup
+    ?await _supa.auth.signUp({email:email,password:password})
+    :await _supa.auth.signInWithPassword({email:email,password:password});
+  if(res.error){showAuthErr(res.error.message);this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';return;}
+  this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';
+});
+function showAuthErr(msg){var el=document.getElementById('auth-err');el.textContent=msg;el.style.display='block';}
+document.getElementById('auth-password').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btn-auth').click();});
+
+// Forgot password
+document.getElementById('btn-forgot').addEventListener('click',function(){
+  document.getElementById('reset-email').value=document.getElementById('auth-email').value;
+  showAuthPanel('auth-reset');
+});
+document.getElementById('btn-reset-back').addEventListener('click',function(){showAuthPanel('auth-form');});
+document.getElementById('btn-send-reset').addEventListener('click',async function(){
+  var email=document.getElementById('reset-email').value.trim();
+  if(!email){return;}
   this.disabled=true;this.textContent='Sending…';
-  var res=await sendOtp(email);
-  if(res.error){showAuthErr(res.error.message);this.disabled=false;this.textContent='Continue';return;}
+  var res=await _supa.auth.resetPasswordForEmail(email,{redirectTo:location.href});
+  var msg=document.getElementById('reset-msg');
+  msg.style.display='block';
+  if(res.error){msg.textContent=res.error.message;msg.style.color='var(--co)';}
+  else{msg.textContent='Reset link sent — check your email.';msg.style.color='var(--gr)';}
+  this.disabled=false;this.textContent='Send reset link';
+});
+
+// Email code flow
+document.getElementById('btn-use-code').addEventListener('click',async function(){
+  var email=document.getElementById('auth-email').value.trim();
+  if(!email){showAuthErr('Enter your email first.');return;}
+  this.disabled=true;this.textContent='Sending…';
+  var res=await _supa.auth.signInWithOtp({email:email});
+  if(res.error){showAuthErr(res.error.message);this.disabled=false;this.textContent='Sign in with email code';return;}
   _lastAuthEmail=email;
-  document.getElementById('auth-form').style.display='none';
-  document.getElementById('auth-sent').style.display='block';
   document.getElementById('auth-sent-to').textContent=email;
   document.getElementById('auth-otp').value='';
   document.getElementById('otp-err').style.display='none';
+  showAuthPanel('auth-sent');
   document.getElementById('auth-otp').focus();
-  this.disabled=false;this.textContent='Continue';
+  this.disabled=false;this.textContent='Sign in with email code';
 });
-function showAuthErr(msg){var el=document.getElementById('auth-err');el.textContent=msg;el.style.display='block';}
-
+document.getElementById('btn-code-back').addEventListener('click',function(){showAuthPanel('auth-form');});
 document.getElementById('btn-verify').addEventListener('click',async function(){
   var code=(document.getElementById('auth-otp').value||'').trim();
   if(!code){showOtpErr('Please enter the 6-digit code.');return;}
@@ -3848,14 +3927,11 @@ document.getElementById('btn-verify').addEventListener('click',async function(){
 });
 function showOtpErr(msg){var el=document.getElementById('otp-err');el.textContent=msg;el.style.display='block';}
 document.getElementById('auth-otp').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btn-verify').click();});
-
 document.getElementById('btn-resend').addEventListener('click',async function(){
-  var btn=this;
-  if(!_lastAuthEmail)return;
+  var btn=this;if(!_lastAuthEmail)return;
   btn.disabled=true;btn.textContent='Sending…';
-  var res=await sendOtp(_lastAuthEmail);
-  var msg=document.getElementById('resend-msg');
-  msg.style.display='block';
+  var res=await _supa.auth.signInWithOtp({email:_lastAuthEmail});
+  var msg=document.getElementById('resend-msg');msg.style.display='block';
   if(res.error){msg.textContent='Error: '+res.error.message;msg.style.color='var(--co)';}
   else{msg.textContent='New code sent!';msg.style.color='var(--gr)';}
   btn.textContent='Resend code';
