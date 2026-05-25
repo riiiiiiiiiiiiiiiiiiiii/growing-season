@@ -10,6 +10,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.svg">
 <title>Growing Season</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 :root{
@@ -414,8 +415,54 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 
   <div id="screen-wrap">
 
+  <!-- AUTH -->
+  <div id="s-auth" class="scr">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%;padding:48px 28px 80px;">
+      <div style="font-size:52px;margin-bottom:14px;">🌱</div>
+      <div style="font-family:var(--serif);font-size:28px;font-weight:700;color:var(--gr);margin-bottom:6px;">Growing Season</div>
+      <div style="font-size:14px;color:var(--tx2);margin-bottom:44px;text-align:center;line-height:1.6;">Track your growth,<br>share your journey</div>
+      <div id="auth-form" style="width:100%;max-width:340px;">
+        <div class="sl" style="margin-bottom:6px;">Email</div>
+        <input id="auth-email" type="email" class="sinp" placeholder="you@example.com" style="width:100%;margin-bottom:12px;">
+        <button id="btn-auth" class="btn btn-p" style="width:100%;">Continue</button>
+        <div id="auth-err" style="font-size:12px;color:var(--co);margin-top:8px;text-align:center;display:none;"></div>
+      </div>
+      <div id="auth-sent" style="width:100%;max-width:340px;text-align:center;display:none;">
+        <div style="font-size:44px;margin-bottom:14px;">📬</div>
+        <div style="font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:10px;">Check your email</div>
+        <div style="font-size:13px;color:var(--tx2);line-height:1.7;">We sent a magic link to<br><strong id="auth-sent-to"></strong><br>Click it to sign in — no password needed.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE CREATION -->
+  <div id="s-profile" class="scr">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%;padding:48px 28px 80px;">
+      <div style="font-size:52px;margin-bottom:14px;">🌿</div>
+      <div style="font-family:var(--serif);font-size:24px;font-weight:700;margin-bottom:6px;">Your profile</div>
+      <div style="font-size:13px;color:var(--tx2);margin-bottom:32px;text-align:center;">How friends will find you</div>
+      <div style="width:100%;max-width:340px;">
+        <div class="sf">
+          <div class="sl">Emoji</div>
+          <input id="prof-emoji" class="sinp" placeholder="🌱" maxlength="2" style="width:60px;text-align:center;font-size:20px;">
+        </div>
+        <div class="sf">
+          <div class="sl">Username</div>
+          <input id="prof-username" class="sinp" placeholder="rayan" style="width:100%;">
+          <div style="font-size:11px;color:var(--tx3);margin-top:4px;">Letters, numbers and underscores only</div>
+        </div>
+        <div class="sf">
+          <div class="sl">Display name</div>
+          <input id="prof-name" class="sinp" placeholder="Rayan" style="width:100%;">
+        </div>
+        <button id="btn-prof-save" class="btn btn-p" style="width:100%;margin-top:4px;">Start growing</button>
+        <div id="prof-err" style="font-size:12px;color:var(--co);margin-top:10px;text-align:center;display:none;"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ONBOARD 1 -->
-  <div id="s-ob1" class="scr on">
+  <div id="s-ob1" class="scr">
     <div style="text-align:center;padding:44px 24px 20px;">
       <div style="font-size:48px;margin-bottom:10px;">🌱</div>
       <div style="font-family:var(--serif);font-size:28px;font-weight:700;color:var(--gr);margin-bottom:4px;">Growing Season</div>
@@ -713,6 +760,13 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
+// ── SUPABASE ──────────────────────────────────────────
+var _supa = window.supabase.createClient(
+  'https://qeuhuvdyhqynsllfcgyn.supabase.co',
+  'sb_publishable_fiY2irS6Jd1BkbtqdhEYRA_gFQerBxw'
+);
+var supaUser = null;
+
 // ── DATA ──────────────────────────────────────────────
 var CATS = ['Creative','Active','Learning','Social','Mindfulness','Productive','Digital','Outdoor','Entertainment'];
 var CEM = {Creative:'🎨',Active:'💪',Learning:'📚',Social:'👯',Mindfulness:'🧘',Productive:'🔧',Digital:'💻',Outdoor:'🌿',Entertainment:'🎬'};
@@ -776,7 +830,7 @@ var ACTS = [
 
 // ── STATE ─────────────────────────────────────────────
 function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[],collection:{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]},activityNotes:{},darkMode:false,customCats:[],colorPalette:'green'};}
-function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,darkMode:darkMode,customCats:customCats,colorPalette:colorPalette}));}catch(e){}}
+function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,darkMode:darkMode,customCats:customCats,colorPalette:colorPalette}));}catch(e){}if(supaUser)syncToSupabase();}
 var st=ld(), myActs=st.myActs, sessions=st.sessions, onboarded=st.onboarded, profile=st.profile, active=st.active;
 var weeklyFocus=st.weeklyFocus||{weekKey:'',actIds:[]};
 var archivedActs=st.archivedActs||[];
@@ -3237,9 +3291,136 @@ document.addEventListener('pointerdown',function(e){
   if(card)haptic(6);
 },true);
 
+// ── SUPABASE SYNC ─────────────────────────────────────
+async function syncToSupabase(){
+  if(!supaUser)return;
+  var uid=supaUser.id;
+  try{
+    // Assign stable IDs to any sessions that don't have one
+    sessions.forEach(function(s,i){if(!s.id)s.id=uid.slice(0,8)+'-'+(s.date||Date.now())+'-'+i;});
+
+    await _supa.from('user_state').upsert({
+      user_id:uid,
+      data:{onboarded:onboarded,weeklyFocus:weeklyFocus,collection:collection,activityNotes:activityNotes,darkMode:darkMode,colorPalette:colorPalette,customCats:customCats,profile:profile,archivedActs:archivedActs,active:active},
+      updated_at:new Date().toISOString()
+    },{onConflict:'user_id'});
+
+    if(myActs.length){
+      await _supa.from('activities').upsert(
+        myActs.map(function(a){return{id:a.id,user_id:uid,name:a.name,emoji:a.emoji,cat:a.cat||'',type:a.type||'recreational',level:a.level||'beginner',data:a};}),
+        {onConflict:'id,user_id'}
+      );
+    }
+
+    if(sessions.length){
+      await _supa.from('sessions').upsert(
+        sessions.map(function(s){return{id:s.id,user_id:uid,act_id:s.actId,date:new Date(s.date||Date.now()).toISOString(),hours:s.hours||0,mins:s.mins||0,rating:s.rating||null,note:s.notes||'',feels:s.feel||[],momentum:s.momentum||'',data:s};}),
+        {onConflict:'id,user_id'}
+      );
+    }
+  }catch(e){console.warn('Supabase sync error:',e);}
+}
+
+async function loadFromSupabase(){
+  if(!supaUser)return;
+  var uid=supaUser.id;
+  try{
+    var stateRes=await _supa.from('user_state').select('data').eq('user_id',uid).single();
+    if(stateRes.data&&stateRes.data.data){
+      var d=stateRes.data.data;
+      if(d.onboarded!==undefined)onboarded=d.onboarded;
+      if(d.weeklyFocus)weeklyFocus=d.weeklyFocus;
+      if(d.collection)collection=d.collection;
+      if(d.activityNotes)activityNotes=d.activityNotes;
+      if(d.darkMode!==undefined)darkMode=d.darkMode;
+      if(d.colorPalette)colorPalette=d.colorPalette;
+      if(d.customCats)customCats=d.customCats;
+      if(d.profile)profile=d.profile;
+      if(d.archivedActs)archivedActs=d.archivedActs;
+      if(d.active!==undefined)active=d.active;
+    }
+
+    var actsRes=await _supa.from('activities').select('*').eq('user_id',uid);
+    if(actsRes.data&&actsRes.data.length){
+      myActs.splice(0,myActs.length);
+      actsRes.data.forEach(function(a){myActs.push(Object.assign({},a.data||{},{id:a.id,name:a.name,emoji:a.emoji,cat:a.cat,type:a.type,level:a.level}));});
+    }
+
+    var sessRes=await _supa.from('sessions').select('*').eq('user_id',uid).order('date',{ascending:false});
+    if(sessRes.data&&sessRes.data.length){
+      sessions.splice(0,sessions.length);
+      sessRes.data.forEach(function(s){sessions.push(Object.assign({},s.data||{},{id:s.id,actId:s.act_id,date:new Date(s.date).getTime(),hours:s.hours||0,mins:s.mins||0,rating:s.rating,notes:s.note||'',feel:s.feels||[],momentum:s.momentum||''}));});
+    }
+
+    sv();
+  }catch(e){console.warn('Supabase load error:',e);}
+}
+
+async function checkProfile(){
+  var res=await _supa.from('profiles').select('*').eq('id',supaUser.id).single();
+  if(res.data){
+    // Profile exists — load all data then boot
+    await loadFromSupabase();
+    bootApp();
+  } else {
+    // New user — show profile creation
+    show('s-profile');
+  }
+}
+
+function bootApp(){
+  document.getElementById('main-nav').classList.add('on');
+  applyDark();applyPalette();
+  if(onboarded){launch();checkNewWeek();}
+  else{show('s-ob1');rObCats();rObGrid();}
+}
+
+// ── AUTH SCREEN HANDLERS ──────────────────────────────
+document.getElementById('btn-auth').addEventListener('click',async function(){
+  var email=document.getElementById('auth-email').value.trim();
+  if(!email){showAuthErr('Please enter your email.');return;}
+  this.disabled=true;this.textContent='Sending…';
+  var res=await _supa.auth.signInWithOtp({email:email,options:{emailRedirectTo:location.href}});
+  if(res.error){showAuthErr(res.error.message);this.disabled=false;this.textContent='Continue';return;}
+  document.getElementById('auth-form').style.display='none';
+  document.getElementById('auth-sent').style.display='block';
+  document.getElementById('auth-sent-to').textContent=email;
+});
+function showAuthErr(msg){var el=document.getElementById('auth-err');el.textContent=msg;el.style.display='block';}
+
+// ── PROFILE CREATION HANDLER ──────────────────────────
+document.getElementById('btn-prof-save').addEventListener('click',async function(){
+  var username=document.getElementById('prof-username').value.trim().toLowerCase();
+  var displayName=document.getElementById('prof-name').value.trim();
+  var emoji=document.getElementById('prof-emoji').value.trim()||'🌱';
+  if(!username){showProfErr('Please choose a username.');return;}
+  if(!/^[a-z0-9_]+$/.test(username)){showProfErr('Letters, numbers and underscores only.');return;}
+  if(!displayName){showProfErr('Please enter a display name.');return;}
+  this.disabled=true;this.textContent='Saving…';
+  var res=await _supa.from('profiles').insert({id:supaUser.id,username:username,display_name:displayName,emoji:emoji});
+  if(res.error){showProfErr(res.error.code==='23505'?'That username is taken.':res.error.message);this.disabled=false;this.textContent='Start growing';return;}
+  // Set local profile
+  profile=Object.assign(profile||{},{name:displayName,emoji:emoji});
+  bootApp();
+});
+function showProfErr(msg){var el=document.getElementById('prof-err');el.textContent=msg;el.style.display='block';}
+
 // ── BOOT ──────────────────────────────────────────────
-if(onboarded){launch();checkNewWeek();}
-else{show('s-ob1');rObCats();rObGrid();}
+_supa.auth.onAuthStateChange(async function(event,session){
+  supaUser=session?session.user:null;
+  if(event==='SIGNED_IN'){await checkProfile();}
+  else if(event==='SIGNED_OUT'){show('s-auth');document.getElementById('main-nav').classList.remove('on');}
+});
+
+// Check for existing session on load
+_supa.auth.getSession().then(async function(res){
+  if(res.data&&res.data.session){
+    supaUser=res.data.session.user;
+    await checkProfile();
+  } else {
+    show('s-auth');
+  }
+});
 
 }); // DOMContentLoaded
 
