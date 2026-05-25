@@ -359,7 +359,7 @@ html.dark{
 }
 html.dark body{background:var(--bg);}
 html.dark #sidebar{background:var(--bg);border-color:var(--br);}
-html.dark #sb-toggle{background:var(--bg2);border-color:var(--br2);color:var(--tx);}
+html.dark #sb-toggle,html.dark #friends-btn{background:var(--bg2);border-color:var(--br2);color:var(--tx);}
 html.dark .nav{background:rgba(26,36,32,.96);}
 html.dark .sh{background:var(--bg);}
 html.dark .si,html.dark .di,html.dark .nta,html.dark .sinp{background:var(--bg2);border-color:var(--br2);color:var(--tx);}
@@ -426,6 +426,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div class="sb-menu">
       <button class="sb-mr" id="sb-signin-btn" style="display:none;color:var(--gr);font-weight:600;"><span class="sb-mr-em">🔑</span><span>Sign in / Sign up</span></button>
       <button class="sb-mr" id="sb-profile-btn"><span class="sb-mr-em" id="sb-prof-em">👤</span><span id="sb-prof-name">Profile</span></button>
+      <button class="sb-mr" id="sb-signout-btn" style="display:none;color:var(--co);"><span class="sb-mr-em">🚪</span><span>Sign out</span></button>
       <button class="sb-mr" id="sb-collect-btn"><span class="sb-mr-em">🫙</span><span>Collections</span><span id="sb-collect-dot" style="display:none;width:7px;height:7px;background:#E53E3E;border-radius:50%;margin-left:auto;flex-shrink:0;"></span></button>
       <button class="sb-mr" id="sb-notes-btn"><span class="sb-mr-em">📓</span><span>Notes</span></button>
       <button class="sb-mr" id="sb-dark-btn"><span class="sb-mr-em" id="sb-dark-em">🌙</span><span id="sb-dark-lbl">Dark mode</span></button>
@@ -463,9 +464,15 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
         <div class="sl" style="margin-bottom:6px;">Password</div>
         <input id="auth-password" type="password" class="sinp" placeholder="••••••••" style="width:100%;margin-bottom:14px;" autocomplete="current-password">
         <button id="btn-auth" class="btn btn-p" style="width:100%;">Sign in</button>
-        <div id="auth-err" style="font-size:12px;color:var(--co);margin-top:8px;text-align:center;display:none;"></div>
+        <div id="auth-err" style="font-size:13px;font-weight:500;padding:8px 12px;border-radius:8px;margin-top:10px;text-align:center;display:none;"></div>
         <button id="btn-forgot" style="background:none;border:none;color:var(--tx3);font-size:12px;cursor:pointer;margin-top:10px;display:block;width:100%;text-align:center;">Forgot password?</button>
-        <div style="display:flex;align-items:center;gap:10px;margin:14px 0;">
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;">
+          <div style="flex:1;height:.5px;background:var(--bg3);"></div>
+          <span style="font-size:12px;color:var(--tx3);">or</span>
+          <div style="flex:1;height:.5px;background:var(--bg3);"></div>
+        </div>
+        <button id="btn-magic" class="btn btn-s" style="width:100%;">✉️ Send sign-in link</button>
+        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;">
           <div style="flex:1;height:.5px;background:var(--bg3);"></div>
           <span style="font-size:12px;color:var(--tx3);">or</span>
           <div style="flex:1;height:.5px;background:var(--bg3);"></div>
@@ -580,6 +587,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div id="home-menu" class="hmenu off">
       <div class="hmenu-row" id="hmenu-signin" style="display:none;color:var(--gr);font-weight:600;"><span class="hmenu-em">🔑</span><span>Sign in / Sign up</span></div>
       <div class="hmenu-row" id="hmenu-profile"><span class="hmenu-em" id="hmenu-em">👤</span><span id="hmenu-name">Profile</span></div>
+      <div class="hmenu-row" id="hmenu-signout" style="display:none;color:var(--co);"><span class="hmenu-em">🚪</span><span>Sign out</span></div>
       <div class="hmenu-row" id="hmenu-collect"><span class="hmenu-em">🫙</span><span>Collections</span><span id="hmenu-badge" class="hmenu-dot" style="display:none;"></span></div>
       <div class="hmenu-row" id="hmenu-notes"><span class="hmenu-em">📓</span><span>Notes</span></div>
       <div class="hmenu-row" id="hmenu-palette" style="flex-direction:column;align-items:flex-start;gap:8px;">
@@ -1231,6 +1239,8 @@ function launch(){
   var isGuest=!supaUser;
   document.getElementById('sb-signin-btn').style.display=isGuest?'flex':'none';
   document.getElementById('hmenu-signin').style.display=isGuest?'flex':'none';
+  document.getElementById('sb-signout-btn').style.display=isGuest?'none':'flex';
+  document.getElementById('hmenu-signout').style.display=isGuest?'none':'flex';
   applyDark();
   applyPalette();
   rHome();
@@ -3864,6 +3874,7 @@ document.getElementById('tab-signin').addEventListener('click',function(){
   document.getElementById('tab-signup').style.background='var(--bg2)';document.getElementById('tab-signup').style.color='var(--tx2)';
   document.getElementById('btn-auth').textContent='Sign in';
   document.getElementById('btn-forgot').style.display='block';
+  document.getElementById('btn-magic').textContent='✉️ Send sign-in link';
   document.getElementById('auth-password').autocomplete='current-password';
 });
 document.getElementById('tab-signup').addEventListener('click',function(){
@@ -3872,6 +3883,7 @@ document.getElementById('tab-signup').addEventListener('click',function(){
   document.getElementById('tab-signin').style.background='var(--bg2)';document.getElementById('tab-signin').style.color='var(--tx2)';
   document.getElementById('btn-auth').textContent='Create account';
   document.getElementById('btn-forgot').style.display='none';
+  document.getElementById('btn-magic').textContent='✉️ Send sign-up link';
   document.getElementById('auth-password').autocomplete='new-password';
 });
 
@@ -3908,8 +3920,39 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
   supaUser=res.data.user;
   try{await checkProfile();}catch(e){showAuthErr('Sign in failed. Please try again.');console.error('checkProfile error:',e);}
 });
-function showAuthErr(msg){var el=document.getElementById('auth-err');el.textContent=msg;el.style.display='block';}
+function showAuthErr(msg,isSuccess){
+  var el=document.getElementById('auth-err');
+  el.textContent=msg;el.style.display='block';
+  el.style.background=isSuccess?'var(--grl)':'var(--col)';
+  el.style.color=isSuccess?'var(--gr2)':'var(--co)';
+}
 document.getElementById('auth-password').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btn-auth').click();});
+
+// Magic link
+document.getElementById('btn-magic').addEventListener('click',async function(){
+  var input=document.getElementById('auth-email').value.trim();
+  if(!input){showAuthErr('Please enter your email to send a sign-in link.');return;}
+  this.disabled=true;this.textContent='Sending…';
+  var email=input;
+  if(!input.includes('@')||input.indexOf('@')===0){
+    email=await resolveEmail(input);
+    if(!email){showAuthErr('No account found for that username.');this.disabled=false;this.textContent='✉️ Send sign-in link';return;}
+  }
+  var res=await _supa.auth.signInWithOtp({email:email,options:{emailRedirectTo:location.href}});
+  this.disabled=false;this.textContent='✉️ Send sign-in link';
+  if(res.error){showAuthErr(res.error.message);return;}
+  showAuthErr('✓ Check your email — your sign-in link is on the way!',true);
+});
+
+// Sign out
+async function doSignOut(){
+  _guestMode=false;_authHandled=false;
+  await _supa.auth.signOut();
+  supaUser=null;
+  _showAuth();
+}
+document.getElementById('sb-signout-btn').addEventListener('click',function(){closeSidebar();doSignOut();});
+document.getElementById('hmenu-signout').addEventListener('click',function(){closeHomeMenu();doSignOut();});
 
 // Forgot password
 document.getElementById('btn-forgot').addEventListener('click',function(){
