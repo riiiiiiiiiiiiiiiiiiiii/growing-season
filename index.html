@@ -4077,8 +4077,11 @@ _supa.auth.onAuthStateChange(async function(event,session){
 setTimeout(function(){
   if(!_authHandled&&!_guestMode){_showAuth();}
 },3000);
-// Hard fallback: loading screen must always clear
-setTimeout(function(){_hideLoading();},6000);
+// Hard fallback: loading screen must always clear and a screen must show
+setTimeout(function(){
+  _hideLoading();
+  if(!document.querySelector('.scr.on')){_showAuth();}
+},6000);
 
 }); // DOMContentLoaded
 
