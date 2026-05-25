@@ -3827,14 +3827,17 @@ async function loadFromSupabase(){
 }
 
 async function checkProfile(){
-  var res=await _supa.from('profiles').select('*').eq('id',supaUser.id).single();
-  if(res.data){
-    await loadFromSupabase();
-    bootApp();
-  } else {
-    document.body.classList.remove('auth-mode');
-    show('s-profile');
-  }
+  if(!supaUser){console.error('checkProfile called with no supaUser');return;}
+  try{
+    var res=await _supa.from('profiles').select('*').eq('id',supaUser.id).single();
+    if(res.data){
+      await loadFromSupabase();
+      bootApp();
+    } else {
+      document.body.classList.remove('auth-mode');
+      show('s-profile');
+    }
+  }catch(e){console.error('checkProfile error:',e);throw e;}
 }
 
 function bootApp(){
@@ -3895,15 +3898,15 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
     email=await resolveEmail(input);
     if(!email){showAuthErr('No account found for that username.');this.disabled=false;this.textContent='Sign in';return;}
   }
+  // Set flags before the async call so onAuthStateChange SIGNED_IN doesn't race
+  _authHandled=true;_guestMode=false;
   var res=_authIsSignup
     ?await _supa.auth.signUp({email:email,password:password})
     :await _supa.auth.signInWithPassword({email:email,password:password});
-  if(res.error){showAuthErr(res.error.message);this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';return;}
+  if(res.error){_authHandled=false;showAuthErr(res.error.message);this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';return;}
   this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';
   supaUser=res.data.user;
-  _authHandled=true;
-  _guestMode=false;
-  await checkProfile();
+  try{await checkProfile();}catch(e){showAuthErr('Sign in failed. Please try again.');console.error('checkProfile error:',e);}
 });
 function showAuthErr(msg){var el=document.getElementById('auth-err');el.textContent=msg;el.style.display='block';}
 document.getElementById('auth-password').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btn-auth').click();});
@@ -3977,6 +3980,13 @@ function showProfErr(msg){var el=document.getElementById('prof-err');el.textCont
 // ── BOOT ──────────────────────────────────────────────
 var _authHandled=false;
 var _guestMode=false;
+function _showAuth(){
+  document.body.classList.add('auth-mode');
+  show('s-auth');
+  showAuthPanel('auth-form');
+  document.getElementById('main-nav').classList.remove('on');
+  document.getElementById('friends-btn').style.display='none';
+}
 _supa.auth.onAuthStateChange(async function(event,session){
   supaUser=session?session.user:null;
   if(event==='PASSWORD_RECOVERY'){
@@ -3990,20 +4000,15 @@ _supa.auth.onAuthStateChange(async function(event,session){
   } else if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_authHandled){
     _authHandled=true;_guestMode=false;
     await checkProfile();
-  } else if(event==='SIGNED_OUT'){
-    if(_guestMode)return; // stale session expiry — don't disrupt guest
+  } else if((event==='INITIAL_SESSION'||event==='SIGNED_OUT')&&!session&&!_guestMode){
     _authHandled=false;
-    document.body.classList.add('auth-mode');
-    show('s-auth');
-    showAuthPanel('auth-form');
-    document.getElementById('main-nav').classList.remove('on');
-    document.getElementById('friends-btn').style.display='none';
+    _showAuth();
   }
 });
 
 // Fallback: show auth if no session after 3s
 setTimeout(function(){
-  if(!_authHandled){document.body.classList.remove('auth-mode');show('s-auth');}
+  if(!_authHandled&&!_guestMode){_showAuth();}
 },3000);
 
 }); // DOMContentLoaded
