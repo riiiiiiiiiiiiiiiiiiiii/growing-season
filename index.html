@@ -3947,7 +3947,15 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
   var res=_authIsSignup
     ?await _supa.auth.signUp({email:email,password:password})
     :await _supa.auth.signInWithPassword({email:email,password:password});
-  if(res.error){_authHandled=false;showAuthErr(res.error.message);this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';return;}
+  if(res.error){
+    _authHandled=false;
+    var msg=res.error.message;
+    if(msg==='Load failed'||msg==='Failed to fetch'||msg==='NetworkError'||/network|load fail/i.test(msg)){
+      msg='Connection blocked — your browser or network is preventing sign-in. Try the ✉️ magic link below instead.';
+    }
+    showAuthErr(msg);
+    this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';return;
+  }
   this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';
   supaUser=res.data.user;
   try{await checkProfile();}catch(e){showAuthErr('Sign in failed. Please try again.');console.error('checkProfile error:',e);}
@@ -4081,6 +4089,11 @@ _supa.auth.onAuthStateChange(async function(event,session){
   } else if((event==='INITIAL_SESSION'||event==='SIGNED_OUT')&&!session&&!_guestMode){
     _authHandled=false;
     _showAuth();
+    // If this was a magic link redirect that failed (token expired/invalid), say so
+    if(event==='INITIAL_SESSION'&&window.location.hash&&window.location.hash.includes('type=magiclink')){
+      showAuthErr('This sign-in link has expired. Please request a new one.');
+      window.location.hash='';
+    }
   }
 });
 
