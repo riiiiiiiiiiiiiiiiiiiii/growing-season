@@ -1238,6 +1238,7 @@ function launch(){
   updateCollectBadge();
 }
 function goToSignIn(){
+  _guestMode=false;
   document.body.classList.add('auth-mode');
   show('s-auth');
   showAuthPanel('auth-form');
@@ -3938,7 +3939,7 @@ document.getElementById('btn-set-pw').addEventListener('click',async function(){
 document.getElementById('new-pw2').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btn-set-pw').click();});
 
 document.getElementById('btn-guest').addEventListener('click',async function(){
-  _authHandled=true;
+  _authHandled=true;_guestMode=true;
   try{
     var gid=localStorage.getItem('gs-guest-id');
     if(!gid){
@@ -3971,11 +3972,11 @@ function showProfErr(msg){var el=document.getElementById('prof-err');el.textCont
 
 // ── BOOT ──────────────────────────────────────────────
 var _authHandled=false;
+var _guestMode=false;
 _supa.auth.onAuthStateChange(async function(event,session){
   supaUser=session?session.user:null;
   if(event==='PASSWORD_RECOVERY'){
-    // User clicked a reset link — show the set-new-password form
-    _authHandled=true;
+    _authHandled=true;_guestMode=false;
     document.body.classList.remove('auth-mode');
     show('s-auth');
     showAuthPanel('auth-new-pw');
@@ -3983,13 +3984,16 @@ _supa.auth.onAuthStateChange(async function(event,session){
     document.getElementById('new-pw2').value='';
     document.getElementById('new-pw-err').style.display='none';
   } else if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_authHandled){
-    _authHandled=true;
+    _authHandled=true;_guestMode=false;
     await checkProfile();
   } else if(event==='SIGNED_OUT'){
+    if(_guestMode)return; // stale session expiry — don't disrupt guest
     _authHandled=false;
     document.body.classList.add('auth-mode');
     show('s-auth');
+    showAuthPanel('auth-form');
     document.getElementById('main-nav').classList.remove('on');
+    document.getElementById('friends-btn').style.display='none';
   }
 });
 
