@@ -41,7 +41,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 #s-garden{padding-top:0;padding-left:0;padding-right:0;}
 .scr.on{display:block;animation:scrIn .22s ease;}
 @keyframes scrIn{from{opacity:0;}to{opacity:1;}}
-body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode #sidebar,body.auth-mode #sb-backdrop{display:none!important;}
+body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode #sidebar,body.auth-mode #sb-backdrop,body.auth-mode #friends-btn{display:none!important;}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(244,250,246,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:var(--br);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
 .nb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--tx3);padding:6px 4px;user-select:none;}
@@ -383,6 +383,34 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 .stageup-confetti{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;}
 @keyframes suPop{0%{transform:scale(.3) rotate(-10deg);opacity:0;}70%{transform:scale(1.15) rotate(4deg);}100%{transform:scale(1) rotate(0deg);opacity:1;}}
 @keyframes suFloat{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(-110px) rotate(360deg);opacity:0;}}
+/* ── FRIENDS ──────────────────────────────────────── */
+#friends-btn{position:fixed;top:14px;right:16px;z-index:401;background:var(--bg2);border:var(--br);border-radius:10px;width:36px;height:36px;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--sh);transition:background .14s;}
+#friends-btn:hover{background:var(--bg3);}
+#friends-ov{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s ease;display:flex;align-items:flex-end;justify-content:center;}
+#friends-ov.on{background:rgba(0,0,0,.55);pointer-events:all;}
+#friends-panel{width:100%;max-width:430px;height:92vh;background:var(--bg);border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;transform:translateY(100%);transition:transform .34s cubic-bezier(.25,.46,.45,.94);}
+#friends-ov.on #friends-panel{transform:translateY(0);}
+.fr-tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;font-size:13px;font-weight:600;color:var(--tx3);padding:10px 4px;cursor:pointer;transition:all .15s;}
+.fr-tab.on{color:var(--gr);border-bottom-color:var(--gr);}
+.fr-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:.5px solid var(--bg3);}
+.fr-row:last-child{border-bottom:none;}
+.fr-em{font-size:26px;width:36px;text-align:center;flex-shrink:0;}
+.fr-info{flex:1;min-width:0;}
+.fr-name{font-size:14px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fr-un{font-size:12px;color:var(--tx3);}
+.fr-acts{display:flex;gap:6px;flex-shrink:0;}
+.fr-ic-btn{background:var(--bg2);border:var(--br);border-radius:8px;width:32px;height:32px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .14s;flex-shrink:0;}
+.fr-ic-btn:hover{background:var(--bg3);}
+#conv-ov{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s ease;display:flex;align-items:flex-end;justify-content:center;}
+#conv-ov.on{background:rgba(0,0,0,.55);pointer-events:all;}
+#conv-panel{width:100%;max-width:430px;height:96vh;background:var(--bg);border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;transform:translateY(100%);transition:transform .34s cubic-bezier(.25,.46,.45,.94);}
+#conv-ov.on #conv-panel{transform:translateY(0);}
+#conv-msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:6px;}
+.msg-out{align-self:flex-end;background:var(--gr);color:#fff;padding:9px 13px;border-radius:18px 18px 4px 18px;font-size:14px;max-width:76%;line-height:1.45;word-break:break-word;}
+.msg-in{align-self:flex-start;background:var(--bg2);color:var(--tx);padding:9px 13px;border-radius:18px 18px 18px 4px;font-size:14px;max-width:76%;line-height:1.45;word-break:break-word;}
+.msg-wave{align-self:center;font-size:30px;padding:4px 0;}
+.msg-time{align-self:center;font-size:10px;color:var(--tx3);margin:4px 0;}
+html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
 </style>
 </head>
 <body>
@@ -406,14 +434,15 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
       <div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Theme</div>
       <div style="display:flex;gap:10px;">
         <div class="pal-dot" data-pal="green" data-season="Spring" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-        <div class="pal-dot" data-pal="blue" data-season="Summer" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-        <div class="pal-dot" data-pal="pink" data-season="Winter" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#F07090,#D44870);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-        <div class="pal-dot" data-pal="yellow" data-season="Autumn" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#D8A840,#A07010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+        <div class="pal-dot" data-pal="blue" data-season="Winter" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+        <div class="pal-dot" data-pal="pink" data-season="Summer" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#F07090,#D44870);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+        <div class="pal-dot" data-pal="yellow" data-season="Autumn" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#E88030,#A04010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
       </div>
     </div>
   </div>
   <div id="sb-backdrop"></div>
   <button id="sb-toggle">☰</button>
+  <button id="friends-btn" title="Friends">👥</button>
 
   <div id="screen-wrap">
 
@@ -440,6 +469,8 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
         <div style="font-size:44px;margin-bottom:14px;">📬</div>
         <div style="font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:10px;">Check your email</div>
         <div style="font-size:13px;color:var(--tx2);line-height:1.7;">We sent a magic link to<br><strong id="auth-sent-to"></strong><br>Click it to sign in — no password needed.</div>
+        <button id="btn-resend" class="btn btn-s" style="width:100%;margin-top:22px;">Resend link</button>
+        <div id="resend-msg" style="font-size:12px;color:var(--tx3);margin-top:8px;display:none;"></div>
       </div>
     </div>
   </div>
@@ -536,9 +567,9 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
         <span style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;">Theme</span>
         <div style="display:flex;gap:9px;">
           <div class="pal-dot" data-pal="green" data-season="Spring" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="blue" data-season="Summer" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="pink" data-season="Winter" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#F07090,#D44870);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="yellow" data-season="Autumn" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#D8A840,#A07010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="blue" data-season="Winter" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="pink" data-season="Summer" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#F07090,#D44870);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="yellow" data-season="Autumn" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#E88030,#A04010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
         </div>
       </div>
       <div class="hmenu-row" id="hmenu-dark"><span class="hmenu-em" id="hmenu-dark-em">🌙</span><span id="hmenu-dark-lbl">Dark mode</span></div>
@@ -672,6 +703,46 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 </div>
 
 <button class="fab" id="fab">+</button>
+
+<!-- FRIENDS OVERLAY -->
+<div id="friends-ov">
+  <div id="friends-panel">
+    <div style="padding:18px 20px 0;flex-shrink:0;">
+      <div style="display:flex;align-items:center;margin-bottom:14px;">
+        <div style="flex:1;font-family:var(--serif);font-size:20px;font-weight:700;">Friends</div>
+        <button id="btn-friends-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;">×</button>
+      </div>
+      <div class="sw" style="margin-bottom:10px;"><span class="sic" style="font-size:14px;font-weight:600;">@</span><input class="si" id="fr-search" placeholder="Find by username…"></div>
+      <div id="fr-search-result" style="margin-bottom:6px;"></div>
+      <div style="display:flex;border-bottom:.5px solid var(--bg3);">
+        <button class="fr-tab on" id="fr-tab-friends">Friends</button>
+        <button class="fr-tab" id="fr-tab-requests">Requests <span id="fr-req-badge" style="display:none;background:#E53E3E;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;vertical-align:middle;"></span></button>
+        <button class="fr-tab" id="fr-tab-messages">Messages</button>
+      </div>
+    </div>
+    <div id="fr-body" style="flex:1;overflow-y:auto;padding:12px 20px 80px;"></div>
+  </div>
+</div>
+
+<!-- CONVERSATION OVERLAY -->
+<div id="conv-ov">
+  <div id="conv-panel">
+    <div style="padding:14px 18px;border-bottom:.5px solid var(--bg3);display:flex;align-items:center;gap:10px;flex-shrink:0;">
+      <button id="btn-conv-back" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;">‹</button>
+      <div style="font-size:18px;flex-shrink:0;" id="conv-em"></div>
+      <div style="flex:1;min-width:0;">
+        <div id="conv-name" style="font-size:15px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+        <div id="conv-un" style="font-size:12px;color:var(--tx3);"></div>
+      </div>
+      <button id="btn-conv-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;">×</button>
+    </div>
+    <div id="conv-msgs"></div>
+    <div style="padding:10px 14px;border-top:.5px solid var(--bg3);display:flex;gap:8px;align-items:center;flex-shrink:0;background:var(--bg);padding-bottom:max(10px,env(safe-area-inset-bottom));">
+      <input id="conv-input" class="sinp" placeholder="Message…" style="flex:1;margin:0;">
+      <button id="btn-conv-send" style="background:var(--gr);border:none;border-radius:10px;padding:10px 18px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;flex-shrink:0;">Send</button>
+    </div>
+  </div>
+</div>
 
 <!-- STAGE-UP CELEBRATION -->
 <div id="stageup-ov">
@@ -853,7 +924,7 @@ var PALETTES={
   green:{gr:'#18835A',gr2:'#0F6040',grl:'#D4F2E4',grm:'#50C898',bg:'#F4FAF6',bg2:'#E6F5EC',bg3:'#C8E8D6',tx:'#0A1F14',tx2:'#2D6045',tx3:'#68A882',brC:'#BCDECE',br2C:'#9CCAB8',sh:'0 1px 4px rgba(22,36,24,.08)',pcGrad:'linear-gradient(150deg,#18835A,#0F6040,#074028)',mfGrad:'linear-gradient(90deg,#18835A,#50C898)',fabSh:'0 4px 16px rgba(24,131,90,.4)',btnSh:'0 3px 10px rgba(24,131,90,.28)',fabActSh:'0 1px 6px rgba(24,131,90,.25)',pcSh:'0 4px 18px rgba(24,131,90,.3)',homeBg:null,homeTc:null,decoGround:'#4A8A40',decoGrass1:'#2D7A2A',decoGrass2:'#3D9A3A',decoStem:'#3A7A30'},
   blue:{gr:'#1870B0',gr2:'#0D4E80',grl:'#D0E8F4',grm:'#50A8D8',bg:'#F4F8FC',bg2:'#E4EEF8',bg3:'#C4D8EC',tx:'#0A1520',tx2:'#284870',tx3:'#6088A8',brC:'#B0CCDE',br2C:'#90AECA',sh:'0 1px 4px rgba(20,32,42,.08)',pcGrad:'linear-gradient(150deg,#1870B0,#0D4E80,#072840)',mfGrad:'linear-gradient(90deg,#1870B0,#50A8D8)',fabSh:'0 4px 16px rgba(24,112,176,.4)',btnSh:'0 3px 10px rgba(24,112,176,.28)',fabActSh:'0 1px 6px rgba(24,112,176,.25)',pcSh:'0 4px 18px rgba(24,112,176,.3)',homeBg:'linear-gradient(135deg,#A8CCEC,#1870B0)',homeTc:'#08182E',decoGround:'#3A6A8A',decoGrass1:'#2A5A7A',decoGrass2:'#3A789A',decoStem:'#2A608A'},
   pink:{gr:'#D44870',gr2:'#A02850',grl:'#FDE8EE',grm:'#F07090',bg:'#FDF7F9',bg2:'#FAE8EC',bg3:'#F2D4DA',tx:'#200810',tx2:'#7A3048',tx3:'#B07080',brC:'#ECBAC8',br2C:'#DCA0B4',sh:'0 1px 4px rgba(40,8,20,.08)',pcGrad:'linear-gradient(150deg,#D44870,#A02850,#600025)',mfGrad:'linear-gradient(90deg,#D44870,#F07090)',fabSh:'0 4px 16px rgba(212,72,112,.4)',btnSh:'0 3px 10px rgba(212,72,112,.28)',fabActSh:'0 1px 6px rgba(212,72,112,.25)',pcSh:'0 4px 18px rgba(212,72,112,.3)',homeBg:'linear-gradient(135deg,#F5C8D8,#D44870)',homeTc:'#38081A',decoGround:'#8A4860',decoGrass1:'#7A3050',decoGrass2:'#9A5070',decoStem:'#7A4060'},
-  yellow:{gr:'#A07010',gr2:'#784800',grl:'#F8EAC0',grm:'#D8A840',bg:'#FAF7F0',bg2:'#F5EDD8',bg3:'#EAD8A0',tx:'#201408',tx2:'#604820',tx3:'#A08040',brC:'#D8C090',br2C:'#C0A870',sh:'0 1px 4px rgba(42,32,14,.08)',pcGrad:'linear-gradient(150deg,#A07010,#784800,#502800)',mfGrad:'linear-gradient(90deg,#A07010,#D8A840)',fabSh:'0 4px 16px rgba(160,112,16,.4)',btnSh:'0 3px 10px rgba(160,112,16,.28)',fabActSh:'0 1px 6px rgba(160,112,16,.25)',pcSh:'0 4px 18px rgba(160,112,16,.3)',homeBg:'linear-gradient(135deg,#F5E8A8,#A07010)',homeTc:'#2E1800',decoGround:'#8A7830',decoGrass1:'#786018',decoGrass2:'#988838',decoStem:'#887028'}
+  yellow:{gr:'#B04810',gr2:'#7A2800',grl:'#FDE8D4',grm:'#E88030',bg:'#FBF6F1',bg2:'#F7EAD8',bg3:'#EDD0AC',tx:'#201008',tx2:'#6A3010',tx3:'#A06030',brC:'#DDB890',br2C:'#C8986A',sh:'0 1px 4px rgba(42,20,8,.08)',pcGrad:'linear-gradient(150deg,#B04810,#7A2800,#4A1000)',mfGrad:'linear-gradient(90deg,#B04810,#E88030)',fabSh:'0 4px 16px rgba(176,72,16,.4)',btnSh:'0 3px 10px rgba(176,72,16,.28)',fabActSh:'0 1px 6px rgba(176,72,16,.25)',pcSh:'0 4px 18px rgba(176,72,16,.3)',homeBg:'linear-gradient(135deg,#F5C890,#B04810)',homeTc:'#2E0E00',decoGround:'#8A5030',decoGrass1:'#7A3820',decoGrass2:'#9A6038',decoStem:'#884020'}
 };
 function applyPalette(){
   var p=PALETTES[colorPalette]||PALETTES.green;
@@ -1137,6 +1208,7 @@ function launch(){
   show('s-home');
   document.getElementById('main-nav').classList.add('on');
   document.getElementById('fab').style.display='none';
+  document.getElementById('friends-btn').style.display='flex';
   applyDark();
   applyPalette();
   rHome();
@@ -1904,6 +1976,329 @@ document.getElementById('hmenu-palette').addEventListener('click',function(e){
 })();
 document.getElementById('btn-collect-close').addEventListener('click',closeCollect);
 document.getElementById('btn-stageup-close').addEventListener('click',function(){document.getElementById('stageup-ov').classList.remove('on');});
+
+// ── FRIENDS ──────────────────────────────────────────
+// Required Supabase tables:
+//   CREATE TABLE friendships (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, requester_id uuid REFERENCES auth.users(id), addressee_id uuid REFERENCES auth.users(id), status text DEFAULT 'pending', created_at timestamptz DEFAULT now(), UNIQUE(requester_id,addressee_id));
+//   CREATE TABLE messages (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, from_id uuid REFERENCES auth.users(id), to_id uuid REFERENCES auth.users(id), content text, created_at timestamptz DEFAULT now(), read_at timestamptz);
+//   Enable RLS and add policies allowing users to read/write their own rows.
+var _frTab='friends';
+var _convUserId=null,_convName=null,_convUn=null,_convEmoji=null;
+var _frSearchTimer=null;
+
+function openFriends(){
+  document.getElementById('friends-ov').classList.add('on');
+  _frTab='friends';
+  ['friends','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='friends');});
+  renderFriends();
+}
+function closeFriends(){document.getElementById('friends-ov').classList.remove('on');}
+
+function openConvOv(userId,name,un,emoji){
+  _convUserId=userId;_convName=name;_convUn=un;_convEmoji=emoji||'🌱';
+  document.getElementById('conv-em').textContent=_convEmoji;
+  document.getElementById('conv-name').textContent=name||un||'?';
+  document.getElementById('conv-un').textContent='@'+(un||'');
+  document.getElementById('conv-input').value='';
+  document.getElementById('conv-ov').classList.add('on');
+  renderConv();
+}
+function closeConv(){document.getElementById('conv-ov').classList.remove('on');}
+
+async function renderFriends(){
+  if(_frTab==='friends')await renderFriendsList();
+  else if(_frTab==='requests')await renderRequests();
+  else await renderConvList();
+}
+
+async function renderFriendsList(){
+  var body=document.getElementById('fr-body');
+  if(!supaUser){
+    body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);font-size:14px;">Sign in to connect with friends</div>';
+    return;
+  }
+  body.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
+  try{
+    var res=await _supa.from('friendships').select('id,requester_id,addressee_id').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','accepted');
+    if(res.error)throw res.error;
+    var friends=res.data||[];
+    if(!friends.length){
+      body.innerHTML='<div style="text-align:center;padding:44px 0;"><div style="font-size:38px;margin-bottom:12px;">🌱</div><div style="color:var(--tx2);font-size:14px;line-height:1.6;">No friends yet.<br>Search for someone by their @username.</div></div>';
+      return;
+    }
+    var ids=friends.map(function(f){return f.requester_id===supaUser.id?f.addressee_id:f.requester_id;});
+    var pRes=await _supa.from('profiles').select('id,username,display_name,emoji').in('id',ids);
+    var profiles={};(pRes.data||[]).forEach(function(p){profiles[p.id]=p;});
+    body.innerHTML='';
+    friends.forEach(function(f){
+      var fid=f.requester_id===supaUser.id?f.addressee_id:f.requester_id;
+      var p=profiles[fid]||{};
+      var em=p.emoji||'🌱';var name=p.display_name||p.username||'?';var un=p.username||'';
+      var row=document.createElement('div');row.className='fr-row';
+      row.innerHTML='<div class="fr-em">'+em+'</div>'
+        +'<div class="fr-info"><div class="fr-name">'+name+'</div><div class="fr-un">@'+un+'</div></div>'
+        +'<div class="fr-acts">'
+          +'<button class="fr-ic-btn" title="Wave" data-fid="'+fid+'" data-un="'+un+'">👋</button>'
+          +'<button class="fr-ic-btn" title="Message" data-fid="'+fid+'" data-name="'+name+'" data-un="'+un+'" data-em="'+em+'">💬</button>'
+        +'</div>';
+      row.querySelectorAll('.fr-ic-btn').forEach(function(btn){
+        btn.addEventListener('click',function(e){
+          e.stopPropagation();
+          if(btn.title==='Wave'){
+            waveAt(btn.dataset.fid);
+            btn.textContent='✅';setTimeout(function(){btn.textContent='👋';},1500);
+          } else {
+            openConvOv(btn.dataset.fid,btn.dataset.name,btn.dataset.un,btn.dataset.em);
+          }
+        });
+      });
+      body.appendChild(row);
+    });
+  }catch(e){
+    var msg=e&&e.message&&e.message.indexOf('does not exist')>-1?'Friends feature needs DB setup — see code comments.':'Something went wrong.';
+    body.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;">'+msg+'</div>';
+  }
+}
+
+async function renderRequests(){
+  var body=document.getElementById('fr-body');
+  if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);">Sign in to see requests</div>';return;}
+  body.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
+  try{
+    var res=await _supa.from('friendships').select('id,requester_id,addressee_id,status,created_at').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','pending');
+    if(res.error)throw res.error;
+    var reqs=res.data||[];
+    var incoming=reqs.filter(function(r){return r.addressee_id===supaUser.id;});
+    var outgoing=reqs.filter(function(r){return r.requester_id===supaUser.id;});
+    var badge=document.getElementById('fr-req-badge');
+    if(incoming.length){badge.textContent=incoming.length;badge.style.display='inline';}
+    else{badge.style.display='none';}
+    body.innerHTML='';
+
+    function mkLabel(text,mt){
+      var d=document.createElement('div');
+      d.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin:'+(mt||'0')+' 0 10px;';
+      d.textContent=text;return d;
+    }
+    body.appendChild(mkLabel('Incoming'));
+    if(!incoming.length){
+      var em=document.createElement('div');em.style.cssText='color:var(--tx3);font-size:13px;margin-bottom:18px;';em.textContent='No incoming requests';body.appendChild(em);
+    } else {
+      var iids=incoming.map(function(r){return r.requester_id;});
+      var pRes=await _supa.from('profiles').select('id,username,display_name,emoji').in('id',iids);
+      var ip={};(pRes.data||[]).forEach(function(p){ip[p.id]=p;});
+      incoming.forEach(function(req){
+        var p=ip[req.requester_id]||{};
+        var em2=p.emoji||'🌱';var name=p.display_name||p.username||'?';var un=p.username||'';
+        var row=document.createElement('div');row.className='fr-row';
+        row.innerHTML='<div class="fr-em">'+em2+'</div>'
+          +'<div class="fr-info"><div class="fr-name">'+name+'</div><div class="fr-un">@'+un+'</div></div>'
+          +'<div class="fr-acts">'
+            +'<button style="background:var(--gr);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;" data-reqid="'+req.id+'" class="fr-accept-btn">Accept</button>'
+            +'<button style="background:var(--bg2);color:var(--tx2);border:var(--br);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;" data-reqid="'+req.id+'" class="fr-decline-btn">✕</button>'
+          +'</div>';
+        row.querySelector('.fr-accept-btn').addEventListener('click',async function(){
+          var id=this.dataset.reqid;
+          this.textContent='…';this.disabled=true;
+          await _supa.from('friendships').update({status:'accepted'}).eq('id',id);
+          renderFriends();
+        });
+        row.querySelector('.fr-decline-btn').addEventListener('click',async function(){
+          var id=this.dataset.reqid;
+          await _supa.from('friendships').delete().eq('id',id);
+          renderFriends();
+        });
+        body.appendChild(row);
+      });
+    }
+
+    body.appendChild(mkLabel('Sent','16px'));
+    if(!outgoing.length){
+      var em3=document.createElement('div');em3.style.cssText='color:var(--tx3);font-size:13px;';em3.textContent='No pending requests';body.appendChild(em3);
+    } else {
+      var oids=outgoing.map(function(r){return r.addressee_id;});
+      var pRes2=await _supa.from('profiles').select('id,username,display_name,emoji').in('id',oids);
+      var op={};(pRes2.data||[]).forEach(function(p){op[p.id]=p;});
+      outgoing.forEach(function(req){
+        var p=op[req.addressee_id]||{};
+        var em4=p.emoji||'🌱';var name=p.display_name||p.username||'?';var un=p.username||'';
+        var row=document.createElement('div');row.className='fr-row';
+        row.innerHTML='<div class="fr-em">'+em4+'</div>'
+          +'<div class="fr-info"><div class="fr-name">'+name+'</div><div class="fr-un">@'+un+'</div></div>'
+          +'<div style="font-size:12px;color:var(--tx3);font-style:italic;">Pending…</div>';
+        body.appendChild(row);
+      });
+    }
+  }catch(e){
+    var msg2=e&&e.message&&e.message.indexOf('does not exist')>-1?'Friends feature needs DB setup.':'Something went wrong.';
+    body.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;">'+msg2+'</div>';
+  }
+}
+
+async function renderConvList(){
+  var body=document.getElementById('fr-body');
+  if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);">Sign in to see messages</div>';return;}
+  body.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
+  try{
+    var res=await _supa.from('messages').select('*').or('from_id.eq.'+supaUser.id+',to_id.eq.'+supaUser.id).order('created_at',{ascending:false});
+    if(res.error)throw res.error;
+    var msgs=res.data||[];
+    if(!msgs.length){
+      body.innerHTML='<div style="text-align:center;padding:44px 0;"><div style="font-size:38px;margin-bottom:12px;">💬</div><div style="color:var(--tx2);font-size:14px;line-height:1.6;">No messages yet.<br>Wave or message a friend to get started.</div></div>';
+      return;
+    }
+    var convMap={};
+    msgs.forEach(function(m){
+      var other=m.from_id===supaUser.id?m.to_id:m.from_id;
+      if(!convMap[other]){convMap[other]={lastMsg:m,unread:0};}
+      if(m.from_id!==supaUser.id&&!m.read_at)convMap[other].unread++;
+    });
+    var otherIds=Object.keys(convMap);
+    var pRes=await _supa.from('profiles').select('id,username,display_name,emoji').in('id',otherIds);
+    var profiles={};(pRes.data||[]).forEach(function(p){profiles[p.id]=p;});
+    body.innerHTML='';
+    otherIds.forEach(function(oid){
+      var p=profiles[oid]||{};
+      var em=p.emoji||'🌱';var name=p.display_name||p.username||'?';var un=p.username||'';
+      var conv=convMap[oid];
+      var last=conv.lastMsg.content==='__wave__'?'👋 wave':(conv.lastMsg.content||'');
+      if(last.length>32)last=last.slice(0,32)+'…';
+      var isOut=conv.lastMsg.from_id===supaUser.id;
+      var t=new Date(conv.lastMsg.created_at);
+      var now=new Date();
+      var timeStr=t.toDateString()===now.toDateString()?t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):t.toLocaleDateString([],{month:'short',day:'numeric'});
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:.5px solid var(--bg3);cursor:pointer;';
+      row.innerHTML='<div style="font-size:26px;width:36px;text-align:center;flex-shrink:0;">'+em+'</div>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:14px;font-weight:'+(conv.unread?700:500)+';color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+name+'</div>'
+          +'<div style="font-size:12px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(isOut?'You: ':'')+last+'</div>'
+        +'</div>'
+        +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">'
+          +'<div style="font-size:11px;color:var(--tx3);">'+timeStr+'</div>'
+          +(conv.unread?'<div style="background:#E53E3E;color:#fff;border-radius:10px;font-size:10px;min-width:16px;padding:1px 5px;text-align:center;">'+conv.unread+'</div>':'')
+        +'</div>';
+      row.addEventListener('click',function(){openConvOv(oid,name,un,em);});
+      body.appendChild(row);
+    });
+  }catch(e){
+    var msg3=e&&e.message&&e.message.indexOf('does not exist')>-1?'Messages feature needs DB setup.':'Something went wrong.';
+    body.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;">'+msg3+'</div>';
+  }
+}
+
+async function renderConv(){
+  var container=document.getElementById('conv-msgs');
+  container.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
+  if(!supaUser||!_convUserId)return;
+  try{
+    var uid=supaUser.id,fid=_convUserId;
+    var res=await _supa.from('messages').select('*')
+      .or('and(from_id.eq.'+uid+',to_id.eq.'+fid+'),and(from_id.eq.'+fid+',to_id.eq.'+uid+')')
+      .order('created_at',{ascending:true});
+    if(res.error)throw res.error;
+    var data=res.data||[];
+    // Mark received messages as read
+    var unreadIds=data.filter(function(m){return m.from_id===fid&&!m.read_at;}).map(function(m){return m.id;});
+    if(unreadIds.length)_supa.from('messages').update({read_at:new Date().toISOString()}).in('id',unreadIds);
+    container.innerHTML='';
+    if(!data.length){
+      container.innerHTML='<div style="text-align:center;padding:50px 0;"><div style="font-size:38px;margin-bottom:10px;">👋</div><div style="color:var(--tx3);font-size:13px;">Send a message or wave!</div></div>';
+      return;
+    }
+    data.forEach(function(m,i){
+      var isOut=m.from_id===uid;
+      var isWave=m.content==='__wave__';
+      if(i===0||(new Date(m.created_at)-new Date(data[i-1].created_at))>3600000){
+        var td=document.createElement('div');td.className='msg-time';
+        td.textContent=new Date(m.created_at).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        container.appendChild(td);
+      }
+      var el=document.createElement('div');
+      if(isWave){el.className='msg-wave';el.textContent='👋';}
+      else{el.className=isOut?'msg-out':'msg-in';el.textContent=m.content;}
+      container.appendChild(el);
+    });
+    container.scrollTop=container.scrollHeight;
+  }catch(e){
+    container.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);">Could not load messages.</div>';
+  }
+}
+
+async function waveAt(toId){
+  if(!supaUser)return;
+  await _supa.from('messages').insert({from_id:supaUser.id,to_id:toId,content:'__wave__'});
+}
+
+async function sendMessage(){
+  var inp=document.getElementById('conv-input');
+  var content=(inp.value||'').trim();
+  if(!content||!supaUser||!_convUserId)return;
+  inp.value='';
+  var btn=document.getElementById('btn-conv-send');
+  btn.disabled=true;
+  await _supa.from('messages').insert({from_id:supaUser.id,to_id:_convUserId,content:content});
+  btn.disabled=false;
+  renderConv();
+}
+
+async function searchUser(username){
+  var res=document.getElementById('fr-search-result');
+  if(!username){res.innerHTML='';return;}
+  if(!supaUser){res.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:6px 0;">Sign in to search</div>';return;}
+  username=username.toLowerCase().replace(/^@/,'');
+  res.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:6px 0;">Searching…</div>';
+  try{
+    var r=await _supa.from('profiles').select('id,username,display_name,emoji').eq('username',username).maybeSingle();
+    if(r.error)throw r.error;
+    if(!r.data){res.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:6px 0;">No user found with @'+username+'</div>';return;}
+    var p=r.data;
+    if(p.id===supaUser.id){res.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:6px 0;">That\'s you!</div>';return;}
+    var fr=await _supa.from('friendships').select('id,status,requester_id').or('and(requester_id.eq.'+supaUser.id+',addressee_id.eq.'+p.id+'),and(requester_id.eq.'+p.id+',addressee_id.eq.'+supaUser.id+')').maybeSingle();
+    var btnHtml='';
+    if(fr.data){
+      if(fr.data.status==='accepted')btnHtml='<span style="color:var(--gr);font-size:12px;font-weight:600;">✓ Friends</span>';
+      else if(fr.data.requester_id===supaUser.id)btnHtml='<span style="color:var(--tx3);font-size:12px;">Pending…</span>';
+      else btnHtml='<button id="fr-add-btn" style="background:var(--gr);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">Accept</button>';
+    } else {
+      btnHtml='<button id="fr-add-btn" style="background:var(--gr);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;">+ Add</button>';
+    }
+    res.innerHTML='<div class="fr-row" style="background:var(--bg2);border-radius:12px;padding:10px 12px;margin-top:2px;">'
+      +'<div class="fr-em">'+(p.emoji||'🌱')+'</div>'
+      +'<div class="fr-info"><div class="fr-name">'+(p.display_name||p.username||'?')+'</div><div class="fr-un">@'+(p.username||'')+'</div></div>'
+      +'<div>'+btnHtml+'</div>'
+      +'</div>';
+    var addBtn=document.getElementById('fr-add-btn');
+    if(addBtn){
+      var isAccept=fr.data&&fr.data.status==='pending'&&fr.data.requester_id!==supaUser.id;
+      addBtn.addEventListener('click',async function(){
+        addBtn.disabled=true;addBtn.textContent='…';
+        if(isAccept){
+          await _supa.from('friendships').update({status:'accepted'}).eq('id',fr.data.id);
+          addBtn.textContent='Friends ✓';
+        } else {
+          var ins=await _supa.from('friendships').insert({requester_id:supaUser.id,addressee_id:p.id,status:'pending'});
+          addBtn.textContent=ins.error?'Error':'Sent!';
+        }
+      });
+    }
+  }catch(e){res.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:6px 0;">Search failed.</div>';}
+}
+
+document.getElementById('fr-tab-friends').addEventListener('click',function(){_frTab='friends';['friends','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='friends');});renderFriends();});
+document.getElementById('fr-tab-requests').addEventListener('click',function(){_frTab='requests';['friends','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='requests');});renderFriends();});
+document.getElementById('fr-tab-messages').addEventListener('click',function(){_frTab='messages';['friends','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='messages');});renderFriends();});
+document.getElementById('btn-friends-close').addEventListener('click',closeFriends);
+document.getElementById('friends-btn').addEventListener('click',function(){openFriends();});
+document.getElementById('btn-conv-back').addEventListener('click',closeConv);
+document.getElementById('btn-conv-close').addEventListener('click',function(){closeConv();closeFriends();});
+document.getElementById('btn-conv-send').addEventListener('click',sendMessage);
+document.getElementById('conv-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+document.getElementById('fr-search').addEventListener('input',function(){
+  clearTimeout(_frSearchTimer);
+  var v=this.value.trim();
+  _frSearchTimer=setTimeout(function(){searchUser(v);},420);
+});
 
 // ── ACTIVITY PICKER ───────────────────────────────────
 function animateIn(el){
@@ -3430,6 +3825,25 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
   document.getElementById('auth-sent-to').textContent=email;
 });
 function showAuthErr(msg){var el=document.getElementById('auth-err');el.textContent=msg;el.style.display='block';}
+
+var _lastAuthEmail='';
+document.getElementById('btn-auth').addEventListener('click',async function(){
+  // store email for resend
+  _lastAuthEmail=document.getElementById('auth-email').value.trim();
+},{capture:true});
+
+document.getElementById('btn-resend').addEventListener('click',async function(){
+  var btn=this;
+  if(!_lastAuthEmail)return;
+  btn.disabled=true;btn.textContent='Sending…';
+  var res=await _supa.auth.signInWithOtp({email:_lastAuthEmail,options:{emailRedirectTo:location.href}});
+  var msg=document.getElementById('resend-msg');
+  msg.style.display='block';
+  if(res.error){msg.textContent='Error: '+res.error.message;msg.style.color='var(--co)';}
+  else{msg.textContent='Link resent!';msg.style.color='var(--gr)';}
+  btn.textContent='Resend link';
+  setTimeout(function(){btn.disabled=false;msg.style.display='none';},4000);
+});
 
 document.getElementById('btn-guest').addEventListener('click',async function(){
   _authHandled=true;
