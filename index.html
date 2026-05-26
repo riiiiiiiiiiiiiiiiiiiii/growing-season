@@ -50,7 +50,7 @@ body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode
 .nb-wrap{display:flex;align-items:center;justify-content:center;padding:2px 12px;min-width:44px;border-radius:14px;transition:background .18s;}
 .nb.on .nb-wrap{background:var(--grl);}
 .nb-ic{font-size:20px;line-height:1;display:block;}
-.fab{position:fixed;bottom:82px;right:16px;width:50px;height:50px;border-radius:50%;background:var(--gr);color:#fff;font-size:26px;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:99;box-shadow:var(--fab-sh);}
+.fab{position:fixed;bottom:82px;right:16px;width:50px;height:50px;border-radius:50%;background:var(--gr);color:#fff;font-size:28px;line-height:1;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:99;box-shadow:var(--fab-sh);}
 .btn{display:block;width:100%;padding:14px;border-radius:var(--rad);border:none;font-size:15px;font-weight:600;cursor:pointer;text-align:center;margin-top:10px;transition:transform .12s cubic-bezier(.34,1.56,.64,1);user-select:none;touch-action:manipulation;}
 .btn:active{transform:scale(.97);}
 .btn-p{background:var(--gr);color:#fff;box-shadow:var(--btn-p-sh);}
@@ -746,7 +746,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
   </nav>
 </div>
 
-<button class="fab" id="fab">+</button>
+<button class="fab" id="fab"><span style="display:block;line-height:1;transform:translateY(-1px);">+</span></button>
 
 <!-- FRIENDS OVERLAY -->
 <div id="friends-ov">
