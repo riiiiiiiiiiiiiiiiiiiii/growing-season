@@ -3847,8 +3847,8 @@ async function loadFromSupabase(){
   if(!supaUser)return;
   var uid=supaUser.id;
   try{
-    var stateRes=await _supa.from('user_state').select('data').eq('user_id',uid).single();
-    if(stateRes.data&&stateRes.data.data){
+    var stateRes=await _tq(_supa.from('user_state').select('data').eq('user_id',uid).maybeSingle(),8000);
+    if(stateRes&&stateRes.data&&stateRes.data.data){
       var d=stateRes.data.data;
       if(d.onboarded!==undefined)onboarded=d.onboarded;
       if(d.weeklyFocus)weeklyFocus=d.weeklyFocus;
@@ -3862,14 +3862,14 @@ async function loadFromSupabase(){
       if(d.active!==undefined)active=d.active;
     }
 
-    var actsRes=await _supa.from('activities').select('*').eq('user_id',uid);
-    if(actsRes.data&&actsRes.data.length){
+    var actsRes=await _tq(_supa.from('activities').select('*').eq('user_id',uid),8000);
+    if(actsRes&&actsRes.data&&actsRes.data.length){
       myActs.splice(0,myActs.length);
       actsRes.data.forEach(function(a){myActs.push(Object.assign({},a.data||{},{id:a.id,name:a.name,emoji:a.emoji,cat:a.cat,type:a.type,level:a.level}));});
     }
 
-    var sessRes=await _supa.from('sessions').select('*').eq('user_id',uid).order('date',{ascending:false});
-    if(sessRes.data&&sessRes.data.length){
+    var sessRes=await _tq(_supa.from('sessions').select('*').eq('user_id',uid).order('date',{ascending:false}),8000);
+    if(sessRes&&sessRes.data&&sessRes.data.length){
       sessions.splice(0,sessions.length);
       sessRes.data.forEach(function(s){sessions.push(Object.assign({},s.data||{},{id:s.id,actId:s.act_id,date:new Date(s.date).getTime(),hours:s.hours||0,mins:s.mins||0,rating:s.rating,notes:s.note||'',feel:s.feels||[],momentum:s.momentum||''}));});
     }
@@ -3881,13 +3881,14 @@ async function loadFromSupabase(){
 async function checkProfile(){
   if(!supaUser){console.error('checkProfile called with no supaUser');return;}
   try{
-    var res=await _supa.from('profiles').select('*').eq('id',supaUser.id).single();
-    if(res.data){
+    var res=await _tq(_supa.from('profiles').select('*').eq('id',supaUser.id).maybeSingle(),8000);
+    if(res&&res.data){
       await loadFromSupabase();
       bootApp();
     } else {
       _hideLoading();
       document.body.classList.remove('auth-mode');
+      document.getElementById('main-nav').classList.add('on');
       show('s-profile');
     }
   }catch(e){console.error('checkProfile error:',e);throw e;}
@@ -3975,9 +3976,9 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
     showAuthErr(msg);
     this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';return;
   }
-  this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';
   supaUser=res.data.user;
-  try{await checkProfile();}catch(e){showAuthErr('Sign in failed. Please try again.');console.error('checkProfile error:',e);}
+  try{await checkProfile();}catch(e){showAuthErr('Sign in failed: '+e.message);console.error('checkProfile error:',e);}
+  this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';
 });
 function showAuthErr(msg,isSuccess){
   var el=document.getElementById('auth-err');
