@@ -897,9 +897,13 @@ document.body.classList.add('auth-mode');
 // ── SUPABASE ──────────────────────────────────────────
 var _supa = window.supabase.createClient(
   'https://qeuhuvdyhqynsllfcgyn.supabase.co',
-  'sb_publishable_fiY2irS6Jd1BkbtqdhEYRA_gFQerBxw'
+  'sb_publishable_fiY2irS6Jd1BkbtqdhEYRA_gFQerBxw',
+  {auth:{autoRefreshToken:false,persistSession:true}}
 );
 var supaUser = null;
+// Wraps any promise with a timeout so hanging Supabase queries don't freeze the UI
+function _tq(promise,ms){return Promise.race([promise,new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},ms||6000);})]);}
+
 
 // ── DATA ──────────────────────────────────────────────
 var CATS = ['Creative','Active','Learning','Social','Mindfulness','Productive','Digital','Outdoor','Entertainment'];
@@ -1812,7 +1816,7 @@ async function openProfileEdit(){
   var supaProfile=null;
   if(supaUser){
     try{
-      var spRes=await _supa.from('profiles').select('*').eq('id',supaUser.id).single();
+      var spRes=await _tq(_supa.from('profiles').select('*').eq('id',supaUser.id).single());
       if(spRes.data)supaProfile=spRes.data;
     }catch(e){console.warn('profile fetch error:',e);}
   }
@@ -2091,7 +2095,7 @@ async function renderFriendsList(){
   }
   body.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
   try{
-    var res=await _supa.from('friendships').select('id,requester_id,addressee_id').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','accepted');
+    var res=await _tq(_supa.from('friendships').select('id,requester_id,addressee_id').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','accepted'));
     if(res.error)throw res.error;
     var friends=res.data||[];
     if(!friends.length){
@@ -2137,7 +2141,7 @@ async function renderRequests(){
   if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);">Sign in to see requests</div>';return;}
   body.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
   try{
-    var res=await _supa.from('friendships').select('id,requester_id,addressee_id,status,created_at').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','pending');
+    var res=await _tq(_supa.from('friendships').select('id,requester_id,addressee_id,status,created_at').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','pending'));
     if(res.error)throw res.error;
     var reqs=res.data||[];
     var incoming=reqs.filter(function(r){return r.addressee_id===supaUser.id;});
