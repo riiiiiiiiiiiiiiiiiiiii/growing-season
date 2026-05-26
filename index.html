@@ -3971,7 +3971,7 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
     _authHandled=false;
     var msg=res.error.message;
     if(msg==='Load failed'||msg==='Failed to fetch'||msg==='NetworkError'||/network|load fail/i.test(msg)){
-      msg='Connection blocked — your browser or network is preventing sign-in. Try the ✉️ magic link below instead.';
+      msg='Safari is blocking the request ("'+res.error.message+'"). Try: Safari → Settings → Privacy → uncheck "Prevent cross-site tracking". Or use the ✉️ magic link below.';
     }
     showAuthErr(msg);
     this.disabled=false;this.textContent=_authIsSignup?'Create account':'Sign in';return;
