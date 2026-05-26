@@ -1811,8 +1811,10 @@ async function openProfileEdit(){
   var sh=document.getElementById('ed-sh');
   var supaProfile=null;
   if(supaUser){
-    var spRes=await _supa.from('profiles').select('*').eq('id',supaUser.id).single();
-    if(spRes.data)supaProfile=spRes.data;
+    try{
+      var spRes=await _supa.from('profiles').select('*').eq('id',supaUser.id).single();
+      if(spRes.data)supaProfile=spRes.data;
+    }catch(e){console.warn('profile fetch error:',e);}
   }
   var accountSection='';
   if(supaProfile){
@@ -4086,11 +4088,11 @@ function _showAuth(){
   showAuthPanel('auth-form');
   document.getElementById('main-nav').classList.remove('on');
   document.getElementById('friends-btn').style.display='none';
-  // Quick connection test — shows a banner if Supabase auth is unreachable
+  // Quick connection test — only show banner on true network failure (not non-2xx)
   var banner=document.getElementById('auth-conn-banner');
   if(banner)banner.style.display='none';
   fetch('https://qeuhuvdyhqynsllfcgyn.supabase.co/auth/v1/health',{method:'GET'})
-    .then(function(r){if(!r.ok&&banner)banner.style.display='block';})
+    .then(function(){/* server responded — reachable */})
     .catch(function(){if(banner)banner.style.display='block';});
 }
 _supa.auth.onAuthStateChange(async function(event,session){
