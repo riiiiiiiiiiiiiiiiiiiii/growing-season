@@ -4141,12 +4141,20 @@ document.getElementById('btn-prof-save').addEventListener('click',async function
   if(!username){showProfErr('Please choose a username.');return;}
   if(!/^[a-z0-9_]+$/.test(username)){showProfErr('Letters, numbers and underscores only.');return;}
   this.disabled=true;this.textContent='Saving…';
-  var res=await _supa.from('profiles').insert({id:supaUser.id,username:username,display_name:username,emoji:emoji,email:supaUser.email});
+  var hadGuestData=onboarded;
+  var guestName=profile.name||username;
+  var guestEmoji=profile.emoji||emoji;
+  var res=await _supa.from('profiles').insert({id:supaUser.id,username:username,display_name:hadGuestData?guestName:username,emoji:hadGuestData?guestEmoji:emoji,email:supaUser.email});
   if(res.error){showProfErr(res.error.code==='23505'?'That username is taken.':res.error.message);this.disabled=false;this.textContent='Start growing';return;}
-  // Reset state so new account always goes through full onboarding
-  onboarded=false;myActs.splice(0);sessions.splice(0);archivedActs.splice(0);
-  active=null;weeklyFocus={weekKey:'',actIds:[]};
-  profile=Object.assign({},{name:username,emoji:emoji});
+  if(hadGuestData){
+    // Preserve all guest data — just make sure profile has a name/emoji
+    profile.name=guestName;profile.emoji=guestEmoji;
+  }else{
+    // Fresh sign-up — clear for full onboarding
+    onboarded=false;myActs.splice(0);sessions.splice(0);archivedActs.splice(0);
+    active=null;weeklyFocus={weekKey:'',actIds:[]};
+    profile=Object.assign({},{name:username,emoji:emoji});
+  }
   sv();
   bootApp();
 });
