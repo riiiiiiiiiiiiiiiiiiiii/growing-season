@@ -2119,13 +2119,19 @@ async function renderFriendsList(){
         +'<div class="fr-acts">'
           +'<button class="fr-ic-btn" title="Wave" data-fid="'+fid+'" data-un="'+un+'">👋</button>'
           +'<button class="fr-ic-btn" title="Message" data-fid="'+fid+'" data-name="'+name+'" data-un="'+un+'" data-em="'+em+'">💬</button>'
+          +'<button class="fr-ic-btn" title="Remove" data-fid="'+fid+'" data-fship="'+f.id+'" style="color:var(--tx3);font-size:13px;">✕</button>'
         +'</div>';
       row.querySelectorAll('.fr-ic-btn').forEach(function(btn){
-        btn.addEventListener('click',function(e){
+        btn.addEventListener('click',async function(e){
           e.stopPropagation();
           if(btn.title==='Wave'){
             waveAt(btn.dataset.fid);
             btn.textContent='✅';setTimeout(function(){btn.textContent='👋';},1500);
+          } else if(btn.title==='Remove'){
+            if(!confirm('Remove this friend?'))return;
+            btn.disabled=true;
+            await _supa.from('friendships').delete().eq('id',btn.dataset.fship);
+            renderFriendsList();
           } else {
             openConvOv(btn.dataset.fid,btn.dataset.name,btn.dataset.un,btn.dataset.em);
           }
