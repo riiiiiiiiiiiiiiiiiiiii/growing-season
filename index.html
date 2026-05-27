@@ -3937,6 +3937,7 @@ async function checkProfile(){
       _hideLoading();
       document.body.classList.remove('auth-mode');
       document.getElementById('main-nav').classList.add('on');
+      document.getElementById('friends-btn').style.display='flex';
       show('s-profile');
     }
   }catch(e){console.error('checkProfile error:',e);throw e;}
@@ -3946,6 +3947,7 @@ function bootApp(){
   _hideLoading();
   document.body.classList.remove('auth-mode');
   document.getElementById('main-nav').classList.add('on');
+  document.getElementById('friends-btn').style.display='flex';
   applyDark();applyPalette();
   if(onboarded){launch();checkNewWeek();}
   else{show('s-ob1');rObCats();rObGrid();}
