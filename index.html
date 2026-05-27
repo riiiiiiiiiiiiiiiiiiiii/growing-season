@@ -1838,7 +1838,7 @@ async function openProfileEdit(){
     +'<input id="pe-name" class="sinp" placeholder="e.g. Rayan" style="width:100%;font-size:16px;margin-bottom:18px;" maxlength="30">'
     +'<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Your emblem</div>'
     +'<div id="pe-em-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;"></div>';
-  document.getElementById('pe-name').value=profile.name||'';
+  var peNameEl=document.getElementById('pe-name');peNameEl.value=profile.name||'';setTimeout(function(){peNameEl.select();},80);
   var grid=document.getElementById('pe-em-grid');
   PROF_EMOJIS.forEach(function(em){
     var btn=document.createElement('div');
