@@ -3908,6 +3908,9 @@ async function checkProfile(){
     var res=await _tq(_supa.from('profiles').select('*').eq('id',supaUser.id).maybeSingle(),8000);
     if(res&&res.data){
       await loadFromSupabase();
+      // Always override profile name/emoji from the authoritative profiles table
+      if(res.data.display_name)profile.name=res.data.display_name;
+      if(res.data.emoji)profile.emoji=res.data.emoji;
       bootApp();
     } else {
       _hideLoading();
