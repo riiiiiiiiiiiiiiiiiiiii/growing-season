@@ -466,6 +466,10 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div style="font-size:14px;color:var(--tx2);margin-bottom:44px;text-align:center;line-height:1.6;">Track your growth,<br>share your journey</div>
       <div id="auth-conn-banner" style="display:none;width:100%;max-width:340px;background:#FDEAE6;border:1.5px solid #D4614A;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;color:#D4614A;text-align:center;margin-bottom:12px;">⚠️ Can't reach Supabase — sign-in will fail.<br><span style="font-weight:400;font-size:12px;">Use "Continue as guest" or check your network.</span></div>
       <div id="auth-form" style="width:100%;max-width:340px;">
+        <div style="display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--bg3);margin-bottom:20px;">
+          <button id="tab-signin" style="flex:1;padding:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--gr);color:#fff;transition:all .15s;">Sign in</button>
+          <button id="tab-signup" style="flex:1;padding:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--tx2);transition:all .15s;">Create account</button>
+        </div>
         <div class="sl" style="margin-bottom:6px;">Email or username</div>
         <input id="auth-email" type="text" class="sinp" placeholder="you@example.com or @sillyblackcat" style="width:100%;margin-bottom:10px;" autocomplete="username" inputmode="email">
         <div class="sl" style="margin-bottom:6px;">Password</div>
@@ -476,12 +480,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
         <button id="btn-auth" class="btn btn-p" style="width:100%;">Sign in</button>
         <div id="auth-err" style="font-size:14px;font-weight:600;padding:10px 14px;border-radius:8px;margin-top:10px;text-align:center;display:none;border:1.5px solid currentColor;"></div>
         <button id="btn-forgot" style="background:none;border:none;color:var(--tx3);font-size:12px;cursor:pointer;margin-top:10px;display:block;width:100%;text-align:center;">Forgot password?</button>
-        <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;">
-          <div style="flex:1;height:.5px;background:var(--bg3);"></div>
-          <span style="font-size:12px;color:var(--tx3);">or</span>
-          <div style="flex:1;height:.5px;background:var(--bg3);"></div>
-        </div>
-        <button id="btn-magic" class="btn btn-s" style="width:100%;">✉️ Send sign-in link</button>
         <div style="display:flex;align-items:center;gap:10px;margin:14px 0 10px;">
           <div style="flex:1;height:.5px;background:var(--bg3);"></div>
           <span style="font-size:12px;color:var(--tx3);">or</span>
@@ -3962,6 +3960,23 @@ function showAuthPanel(panel){
   });
 }
 
+// Sign in / Create account tabs
+document.getElementById('tab-signin').addEventListener('click',function(){
+  _authIsSignup=false;
+  this.style.background='var(--gr)';this.style.color='#fff';
+  document.getElementById('tab-signup').style.background='var(--bg2)';document.getElementById('tab-signup').style.color='var(--tx2)';
+  document.getElementById('btn-auth').textContent='Sign in';
+  document.getElementById('btn-forgot').style.display='block';
+  document.getElementById('auth-password').autocomplete='current-password';
+});
+document.getElementById('tab-signup').addEventListener('click',function(){
+  _authIsSignup=true;
+  this.style.background='var(--gr)';this.style.color='#fff';
+  document.getElementById('tab-signin').style.background='var(--bg2)';document.getElementById('tab-signin').style.color='var(--tx2)';
+  document.getElementById('btn-auth').textContent='Create account';
+  document.getElementById('btn-forgot').style.display='none';
+  document.getElementById('auth-password').autocomplete='new-password';
+});
 
 // Resolve email or username → email
 async function resolveEmail(input){
@@ -4023,28 +4038,6 @@ function showAuthErr(msg,isSuccess){
 }
 document.getElementById('auth-password').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('btn-auth').click();});
 
-// Magic link
-document.getElementById('btn-magic').addEventListener('click',async function(){
-  var input=document.getElementById('auth-email').value.trim();
-  if(!input){showAuthErr('Please enter your email to send a sign-in link.');return;}
-  this.disabled=true;this.textContent='Sending…';
-  var email=input;
-  if(!input.includes('@')||input.indexOf('@')===0){
-    var resolved2=await resolveEmail(input);
-    if(resolved2.error){showAuthErr(resolved2.error);this.disabled=false;this.textContent='✉️ Send sign-in link';return;}
-    email=resolved2.email;
-  }
-  var res;
-  try{res=await _supa.auth.signInWithOtp({email:email,options:{emailRedirectTo:location.href}});}
-  catch(e){this.disabled=false;this.textContent='✉️ Send sign-in link';showAuthErr('Connection error — your Supabase project may be paused. Visit supabase.com to resume it.');return;}
-  this.disabled=false;this.textContent='✉️ Send sign-in link';
-  if(res.error){
-    var m=res.error.message;
-    if(/load fail|fetch|network/i.test(m))m='Connection error — your Supabase project may be paused. Visit supabase.com to resume it.';
-    showAuthErr(m);return;
-  }
-  showAuthErr('✓ Check your email — your sign-in link is on the way!',true);
-});
 
 // Sign out
 async function doSignOut(){
