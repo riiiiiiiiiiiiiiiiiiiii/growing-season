@@ -3847,8 +3847,11 @@ async function loadFromSupabase(){
   if(!supaUser)return;
   var uid=supaUser.id;
   try{
+    var gotData=false;
+
     var stateRes=await _tq(_supa.from('user_state').select('data').eq('user_id',uid).maybeSingle(),8000);
     if(stateRes&&stateRes.data&&stateRes.data.data){
+      gotData=true;
       var d=stateRes.data.data;
       if(d.onboarded!==undefined)onboarded=d.onboarded;
       if(d.weeklyFocus)weeklyFocus=d.weeklyFocus;
@@ -3864,17 +3867,38 @@ async function loadFromSupabase(){
 
     var actsRes=await _tq(_supa.from('activities').select('*').eq('user_id',uid),8000);
     if(actsRes&&actsRes.data&&actsRes.data.length){
+      gotData=true;
       myActs.splice(0,myActs.length);
       actsRes.data.forEach(function(a){myActs.push(Object.assign({},a.data||{},{id:a.id,name:a.name,emoji:a.emoji,cat:a.cat,type:a.type,level:a.level}));});
     }
 
     var sessRes=await _tq(_supa.from('sessions').select('*').eq('user_id',uid).order('date',{ascending:false}),8000);
     if(sessRes&&sessRes.data&&sessRes.data.length){
+      gotData=true;
       sessions.splice(0,sessions.length);
       sessRes.data.forEach(function(s){sessions.push(Object.assign({},s.data||{},{id:s.id,actId:s.act_id,date:new Date(s.date).getTime(),hours:s.hours||0,mins:s.mins||0,rating:s.rating,notes:s.note||'',feel:s.feels||[],momentum:s.momentum||''}));});
     }
 
-    sv();
+    if(gotData){
+      sv();
+    } else {
+      // Nothing in Supabase — restore from localStorage so local-only data isn't lost
+      var loc=ld();
+      if(loc.onboarded){
+        onboarded=loc.onboarded;
+        if(loc.myActs&&loc.myActs.length){myActs.splice(0);loc.myActs.forEach(function(a){myActs.push(a);});}
+        if(loc.sessions&&loc.sessions.length){sessions.splice(0);loc.sessions.forEach(function(s){sessions.push(s);});}
+        if(loc.profile)profile=loc.profile;
+        if(loc.weeklyFocus)weeklyFocus=loc.weeklyFocus;
+        if(loc.archivedActs&&loc.archivedActs.length){archivedActs.splice(0);loc.archivedActs.forEach(function(a){archivedActs.push(a);});}
+        if(loc.activityNotes)activityNotes=loc.activityNotes;
+        if(loc.collection)collection=loc.collection;
+        if(loc.darkMode!==undefined)darkMode=loc.darkMode;
+        if(loc.customCats)customCats=loc.customCats;
+        if(loc.colorPalette)colorPalette=loc.colorPalette;
+        syncToSupabase(); // Upload their local data to Supabase for next time
+      }
+    }
   }catch(e){console.warn('Supabase load error:',e);}
 }
 
@@ -4020,7 +4044,6 @@ async function doSignOut(){
   onboarded=false;profile={};active=null;
   weeklyFocus={weekKey:'',actIds:[]};activityNotes={};
   collection={pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]};
-  try{localStorage.removeItem('gs-v3');}catch(e){}
   _showAuth();
 }
 document.getElementById('sb-signout-btn').addEventListener('click',function(){closeSidebar();doSignOut();});
