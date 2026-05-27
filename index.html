@@ -2134,8 +2134,8 @@ async function renderFriendsList(){
       body.appendChild(row);
     });
   }catch(e){
-    var msg=e&&e.message&&e.message.indexOf('does not exist')>-1?'Friends feature needs DB setup — see code comments.':'Something went wrong.';
-    body.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;">'+msg+'</div>';
+    var msg=e&&e.message?e.message:'Unknown error';
+    body.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;">Error: '+msg+'</div>';
   }
 }
 
@@ -4015,6 +4015,12 @@ async function doSignOut(){
   _guestMode=false;_authHandled=false;
   await _supa.auth.signOut();
   supaUser=null;
+  // Clear all in-memory user data so the next account starts fresh
+  myActs.splice(0);sessions.splice(0);archivedActs.splice(0);
+  onboarded=false;profile={};active=null;
+  weeklyFocus={weekKey:'',actIds:[]};activityNotes={};
+  collection={pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]};
+  try{localStorage.removeItem('gs-v3');}catch(e){}
   _showAuth();
 }
 document.getElementById('sb-signout-btn').addEventListener('click',function(){closeSidebar();doSignOut();});
