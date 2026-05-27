@@ -532,10 +532,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
           <input id="prof-username" class="sinp" placeholder="rayan" style="width:100%;">
           <div style="font-size:11px;color:var(--tx3);margin-top:4px;">Letters, numbers and underscores only</div>
         </div>
-        <div class="sf">
-          <div class="sl">Display name</div>
-          <input id="sprofile-dispname" class="sinp" placeholder="Rayan" style="width:100%;">
-        </div>
         <button id="btn-prof-save" class="btn btn-p" style="width:100%;margin-top:4px;">Start growing</button>
         <div id="prof-err" style="font-size:12px;color:var(--co);margin-top:10px;text-align:center;display:none;"></div>
       </div>
@@ -4129,16 +4125,14 @@ document.getElementById('btn-guest').addEventListener('click',function(){
 // ── PROFILE CREATION HANDLER ──────────────────────────
 document.getElementById('btn-prof-save').addEventListener('click',async function(){
   var username=document.getElementById('prof-username').value.trim().toLowerCase();
-  var displayName=document.getElementById('sprofile-dispname').value.trim();
   var emoji='🌱';
   if(!username){showProfErr('Please choose a username.');return;}
   if(!/^[a-z0-9_]+$/.test(username)){showProfErr('Letters, numbers and underscores only.');return;}
-  if(!displayName){showProfErr('Please enter a display name.');return;}
   this.disabled=true;this.textContent='Saving…';
-  var res=await _supa.from('profiles').insert({id:supaUser.id,username:username,display_name:displayName,emoji:emoji,email:supaUser.email});
+  var res=await _supa.from('profiles').insert({id:supaUser.id,username:username,display_name:username,emoji:emoji,email:supaUser.email});
   if(res.error){showProfErr(res.error.code==='23505'?'That username is taken.':res.error.message);this.disabled=false;this.textContent='Start growing';return;}
-  profile=Object.assign(profile||{},{name:displayName,emoji:emoji});
-  sv(); // sync existing local data up to Supabase
+  profile=Object.assign(profile||{},{name:username,emoji:emoji});
+  sv();
   bootApp();
 });
 function showProfErr(msg){var el=document.getElementById('prof-err');el.textContent=msg;el.style.display='block';}
