@@ -534,7 +534,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
         </div>
         <div class="sf">
           <div class="sl">Display name</div>
-          <input id="prof-name" class="sinp" placeholder="Rayan" style="width:100%;">
+          <input id="sprofile-dispname" class="sinp" placeholder="Rayan" style="width:100%;">
         </div>
         <button id="btn-prof-save" class="btn btn-p" style="width:100%;margin-top:4px;">Start growing</button>
         <div id="prof-err" style="font-size:12px;color:var(--co);margin-top:10px;text-align:center;display:none;"></div>
@@ -2835,16 +2835,21 @@ function addSwipe(wrap,card,onArchive,onFocus){
       if(foc)foc.style.opacity=0;
     }
   }
+  function _blockNextClick(){
+    card.addEventListener('click',function blocker(e){e.stopPropagation();e.preventDefault();card.removeEventListener('click',blocker,true);},true);
+  }
   function onEnd(){
     if(isSwipe&&dx<-threshold){
       card.style.transition='transform .28s cubic-bezier(.55,.06,.68,.19)';
       card.style.transform='translateX(-110vw)';
       if(del)del.style.opacity=0;
+      _blockNextClick();
       setTimeout(onArchive,240);
     } else if(isSwipe&&dx>threshold&&onFocus){
       card.style.transition='transform .2s cubic-bezier(.25,.46,.45,.94)';
       card.style.transform='translateX(55px)';
       if(foc)foc.style.opacity=0;
+      _blockNextClick();
       setTimeout(function(){
         card.style.transition='transform .34s cubic-bezier(.34,1.56,.64,1)';
         card.style.transform='translateX(0)';
@@ -4104,7 +4109,7 @@ document.getElementById('btn-guest').addEventListener('click',function(){
 // ── PROFILE CREATION HANDLER ──────────────────────────
 document.getElementById('btn-prof-save').addEventListener('click',async function(){
   var username=document.getElementById('prof-username').value.trim().toLowerCase();
-  var displayName=document.getElementById('prof-name').value.trim();
+  var displayName=document.getElementById('sprofile-dispname').value.trim();
   var emoji='🌱';
   if(!username){showProfErr('Please choose a username.');return;}
   if(!/^[a-z0-9_]+$/.test(username)){showProfErr('Letters, numbers and underscores only.');return;}
