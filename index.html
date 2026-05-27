@@ -3982,11 +3982,14 @@ document.getElementById('tab-signup').addEventListener('click',function(){
 // Resolve email or username → email
 async function resolveEmail(input){
   input=input.trim();
-  if(input.includes('@')&&input.indexOf('@')!==0)return input; // looks like an email
+  if(input.includes('@')&&input.indexOf('@')!==0)return {email:input};
   var username=input.replace(/^@/,'').toLowerCase();
-  var r=await _supa.from('profiles').select('email').eq('username',username).maybeSingle();
-  if(r.error||!r.data||!r.data.email)return null;
-  return r.data.email;
+  var r;
+  try{r=await _tq(_supa.from('profiles').select('email').eq('username',username).maybeSingle(),6000);}
+  catch(e){return {error:'Username lookup timed out — try signing in with your email address instead.'};}
+  if(r.error)return {error:'Username lookup failed: '+r.error.message};
+  if(!r.data||!r.data.email)return {error:'No account found for that username.'};
+  return {email:r.data.email};
 }
 
 // Password sign in / sign up
@@ -3999,8 +4002,9 @@ document.getElementById('btn-auth').addEventListener('click',async function(){
   this.disabled=true;this.textContent=_authIsSignup?'Creating…':'Signing in…';
   var email=input;
   if(!_authIsSignup){
-    email=await resolveEmail(input);
-    if(!email){showAuthErr('No account found for that username.');this.disabled=false;this.textContent='Sign in';return;}
+    var resolved=await resolveEmail(input);
+    if(resolved.error){showAuthErr(resolved.error);this.disabled=false;this.textContent='Sign in';return;}
+    email=resolved.email;
   }
   // Set flags before the async call so onAuthStateChange SIGNED_IN doesn't race
   _authHandled=true;_guestMode=false;
@@ -4042,8 +4046,9 @@ document.getElementById('btn-magic').addEventListener('click',async function(){
   this.disabled=true;this.textContent='Sending…';
   var email=input;
   if(!input.includes('@')||input.indexOf('@')===0){
-    email=await resolveEmail(input);
-    if(!email){showAuthErr('No account found for that username.');this.disabled=false;this.textContent='✉️ Send sign-in link';return;}
+    var resolved2=await resolveEmail(input);
+    if(resolved2.error){showAuthErr(resolved2.error);this.disabled=false;this.textContent='✉️ Send sign-in link';return;}
+    email=resolved2.email;
   }
   var res;
   try{res=await _supa.auth.signInWithOtp({email:email,options:{emailRedirectTo:location.href}});}
