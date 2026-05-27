@@ -2085,7 +2085,7 @@ function openConvOv(userId,name,un,emoji){
   document.getElementById('conv-ov').classList.add('on');
   renderConv();
 }
-function closeConv(){document.getElementById('conv-ov').classList.remove('on');}
+function closeConv(){document.getElementById('conv-ov').classList.remove('on');if(_frTab==='messages')renderConvList();}
 
 async function renderFriends(){
   if(_frTab==='friends')await renderFriendsList();
