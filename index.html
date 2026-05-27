@@ -529,7 +529,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div style="width:100%;max-width:340px;">
         <div class="sf">
           <div class="sl">Username</div>
-          <input id="prof-username" class="sinp" placeholder="rayan" style="width:100%;">
+          <input id="prof-username" class="sinp" placeholder="sillyblackcat" style="width:100%;">
           <div style="font-size:11px;color:var(--tx3);margin-top:4px;">Letters, numbers and underscores only</div>
         </div>
         <button id="btn-prof-save" class="btn btn-p" style="width:100%;margin-top:4px;">Start growing</button>
@@ -576,7 +576,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:26px;">What should we call you? Pick a little emblem that feels like you — it'll mark your garden.</div>
       <div style="margin-bottom:22px;">
         <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Your name</div>
-        <input id="prof-name" class="sinp" placeholder="e.g. Rayan" style="width:100%;font-size:16px;" maxlength="30">
+        <input id="prof-name" class="sinp" placeholder="e.g. Sillyblackcat" style="width:100%;font-size:16px;" maxlength="30">
       </div>
       <div style="margin-bottom:28px;">
         <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Your emblem</div>
@@ -1833,7 +1833,7 @@ async function openProfileEdit(){
   sh.innerHTML='<div style="font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:16px;">Edit profile</div>'
     +accountSection
     +'<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Your name</div>'
-    +'<input id="pe-name" class="sinp" placeholder="e.g. Rayan" style="width:100%;font-size:16px;margin-bottom:18px;" maxlength="30">'
+    +'<input id="pe-name" class="sinp" placeholder="e.g. Sillyblackcat" style="width:100%;font-size:16px;margin-bottom:18px;" maxlength="30">'
     +'<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Your emblem</div>'
     +'<div id="pe-em-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;"></div>';
   var peNameEl=document.getElementById('pe-name');peNameEl.value=profile.name||'';setTimeout(function(){peNameEl.select();},80);
