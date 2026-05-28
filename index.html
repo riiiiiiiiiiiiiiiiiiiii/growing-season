@@ -2557,7 +2557,7 @@ function rResults(){
     card.addEventListener('click',function(){startFrom(r.a.id);});
     body.appendChild(card);
   });
-  var tryAgain=document.createElement('button');tryAgain.className='btn btn-s';tryAgain.textContent='Try different answers';tryAgain.addEventListener('click',function(){pqStep=0;pqA={};rPQ();});body.appendChild(tryAgain);
+  var tryAgain=document.createElement('button');tryAgain.className='btn btn-s';tryAgain.textContent='← Back';tryAgain.addEventListener('click',function(){pqStep=Math.max(0,pqStep-1);rPQ();});body.appendChild(tryAgain);
   var orDiv=document.createElement('div');orDiv.className='or-div';orDiv.innerHTML='<div class="or-line"></div><div class="or-txt">or</div><div class="or-line"></div>';body.appendChild(orDiv);
   var browse=document.createElement('button');browse.className='btn btn-s';browse.textContent='Browse all activities';browse.addEventListener('click',showBrowse);body.appendChild(browse);
   var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.marginTop='6px';cancel.textContent='Cancel';cancel.addEventListener('click',closePicker);body.appendChild(cancel);
