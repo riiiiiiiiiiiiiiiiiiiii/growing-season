@@ -2788,10 +2788,29 @@ function saveLog(){
   for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(logId,s);
   checkTrophies();
   active=null;sv();rHome();goBack();
+  showHarvestBurst(_logAct.emoji);
   if(stageAfter>stageBefore){
     var a=myActs.find(function(x){return x.id===logId;});
     if(a)setTimeout(function(){showStageUp(a,stageAfter);},320);
   }
+}
+function showHarvestBurst(actEmoji){
+  var wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden;';
+  var pool=[actEmoji||'🌱','✨','🌿','🍃','⭐','🌸','💧','🌾'];
+  for(var i=0;i<14;i++){
+    var sp=document.createElement('span');
+    sp.textContent=pool[i%pool.length];
+    var x=15+Math.random()*70;
+    var dx=(Math.random()-.5)*60;
+    var delay=Math.random()*.35;
+    var dur=.9+Math.random()*.6;
+    var size=15+Math.random()*18;
+    sp.style.cssText='position:absolute;left:'+x+'%;bottom:25%;font-size:'+size+'px;transform:translateX('+dx+'px);animation:suFloat '+dur+'s ease-out '+delay+'s both;';
+    wrap.appendChild(sp);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(function(){if(wrap.parentNode)wrap.parentNode.removeChild(wrap);},1800);
 }
 function showStageUp(a,stage){
   var stagePlants=['🌰','🌱','🪴','🌸','🌺'];
