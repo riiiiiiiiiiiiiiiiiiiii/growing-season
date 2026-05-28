@@ -859,6 +859,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div id="lib-cats" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;"></div>
       <div id="lib-grid" style="display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow-y:auto;"></div>
       <button class="btn btn-p" id="btn-lib-save" style="margin-top:10px;" disabled>Select seeds to plant</button>
+      <button class="btn btn-s" id="btn-add-cancel-lib" style="margin-top:6px;width:100%;">Cancel</button>
     </div>
     <!-- Custom tab -->
     <div id="add-panel-custom" style="display:none;">
@@ -868,8 +869,8 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div class="sf"><div class="sl">Commitment</div><div class="so" id="add-type"></div></div>
       <div class="sf"><div class="sl">Level</div><div class="so" id="add-level"></div></div>
       <button class="btn btn-p" id="btn-add-save" style="margin-top:4px;">Plant it</button>
+      <button class="btn btn-s" id="btn-add-cancel-custom" style="margin-top:6px;width:100%;">Cancel</button>
     </div>
-    <div style="position:sticky;bottom:-26px;background:var(--bg);padding:10px 0 0;margin-top:8px;"><button class="btn btn-s" style="width:100%;" id="btn-add-cancel">Cancel</button></div>
   </div>
 </div>
 
@@ -1394,7 +1395,8 @@ document.getElementById('ob-back-btn').addEventListener('click',function(){
 });
 document.getElementById('btn-discard').addEventListener('click',discard);
 document.getElementById('btn-ed-cancel').addEventListener('click',closeEd);
-document.getElementById('btn-add-cancel').addEventListener('click',closeAdd);
+document.getElementById('btn-add-cancel-lib').addEventListener('click',closeAdd);
+document.getElementById('btn-add-cancel-custom').addEventListener('click',closeAdd);
 document.getElementById('btn-add-cat').addEventListener('click',function(){
   var name=document.getElementById('ac-custom-name').value.trim();
   if(!name)return;
