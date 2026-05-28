@@ -713,11 +713,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div class="fr" id="feels"></div>
     </div>
     <div class="fl">
-      <div class="fl-lbl">Rate this session</div>
-      <div class="stars" id="stars"></div>
-      <div class="slbl" id="slbl"></div>
-    </div>
-    <div class="fl">
       <div class="fl-lbl">Field notes</div>
       <textarea class="nta" id="ln" placeholder="What did you work on? What grew today?"></textarea>
     </div>
@@ -732,6 +727,11 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div class="fl">
       <div class="fl-lbl">Momentum — did this leave you wanting more?</div>
       <div class="fr" id="momentum"></div>
+    </div>
+    <div class="fl">
+      <div class="fl-lbl">Rate this session</div>
+      <div class="stars" id="stars"></div>
+      <div class="slbl" id="slbl"></div>
     </div>
     <button class="btn btn-p" id="btn-save-log">Log the harvest</button>
     <button class="btn btn-s" style="margin-top:8px;" id="btn-discard">Cancel</button>
@@ -1588,9 +1588,11 @@ function rHome(){
     if(_activeTimerInt)clearInterval(_activeTimerInt);
     (function(t0){function tick(){var el=document.getElementById('ip-elapsed');if(el)el.textContent=_fmtElapsed(Date.now()-t0);else{clearInterval(_activeTimerInt);_activeTimerInt=null;}}tick();_activeTimerInt=setInterval(tick,1000);})(active.startedAt);
     pcW.innerHTML='';
+    var hsEl=document.querySelector('#s-home .hs');if(hsEl)hsEl.style.display='none';
   } else {
     if(_activeTimerInt){clearInterval(_activeTimerInt);_activeTimerInt=null;}
     ipW.innerHTML='';
+    var hsEl=document.querySelector('#s-home .hs');if(hsEl)hsEl.style.display='';
     pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-lbl">Ready to grow?</div><div class="pc-title">What should I work on?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-quick-log" style="flex:1;background:var(--bg2);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">Already done? Log it</button><button id="btn-suggest" style="flex:1;background:var(--bg2);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">🎲 Surprise me</button></div>';
     document.getElementById('pc-card').addEventListener('click',openPicker);
     document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
