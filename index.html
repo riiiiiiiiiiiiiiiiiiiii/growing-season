@@ -732,7 +732,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div class="fr" id="momentum"></div>
     </div>
     <button class="btn btn-p" id="btn-save-log">Log the harvest</button>
-    <button class="btn" style="margin-top:8px;background:#F07820;color:#fff;box-shadow:0 3px 10px rgba(240,120,32,.2);" id="btn-discard">Cancel</button>
+    <button class="btn btn-s" style="margin-top:8px;" id="btn-discard">Cancel</button>
   </div>
 
   </div><!-- /screen-wrap -->
@@ -2312,7 +2312,7 @@ async function renderConv(){
     var data=res.data||[];
     // Mark received messages as read
     var unreadIds=data.filter(function(m){return m.from_id===fid&&!m.read_at;}).map(function(m){return m.id;});
-    if(unreadIds.length)_supa.from('messages').update({read_at:new Date().toISOString()}).in('id',unreadIds);
+    if(unreadIds.length){await _supa.from('messages').update({read_at:new Date().toISOString()}).in('id',unreadIds);checkUnreadBadge();}
     container.innerHTML='';
     if(!data.length){
       container.innerHTML='<div style="text-align:center;padding:50px 0;"><div style="font-size:38px;margin-bottom:10px;">👋</div><div style="color:var(--tx3);font-size:13px;">Send a message or wave!</div></div>';
