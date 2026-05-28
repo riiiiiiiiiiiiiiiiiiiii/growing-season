@@ -762,7 +762,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div style="display:flex;border-bottom:.5px solid var(--bg3);">
         <button class="fr-tab on" id="fr-tab-friends">Friends</button>
         <button class="fr-tab" id="fr-tab-requests">Requests <span id="fr-req-badge" style="display:none;background:#E53E3E;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;vertical-align:middle;"></span></button>
-        <button class="fr-tab" id="fr-tab-messages">Messages</button>
+        <button class="fr-tab" id="fr-tab-messages">Messages <span id="fr-msg-badge" style="display:none;background:#E53E3E;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;vertical-align:middle;"></span></button>
       </div>
     </div>
     <div id="fr-body" style="flex:1;overflow-y:auto;padding:12px 20px 80px;"></div>
@@ -1583,12 +1583,13 @@ function rHome(){
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
   if(active){
     var act=myActs.find(function(a){return a.id===active.actId;})||{emoji:'?',name:'Unknown'};
-    var elapsed=Math.max(0,Math.floor((Date.now()-active.startedAt)/60000));
-    var tStr=elapsed<1?'just now':elapsed+'min ago';
-    ipW.innerHTML='<div class="ip" id="ip-card"><div class="ip-dot"></div><div class="ip-lbl">🌱 Currently growing</div><div class="ip-name">'+act.emoji+' '+act.name+'</div><div class="ip-time">Started '+tStr+'</div><div class="ip-btn">Finish &amp; log</div></div>';
+    ipW.innerHTML='<div class="ip" id="ip-card"><div class="ip-dot"></div><div class="ip-lbl">🌱 Currently growing</div><div class="ip-name">'+act.emoji+' '+act.name+'</div><div class="ip-time" id="ip-elapsed" style="font-size:22px;font-weight:700;font-family:var(--mono,monospace);letter-spacing:.04em;color:#fff;margin-bottom:8px;"></div><div class="ip-btn">Finish &amp; log</div></div>';
     document.getElementById('ip-card').addEventListener('click',resumeSess);
+    if(_activeTimerInt)clearInterval(_activeTimerInt);
+    (function(t0){function tick(){var el=document.getElementById('ip-elapsed');if(el)el.textContent=_fmtElapsed(Date.now()-t0);else{clearInterval(_activeTimerInt);_activeTimerInt=null;}}tick();_activeTimerInt=setInterval(tick,1000);})(active.startedAt);
     pcW.innerHTML='';
   } else {
+    if(_activeTimerInt){clearInterval(_activeTimerInt);_activeTimerInt=null;}
     ipW.innerHTML='';
     pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-lbl">Ready to grow?</div><div class="pc-title">What should I work on?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-quick-log" style="flex:1;background:var(--bg2);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">Already done? Log it</button><button id="btn-suggest" style="flex:1;background:var(--bg2);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">🎲 Surprise me</button></div>';
     document.getElementById('pc-card').addEventListener('click',openPicker);
@@ -2085,6 +2086,8 @@ document.getElementById('btn-stageup-close').addEventListener('click',function()
 //   Enable RLS and add policies allowing users to read/write their own rows.
 var _frTab='friends';
 var _convUserId=null,_convName=null,_convUn=null,_convEmoji=null;
+var _activeTimerInt=null;
+function _fmtElapsed(ms){var s=Math.floor(ms/1000);var h=Math.floor(s/3600);var m=Math.floor((s%3600)/60);var sec=s%60;if(h>0)return h+'h '+(m<10?'0':'')+m+'m '+(sec<10?'0':'')+sec+'s';return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;}
 var _frSearchTimer=null;
 
 function openFriends(){
@@ -2107,12 +2110,15 @@ function openConvOv(userId,name,un,emoji){
 function closeConv(){document.getElementById('conv-ov').classList.remove('on');if(_frTab==='messages')renderConvList();checkUnreadBadge();}
 async function checkUnreadBadge(){
   var badge=document.getElementById('friends-unread-badge');
+  var msgTabBadge=document.getElementById('fr-msg-badge');
   if(!badge||!supaUser)return;
   try{
     var r=await _supa.from('messages').select('id',{count:'exact',head:true}).eq('to_id',supaUser.id).is('read_at',null);
     var n=r.count||0;
-    badge.textContent=n>9?'9+':n;
+    var label=n>9?'9+':String(n);
+    badge.textContent=label;
     badge.style.display=n>0?'block':'none';
+    if(msgTabBadge){msgTabBadge.textContent=label;msgTabBadge.style.display=n>0?'inline-block':'none';}
   }catch(e){}
 }
 
@@ -3988,12 +3994,14 @@ async function checkProfile(){
       _needsProfile=true;
       _hideLoading();
       document.body.classList.remove('auth-mode');
-      document.getElementById('main-nav').classList.add('on');
-      document.getElementById('friends-btn').style.display='flex';
       applyDark();applyPalette();
       if(onboarded){
+        // Already did the quiz — just needs username; show nav since they have a plot
+        document.getElementById('main-nav').classList.add('on');
+        document.getElementById('friends-btn').style.display='flex';
         openProfileStep();
       }else{
+        // Brand new account — nav stays hidden until onboarding is complete
         myActs.splice(0);sessions.splice(0);archivedActs.splice(0);active=null;weeklyFocus={weekKey:'',actIds:[]};
         show('s-ob1');rObCats();rObGrid();
       }
@@ -4004,11 +4012,15 @@ async function checkProfile(){
 function bootApp(){
   _hideLoading();
   document.body.classList.remove('auth-mode');
-  document.getElementById('main-nav').classList.add('on');
-  document.getElementById('friends-btn').style.display='flex';
   applyDark();applyPalette();
-  if(onboarded){launch();checkNewWeek();}
-  else{show('s-ob1');rObCats();rObGrid();}
+  if(onboarded){
+    document.getElementById('main-nav').classList.add('on');
+    document.getElementById('friends-btn').style.display='flex';
+    launch();checkNewWeek();
+  }else{
+    // Nav stays hidden — launch() will show it after onboarding completes
+    show('s-ob1');rObCats();rObGrid();
+  }
 }
 
 // ── AUTH SCREEN HANDLERS ──────────────────────────────
