@@ -3986,11 +3986,11 @@ async function resolveEmail(input){
   if(input.includes('@')&&input.indexOf('@')!==0)return {email:input};
   var username=input.replace(/^@/,'').toLowerCase();
   var r;
-  try{r=await _tq(_supa.from('profiles').select('email').eq('username',username).maybeSingle(),6000);}
+  try{r=await _tq(_supa.rpc('get_email_by_username',{uname:username}),6000);}
   catch(e){return {error:'Username lookup timed out — try signing in with your email address instead.'};}
   if(r.error)return {error:'Username lookup failed: '+r.error.message};
-  if(!r.data||!r.data.email)return {error:'No account found for that username.'};
-  return {email:r.data.email};
+  if(!r.data)return {error:'No account found for that username.'};
+  return {email:r.data};
 }
 
 // Password sign in / sign up
