@@ -399,7 +399,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 .fr-tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;font-size:13px;font-weight:600;color:var(--tx3);padding:10px 4px;cursor:pointer;transition:color .22s ease,border-color .22s ease;}
 .fr-tab.on{color:var(--gr);border-bottom-color:var(--gr);}
 .fr-tab:active{opacity:.7;}
-#fr-body{transition:opacity .18s ease;}
+#fr-body{transition:opacity .1s ease;}
 .fr-row{display:flex;align-items:center;gap:11px;padding:10px 8px;margin:0 -8px;border-bottom:.5px solid var(--bg3);border-radius:10px;transition:background .15s ease;}
 .fr-row:last-child{border-bottom:none;}
 .fr-row:hover{background:var(--bg2);}
@@ -467,7 +467,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
   </div>
   <div id="sb-backdrop"></div>
   <button id="sb-toggle">☰</button>
-  <button id="friends-btn" title="Friends" style="position:relative;">👥<span id="friends-unread-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#E53E3E;color:#fff;border-radius:10px;font-size:9px;min-width:14px;padding:1px 4px;text-align:center;line-height:14px;pointer-events:none;"></span></button>
+  <button id="friends-btn" title="Friends">👥<span id="friends-unread-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#E53E3E;color:#fff;border-radius:10px;font-size:9px;min-width:14px;padding:1px 4px;text-align:center;line-height:14px;pointer-events:none;"></span></button>
 
   <div id="screen-wrap">
 
@@ -2411,7 +2411,7 @@ function _switchFrTab(tab){
   ['friends','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t===tab);});
   var body=document.getElementById('fr-body');
   body.style.opacity='0';
-  setTimeout(function(){body.style.opacity='1';renderFriends();},160);
+  setTimeout(function(){body.style.opacity='1';renderFriends();},80);
 }
 document.getElementById('fr-tab-friends').addEventListener('click',function(){_switchFrTab('friends');});
 document.getElementById('fr-tab-requests').addEventListener('click',function(){_switchFrTab('requests');});
