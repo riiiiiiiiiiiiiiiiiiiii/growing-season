@@ -3799,9 +3799,9 @@ function rGarden(){
     plotCard.appendChild(svgWrap);container.appendChild(plotCard);wrap.appendChild(container);
   } else {
     // Patch layout
-    var patchCols=isDesktop?3:2;
-    var perPatch=patchCols*patchCols;
-    var gridCols=isDesktop?3:2;
+    var patchCols=isDesktop?2:2;
+    var perPatch=isDesktop?6:4;
+    var gridCols=isDesktop?6:2;
     var grid=document.createElement('div');
     grid.style.cssText='display:grid;grid-template-columns:repeat('+gridCols+',1fr);gap:12px;padding:0 16px 20px;';
     var chunks=[];for(var ci=0;ci<visibleActs.length;ci+=perPatch)chunks.push(visibleActs.slice(ci,ci+perPatch));
