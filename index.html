@@ -150,11 +150,11 @@ body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode
 .mf{height:5px;border-radius:3px;background:var(--mf-grad);}
 .nudge{background:var(--sul);border-radius:var(--rsm);padding:9px 12px;margin-bottom:10px;font-size:13px;color:#6B4A00;border:1px solid var(--sum);}
 .bp-card{background:#fff;border:var(--br);border-radius:var(--rad);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:11px;margin-bottom:6px;box-shadow:var(--sh);}
-.lh{display:flex;align-items:center;gap:13px;margin-bottom:6px;}
+.lh{display:flex;align-items:center;gap:13px;margin-bottom:16px;}
 .le{font-size:38px;}
 .lt{font-family:var(--serif);font-size:20px;font-weight:700;}
-.ls{font-size:13px;color:var(--tx2);margin-top:2px;}
-.lbadge{font-size:12px;color:var(--gr);font-weight:500;background:var(--grl);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:14px;}
+.ls{font-size:13px;color:var(--tx2);margin-top:3px;}
+.lbadge{font-size:12px;color:var(--gr);font-weight:500;background:var(--grl);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:16px;}
 .fl{margin-bottom:24px;}
 .fl-lbl{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
 .dr{display:flex;gap:8px;align-items:center;}
@@ -184,12 +184,12 @@ body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode
 .hc{background:#fff;border:var(--br);border-radius:var(--rad);padding:14px;margin-bottom:8px;box-shadow:var(--sh);animation:cardIn .22s cubic-bezier(.25,.46,.45,.94) both;}
 @keyframes cardIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-.hc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.hc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
 .hc-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;}
 .hc-r{font-size:13px;color:var(--gr);font-weight:700;}
 .hc-edit-btn{background:none;border:none;font-size:14px;cursor:pointer;padding:2px 4px;border-radius:6px;opacity:.5;transition:opacity .15s;}
 .hc-edit-btn:hover,.hc-edit-btn:active{opacity:1;background:var(--bg2);}
-.hc-m{font-size:12px;color:var(--tx2);display:flex;gap:9px;flex-wrap:wrap;}
+.hc-m{font-size:12px;color:var(--tx2);display:flex;gap:9px;flex-wrap:wrap;line-height:1.6;}
 .hc-note{font-size:12px;color:var(--tx2);margin-top:6px;padding:6px 0 0;border-top:var(--br);}
 .hc-note[style*="border-left"]{border-top:none;border-left:3px solid;padding:5px 8px;background:var(--bg2);border-radius:0 6px 6px 0;margin-top:6px;}
 .sf{margin-bottom:13px;}
@@ -3717,7 +3717,7 @@ function saveAdd(){
 
 // ── GARDEN ────────────────────────────────────────────
 function getHours(actId){return sessions.filter(function(s){return s.actId===actId;}).reduce(function(t,s){return t+(s.hours||0)+((s.mins||0)/60);},0);}
-function getStage(hrs){if(hrs>=10)return 4;if(hrs>=5)return 3;if(hrs>=2)return 2;if(hrs>=0.5)return 1;return 0;}
+function getStage(hrs){if(hrs>=10)return 4;if(hrs>=5)return 3;if(hrs>=3)return 2;if(hrs>=0.5)return 1;return 0;}
 var STAGE_LABELS=['Seed','Sprout','Seedling','Flowering','In full bloom'];
 var NEXT_THRESH=[0.5,2,5,10,null];
 
@@ -4230,19 +4230,16 @@ function _showAuth(){
     .catch(function(){if(banner)banner.style.display='block';});
 }
 _supa.auth.onAuthStateChange(async function(event,session){
-  // INITIAL_SESSION is the canonical Supabase v2 boot event — fires immediately on subscribe
   if(event==='INITIAL_SESSION'){
+    // Fast path: if Supabase already has a fresh session, boot immediately
     if(session&&!_authHandled){
       supaUser=session.user;_authHandled=true;_guestMode=false;
       await checkProfile();
-    } else if(!session&&!_authHandled&&!_guestMode){
-      _showAuth();
     }
+    // null session here means token may just need refreshing — getSession() IIFE handles it
     return;
   }
-
   supaUser=session?session.user:null;
-
   if(event==='PASSWORD_RECOVERY'){
     _authHandled=true;_guestMode=false;
     document.body.classList.remove('auth-mode');
@@ -4253,16 +4250,13 @@ _supa.auth.onAuthStateChange(async function(event,session){
   } else if(event==='SIGNED_IN'&&session&&!_authHandled){
     _authHandled=true;_guestMode=false;
     await checkProfile();
-  } else if(event==='SIGNED_OUT'&&!_guestMode&&_authHandled){
-    // _authHandled stays true until we're sure the user is signed out.
-    // doSignOut() sets _authHandled=false before calling supabase signOut(),
-    // so this branch only fires for externally-triggered sign-outs (expired refresh token etc.).
-    _authHandled=false;supaUser=null;
-    _showAuth();
   }
+  // SIGNED_OUT: not handled here — doSignOut() calls _showAuth() directly after signOut().
+  // Reacting to the event causes false logouts when token refresh temporarily fails.
 });
 
-// Fallback boot: if INITIAL_SESSION didn't fire (shouldn't happen in v2 but just in case)
+// Primary boot: getSession() waits for token refresh to complete before deciding.
+// This is the only place that calls _showAuth() on load.
 (async function(){
   try{
     var r=await _supa.auth.getSession();
@@ -4278,11 +4272,12 @@ _supa.auth.onAuthStateChange(async function(event,session){
   }
 })();
 
-// Hard fallback: loading screen must always clear and a screen must show
+// Hard fallback: only show auth if we have no session at all (_authHandled=false).
+// If _authHandled=true, a session exists but profile loading is slow — don't interrupt.
 setTimeout(function(){
   _hideLoading();
-  if(!document.querySelector('.scr.on')&&!_guestMode){_showAuth();}
-},8000);
+  if(!document.querySelector('.scr.on')&&!_guestMode&&!_authHandled){_showAuth();}
+},10000);
 
 }); // DOMContentLoaded
 
