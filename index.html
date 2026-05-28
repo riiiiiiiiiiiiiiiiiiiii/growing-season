@@ -4176,39 +4176,45 @@ function _showAuth(){
     .then(function(){/* server responded — reachable */})
     .catch(function(){if(banner)banner.style.display='block';});
 }
+// onAuthStateChange handles transitions only (sign-in after auth screen, sign-out, password reset)
 _supa.auth.onAuthStateChange(async function(event,session){
   supaUser=session?session.user:null;
   if(event==='PASSWORD_RECOVERY'){
     _authHandled=true;_guestMode=false;
     document.body.classList.remove('auth-mode');
-    show('s-auth');
-    showAuthPanel('auth-new-pw');
+    show('s-auth');showAuthPanel('auth-new-pw');
     document.getElementById('new-pw').value='';
     document.getElementById('new-pw2').value='';
     document.getElementById('new-pw-err').style.display='none';
-  } else if((event==='SIGNED_IN'||event==='INITIAL_SESSION'||event==='TOKEN_REFRESHED')&&session&&!_authHandled){
+  } else if(event==='SIGNED_IN'&&session&&!_authHandled){
     _authHandled=true;_guestMode=false;
     await checkProfile();
-  } else if(event==='SIGNED_OUT'&&!session&&!_guestMode){
-    _authHandled=false;
+  } else if(event==='SIGNED_OUT'&&!_guestMode){
+    _authHandled=false;supaUser=null;
     _showAuth();
-  } else if(event==='INITIAL_SESSION'&&!session&&!_guestMode){
-    // Don't snap to auth immediately — token refresh may still be in flight
-    setTimeout(function(){if(!_authHandled&&!_guestMode)_showAuth();},800);
-    if(window.location.hash&&window.location.hash.includes('type=magiclink')){
-      setTimeout(function(){showAuthErr('This sign-in link has expired. Please request a new one.');window.location.hash='';},850);
-    }
   }
 });
 
-// Fallback: show auth if no session after 3s
-setTimeout(function(){
-  if(!_authHandled&&!_guestMode){_showAuth();}
-},3000);
+// Boot: read session directly from storage — no event race conditions
+(async function(){
+  try{
+    var r=await _supa.auth.getSession();
+    var session=r&&r.data&&r.data.session;
+    if(session&&!_authHandled){
+      supaUser=session.user;_authHandled=true;_guestMode=false;
+      await checkProfile();
+    } else if(!session&&!_authHandled&&!_guestMode){
+      _showAuth();
+    }
+  }catch(e){
+    if(!_authHandled&&!_guestMode)_showAuth();
+  }
+})();
+
 // Hard fallback: loading screen must always clear and a screen must show
 setTimeout(function(){
   _hideLoading();
-  if(!document.querySelector('.scr.on')){_showAuth();}
+  if(!document.querySelector('.scr.on')&&!_guestMode){_showAuth();}
 },6000);
 
 }); // DOMContentLoaded
