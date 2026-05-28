@@ -4188,16 +4188,17 @@ _supa.auth.onAuthStateChange(async function(event,session){
     document.getElementById('new-pw').value='';
     document.getElementById('new-pw2').value='';
     document.getElementById('new-pw-err').style.display='none';
-  } else if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_authHandled){
+  } else if((event==='SIGNED_IN'||event==='INITIAL_SESSION'||event==='TOKEN_REFRESHED')&&session&&!_authHandled){
     _authHandled=true;_guestMode=false;
     await checkProfile();
-  } else if((event==='INITIAL_SESSION'||event==='SIGNED_OUT')&&!session&&!_guestMode){
+  } else if(event==='SIGNED_OUT'&&!session&&!_guestMode){
     _authHandled=false;
     _showAuth();
-    // If this was a magic link redirect that failed (token expired/invalid), say so
-    if(event==='INITIAL_SESSION'&&window.location.hash&&window.location.hash.includes('type=magiclink')){
-      showAuthErr('This sign-in link has expired. Please request a new one.');
-      window.location.hash='';
+  } else if(event==='INITIAL_SESSION'&&!session&&!_guestMode){
+    // Don't snap to auth immediately — token refresh may still be in flight
+    setTimeout(function(){if(!_authHandled&&!_guestMode)_showAuth();},800);
+    if(window.location.hash&&window.location.hash.includes('type=magiclink')){
+      setTimeout(function(){showAuthErr('This sign-in link has expired. Please request a new one.');window.location.hash='';},850);
     }
   }
 });
