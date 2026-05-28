@@ -731,7 +731,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div class="fl-lbl">Momentum — did this leave you wanting more?</div>
       <div class="fr" id="momentum"></div>
     </div>
-    <button class="btn btn-co" id="btn-save-log">Log the harvest</button>
+    <button class="btn btn-p" id="btn-save-log">Log the harvest</button>
     <button class="btn" style="margin-top:8px;background:#F07820;color:#fff;box-shadow:0 3px 10px rgba(240,120,32,.2);" id="btn-discard">Cancel</button>
   </div>
 
@@ -2725,7 +2725,7 @@ function setupLogScreen(id,from,startedAt){
   }
 
   var feels=document.getElementById('feels');feels.innerHTML='';
-  ['⚡ Energized','😌 Calm','🌟 Proud','✨ Inspired','🎯 Focused','😊 Happy','💪 Accomplished','😴 Tired','😵 Distracted','😤 Frustrated','🪫 Drained','🤔 Rusty','😐 Meh'].forEach(function(f){
+  ['⚡ Energized','😌 Calm','🌟 Proud','✨ Inspired','🎯 Focused','😊 Happy','💪 Accomplished','🥰 Good','🤩 Excited','🤔 Unsure','😴 Tired','😵 Distracted','😤 Frustrated','🪫 Drained','🤔 Rusty','😐 Meh'].forEach(function(f){
     var b=document.createElement('div');b.className='fb';b.textContent=f;
     b.addEventListener('click',function(){
       var idx=logFeels.indexOf(f);
@@ -3071,7 +3071,6 @@ function rMy(){
       var del=document.createElement('div');del.className='mc-del';del.textContent='🗃️';wrap.appendChild(del);
       var focEl=document.createElement('div');focEl.className='mc-foc';focEl.textContent='🎯';wrap.appendChild(focEl);
       var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
-      card.style.animationDelay=(_fi*38)+'ms';
       var dragHandle=document.createElement('div');dragHandle.className='drag-handle';dragHandle.textContent='⠿';card.appendChild(dragHandle);
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
       var streak=getStreakAt(a.id,Date.now());
@@ -3129,7 +3128,6 @@ function rMy(){
       var del=document.createElement('div');del.className='mc-del';del.textContent='🗃️';wrap.appendChild(del);
       var focEl=document.createElement('div');focEl.className='mc-foc';focEl.textContent='🎯';wrap.appendChild(focEl);
       var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
-      card.style.animationDelay=(_ai*38)+'ms';
       var dragHandle=document.createElement('div');dragHandle.className='drag-handle';dragHandle.textContent='⠿';
       card.appendChild(dragHandle);
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
