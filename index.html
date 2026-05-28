@@ -155,8 +155,8 @@ body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode
 .lt{font-family:var(--serif);font-size:20px;font-weight:700;}
 .ls{font-size:13px;color:var(--tx2);margin-top:2px;}
 .lbadge{font-size:12px;color:var(--gr);font-weight:500;background:var(--grl);padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:14px;}
-.fl{margin-bottom:16px;}
-.fl-lbl{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
+.fl{margin-bottom:24px;}
+.fl-lbl{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
 .dr{display:flex;gap:8px;align-items:center;}
 .di{width:62px;padding:8px 10px;border-radius:var(--rsm);border:var(--br2);background:var(--bg2);color:var(--tx);font-size:15px;text-align:center;-webkit-appearance:none;}
 .du{font-size:13px;color:var(--tx2);}
@@ -699,7 +699,8 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div id="lbadge-wrap"></div>
     <div class="fl">
       <div class="fl-lbl">Date</div>
-      <input type="date" id="log-date" class="sinp" style="width:100%;">
+      <button id="log-today-btn" style="display:inline-flex;align-items:center;gap:6px;background:var(--grl);border:1.5px solid var(--grm);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--gr2);cursor:pointer;">✓ Today</button>
+      <input type="date" id="log-date" class="sinp" style="width:100%;margin-top:8px;display:none;">
     </div>
     <div class="fl">
       <div class="fl-lbl">Time spent <span class="au" id="au-btn"></span></div>
@@ -2749,7 +2750,17 @@ function setupLogScreen(id,from,startedAt){
 
   logRating=0;
   makeStarRating(document.getElementById('stars'),0,function(val,lbl){logRating=val;document.getElementById('slbl').textContent=lbl;});
-  document.getElementById('log-date').value=new Date().toLocaleDateString('en-CA');
+  var _logToday=true;
+  var logTodayBtn=document.getElementById('log-today-btn');
+  var logDateInp=document.getElementById('log-date');
+  logDateInp.value=new Date().toLocaleDateString('en-CA');
+  logDateInp.style.display='none';
+  logTodayBtn.style.background='var(--grl)';logTodayBtn.style.color='var(--gr2)';logTodayBtn.style.borderColor='var(--grm)';logTodayBtn.textContent='✓ Today';
+  logTodayBtn.onclick=function(){
+    _logToday=!_logToday;
+    if(_logToday){logDateInp.style.display='none';logTodayBtn.textContent='✓ Today';logTodayBtn.style.background='var(--grl)';logTodayBtn.style.color='var(--gr2)';logTodayBtn.style.borderColor='var(--grm)';}
+    else{logDateInp.style.display='block';logDateInp.value=new Date().toLocaleDateString('en-CA');logTodayBtn.textContent='Pick a date';logTodayBtn.style.background='var(--bg2)';logTodayBtn.style.color='var(--tx2)';logTodayBtn.style.borderColor='var(--bg3)';}
+  };
   document.getElementById('ln').value='';
   document.getElementById('ln-well').value='';
   document.getElementById('ln-diff').value='';
@@ -2770,7 +2781,8 @@ function saveLog(){
   var stageBefore=getStage(getHours(logId));
   var _logAct=myActs.find(function(x){return x.id===logId;})||{};
   var logDateVal=document.getElementById('log-date').value;
-  var logTs=logDateVal?new Date(logDateVal+'T12:00:00').getTime():Date.now();
+  var _todayActive=document.getElementById('log-today-btn').textContent.indexOf('✓')>-1;
+  var logTs=_todayActive?Date.now():(logDateVal?new Date(logDateVal+'T12:00:00').getTime():Date.now());
   sessions.push({actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:logTs,hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
   var stageAfter=getStage(getHours(logId));
   for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(logId,s);
