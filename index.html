@@ -696,6 +696,10 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div class="lh"><div class="le" id="le"></div><div><div class="lt" id="lt"></div><div class="ls" id="ls"></div></div></div>
     <div id="lbadge-wrap"></div>
     <div class="fl">
+      <div class="fl-lbl">Date</div>
+      <input type="date" id="log-date" class="sinp" style="width:100%;">
+    </div>
+    <div class="fl">
       <div class="fl-lbl">Time spent <span class="au" id="au-btn"></span></div>
       <div class="dr">
         <input type="number" class="di" id="lh" min="0" max="24" value="0"><span class="du">h</span>
@@ -2733,6 +2737,7 @@ function setupLogScreen(id,from,startedAt){
 
   logRating=0;
   makeStarRating(document.getElementById('stars'),0,function(val,lbl){logRating=val;document.getElementById('slbl').textContent=lbl;});
+  document.getElementById('log-date').value=new Date().toLocaleDateString('en-CA');
   document.getElementById('ln').value='';
   document.getElementById('ln-well').value='';
   document.getElementById('ln-diff').value='';
@@ -2752,7 +2757,9 @@ function openFinish(id,from){setupLogScreen(id,from,active?active.startedAt:null
 function saveLog(){
   var stageBefore=getStage(getHours(logId));
   var _logAct=myActs.find(function(x){return x.id===logId;})||{};
-  sessions.push({actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:Date.now(),hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
+  var logDateVal=document.getElementById('log-date').value;
+  var logTs=logDateVal?new Date(logDateVal+'T12:00:00').getTime():Date.now();
+  sessions.push({actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:logTs,hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
   var stageAfter=getStage(getHours(logId));
   for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(logId,s);
   checkTrophies();
