@@ -48,7 +48,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 @keyframes obFadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 .ob0-anim{opacity:0;animation:obFadeUp .7s cubic-bezier(.22,1,.36,1) both;}
 body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode #sidebar,body.auth-mode #sb-backdrop,body.auth-mode #profile-btn{display:none!important;}
-body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #fab{display:none!important;}
+body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!important;}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(244,250,246,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:var(--br);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
 .nb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--tx3);padding:6px 4px;user-select:none;position:relative;}
@@ -461,7 +461,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <button class="sb-mr" id="sb-dark-btn"><span class="sb-mr-em" id="sb-dark-em">🌙</span><span id="sb-dark-lbl">Dark mode</span></button>
     </div>
     <div id="sb-palette" style="margin-top:auto;padding:14px 10px 6px;">
-      <button class="sb-mr" id="sb-signout-btn" style="display:none;color:var(--co);width:100%;margin-bottom:10px;"><span class="sb-mr-em">🚪</span><span>Sign out</span></button>
       <div style="height:.5px;background:var(--bg3);margin-bottom:14px;"></div>
       <div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Theme</div>
       <div style="display:flex;gap:10px;">
@@ -541,7 +540,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div class="ob0-anim" style="font-size:56px;margin-bottom:18px;animation-delay:0s;">🌱</div>
       <div class="ob0-anim" style="font-family:var(--serif);font-size:30px;font-weight:700;color:var(--gr);margin-bottom:8px;animation-delay:.18s;">Growing Season</div>
       <div class="ob0-anim" style="font-size:13px;color:var(--tx2);margin-bottom:28px;letter-spacing:.02em;animation-delay:.32s;">every season, something new takes root</div>
-      <div class="ob0-anim" style="font-size:15px;color:var(--tx);line-height:1.75;margin-bottom:40px;max-width:300px;animation-delay:.46s;"><div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:8px;">Hello, Gardener.</div>In the next step, you'll pick activities from different categories that genuinely interest you, and we'll take care of the rest.</div>
+      <div class="ob0-anim" style="font-size:15px;color:var(--tx2);line-height:1.75;margin-bottom:40px;max-width:300px;animation-delay:.46s;"><div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:8px;color:var(--gr);">Hello, Gardener.</div>In the next step, you'll pick activities from different categories that genuinely interest you, and we'll take care of the rest.</div>
       <div class="ob0-anim" style="width:100%;max-width:320px;animation-delay:.62s;">
         <button class="btn btn-p" id="ob0-next">Let's start →</button>
       </div>
@@ -563,7 +562,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div id="ob-cats" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px;"></div>
       <div id="ob-grid" class="og"></div>
       <button class="btn btn-p" id="ob-btn" disabled>Next</button>
-      <button class="btn btn-s" id="ob-back-btn" style="display:none;margin-top:6px;">← Back to my plot</button>
+      <button class="btn btn-s" id="ob-back-btn" style="display:none;margin-top:6px;">← Back to seeds</button>
     </div>
   </div>
 
@@ -634,7 +633,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div id="pc-wrap"></div>
     <div class="stats" id="stats"></div>
     <div id="today-glance" style="margin:0 16px 14px;"></div>
-    <div class="hs"><div class="hs-t">Your plot</div><div class="ar" id="ar"></div></div>
+    <div class="hs"><div class="hs-t">Seeds</div><div class="ar" id="ar"></div></div>
     <div id="daily-quote"></div>
     <div id="home-deco" style="width:100%;overflow:hidden;pointer-events:none;margin-top:4px;"></div>
   </div>
@@ -642,7 +641,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
   <!-- PLOT -->
   <div id="s-my" class="scr">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-      <div style="font-family:var(--serif);font-size:23px;font-weight:700;">The plot</div>
+      <div style="font-family:var(--serif);font-size:23px;font-weight:700;">Seeds</div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-size:13px;color:var(--tx2);">Tap to start or log a session</div>
@@ -674,7 +673,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
 
   <!-- HARVEST -->
   <div id="s-hist" class="scr">
-    <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:4px;">Harvest log</div>
+    <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:4px;">Logbook</div>
     <div style="font-size:13px;color:var(--tx2);margin-bottom:16px;">Your logged sessions</div>
     <div class="sw" style="margin-bottom:8px;"><span class="sic">🔍</span><input class="si" id="hist-search" placeholder="Search by activity or notes…" autocomplete="off"></div>
     <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:8px;" id="hist-period-row">
@@ -1297,7 +1296,6 @@ function launch(){
   var isGuest=!supaUser;
   document.getElementById('sb-signin-btn').style.display=isGuest?'flex':'none';
   document.getElementById('hmenu-signin').style.display=isGuest?'flex':'none';
-  document.getElementById('sb-signout-btn').style.display=isGuest?'none':'flex';
   applyDark();
   applyPalette();
   rHome();
@@ -1748,7 +1746,7 @@ function togInline(id,k,v){var a=myActs.find(function(a){return a.id===id;});if(
 function cycLvl(id){var a=myActs.find(function(a){return a.id===id;});if(!a)return;var l=['beginner','intermediate','comfortable'];a.level=l[(l.indexOf(a.level)+1)%l.length];sv();rObGrid();}
 
 var OQ=[
-  {id:'goal',title:"What's your main goal?",sub:"How do you think about most of the activities in your plot?",opts:[
+  {id:'goal',title:"What's your main goal?",sub:"How do you think about most of the activities in your seeds?",opts:[
     {v:'build',em:'📈',lbl:'Mastery & progress',sub:'I want to improve and see it'},
     {v:'enjoy',em:'🍂',lbl:'Joy & rest',sub:'Low pressure, high pleasure'},
     {v:'balance',em:'🌻',lbl:'A balance',sub:'Some serious, some just for fun'},
@@ -2576,7 +2574,7 @@ function showBrowse(){
   var bCat='all', bSearch='', bFocus=false;
   function rBrowse(){
     var body=document.getElementById('pq-body');body.innerHTML='';
-    var h=document.createElement('div');h.style.cssText='font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:10px;';h.textContent='Pick from your plot';body.appendChild(h);
+    var h=document.createElement('div');h.style.cssText='font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:10px;';h.textContent='Pick from your seeds';body.appendChild(h);
     var sw=document.createElement('div');sw.className='sw';sw.style.marginBottom='8px';
     var sic=document.createElement('span');sic.className='sic';sic.textContent='🔍';sw.appendChild(sic);
     var inp=document.createElement('input');inp.className='si';inp.placeholder='Search...';inp.value=bSearch;
@@ -2793,7 +2791,7 @@ function openActInfo(actId,from){
   rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(firstSess||lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
   if(firstSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Growing since</span><span style="font-size:13px;font-weight:600;">'+fmtD(firstSess.date)+'</span></div>';
   if(lastSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span><span style="font-size:13px;font-weight:600;">'+fmtD(lastSess.date)+'</span></div>';
-  var sh=document.getElementById('sh');
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
   sh.innerHTML='<div style="text-align:center;margin-bottom:16px;"><div style="font-size:44px;margin-bottom:6px;">'+act.emoji+'</div><div style="font-family:var(--serif);font-size:20px;font-weight:700;">'+act.name+'</div></div>'
     +'<div style="background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;">'+rows+'</div>';
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-bottom:10px;';
@@ -4218,7 +4216,6 @@ async function doSignOut(){
   collection={pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]};
   setTimeout(function(){_hideLoading();_showAuth();},350);
 }
-document.getElementById('sb-signout-btn').addEventListener('click',function(){closeSidebar();doSignOut();});
 
 // Forgot password
 document.getElementById('btn-forgot').addEventListener('click',function(){
@@ -4353,7 +4350,7 @@ if('serviceWorker' in navigator){
   <div class="sh" style="text-align:center;">
     <div style="font-size:36px;margin-bottom:10px;">☠️</div>
     <div style="font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:8px;">Terminate the field?</div>
-    <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:22px;">All your seeds will be destroyed and you'll start from scratch. Your harvest log will be kept.<br><br>Do you want to proceed?</div>
+    <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:22px;">All your seeds will be destroyed and you'll start from scratch. Your logbook will be kept.<br><br>Do you want to proceed?</div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-s" style="flex:1;margin-top:0;" id="btn-term-no">No, keep it</button>
       <button class="btn" style="flex:1;margin-top:0;background:#EF4444;color:#fff;" id="btn-term-yes">Yes, terminate</button>
@@ -4365,7 +4362,7 @@ if('serviceWorker' in navigator){
 <div class="ov" id="foc-ov">
   <div class="sh" style="max-height:80vh;display:flex;flex-direction:column;overflow:hidden;">
     <div style="font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:4px;">This week's focus</div>
-    <div style="font-size:13px;color:var(--tx2);margin-bottom:12px;">Pick the activities you want to prioritise. Others stay in your plot but fade into the background.</div>
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:12px;">Pick the activities you want to prioritise. Others stay in your seeds but fade into the background.</div>
     <input type="search" id="foc-search" placeholder="Search activities…" style="width:100%;padding:9px 12px;border-radius:10px;border:var(--br);background:#fff;font-size:14px;margin-bottom:12px;outline:none;-webkit-appearance:none;touch-action:manipulation;">
     <div id="foc-list" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
     <div style="display:flex;gap:8px;padding-top:12px;border-top:var(--br);margin-top:4px;flex-shrink:0;">
