@@ -932,7 +932,7 @@ var _supa = window.supabase.createClient(
 );
 var supaUser = null;
 // Wraps any promise with a timeout so hanging Supabase queries don't freeze the UI
-function _tq(promise,ms){return Promise.race([promise,new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},ms||6000);})]);}
+function _tq(promise,ms){return Promise.race([promise,new Promise(function(_,rej){setTimeout(function(){rej(new Error('timeout'));},ms||12000);})]);}
 
 
 // ── DATA ──────────────────────────────────────────────
