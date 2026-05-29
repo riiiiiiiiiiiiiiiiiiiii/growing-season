@@ -2502,17 +2502,18 @@ function aPQ(qid,val){
 
 function scoreA(a){
   var sc=0,t=a.tags||[],cat=a.cat||'';
+  // Tag match for chosen mode
   if(pqA.mode==='any'){sc+=Math.random()*3;}
   else if(pqA.mode==='physical'&&t.includes('physical'))sc+=3;
   else if(pqA.mode==='mental'&&t.includes('mental'))sc+=3;
   else if(pqA.mode==='creative'&&t.includes('creative'))sc+=3;
   else if(pqA.mode==='calm'&&t.includes('calm'))sc+=3;
-  // Bonus when the activity's category is a primary match for the chosen mode
-  // (e.g. mode=mental should prefer Learning/Mindfulness over Creative-that-also-has-mental)
-  if(pqA.mode==='mental'&&(cat==='Learning'||cat==='Mindfulness'))sc+=2;
-  else if(pqA.mode==='creative'&&(cat==='Creative'||cat==='Digital'))sc+=2;
-  else if(pqA.mode==='physical'&&(cat==='Active'||cat==='Outdoor'))sc+=2;
-  else if(pqA.mode==='calm'&&cat==='Mindfulness')sc+=2;
+  // Category bonus: prefer activities whose primary category matches the mode
+  // This breaks ties so e.g. mode=mental ranks Learning above Creative-with-mental-tag
+  if(pqA.mode==='mental'&&(cat==='Learning'||cat==='Mindfulness'||cat==='Digital'||cat==='Productive'))sc+=2;
+  if(pqA.mode==='creative'&&(cat==='Creative'||cat==='Digital'))sc+=2;
+  if(pqA.mode==='physical'&&(cat==='Active'||cat==='Outdoor'))sc+=2;
+  if(pqA.mode==='calm'&&(cat==='Mindfulness'||cat==='Entertainment'||cat==='Learning'))sc+=2;
   if(pqA.social==='solo'&&t.includes('solo'))sc+=2;
   if(pqA.social==='social'&&t.includes('social'))sc+=2;
   if(pqA.social==='either')sc+=1;
