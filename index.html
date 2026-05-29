@@ -1053,7 +1053,7 @@ var STAGE_ITEMS=[
   {type:'drop', emoji:'💧', label:'Water Drop', desc:'Earned when a plant sprouts — log your first 30 min on any activity.'},
   {type:'leaf', emoji:'🍃', label:'Leaf', desc:'Earned when a plant takes root — reach 2 hours on any activity.'},
   {type:'petal', emoji:'🌸', label:'Petal', desc:'Earned when a plant flowers — reach 5 hours on any activity.'},
-  {type:'bee', emoji:'🐝', label:'Bee', desc:'Earned when a plant reaches full bloom — 10 hours on any activity.'},
+  {type:'bee', emoji:'🐝', label:'Bee', desc:'Earned when a plant reaches full bloom — 12 hours on any activity.'},
 ];
 var TROPHIES=[
   // First steps
@@ -4083,7 +4083,7 @@ function rGarden(){
 
   var legend=document.getElementById('garden-legend');
   var clrs=['#C8D8C8','#7EC8A8','#56AB74','#D4537E','#F5C842'];
-  var thresh=['0h','0.5h+','2h+','5h+','10h+'];
+  var thresh=['0h'].concat(NEXT_THRESH.slice(0,4).map(function(t){return t+'h+';}));
   legend.innerHTML='';
   STAGE_LABELS.forEach(function(l,i){
     var item=document.createElement('div');item.className='legend-item';
