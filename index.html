@@ -2635,8 +2635,6 @@ function suggestAct(){
   body.appendChild(card);
   var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='Start this now';
   startBtn.addEventListener('click',function(){closePicker();startFrom(pick.id);});body.appendChild(startBtn);
-  var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='Already done it? Log it';
-  logBtn.addEventListener('click',function(){closePicker();openLogDirect(pick.id,'home');});body.appendChild(logBtn);
   var again=document.createElement('button');again.className='btn btn-s';again.style.marginTop='8px';again.textContent='Try another suggestion';
   again.addEventListener('click',suggestAct);body.appendChild(again);
   var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.marginTop='8px';cancel.textContent='Cancel';cancel.addEventListener('click',closePicker);body.appendChild(cancel);
