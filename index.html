@@ -2701,8 +2701,24 @@ async function renderFriendsList(){
       var row=document.createElement('div');row.className='fr-row';row.style.cursor='pointer';
       row.innerHTML='<div class="fr-em">'+em+'</div>'
         +'<div class="fr-info"><div class="fr-name">'+name+'</div><div class="fr-un">@'+un+'</div></div>'
-        +'<div style="font-size:18px;color:var(--tx3);flex-shrink:0;">›</div>';
-      row.addEventListener('click',function(){openFriendProfile(fid,p,f.id);});
+        +'<div class="fr-acts">'
+          +'<button class="fr-ic-btn" data-action="wave" title="Wave">👋</button>'
+          +'<button class="fr-ic-btn" data-action="clap" title="Cheer">👏</button>'
+        +'</div>';
+      row.addEventListener('click',function(e){
+        if(e.target.closest('.fr-ic-btn'))return;
+        openFriendProfile(fid,p,f.id);
+      });
+      row.querySelectorAll('.fr-ic-btn').forEach(function(btn){
+        btn.addEventListener('click',function(e){
+          e.stopPropagation();
+          if(btn.dataset.action==='wave'){
+            waveAt(fid);btn.textContent='✅';setTimeout(function(){btn.textContent='👋';},1500);
+          } else {
+            cheerAt(fid);btn.textContent='✅';setTimeout(function(){btn.textContent='👏';},1500);
+          }
+        });
+      });
       body.appendChild(row);
     });
   }catch(e){
@@ -2955,6 +2971,10 @@ async function renderConv(){
 async function waveAt(toId){
   if(!supaUser)return;
   await _supa.from('messages').insert({from_id:supaUser.id,to_id:toId,content:'__wave__'});
+}
+async function cheerAt(toId){
+  if(!supaUser)return;
+  await _supa.from('messages').insert({from_id:supaUser.id,to_id:toId,content:'__clap__'});
 }
 
 async function sendMessage(){
