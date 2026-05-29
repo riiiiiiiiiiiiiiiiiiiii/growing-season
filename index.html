@@ -398,7 +398,7 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 @keyframes suPop{0%{transform:scale(.3) rotate(-10deg);opacity:0;}70%{transform:scale(1.15) rotate(4deg);}100%{transform:scale(1) rotate(0deg);opacity:1;}}
 @keyframes suFloat{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(-110px) rotate(360deg);opacity:0;}}
 /* ── FRIENDS ──────────────────────────────────────── */
-#profile-btn{position:fixed;top:14px;right:16px;z-index:401;background:var(--bg2);border:var(--br);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--sh);transition:background .14s;}
+#profile-btn{position:fixed;top:14px;right:16px;z-index:200;background:var(--bg2);border:var(--br);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--sh);transition:background .14s;}
 #profile-btn:hover{background:var(--bg3);}
 #s-friends{overflow:hidden!important;padding-bottom:0!important;}
 #s-friends.on{display:flex!important;flex-direction:column;}
@@ -1303,6 +1303,7 @@ function nav(v){
   show('s-'+v);
   ['home','my','garden','hist','friends'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
   document.getElementById('fab').style.display=(v==='my'||v==='garden'||v==='hist')?'flex':'none';
+  var pb=document.getElementById('profile-btn');if(pb)pb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist')?'flex':'none';
   if(v==='home')rHome();
   if(v==='my')rMy();
   if(v==='garden')rGarden();
@@ -2679,10 +2680,7 @@ async function renderFriends(){
 
 async function renderFriendsList(){
   var body=document.getElementById('fr-body');
-  if(!supaUser){
-    body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);font-size:14px;">Sign in to connect with friends</div>';
-    return;
-  }
+  if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);font-size:14px;">Sign in to connect with friends</div>';return;}
   body.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
   try{
     var res=await _tq(_supa.from('friendships').select('id,requester_id,addressee_id').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','accepted'));
@@ -2700,36 +2698,89 @@ async function renderFriendsList(){
       var fid=f.requester_id===supaUser.id?f.addressee_id:f.requester_id;
       var p=profiles[fid]||{};
       var em=p.emoji||'🌱';var name=p.display_name||p.username||'?';var un=p.username||'';
-      var row=document.createElement('div');row.className='fr-row';
+      var row=document.createElement('div');row.className='fr-row';row.style.cursor='pointer';
       row.innerHTML='<div class="fr-em">'+em+'</div>'
         +'<div class="fr-info"><div class="fr-name">'+name+'</div><div class="fr-un">@'+un+'</div></div>'
-        +'<div class="fr-acts">'
-          +'<button class="fr-ic-btn" title="Wave" data-fid="'+fid+'" data-un="'+un+'">👋</button>'
-          +'<button class="fr-ic-btn" title="Message" data-fid="'+fid+'" data-name="'+name+'" data-un="'+un+'" data-em="'+em+'">💬</button>'
-          +'<button class="fr-ic-btn" title="Remove" data-fid="'+fid+'" data-fship="'+f.id+'" style="color:var(--tx3);font-size:13px;">✕</button>'
-        +'</div>';
-      row.querySelectorAll('.fr-ic-btn').forEach(function(btn){
-        btn.addEventListener('click',async function(e){
-          e.stopPropagation();
-          if(btn.title==='Wave'){
-            waveAt(btn.dataset.fid);
-            btn.textContent='✅';setTimeout(function(){btn.textContent='👋';},1500);
-          } else if(btn.title==='Remove'){
-            if(!confirm('Remove this friend?'))return;
-            btn.disabled=true;
-            await _supa.from('friendships').delete().eq('id',btn.dataset.fship);
-            renderFriendsList();
-          } else {
-            openConvOv(btn.dataset.fid,btn.dataset.name,btn.dataset.un,btn.dataset.em);
-          }
-        });
-      });
+        +'<div style="font-size:18px;color:var(--tx3);flex-shrink:0;">›</div>';
+      row.addEventListener('click',function(){openFriendProfile(fid,p,f.id);});
       body.appendChild(row);
     });
   }catch(e){
     var msg=e&&e.message?e.message:'Unknown error';
     body.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;">Error: '+msg+'</div>';
   }
+}
+
+async function openFriendProfile(fid,p,fshipId){
+  var ov=document.getElementById('ed-ov'),sh=document.getElementById('ed-sh');
+  var em=p.emoji||'🌱';var name=p.display_name||p.username||'?';var un=p.username||'';
+  sh.innerHTML='<div style="text-align:center;color:var(--tx3);font-size:13px;padding:16px 0;">Loading profile…</div>';
+  ov.classList.add('on');
+  var seedCount=0;
+  try{
+    var aRes=await _supa.from('activities').select('id').eq('user_id',fid);
+    seedCount=(aRes.data||[]).length;
+  }catch(e){}
+  sh.innerHTML='';
+
+  // Avatar + name
+  var avatar=document.createElement('div');avatar.style.cssText='text-align:center;margin-bottom:14px;';
+  avatar.innerHTML='<div style="font-size:52px;width:72px;height:72px;border-radius:50%;background:var(--bg2);border:var(--br);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">'+em+'</div>'
+    +'<div style="font-family:var(--serif);font-size:19px;font-weight:700;color:var(--tx);">'+name+'</div>'
+    +'<div style="font-size:13px;color:var(--tx3);margin-top:2px;">@'+un+'</div>';
+  sh.appendChild(avatar);
+
+  // Seed count stat
+  var stat=document.createElement('div');
+  stat.style.cssText='display:flex;justify-content:center;margin-bottom:20px;';
+  stat.innerHTML='<div style="background:var(--grl);border-radius:12px;padding:10px 22px;text-align:center;">'
+    +'<div style="font-size:22px;font-weight:700;color:var(--gr);">'+seedCount+'</div>'
+    +'<div style="font-size:11px;color:var(--tx2);margin-top:2px;">seed'+(seedCount!==1?'s':'')+' planted</div>'
+    +'</div>';
+  sh.appendChild(stat);
+
+  // Action buttons row
+  var actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;margin-bottom:18px;';
+  var waveBtn=document.createElement('button');waveBtn.className='btn btn-s';waveBtn.style.flex='1';waveBtn.textContent='👋 Wave';
+  waveBtn.addEventListener('click',function(){waveAt(fid);waveBtn.textContent='✅ Sent!';setTimeout(function(){waveBtn.textContent='👋 Wave';},1800);});
+  var msgBtn=document.createElement('button');msgBtn.className='btn btn-s';msgBtn.style.flex='1';msgBtn.textContent='💬 Message';
+  msgBtn.addEventListener('click',function(){ov.classList.remove('on');openConvOv(fid,name,un,em);});
+  actions.appendChild(waveBtn);actions.appendChild(msgBtn);sh.appendChild(actions);
+
+  // Gift picker
+  var giftLbl=document.createElement('div');giftLbl.style.cssText='font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;';giftLbl.textContent='Send a gift';sh.appendChild(giftLbl);
+  var gifts=['🍎','🍊','🍋','🍓','🍇','🌸','🌻','⭐','🌿','🫧'];
+  var giftRow=document.createElement('div');giftRow.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;';
+  gifts.forEach(function(g){
+    var btn=document.createElement('button');
+    btn.style.cssText='font-size:22px;background:var(--bg2);border:var(--br);border-radius:10px;width:42px;height:42px;cursor:pointer;transition:transform .12s;display:flex;align-items:center;justify-content:center;';
+    btn.textContent=g;
+    btn.addEventListener('click',async function(){
+      btn.style.transform='scale(1.3)';
+      await _supa.from('messages').insert({from_id:supaUser.id,to_id:fid,content:g});
+      setTimeout(function(){btn.style.transform='';},200);
+      giftLbl.textContent='Sent '+g+'!';giftLbl.style.color='var(--gr)';
+      setTimeout(function(){giftLbl.textContent='Send a gift';giftLbl.style.color='';},2000);
+    });
+    giftRow.appendChild(btn);
+  });
+  sh.appendChild(giftRow);
+
+  // Remove friend (small, at bottom)
+  var removeBtn=document.createElement('button');
+  removeBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;width:100%;padding:6px 0;text-decoration:underline;';
+  removeBtn.textContent='Remove friend';
+  removeBtn.addEventListener('click',async function(){
+    if(!confirm('Remove '+name+' as a friend?'))return;
+    removeBtn.disabled=true;removeBtn.textContent='Removing…';
+    await _supa.from('friendships').delete().eq('id',fshipId);
+    ov.classList.remove('on');renderFriendsList();
+  });
+  sh.appendChild(removeBtn);
+
+  var cancelBtn=document.createElement('button');cancelBtn.className='btn btn-s';cancelBtn.style.cssText='width:100%;margin-top:6px;';cancelBtn.textContent='Close';
+  cancelBtn.addEventListener('click',function(){ov.classList.remove('on');});
+  sh.appendChild(cancelBtn);
 }
 
 async function renderRequests(){
