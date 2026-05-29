@@ -1605,19 +1605,7 @@ function rHome(){
   document.getElementById('stat-sess').addEventListener('click',openSessionsStats);
   document.getElementById('stat-time').addEventListener('click',openTimeStats);
 
-  var todayStart=new Date();todayStart.setHours(0,0,0,0);
-  var todaySess=sessions.filter(function(s){return new Date(s.date).setHours(0,0,0,0)>=todayStart.getTime();});
-  var todayMins=todaySess.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
-  var tgEl=document.getElementById('today-glance');
-  if(tgEl){
-    if(todaySess.length===0){
-      tgEl.innerHTML='';
-    } else {
-      var _todayFmt=todayMins>=60?Math.floor(todayMins/60)+'h '+(todayMins%60)+'m':todayMins+'m';
-      tgEl.innerHTML='<div style="background:var(--bg2);border:var(--br);border-radius:var(--rad);padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;" id="tg-card"><div><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;">Today</span><span style="font-size:12px;font-weight:700;color:var(--gr);">'+_todayFmt+'</span></div><div style="font-size:13px;color:var(--tx2);">'+todaySess.length+' session'+(todaySess.length!==1?'s':'')+' logged</div></div><div style="font-size:18px;color:var(--gr);">›</div></div>';
-      document.getElementById('tg-card').addEventListener('click',function(){showTodayDetail(todaySess);});
-    }
-  }
+  var tgEl=document.getElementById('today-glance');if(tgEl)tgEl.innerHTML='';
 
   var catChipBg=darkMode
     ?{Creative:'#2A1828',Active:'#2A1A14',Learning:'#141E30',Social:'#142418',Mindfulness:'#1A1428',Productive:'#221A08',Digital:'#141828',Outdoor:'#142218'}
