@@ -456,7 +456,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div class="sb-divider"></div>
     <div class="sb-menu">
       <button class="sb-mr" id="sb-signin-btn" style="display:none;color:var(--gr);font-weight:600;"><span class="sb-mr-em">🔑</span><span>Sign in / Sign up</span></button>
-      <button class="sb-mr" id="sb-profile-btn"><span class="sb-mr-em" id="sb-prof-em">👤</span><span id="sb-prof-name">Gardener</span></button>
       <button class="sb-mr" id="sb-collect-btn"><span class="sb-mr-em">🫙</span><span>Collections</span><span id="sb-collect-dot" style="display:none;width:7px;height:7px;background:#E53E3E;border-radius:50%;margin-left:auto;flex-shrink:0;"></span></button>
       <button class="sb-mr" id="sb-notes-btn"><span class="sb-mr-em">📓</span><span>Notes</span></button>
       <button class="sb-mr" id="sb-dark-btn"><span class="sb-mr-em" id="sb-dark-em">🌙</span><span id="sb-dark-lbl">Dark mode</span></button>
@@ -617,7 +616,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <!-- Hamburger dropdown -->
     <div id="home-menu" class="hmenu off">
       <div class="hmenu-row" id="hmenu-signin" style="display:none;color:var(--gr);font-weight:600;"><span class="hmenu-em">🔑</span><span>Sign in / Sign up</span></div>
-      <div class="hmenu-row" id="hmenu-profile"><span class="hmenu-em" id="hmenu-em">👤</span><span id="hmenu-name">Gardener</span></div>
       <div class="hmenu-row" id="hmenu-signout" style="display:none;color:var(--co);"><span class="hmenu-em">🚪</span><span>Sign out</span></div>
       <div class="hmenu-row" id="hmenu-collect"><span class="hmenu-em">🫙</span><span>Collections</span><span id="hmenu-badge" class="hmenu-dot" style="display:none;"></span></div>
       <div class="hmenu-row" id="hmenu-notes"><span class="hmenu-em">📓</span><span>Notes</span></div>
@@ -1331,7 +1329,6 @@ document.getElementById('sb-toggle').addEventListener('click',function(){documen
 document.getElementById('sb-backdrop').addEventListener('click',closeSidebar);
 // Sidebar menu
 document.getElementById('sb-signin-btn').addEventListener('click',function(){closeSidebar();goToSignIn();});
-document.getElementById('sb-profile-btn').addEventListener('click',function(){closeSidebar();openProfileEdit();});
 document.getElementById('sb-collect-btn').addEventListener('click',function(){closeSidebar();openCollect();});
 document.getElementById('sb-notes-btn').addEventListener('click',function(){closeSidebar();openNotes();});
 document.getElementById('sb-dark-btn').addEventListener('click',function(){darkMode=!darkMode;applyDark();sv();});
@@ -1585,10 +1582,7 @@ function rHome(){
   document.getElementById('sb-label').textContent=greet+nameStr+' · '+sea.label;
   document.getElementById('sb-title').textContent=sea.title;
   document.getElementById('sb-sub').textContent=sea.sub;
-  var hmenuEm=document.getElementById('hmenu-em');if(hmenuEm)hmenuEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
-  var hmenuName=document.getElementById('hmenu-name');if(hmenuName)hmenuName.textContent=profile&&profile.name?profile.name:'Gardener';
-  var sbEm=document.getElementById('sb-prof-em');if(sbEm)sbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
-  var sbName=document.getElementById('sb-prof-name');if(sbName)sbName.textContent=profile&&profile.name?profile.name:'Gardener';
+  var pbEm=document.getElementById('profile-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
   var pbEm=document.getElementById('profile-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
@@ -2060,7 +2054,6 @@ document.getElementById('btn-menu').addEventListener('click',function(){
 });
 document.getElementById('home-menu-ov').addEventListener('click',closeHomeMenu);
 document.getElementById('hmenu-signin').addEventListener('click',function(){closeHomeMenu();goToSignIn();});
-document.getElementById('hmenu-profile').addEventListener('click',function(){closeHomeMenu();openProfileEdit();});
 document.getElementById('hmenu-collect').addEventListener('click',function(){closeHomeMenu();openCollect();});
 document.getElementById('hmenu-dark').addEventListener('click',function(){closeHomeMenu();darkMode=!darkMode;applyDark();sv();});
 document.getElementById('hmenu-palette').addEventListener('click',function(e){
