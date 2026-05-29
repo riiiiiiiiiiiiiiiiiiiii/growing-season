@@ -4059,7 +4059,7 @@ async function syncToSupabase(){
       showToast('Sync error: '+_delR.error.message,null);
     } else if(sessions.length){
       _r=await _supa.from('sessions').insert(
-        sessions.map(function(s){return{id:s.id,user_id:uid,act_id:s.actId,date:new Date(s.date||Date.now()).toISOString(),hours:Math.floor(s.hours||0),mins:Math.round(s.mins||0),rating:s.rating||null,note:s.notes||'',feels:s.feel||[],momentum:s.momentum||'',data:s};})
+        sessions.map(function(s){return{id:s.id,user_id:uid,act_id:s.actId,date:new Date(s.date||Date.now()).toISOString(),hours:Math.floor(s.hours||0),mins:Math.round(s.mins||0),rating:s.rating?Math.round(s.rating):null,note:s.notes||'',feels:s.feel||[],momentum:s.momentum||'',data:s};})
       );
       if(_r&&_r.error){
         console.warn('Supabase sync: sessions insert',_r.error.message,_r.error.code);
