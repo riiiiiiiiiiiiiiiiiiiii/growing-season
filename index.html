@@ -1601,7 +1601,9 @@ function rHome(){
   }
 
   var tm=sessions.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
-  document.getElementById('stats').innerHTML='<div class="sc"><div class="sc-n">'+sessions.length+'</div><div class="sc-l">Sessions logged</div></div><div class="sc"><div class="sc-n">'+Math.floor(tm/60)+'h '+(tm%60)+'m</div><div class="sc-l">Time growing</div></div>';
+  document.getElementById('stats').innerHTML='<div class="sc" id="stat-sess" style="cursor:pointer;"><div class="sc-n">'+sessions.length+'</div><div class="sc-l">Sessions logged</div></div><div class="sc" id="stat-time" style="cursor:pointer;"><div class="sc-n">'+Math.floor(tm/60)+'h '+(tm%60)+'m</div><div class="sc-l">Time growing</div></div>';
+  document.getElementById('stat-sess').addEventListener('click',openSessionsStats);
+  document.getElementById('stat-time').addEventListener('click',openTimeStats);
 
   var todayStart=new Date();todayStart.setHours(0,0,0,0);
   var todaySess=sessions.filter(function(s){return new Date(s.date).setHours(0,0,0,0)>=todayStart.getTime();});
@@ -2776,6 +2778,69 @@ function setupLogScreen(id,from,startedAt){
     mom.appendChild(b);
   });
   show('s-log');
+}
+
+function _fmtMins(m){if(m===0)return '0m';return(m>=60?Math.floor(m/60)+'h ':'')+(m%60?m%60+'m':'');}
+function _periodMins(sArr){return sArr.reduce(function(t,s){return t+(s.hours||0)*60+(s.mins||0);},0);}
+function _startOf(unit){
+  var d=new Date();
+  if(unit==='day'){d.setHours(0,0,0,0);return d.getTime();}
+  if(unit==='week'){d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime();}// Mon start
+  if(unit==='month'){d.setDate(1);d.setHours(0,0,0,0);return d.getTime();}
+  if(unit==='6mo'){d.setMonth(d.getMonth()-6);d.setHours(0,0,0,0);return d.getTime();}
+}
+function _sessIn(ts){return sessions.filter(function(s){return s.date>=ts;});}
+
+function openSessionsStats(){
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
+  var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:16px;';title.textContent='Sessions logged';sh.appendChild(title);
+  var rows=[
+    {label:'Today',count:_sessIn(_startOf('day')).length},
+    {label:'This week',count:_sessIn(_startOf('week')).length},
+    {label:'This month',count:_sessIn(_startOf('month')).length},
+    {label:'Past 6 months',count:_sessIn(_startOf('6mo')).length}
+  ];
+  var tbl=document.createElement('div');tbl.style.cssText='background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;';
+  rows.forEach(function(r,i){
+    var row=document.createElement('div');row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:12px 0;'+(i<rows.length-1?'border-bottom:.5px solid var(--bg3);':'');
+    row.innerHTML='<span style="font-size:14px;color:var(--tx2);">'+r.label+'</span><span style="font-size:15px;font-weight:700;color:var(--gr);">'+r.count+'</span>';
+    tbl.appendChild(row);
+  });
+  sh.appendChild(tbl);
+  var close=document.createElement('button');close.className='btn btn-s';close.style.width='100%';close.textContent='Close';close.addEventListener('click',closeEd);sh.appendChild(close);
+  document.getElementById('ed-ov').classList.add('on');
+}
+
+function openTimeStats(){
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
+  var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:16px;';title.textContent='Time growing';sh.appendChild(title);
+  // Days of current week (Mon–Sun)
+  var weekStart=_startOf('week');
+  var days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var dayTbl=document.createElement('div');dayTbl.style.cssText='background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:12px;';
+  days.forEach(function(day,i){
+    var dayMs=weekStart+i*86400000;
+    var nextMs=dayMs+86400000;
+    var mins=_periodMins(sessions.filter(function(s){return s.date>=dayMs&&s.date<nextMs;}));
+    var row=document.createElement('div');row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 0;'+(i<days.length-1?'border-bottom:.5px solid var(--bg3);':'');
+    row.innerHTML='<span style="font-size:13px;color:var(--tx2);">'+day+'</span><span style="font-size:14px;font-weight:'+(mins>0?'700':'400')+';color:'+(mins>0?'var(--gr)':'var(--tx3)')+';">'+_fmtMins(mins)+'</span>';
+    dayTbl.appendChild(row);
+  });
+  sh.appendChild(dayTbl);
+  var totals=[
+    {label:'This week',mins:_periodMins(_sessIn(_startOf('week')))},
+    {label:'This month',mins:_periodMins(_sessIn(_startOf('month')))},
+    {label:'Past 6 months',mins:_periodMins(_sessIn(_startOf('6mo')))}
+  ];
+  var totTbl=document.createElement('div');totTbl.style.cssText='background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;';
+  totals.forEach(function(r,i){
+    var row=document.createElement('div');row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:12px 0;'+(i<totals.length-1?'border-bottom:.5px solid var(--bg3);':'');
+    row.innerHTML='<span style="font-size:14px;color:var(--tx2);">'+r.label+'</span><span style="font-size:15px;font-weight:700;color:var(--gr);">'+_fmtMins(r.mins)+'</span>';
+    totTbl.appendChild(row);
+  });
+  sh.appendChild(totTbl);
+  var close=document.createElement('button');close.className='btn btn-s';close.style.width='100%';close.textContent='Close';close.addEventListener('click',closeEd);sh.appendChild(close);
+  document.getElementById('ed-ov').classList.add('on');
 }
 
 function openActInfo(actId,from){
