@@ -3502,8 +3502,10 @@ function openSessionEdit(s,a){
   _editSessionRating=s.rating||0;
   _editSessionMomentum=s.momentum||'';
   var sh=document.getElementById('ed-sh');
+  var _d=new Date(s.date),_dv=_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');
   sh.innerHTML='<div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:4px;">Edit session</div>'
-    +'<div style="font-size:12px;color:var(--tx2);margin-bottom:18px;">'+a.emoji+' '+a.name+' · '+new Date(s.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})+'</div>'
+    +'<div style="font-size:12px;color:var(--tx2);margin-bottom:18px;">'+a.emoji+' '+a.name+'</div>'
+    +'<div class="fl"><div class="fl-lbl">Date</div><input type="date" class="sinp" id="ses-edit-date" value="'+_dv+'" style="width:100%;"></div>'
     +'<div class="fl"><div class="fl-lbl">Time spent</div>'
       +'<div class="dr"><input type="number" class="di" id="ses-edit-h" min="0" max="24" value="'+(s.hours||0)+'"><span class="du">h</span><input type="number" class="di" id="ses-edit-m" min="0" max="59" value="'+(s.mins||0)+'"><span class="du">min</span></div></div>'
     +'<div class="fl"><div class="fl-lbl">Feeling after</div><div class="fr" id="ses-edit-feels"></div></div>'
@@ -3544,6 +3546,8 @@ function openSessionEdit(s,a){
   saveBtn.addEventListener('click',function(){
     var idx=sessions.findIndex(function(x){return x.date===_editSessionDate&&x.actId===(a.id||s.actId);});
     if(idx>-1){
+      var _dateVal=sh.querySelector('#ses-edit-date').value;
+      if(_dateVal)sessions[idx].date=new Date(_dateVal+'T12:00:00').getTime();
       sessions[idx].hours=parseInt(sh.querySelector('#ses-edit-h').value)||0;
       sessions[idx].mins=parseInt(sh.querySelector('#ses-edit-m').value)||0;
       sessions[idx].feel=_editSessionFeels.slice();
