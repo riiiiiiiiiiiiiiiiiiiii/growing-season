@@ -400,10 +400,9 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 /* ── FRIENDS ──────────────────────────────────────── */
 #profile-btn{position:fixed;top:14px;right:16px;z-index:401;background:var(--bg2);border:var(--br);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--sh);transition:background .14s;}
 #profile-btn:hover{background:var(--bg3);}
-#friends-ov{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s ease;display:flex;align-items:center;justify-content:center;padding:16px;}
-#friends-ov.on{background:rgba(0,0,0,.55);pointer-events:all;}
-#friends-panel{width:100%;max-width:430px;height:88vh;background:var(--bg);border-radius:24px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,.22);transform:translateY(30px);opacity:0;transition:transform .34s cubic-bezier(.34,1.56,.64,1),opacity .22s ease;}
-#friends-ov.on #friends-panel{transform:translateY(0);opacity:1;}
+#s-friends{overflow:hidden!important;padding-bottom:0!important;}
+#s-friends.on{display:flex!important;flex-direction:column;}
+#friends-panel{width:100%;display:flex;flex-direction:column;flex:1;min-height:0;}
 .fr-tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;font-size:13px;font-weight:600;color:var(--tx3);padding:10px 4px;cursor:pointer;transition:color .22s ease,border-color .22s ease;}
 .fr-tab.on{color:var(--gr);border-bottom-color:var(--gr);}
 .fr-tab:active{opacity:.7;}
@@ -426,8 +425,8 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 #btn-conv-wave:active,#btn-conv-clap:active{transform:scale(0.88);}
 #btn-conv-send{transition:background .14s ease,transform .1s ease,opacity .14s ease;}
 #btn-conv-send:active{transform:scale(0.95);opacity:.85;}
-#btn-friends-close,#btn-conv-back,#btn-conv-close{transition:opacity .14s ease;}
-#btn-friends-close:hover,#btn-conv-back:hover,#btn-conv-close:hover{opacity:.6;}
+#btn-conv-back,#btn-conv-close{transition:opacity .14s ease;}
+#btn-conv-back:hover,#btn-conv-close:hover{opacity:.6;}
 #conv-ov{position:fixed;inset:0;z-index:700;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s ease;display:flex;align-items:center;justify-content:center;padding:16px;}
 #conv-ov.on{background:rgba(0,0,0,.55);pointer-events:all;}
 #conv-panel{width:100%;max-width:430px;height:88vh;background:var(--bg);border-radius:24px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 12px 48px rgba(0,0,0,.22);transform:translateY(30px);opacity:0;transition:transform .34s cubic-bezier(.34,1.56,.64,1),opacity .22s ease;}
@@ -767,13 +766,12 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
 
 <button class="fab" id="fab"><span style="display:block;line-height:1;transform:translateY(-1px);">+</span></button>
 
-<!-- FRIENDS OVERLAY -->
-<div id="friends-ov">
+<!-- FRIENDS PAGE -->
+<div id="s-friends" class="scr">
   <div id="friends-panel">
     <div style="padding:18px 20px 0;flex-shrink:0;">
       <div style="display:flex;align-items:center;margin-bottom:14px;">
         <div style="flex:1;font-family:var(--serif);font-size:20px;font-weight:700;">Neighbours</div>
-        <button id="btn-friends-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;">×</button>
       </div>
       <div class="sw" style="margin-bottom:10px;"><span class="sic" style="font-size:14px;font-weight:600;">@</span><input class="si" id="fr-search" placeholder="Find by username…"></div>
       <div id="fr-search-result" style="margin-bottom:6px;"></div>
@@ -1279,12 +1277,13 @@ var backFrom = 'home';
 function show(id){document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('on');});document.getElementById(id).classList.add('on');}
 function nav(v){
   show('s-'+v);
-  ['home','my','garden','hist'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
+  ['home','my','garden','hist','friends'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
   document.getElementById('fab').style.display=(v==='my'||v==='garden'||v==='hist')?'flex':'none';
   if(v==='home')rHome();
   if(v==='my')rMy();
   if(v==='garden')rGarden();
   if(v==='hist'){histSearch='';histPeriod='all';histActId=null;var hs=document.getElementById('hist-search');if(hs)hs.value='';rHist();}
+  if(v==='friends'){_frTab='friends';['friends','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='friends');});renderFriends();}
 }
 function goBack(){nav(backFrom);}
 function launch(){
@@ -1317,7 +1316,7 @@ document.getElementById('nb-home').addEventListener('click',function(){nav('home
 document.getElementById('nb-my').addEventListener('click',function(){nav('my');});
 document.getElementById('nb-garden').addEventListener('click',function(){nav('garden');});
 document.getElementById('nb-hist').addEventListener('click',function(){nav('hist');});
-document.getElementById('nb-friends').addEventListener('click',function(){openFriends();});
+document.getElementById('nb-friends').addEventListener('click',function(){nav('friends');});
 // Sidebar toggle
 function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('sb-backdrop').classList.add('on');document.getElementById('sb-toggle').textContent='×';}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-backdrop').classList.remove('on');document.getElementById('sb-toggle').textContent='☰';}
@@ -2088,13 +2087,8 @@ var _activeTimerInt=null;
 function _fmtElapsed(ms){var s=Math.floor(ms/1000);var h=Math.floor(s/3600);var m=Math.floor((s%3600)/60);var sec=s%60;if(h>0)return h+'h '+(m<10?'0':'')+m+'m '+(sec<10?'0':'')+sec+'s';return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;}
 var _frSearchTimer=null;
 
-function openFriends(){
-  document.getElementById('friends-ov').classList.add('on');
-  _frTab='friends';
-  ['friends','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='friends');});
-  renderFriends();
-}
-function closeFriends(){document.getElementById('friends-ov').classList.remove('on');}
+function openFriends(){nav('friends');}
+function closeFriends(){nav('home');}
 
 function openConvOv(userId,name,un,emoji){
   _convUserId=userId;_convName=name;_convUn=un;_convEmoji=emoji||'🌱';
@@ -2423,10 +2417,9 @@ function _switchFrTab(tab){
 document.getElementById('fr-tab-friends').addEventListener('click',function(){_switchFrTab('friends');});
 document.getElementById('fr-tab-requests').addEventListener('click',function(){_switchFrTab('requests');});
 document.getElementById('fr-tab-messages').addEventListener('click',function(){_switchFrTab('messages');});
-document.getElementById('btn-friends-close').addEventListener('click',closeFriends);
 document.getElementById('profile-btn').addEventListener('click',function(){openProfileEdit();});
 document.getElementById('btn-conv-back').addEventListener('click',closeConv);
-document.getElementById('btn-conv-close').addEventListener('click',function(){closeConv();closeFriends();});
+document.getElementById('btn-conv-close').addEventListener('click',function(){closeConv();});
 document.getElementById('btn-conv-send').addEventListener('click',sendMessage);
 document.getElementById('conv-input').addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
 document.getElementById('btn-conv-wave').addEventListener('click',async function(){
@@ -3215,7 +3208,7 @@ function rMy(){
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
       var streak=getStreakAt(a.id,Date.now());
       inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
-        +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+(!isAct?'<span class="mc-notes-btn" style="margin-left:6px;font-size:11px;opacity:0.5;cursor:pointer;vertical-align:middle;">✏️</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
+        +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+''+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
         +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
@@ -3273,7 +3266,7 @@ function rMy(){
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
       var streak=getStreakAt(a.id,Date.now());
       inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
-        +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+(!isAct?'<span class="mc-notes-btn" style="margin-left:6px;font-size:11px;opacity:0.5;cursor:pointer;vertical-align:middle;">✏️</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
+        +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+''+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
         +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
@@ -4157,9 +4150,10 @@ async function checkProfile(){
     var res=await _tq(_supa.from('profiles').select('*').eq('id',supaUser.id).maybeSingle(),5000);
     if(res&&res.data){
       await loadFromSupabase();
-      // Always override profile name/emoji from the authoritative profiles table
+      // Always override profile name/emoji/username from the authoritative profiles table
       if(res.data.display_name)profile.name=res.data.display_name;
       if(res.data.emoji)profile.emoji=res.data.emoji;
+      if(res.data.username)profile.username=res.data.username;
       bootApp();
     } else {
       _needsProfile=true;
