@@ -3062,30 +3062,31 @@ function openLogDirect(id,from){setupLogScreen(id,from,null);}
 function openFinish(id,from){setupLogScreen(id,from,active?active.startedAt:null);}
 
 function saveLog(){
-  var stageBefore=getStage(getHours(logId));
-  var _logAct=myActs.find(function(x){return x.id===logId;})||{};
-  var logDateVal=document.getElementById('log-date').value;
-  var _todayActive=document.getElementById('log-today-btn').textContent.indexOf('✓')>-1;
-  var _ph={morning:'09',afternoon:'14',evening:'19'}[logTimeOfDay]||'12';
-  var logTs;
-  if(startedAt&&_todayActive){logTs=startedAt;}
-  else if(_todayActive){var _d=new Date();_d.setHours(parseInt(_ph),0,0,0);logTs=_d.getTime();}
-  else{logTs=logDateVal?new Date(logDateVal+'T'+_ph+':00:00').getTime():Date.now();}
-  var _sid=genUUID();
-  sessions.push({id:_sid,actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:logTs,hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
-  var stageAfter=getStage(getHours(logId));
-  for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(logId,s);
-  checkTrophies();
-  active=null;sv();rHome();goBack();
-  showHarvestBurst(_logAct.emoji);
-  pushFeedEvent('session',_logAct.name||'',_logAct.emoji||'',null);
-  if(stageAfter>stageBefore){
-    var a=myActs.find(function(x){return x.id===logId;});
-    if(a){
-      pushFeedEvent('levelup',a.name,a.emoji,STAGE_LABELS[stageAfter]||null);
-      setTimeout(function(){showStageUp(a,stageAfter);},320);
+  try{
+    var stageBefore=getStage(getHours(logId));
+    var _logAct=myActs.find(function(x){return x.id===logId;})||{};
+    var logDateVal=document.getElementById('log-date').value;
+    var _todayActive=document.getElementById('log-today-btn').textContent.indexOf('✓')>-1;
+    var _ph={morning:'09',afternoon:'14',evening:'19'}[logTimeOfDay]||'12';
+    var logTs;
+    if(_todayActive){var _d=new Date();_d.setHours(parseInt(_ph),0,0,0);logTs=_d.getTime();}
+    else{logTs=logDateVal?new Date(logDateVal+'T'+_ph+':00:00').getTime():Date.now();}
+    var _sid=genUUID();
+    sessions.push({id:_sid,actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:logTs,hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
+    var stageAfter=getStage(getHours(logId));
+    for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(logId,s);
+    checkTrophies();
+    active=null;sv();rHome();goBack();
+    showHarvestBurst(_logAct.emoji);
+    pushFeedEvent('session',_logAct.name||'',_logAct.emoji||'',null);
+    if(stageAfter>stageBefore){
+      var a=myActs.find(function(x){return x.id===logId;});
+      if(a){
+        pushFeedEvent('levelup',a.name,a.emoji,STAGE_LABELS[stageAfter]||null);
+        setTimeout(function(){showStageUp(a,stageAfter);},320);
+      }
     }
-  }
+  }catch(e){showToast('Save error: '+e.message,null);console.error('saveLog error',e);}
 }
 function showHarvestBurst(actEmoji){
   var wrap=document.createElement('div');
@@ -4262,19 +4263,20 @@ async function syncToSupabase(){
       if(_r&&_r.error)console.warn('Supabase sync: activities',_r.error.message,_r.error.code);
     }
 
-    // Sessions: delete all then re-insert — no constraint dependency, handles deletions automatically
-    var _delR=await _supa.from('sessions').delete().eq('user_id',uid);
-    if(_delR&&_delR.error){
-      console.warn('Supabase sync: sessions delete',_delR.error.message,_delR.error.code);
-      showToast('Sync error: '+_delR.error.message,null);
-    } else if(sessions.length){
-      _r=await _supa.from('sessions').insert(
-        sessions.map(function(s){return{id:s.id,user_id:uid,username:profile&&profile.username||null,act_id:s.actId,date:new Date(s.date||Date.now()).toISOString(),hours:Math.floor(s.hours||0),mins:Math.round(s.mins||0),rating:s.rating?Math.round(s.rating):null,note:s.notes||'',feels:s.feel||[],momentum:s.momentum||'',data:s};})
+    // Sessions: upsert by id, then delete any Supabase rows not present locally
+    if(sessions.length){
+      _r=await _supa.from('sessions').upsert(
+        sessions.map(function(s){return{id:s.id,user_id:uid,username:profile&&profile.username||null,act_id:s.actId,date:new Date(s.date||Date.now()).toISOString(),hours:Math.floor(s.hours||0),mins:Math.round(s.mins||0),rating:s.rating?Math.round(s.rating):null,note:s.notes||'',feels:s.feel||[],momentum:s.momentum||'',data:s};}),
+        {onConflict:'id'}
       );
-      if(_r&&_r.error){
-        console.warn('Supabase sync: sessions insert',_r.error.message,_r.error.code);
-        showToast('Sync error: '+_r.error.message,null);
-      }
+      if(_r&&_r.error)console.warn('Supabase sync: sessions upsert',_r.error.message,_r.error.code);
+    }
+    // Remove sessions deleted locally
+    var _remoteIds=await _supa.from('sessions').select('id').eq('user_id',uid);
+    if(_remoteIds.data&&_remoteIds.data.length){
+      var _localSet=new Set(sessions.map(function(s){return s.id;}));
+      var _toDelete=_remoteIds.data.filter(function(r){return!_localSet.has(r.id);}).map(function(r){return r.id;});
+      if(_toDelete.length)await _supa.from('sessions').delete().in('id',_toDelete);
     }
   }catch(e){console.warn('Supabase sync error:',e);showToast('Sync failed: '+e.message,null);}finally{_syncInProgress=false;}
 }
