@@ -680,6 +680,15 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <button class="hist-fp" data-p="week">This week</button>
       <button class="hist-fp" data-p="month">This month</button>
       <button class="hist-fp" data-p="rated">High rated</button>
+      <button class="hist-fp" data-p="custom">Custom</button>
+    </div>
+    <div id="hist-custom-range" style="display:none;background:var(--bg2);border:var(--br);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:none;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:12px;color:var(--tx2);white-space:nowrap;">From</span>
+        <input type="date" id="hist-custom-from" class="sinp" style="flex:1;min-width:100px;padding:6px 10px;font-size:13px;">
+        <span style="font-size:12px;color:var(--tx2);white-space:nowrap;">to</span>
+        <input type="date" id="hist-custom-to" class="sinp" style="flex:1;min-width:100px;padding:6px 10px;font-size:13px;">
+      </div>
     </div>
     <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:10px;" id="hist-act-row"></div>
     <div id="hist-count" style="font-size:12px;color:var(--tx3);margin-bottom:8px;display:none;"></div>
@@ -1282,7 +1291,7 @@ function nav(v){
   if(v==='home')rHome();
   if(v==='my')rMy();
   if(v==='garden')rGarden();
-  if(v==='hist'){histSearch='';histPeriod='all';histActId=null;var hs=document.getElementById('hist-search');if(hs)hs.value='';rHist();}
+  if(v==='hist'){histSearch='';histPeriod='all';histActId=null;histCustomFrom=null;histCustomTo=null;var hs=document.getElementById('hist-search');if(hs)hs.value='';var cr=document.getElementById('hist-custom-range');if(cr)cr.style.display='none';rHist();}
   if(v==='friends'){_frTab='friends';['friends','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='friends');});renderFriends();}
 }
 function goBack(){nav(backFrom);}
@@ -1342,8 +1351,20 @@ document.getElementById('fab').addEventListener('click',function(){
 document.getElementById('hist-search').addEventListener('input',function(){histSearch=this.value;rHist();});
 document.getElementById('hist-period-row').addEventListener('click',function(e){
   var btn=e.target.closest('.hist-fp');if(!btn)return;
-  histPeriod=btn.dataset.p;rHist();
+  histPeriod=btn.dataset.p;
+  var rangeEl=document.getElementById('hist-custom-range');
+  rangeEl.style.display=(histPeriod==='custom')?'block':'none';
+  rHist();
 });
+(function(){
+  function onCustomDate(){
+    histCustomFrom=document.getElementById('hist-custom-from').value||null;
+    histCustomTo=document.getElementById('hist-custom-to').value||null;
+    if(histPeriod==='custom')rHist();
+  }
+  document.getElementById('hist-custom-from').addEventListener('change',onCustomDate);
+  document.getElementById('hist-custom-to').addEventListener('change',onCustomDate);
+})();
 document.getElementById('btn-back').addEventListener('click',goBack);
 document.getElementById('btn-save-log').addEventListener('click',saveLog);
 document.getElementById('btn-foc-cancel').addEventListener('click',closeFocus);
@@ -3384,7 +3405,7 @@ function getStreakAt(actId, date){
   while(actDays.indexOf(check)>-1){streak++;check-=dayMs;}
   return streak;
 }
-var histSearch='', histPeriod='all', histActId=null;
+var histSearch='', histPeriod='all', histActId=null, histCustomFrom=null, histCustomTo=null;
 
 function rHistActRow(){
   var row=document.getElementById('hist-act-row');
@@ -3428,12 +3449,16 @@ function rHist(){
     if(histPeriod==='week'&&s.date<weekAgo.getTime())return false;
     if(histPeriod==='month'&&s.date<monthAgo.getTime())return false;
     if(histPeriod==='rated'&&(!s.rating||normRating(s.rating)<3.5))return false;
+    if(histPeriod==='custom'){
+      if(histCustomFrom&&s.date<new Date(histCustomFrom+'T00:00:00').getTime())return false;
+      if(histCustomTo&&s.date>new Date(histCustomTo+'T23:59:59').getTime())return false;
+    }
     if(q&&a.name.toLowerCase().indexOf(q)<0&&(s.notes||'').toLowerCase().indexOf(q)<0)return false;
     return true;
   });
 
   var countEl=document.getElementById('hist-count');
-  var isFiltered=q||histPeriod!=='all'||histActId;
+  var isFiltered=q||histPeriod!=='all'||histActId||(histPeriod==='custom'&&(histCustomFrom||histCustomTo));
   if(isFiltered&&countEl){countEl.style.display='block';countEl.textContent=sorted.length+' session'+(sorted.length!==1?'s':'');}
   else if(countEl){countEl.style.display='none';}
 
