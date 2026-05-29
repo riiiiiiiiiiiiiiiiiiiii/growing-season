@@ -756,7 +756,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
   <!-- FRIENDS PAGE -->
   <div id="s-friends" class="scr">
   <div id="friends-panel">
-    <div style="padding:18px 20px 0;flex-shrink:0;">
+    <div style="padding:58px 20px 0;flex-shrink:0;">
       <div style="display:flex;align-items:center;margin-bottom:14px;">
         <div style="flex:1;font-family:var(--serif);font-size:20px;font-weight:700;">Neighbours</div>
       </div>
@@ -4054,6 +4054,13 @@ async function syncToSupabase(){
         {onConflict:'id,user_id'}
       );
       if(_r&&_r.error)console.warn('Supabase sync: sessions',_r.error.message,_r.error.code);
+    }
+    // Remove any Supabase sessions that no longer exist locally
+    var _localIds=new Set(sessions.map(function(s){return s.id;}).filter(Boolean));
+    var _allR=await _supa.from('sessions').select('id').eq('user_id',uid);
+    if(_allR&&_allR.data&&_allR.data.length){
+      var _stale=_allR.data.filter(function(r){return !_localIds.has(r.id);}).map(function(r){return r.id;});
+      if(_stale.length)await _supa.from('sessions').delete().in('id',_stale).eq('user_id',uid);
     }
   }catch(e){console.warn('Supabase sync error:',e);}
 }
