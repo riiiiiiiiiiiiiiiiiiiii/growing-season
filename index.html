@@ -4052,8 +4052,10 @@ document.addEventListener('pointerdown',function(e){
 },true);
 
 // ── SUPABASE SYNC ─────────────────────────────────────
+var _syncInProgress=false;
 async function syncToSupabase(){
-  if(!supaUser)return;
+  if(!supaUser||_syncInProgress)return;
+  _syncInProgress=true;
   var uid=supaUser.id;
   try{
     // Assign stable IDs to any sessions that don't have one
@@ -4089,7 +4091,7 @@ async function syncToSupabase(){
         showToast('Sync error: '+_r.error.message,null);
       }
     }
-  }catch(e){console.warn('Supabase sync error:',e);showToast('Sync failed: '+e.message,null);}
+  }catch(e){console.warn('Supabase sync error:',e);showToast('Sync failed: '+e.message,null);}finally{_syncInProgress=false;}
 }
 
 async function loadFromSupabase(){
