@@ -773,8 +773,9 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div id="fr-search-result" style="margin-bottom:6px;"></div>
       <div style="display:flex;border-bottom:.5px solid var(--bg3);">
         <button class="fr-tab on" id="fr-tab-friends">Neighbours</button>
-        <button class="fr-tab" id="fr-tab-requests">Requests <span id="fr-req-badge" style="display:none;background:#E53E3E;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;vertical-align:middle;"></span></button>
+        <button class="fr-tab" id="fr-tab-feed">Feed</button>
         <button class="fr-tab" id="fr-tab-messages">Messages <span id="fr-msg-badge" style="display:none;background:#E53E3E;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;vertical-align:middle;"></span></button>
+        <button class="fr-tab" id="fr-tab-requests">Requests <span id="fr-req-badge" style="display:none;background:#E53E3E;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;vertical-align:middle;"></span></button>
       </div>
     </div>
     <div id="fr-body" style="flex:1;overflow-y:auto;padding:12px 20px 80px;"></div>
@@ -1293,7 +1294,7 @@ function nav(v){
   if(v==='my')rMy();
   if(v==='garden')rGarden();
   if(v==='hist'){histSearch='';histPeriod='all';histActId=null;histCustomFrom=null;histCustomTo=null;var hs=document.getElementById('hist-search');if(hs)hs.value='';var cr=document.getElementById('hist-custom-range');if(cr)cr.style.display='none';rHist();}
-  if(v==='friends'){_frTab='friends';['friends','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='friends');});renderFriends();}
+  if(v==='friends'){_frTab='friends';['friends','feed','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='friends');});renderFriends();}
 }
 function goBack(){nav(backFrom);}
 function launch(){
@@ -1427,7 +1428,7 @@ document.getElementById('btn-add-cat').addEventListener('click',function(){
   sv();if(_renderCats)_renderCats(name);showToast('Category saved',null);
 });
 document.getElementById('btn-lib-save').addEventListener('click',function(){
-  libSelected.forEach(function(id){var a=ACTS.find(function(x){return x.id===id;});if(a)myActs.push(Object.assign({},a,{type:'recreational',level:'beginner'}));});
+  libSelected.forEach(function(id){var a=ACTS.find(function(x){return x.id===id;});if(a){myActs.push(Object.assign({},a,{type:'recreational',level:'beginner'}));pushFeedEvent('plant',a.name,a.emoji,null);}});
   checkTrophies();sv();closeAdd();rMy();
 });
 document.getElementById('btn-ed-save').addEventListener('click',saveEd);
@@ -2102,7 +2103,69 @@ document.getElementById('btn-stageup-close').addEventListener('click',function()
 // Required Supabase tables:
 //   CREATE TABLE friendships (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, requester_id uuid REFERENCES auth.users(id), addressee_id uuid REFERENCES auth.users(id), status text DEFAULT 'pending', created_at timestamptz DEFAULT now(), UNIQUE(requester_id,addressee_id));
 //   CREATE TABLE messages (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, from_id uuid REFERENCES auth.users(id), to_id uuid REFERENCES auth.users(id), content text, created_at timestamptz DEFAULT now(), read_at timestamptz);
+//   CREATE TABLE feed_events (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, username text, user_emoji text, type text NOT NULL, act_name text, act_emoji text, stage text, created_at timestamptz DEFAULT now());
 //   Enable RLS and add policies allowing users to read/write their own rows.
+
+function _fmtAgo(ts){var s=Math.floor((Date.now()-new Date(ts).getTime())/1000);if(s<60)return 'just now';var m=Math.floor(s/60);if(m<60)return m+'m ago';var h=Math.floor(m/60);if(h<24)return h+'h ago';var d=Math.floor(h/24);if(d===1)return 'yesterday';if(d<7)return d+'d ago';return new Date(ts).toLocaleDateString([],{month:'short',day:'numeric'});}
+
+async function pushFeedEvent(type,actName,actEmoji,stage){
+  if(!supaUser)return;
+  try{
+    await _supa.from('feed_events').insert({
+      user_id:supaUser.id,
+      username:profile&&profile.username||null,
+      user_emoji:profile&&profile.emoji||'🌱',
+      type:type,
+      act_name:actName||null,
+      act_emoji:actEmoji||null,
+      stage:stage||null
+    });
+  }catch(e){console.warn('feed push error',e);}
+}
+
+async function renderFeed(){
+  var body=document.getElementById('fr-body');
+  if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);font-size:14px;">Sign in to see your neighbours\' activity</div>';return;}
+  body.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
+  try{
+    var fRes=await _tq(_supa.from('friendships').select('requester_id,addressee_id').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','accepted'));
+    if(fRes.error)throw fRes.error;
+    var friendIds=(fRes.data||[]).map(function(f){return f.requester_id===supaUser.id?f.addressee_id:f.requester_id;});
+    if(!friendIds.length){
+      body.innerHTML='<div style="text-align:center;padding:44px 0;"><div style="font-size:38px;margin-bottom:12px;">🌱</div><div style="color:var(--tx2);font-size:14px;line-height:1.6;">Add neighbours to see their activity here.</div></div>';
+      return;
+    }
+    var evRes=await _tq(_supa.from('feed_events').select('*').in('user_id',friendIds).order('created_at',{ascending:false}).limit(60));
+    if(evRes.error)throw evRes.error;
+    var evs=evRes.data||[];
+    body.innerHTML='';
+    if(!evs.length){
+      body.innerHTML='<div style="text-align:center;padding:44px 0;"><div style="font-size:38px;margin-bottom:12px;">🌿</div><div style="color:var(--tx2);font-size:14px;line-height:1.6;">Nothing yet — your neighbours have been quiet!</div></div>';
+      return;
+    }
+    evs.forEach(function(ev){
+      var name=ev.username?('@'+ev.username):'A neighbour';
+      var em=ev.user_emoji||'🌱';
+      var text='';
+      if(ev.type==='session')text='grew '+ev.act_emoji+' '+ev.act_name;
+      else if(ev.type==='plant')text='planted '+ev.act_emoji+' '+ev.act_name+' as a new seed';
+      else if(ev.type==='levelup')text='leveled up in '+ev.act_emoji+' '+ev.act_name+(ev.stage?' → '+ev.stage:'');
+      else text=ev.type;
+      var card=document.createElement('div');
+      card.style.cssText='display:flex;gap:11px;padding:12px 0;border-bottom:.5px solid var(--bg2);align-items:flex-start;';
+      card.innerHTML='<div style="font-size:26px;flex-shrink:0;width:36px;text-align:center;">'+em+'</div>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:2px;">'+name+'</div>'
+          +'<div style="font-size:13px;color:var(--tx2);line-height:1.45;">'+text+'</div>'
+          +'<div style="font-size:11px;color:var(--tx3);margin-top:4px;">'+_fmtAgo(ev.created_at)+'</div>'
+        +'</div>';
+      body.appendChild(card);
+    });
+  }catch(e){
+    var isSetup=e&&e.message&&e.message.indexOf('does not exist')>-1;
+    body.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;">'+(isSetup?'Feed needs a <code>feed_events</code> table — see code comment for SQL.':'Error loading feed.')+'</div>';
+  }
+}
 var _frTab='friends';
 var _convUserId=null,_convName=null,_convUn=null,_convEmoji=null;
 var _activeTimerInt=null;
@@ -2137,6 +2200,7 @@ async function checkUnreadBadge(){
 
 async function renderFriends(){
   if(_frTab==='friends')await renderFriendsList();
+  else if(_frTab==='feed')await renderFeed();
   else if(_frTab==='requests')await renderRequests();
   else await renderConvList();
 }
@@ -2431,12 +2495,13 @@ async function searchUser(username){
 function _switchFrTab(tab){
   if(_frTab===tab)return;
   _frTab=tab;
-  ['friends','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t===tab);});
+  ['friends','feed','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t===tab);});
   var body=document.getElementById('fr-body');
   body.style.opacity='0';
   setTimeout(function(){body.style.opacity='1';renderFriends();},80);
 }
 document.getElementById('fr-tab-friends').addEventListener('click',function(){_switchFrTab('friends');});
+document.getElementById('fr-tab-feed').addEventListener('click',function(){_switchFrTab('feed');});
 document.getElementById('fr-tab-requests').addEventListener('click',function(){_switchFrTab('requests');});
 document.getElementById('fr-tab-messages').addEventListener('click',function(){_switchFrTab('messages');});
 document.getElementById('profile-btn').addEventListener('click',function(){openProfileEdit();});
@@ -2925,9 +2990,13 @@ function saveLog(){
   checkTrophies();
   active=null;sv();rHome();goBack();
   showHarvestBurst(_logAct.emoji);
+  pushFeedEvent('session',_logAct.name||'',_logAct.emoji||'',null);
   if(stageAfter>stageBefore){
     var a=myActs.find(function(x){return x.id===logId;});
-    if(a)setTimeout(function(){showStageUp(a,stageAfter);},320);
+    if(a){
+      pushFeedEvent('levelup',a.name,a.emoji,STAGE_LABELS[stageAfter]||null);
+      setTimeout(function(){showStageUp(a,stageAfter);},320);
+    }
   }
 }
 function showHarvestBurst(actEmoji){
@@ -3864,7 +3933,9 @@ function saveAdd(){
     cat=catEl.dataset.cat;
     emoji=CEM[cat]||'🌱';
   }
-  myActs.push({id:genUUID(),name:name,emoji:emoji,cat:cat,type:typeEl?typeEl.dataset.type:'recreational',level:lvlEl?lvlEl.dataset.level:'beginner',tags:[]});
+  var _newAct={id:genUUID(),name:name,emoji:emoji,cat:cat,type:typeEl?typeEl.dataset.type:'recreational',level:lvlEl?lvlEl.dataset.level:'beginner',tags:[]};
+  myActs.push(_newAct);
+  pushFeedEvent('plant',name,emoji,null);
   checkTrophies();sv();closeAdd();rMy();
 }
 
