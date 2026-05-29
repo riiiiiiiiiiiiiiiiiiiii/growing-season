@@ -2609,14 +2609,29 @@ var _lastSuggestedId=null;
 function suggestAct(){
   if(!myActs.length){showToast('Plant some seeds first!',null);return;}
   var now=Date.now();
+  var hour=new Date().getHours();
   var pool=hasFocusSet()?myActs.filter(function(a){return isFocused(a.id);}):myActs;
   if(!pool.length)pool=myActs;
+  // Time-based filter: late night (10pm–5am), skip high-energy physical/outdoor
+  function _timeOk(a){
+    if(hour>=22||hour<5){
+      var tags=a.tags||[];var cat=a.cat||'';
+      if(cat==='Active'||cat==='Outdoor')return false;
+      if(tags.indexOf('physical')>-1||tags.indexOf('outdoor')>-1)return false;
+    }
+    return true;
+  }
+  var timeFiltPool=pool.filter(_timeOk);
+  if(timeFiltPool.length)pool=timeFiltPool;
   var candidates=pool.filter(function(a){return a.id!==_lastSuggestedId;});
   if(!candidates.length)candidates=pool;
   var scored=candidates.map(function(a){
     var lastS=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
     var daysSince=lastS?(now-lastS.date)/(24*3600*1000):999;
-    return{a:a,score:daysSince+Math.random()*3};
+    // Morning (5am–9am): boost calm/mindfulness activities
+    var timeBonus=0;
+    if(hour>=5&&hour<9){var tags=a.tags||[];if(tags.indexOf('calm')>-1||a.cat==='Mindfulness')timeBonus=4;}
+    return{a:a,score:daysSince+Math.random()*3+timeBonus};
   });
   scored.sort(function(a,b){return b.score-a.score;});
   var pick=scored[0].a;
