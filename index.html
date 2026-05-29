@@ -3488,7 +3488,7 @@ function openSessionDetail(s,a){
   var deleteBtn=document.createElement('button');deleteBtn.className='btn btn-s';deleteBtn.style.cssText='width:100%;margin-top:6px;color:var(--co);border-color:var(--co);';deleteBtn.textContent='Remove this session';
   deleteBtn.addEventListener('click',function(){
     var idx=sessions.findIndex(function(x){return x.date===s.date&&x.actId===s.actId;});
-    if(idx>-1){var removed=sessions.splice(idx,1)[0];if(supaUser&&removed.id)_supa.from('sessions').delete().eq('id',removed.id).eq('user_id',supaUser.id);sv();rHist();closeEd();showToast('Session removed',function(){sessions.splice(idx,0,removed);sv();rHist();});}
+    if(idx>-1){var removed=sessions.splice(idx,1)[0];sv();rHist();closeEd();showToast('Session removed',function(){sessions.splice(idx,0,removed);sv();rHist();});}
   });
   sh.appendChild(deleteBtn);
   document.getElementById('ed-ov').classList.add('on');
@@ -4052,21 +4052,21 @@ async function syncToSupabase(){
       if(_r&&_r.error)console.warn('Supabase sync: activities',_r.error.message,_r.error.code);
     }
 
-    if(sessions.length){
-      _r=await _supa.from('sessions').upsert(
-        sessions.map(function(s){return{id:s.id,user_id:uid,act_id:s.actId,date:new Date(s.date||Date.now()).toISOString(),hours:Math.floor(s.hours||0),mins:Math.round(s.mins||0),rating:s.rating||null,note:s.notes||'',feels:s.feel||[],momentum:s.momentum||'',data:s};}),
-        {onConflict:'id'}
+    // Sessions: delete all then re-insert — no constraint dependency, handles deletions automatically
+    var _delR=await _supa.from('sessions').delete().eq('user_id',uid);
+    if(_delR&&_delR.error){
+      console.warn('Supabase sync: sessions delete',_delR.error.message,_delR.error.code);
+      showToast('Sync error: '+_delR.error.message,null);
+    } else if(sessions.length){
+      _r=await _supa.from('sessions').insert(
+        sessions.map(function(s){return{id:s.id,user_id:uid,act_id:s.actId,date:new Date(s.date||Date.now()).toISOString(),hours:Math.floor(s.hours||0),mins:Math.round(s.mins||0),rating:s.rating||null,note:s.notes||'',feels:s.feel||[],momentum:s.momentum||'',data:s};})
       );
-      if(_r&&_r.error)console.warn('Supabase sync: sessions',_r.error.message,_r.error.code);
+      if(_r&&_r.error){
+        console.warn('Supabase sync: sessions insert',_r.error.message,_r.error.code);
+        showToast('Sync error: '+_r.error.message,null);
+      }
     }
-    // Remove any Supabase sessions that no longer exist locally
-    var _localIds=new Set(sessions.map(function(s){return s.id;}).filter(Boolean));
-    var _allR=await _supa.from('sessions').select('id').eq('user_id',uid);
-    if(_allR&&_allR.data&&_allR.data.length){
-      var _stale=_allR.data.filter(function(r){return !_localIds.has(r.id);}).map(function(r){return r.id;});
-      if(_stale.length)await _supa.from('sessions').delete().in('id',_stale).eq('user_id',uid);
-    }
-  }catch(e){console.warn('Supabase sync error:',e);}
+  }catch(e){console.warn('Supabase sync error:',e);showToast('Sync failed: '+e.message,null);}
 }
 
 async function loadFromSupabase(){
