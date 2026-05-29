@@ -616,7 +616,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <!-- Hamburger dropdown -->
     <div id="home-menu" class="hmenu off">
       <div class="hmenu-row" id="hmenu-signin" style="display:none;color:var(--gr);font-weight:600;"><span class="hmenu-em">🔑</span><span>Sign in / Sign up</span></div>
-      <div class="hmenu-row" id="hmenu-signout" style="display:none;color:var(--co);"><span class="hmenu-em">🚪</span><span>Sign out</span></div>
       <div class="hmenu-row" id="hmenu-collect"><span class="hmenu-em">🫙</span><span>Collections</span><span id="hmenu-badge" class="hmenu-dot" style="display:none;"></span></div>
       <div class="hmenu-row" id="hmenu-notes"><span class="hmenu-em">📓</span><span>Notes</span></div>
       <div class="hmenu-row" id="hmenu-palette" style="flex-direction:column;align-items:flex-start;gap:8px;">
@@ -1299,7 +1298,6 @@ function launch(){
   document.getElementById('sb-signin-btn').style.display=isGuest?'flex':'none';
   document.getElementById('hmenu-signin').style.display=isGuest?'flex':'none';
   document.getElementById('sb-signout-btn').style.display=isGuest?'none':'flex';
-  document.getElementById('hmenu-signout').style.display=isGuest?'none':'flex';
   applyDark();
   applyPalette();
   rHome();
@@ -4190,7 +4188,6 @@ async function doSignOut(){
   setTimeout(function(){_hideLoading();_showAuth();},350);
 }
 document.getElementById('sb-signout-btn').addEventListener('click',function(){closeSidebar();doSignOut();});
-document.getElementById('hmenu-signout').addEventListener('click',function(){closeHomeMenu();doSignOut();});
 
 // Forgot password
 document.getElementById('btn-forgot').addEventListener('click',function(){
