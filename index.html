@@ -2501,12 +2501,18 @@ function aPQ(qid,val){
 }
 
 function scoreA(a){
-  var sc=0,t=a.tags||[];
+  var sc=0,t=a.tags||[],cat=a.cat||'';
   if(pqA.mode==='any'){sc+=Math.random()*3;}
   else if(pqA.mode==='physical'&&t.includes('physical'))sc+=3;
   else if(pqA.mode==='mental'&&t.includes('mental'))sc+=3;
   else if(pqA.mode==='creative'&&t.includes('creative'))sc+=3;
   else if(pqA.mode==='calm'&&t.includes('calm'))sc+=3;
+  // Bonus when the activity's category is a primary match for the chosen mode
+  // (e.g. mode=mental should prefer Learning/Mindfulness over Creative-that-also-has-mental)
+  if(pqA.mode==='mental'&&(cat==='Learning'||cat==='Mindfulness'))sc+=2;
+  else if(pqA.mode==='creative'&&(cat==='Creative'||cat==='Digital'))sc+=2;
+  else if(pqA.mode==='physical'&&(cat==='Active'||cat==='Outdoor'))sc+=2;
+  else if(pqA.mode==='calm'&&cat==='Mindfulness')sc+=2;
   if(pqA.social==='solo'&&t.includes('solo'))sc+=2;
   if(pqA.social==='social'&&t.includes('social'))sc+=2;
   if(pqA.social==='either')sc+=1;
@@ -2514,6 +2520,7 @@ function scoreA(a){
     if(t.includes('calm'))sc+=3;
     else if(t.includes('mental'))sc+=2;
     if(t.includes('physical'))sc-=2;
+    if(t.includes('creative')&&!t.includes('calm'))sc-=1;
   }else if(pqA.energy==='high'){
     if(t.includes('physical'))sc+=3;
     if(t.includes('calm')&&!t.includes('creative'))sc-=1;
