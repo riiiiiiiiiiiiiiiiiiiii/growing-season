@@ -540,7 +540,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div class="ob0-anim" style="font-size:56px;margin-bottom:18px;animation-delay:0s;">🌱</div>
       <div class="ob0-anim" style="font-family:var(--serif);font-size:30px;font-weight:700;color:var(--gr);margin-bottom:8px;animation-delay:.18s;">Growing Season</div>
       <div class="ob0-anim" style="font-size:13px;color:var(--tx2);margin-bottom:28px;letter-spacing:.02em;animation-delay:.32s;">every season, something new takes root</div>
-      <div class="ob0-anim" style="font-size:15px;color:var(--tx2);line-height:1.75;margin-bottom:40px;max-width:300px;animation-delay:.46s;"><div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:8px;color:var(--gr);">Hello, Gardener.</div>In the next step, you'll pick activities from different categories that genuinely interest you, and we'll take care of the rest.</div>
+      <div class="ob0-anim" style="font-size:15px;color:var(--tx2);line-height:1.55;margin-bottom:40px;max-width:300px;animation-delay:.46s;"><div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:8px;color:var(--gr);">Hello, Gardener.</div>In the next step, you'll pick activities from different categories that genuinely interest you, and we'll take care of the rest.</div>
       <div class="ob0-anim" style="width:100%;max-width:320px;animation-delay:.62s;">
         <button class="btn btn-p" id="ob0-next">Let's start →</button>
       </div>
@@ -3966,24 +3966,28 @@ async function syncToSupabase(){
     // Assign stable IDs to any sessions that don't have one
     sessions.forEach(function(s,i){if(!s.id)s.id=uid.slice(0,8)+'-'+(s.date||Date.now())+'-'+i;});
 
-    await _supa.from('user_state').upsert({
+    var _r;
+    _r=await _supa.from('user_state').upsert({
       user_id:uid,
       data:{onboarded:onboarded,weeklyFocus:weeklyFocus,collection:collection,activityNotes:activityNotes,darkMode:darkMode,colorPalette:colorPalette,customCats:customCats,profile:profile,archivedActs:archivedActs,active:active},
       updated_at:new Date().toISOString()
     },{onConflict:'user_id'});
+    if(_r&&_r.error)console.warn('Supabase sync: user_state',_r.error.message,_r.error.code);
 
     if(myActs.length){
-      await _supa.from('activities').upsert(
+      _r=await _supa.from('activities').upsert(
         myActs.map(function(a){return{id:a.id,user_id:uid,name:a.name,emoji:a.emoji,cat:a.cat||'',type:a.type||'recreational',level:a.level||'beginner',data:a};}),
         {onConflict:'id,user_id'}
       );
+      if(_r&&_r.error)console.warn('Supabase sync: activities',_r.error.message,_r.error.code);
     }
 
     if(sessions.length){
-      await _supa.from('sessions').upsert(
+      _r=await _supa.from('sessions').upsert(
         sessions.map(function(s){return{id:s.id,user_id:uid,act_id:s.actId,date:new Date(s.date||Date.now()).toISOString(),hours:s.hours||0,mins:s.mins||0,rating:s.rating||null,note:s.notes||'',feels:s.feel||[],momentum:s.momentum||'',data:s};}),
         {onConflict:'id,user_id'}
       );
+      if(_r&&_r.error)console.warn('Supabase sync: sessions',_r.error.message,_r.error.code);
     }
   }catch(e){console.warn('Supabase sync error:',e);}
 }
@@ -4015,6 +4019,7 @@ async function loadFromSupabase(){
       gotData=true;
       myActs.splice(0,myActs.length);
       actsRes.data.forEach(function(a){myActs.push(Object.assign({},a.data||{},{id:a.id,name:a.name,emoji:a.emoji,cat:a.cat,type:a.type,level:a.level}));});
+      onboarded=true; // if activities exist, they've definitely been onboarded
     }
 
     var sessRes=await _tq(_supa.from('sessions').select('*').eq('user_id',uid).order('date',{ascending:false}),8000);
@@ -4029,9 +4034,10 @@ async function loadFromSupabase(){
     } else {
       // Nothing in Supabase — restore from localStorage so local-only data isn't lost
       var loc=ld();
-      if(loc.onboarded){
-        onboarded=loc.onboarded;
-        if(loc.myActs&&loc.myActs.length){myActs.splice(0);loc.myActs.forEach(function(a){myActs.push(a);});}
+      // Rescue even if onboarded flag is missing but activities exist locally
+      if(loc.onboarded||(loc.myActs&&loc.myActs.length)){
+        if(loc.onboarded!==undefined)onboarded=loc.onboarded;
+        if(loc.myActs&&loc.myActs.length){onboarded=true;myActs.splice(0);loc.myActs.forEach(function(a){myActs.push(a);});}
         if(loc.sessions&&loc.sessions.length){sessions.splice(0);loc.sessions.forEach(function(s){sessions.push(s);});}
         if(loc.profile)profile=loc.profile;
         if(loc.weeklyFocus)weeklyFocus=loc.weeklyFocus;
@@ -4083,17 +4089,18 @@ async function checkProfile(){
       bootApp();
     } else {
       _needsProfile=true;
+      // Profile row missing — still try to recover data from Supabase/localStorage
+      // before deciding what to show; never wipe data without checking first
+      await loadFromSupabase();
+      if(myActs.length>0)onboarded=true;
       _hideLoading();
       document.body.classList.remove('auth-mode');
       applyDark();applyPalette();
       if(onboarded){
-        // Already did the quiz — just needs username; show nav since they have a plot
         document.getElementById('main-nav').classList.add('on');
         document.getElementById('profile-btn').style.display='flex';
         openProfileStep();
       }else{
-        // Brand new account — nav stays hidden until onboarding is complete
-        myActs.splice(0);sessions.splice(0);archivedActs.splice(0);active=null;weeklyFocus={weekKey:'',actIds:[]};
         document.body.classList.add('ob-mode');
         show('s-ob0');rObCats();rObGrid();
       }
