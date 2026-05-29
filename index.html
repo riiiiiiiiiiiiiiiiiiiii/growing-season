@@ -1894,6 +1894,11 @@ async function openProfileEdit(){
   var cancelBtn=document.createElement('button');cancelBtn.className='btn btn-s';cancelBtn.style.marginTop='8px';cancelBtn.textContent='Cancel';
   cancelBtn.addEventListener('click',closeEd);
   sh.appendChild(cancelBtn);
+  if(supaUser){
+    var signOutBtn=document.createElement('button');signOutBtn.className='btn btn-s';signOutBtn.style.cssText='margin-top:8px;color:var(--co);';signOutBtn.textContent='Sign out';
+    signOutBtn.addEventListener('click',function(){closeEd();doSignOut();});
+    sh.appendChild(signOutBtn);
+  }
   document.getElementById('ed-ov').classList.add('on');
 }
 // ── NOTES ─────────────────────────────────────────────
