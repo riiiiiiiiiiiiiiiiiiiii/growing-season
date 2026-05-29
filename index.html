@@ -641,7 +641,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
   <!-- PLOT -->
   <div id="s-my" class="scr">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-      <div style="font-family:var(--serif);font-size:23px;font-weight:700;">Seeds</div>
+      <div style="font-family:var(--serif);font-size:23px;font-weight:700;">Seed packet</div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
       <div style="font-size:13px;color:var(--tx2);">Tap to start or log a session</div>
@@ -1611,7 +1611,8 @@ function rHome(){
     if(todaySess.length===0){
       tgEl.innerHTML='';
     } else {
-      tgEl.innerHTML='<div style="background:var(--bg2);border:var(--br);border-radius:var(--rad);padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;" id="tg-card"><div><div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;">Today at a glance</div><div style="font-size:14px;font-weight:600;color:var(--tx);">'+todaySess.length+' session'+(todaySess.length!==1?'s':'')+' · '+(todayMins>=60?Math.floor(todayMins/60)+'h '+(todayMins%60)+'m':todayMins+'m')+'</div></div><div style="font-size:18px;color:var(--gr);">›</div></div>';
+      var _todayFmt=todayMins>=60?Math.floor(todayMins/60)+'h '+(todayMins%60)+'m':todayMins+'m';
+      tgEl.innerHTML='<div style="background:var(--bg2);border:var(--br);border-radius:var(--rad);padding:12px 14px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;" id="tg-card"><div><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;"><span style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;">Today</span><span style="font-size:12px;font-weight:700;color:var(--gr);">'+_todayFmt+'</span></div><div style="font-size:13px;color:var(--tx2);">'+todaySess.length+' session'+(todaySess.length!==1?'s':'')+' logged</div></div><div style="font-size:18px;color:var(--gr);">›</div></div>';
       document.getElementById('tg-card').addEventListener('click',function(){showTodayDetail(todaySess);});
     }
   }
@@ -4080,7 +4081,7 @@ setInterval(function(){if(document.visibilityState==='visible')_bgRefresh();},12
 async function checkProfile(){
   if(!supaUser){console.error('checkProfile called with no supaUser');return;}
   try{
-    var res=await _tq(_supa.from('profiles').select('*').eq('id',supaUser.id).maybeSingle(),8000);
+    var res=await _tq(_supa.from('profiles').select('*').eq('id',supaUser.id).maybeSingle(),5000);
     if(res&&res.data){
       await loadFromSupabase();
       // Always override profile name/emoji from the authoritative profiles table
@@ -4105,7 +4106,24 @@ async function checkProfile(){
         show('s-ob0');rObCats();rObGrid();
       }
     }
-  }catch(e){console.error('checkProfile error:',e);throw e;}
+  }catch(e){
+    console.error('checkProfile error:',e);
+    // Supabase unavailable (timeout, paused project, network) — boot from localStorage
+    var _loc=ld();
+    if(_loc.onboarded||(_loc.myActs&&_loc.myActs.length)){
+      if(_loc.myActs&&_loc.myActs.length){onboarded=true;myActs.splice(0);_loc.myActs.forEach(function(a){myActs.push(a);});}
+      if(_loc.sessions&&_loc.sessions.length){sessions.splice(0);_loc.sessions.forEach(function(s){sessions.push(s);});}
+      if(_loc.profile)profile=_loc.profile;
+      if(_loc.weeklyFocus)weeklyFocus=_loc.weeklyFocus;
+      if(_loc.archivedActs&&_loc.archivedActs.length){archivedActs.splice(0);_loc.archivedActs.forEach(function(a){archivedActs.push(a);});}
+      if(_loc.activityNotes)activityNotes=_loc.activityNotes;
+      if(_loc.colorPalette)colorPalette=_loc.colorPalette;
+      bootApp();
+    } else {
+      _hideLoading();
+      if(!_guestMode)_showAuth();
+    }
+  }
 }
 
 function bootApp(){
@@ -4298,7 +4316,7 @@ _supa.auth.onAuthStateChange(async function(event,session){
     // Fast path: if Supabase already has a fresh session, boot immediately
     if(session&&!_authHandled){
       supaUser=session.user;_authHandled=true;_guestMode=false;
-      await checkProfile();
+      await checkProfile(); // checkProfile handles its own errors — won't throw
     }
     // null session here means token may just need refreshing — getSession() IIFE handles it
     return;
@@ -4313,7 +4331,7 @@ _supa.auth.onAuthStateChange(async function(event,session){
     document.getElementById('new-pw-err').style.display='none';
   } else if(event==='SIGNED_IN'&&session&&!_authHandled){
     _authHandled=true;_guestMode=false;
-    await checkProfile();
+    await checkProfile(); // checkProfile handles its own errors — won't throw
   }
   // SIGNED_OUT: not handled here — doSignOut() calls _showAuth() directly after signOut().
   // Reacting to the event causes false logouts when token refresh temporarily fails.
@@ -4337,11 +4355,11 @@ _supa.auth.onAuthStateChange(async function(event,session){
   }
 })();
 
-// Hard fallback: only show auth if we have no session at all (_authHandled=false).
-// If _authHandled=true, a session exists but profile loading is slow — don't interrupt.
+// Hard fallback: if nothing has shown after 10s, something went wrong — show auth.
+// Don't guard on _authHandled: a session can exist but profile load can still fail.
 setTimeout(function(){
   _hideLoading();
-  if(!document.querySelector('.scr.on')&&!_guestMode&&!_authHandled){_showAuth();}
+  if(!document.querySelector('.scr.on')&&!_guestMode){_showAuth();}
 },10000);
 
 }); // DOMContentLoaded
