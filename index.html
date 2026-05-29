@@ -42,6 +42,8 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .scr.on{display:block;animation:scrIn .22s ease;}
 @keyframes scrIn{from{opacity:0;}to{opacity:1;}}
 @keyframes gspin{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
+@keyframes obFadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+.ob0-anim{opacity:0;animation:obFadeUp .7s cubic-bezier(.22,1,.36,1) both;}
 body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode #sidebar,body.auth-mode #sb-backdrop,body.auth-mode #profile-btn{display:none!important;}
 body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #fab{display:none!important;}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(244,250,246,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:var(--br);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
@@ -531,15 +533,26 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
   </div>
 
   <!-- PROFILE CREATION -->
+  <!-- ONBOARD 0 — Intro -->
+  <div id="s-ob0" class="scr">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:85vh;padding:48px 32px 32px;text-align:center;">
+      <div class="ob0-anim" style="font-size:56px;margin-bottom:18px;animation-delay:0s;">🌱</div>
+      <div class="ob0-anim" style="font-family:var(--serif);font-size:30px;font-weight:700;color:var(--gr);margin-bottom:8px;animation-delay:.18s;">Growing Season</div>
+      <div class="ob0-anim" style="font-size:13px;color:var(--tx2);margin-bottom:28px;letter-spacing:.02em;animation-delay:.32s;">every season, something new takes root</div>
+      <div class="ob0-anim" style="font-size:15px;color:var(--tx);line-height:1.75;margin-bottom:40px;max-width:300px;animation-delay:.46s;">In the next step, you'll pick activities that genuinely interest you. Each time you practice, you log a session — and your skills grow with you.</div>
+      <div class="ob0-anim" style="width:100%;max-width:320px;animation-delay:.62s;">
+        <button class="btn btn-p" id="ob0-next">Let's start →</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ONBOARD 1 -->
   <div id="s-ob1" class="scr">
-    <div style="text-align:center;padding:44px 24px 20px;">
-      <div style="font-size:48px;margin-bottom:10px;">🌱</div>
-      <div style="font-family:var(--serif);font-size:28px;font-weight:700;color:var(--gr);margin-bottom:4px;">Growing Season</div>
-      <div style="font-size:13px;color:var(--tx2);margin-bottom:10px;">every season, something new takes root</div>
-      <div style="font-size:14px;color:var(--tx2);line-height:1.6;">Build your personal plot of activities and track how you grow.</div>
+    <div style="padding:28px 16px 8px;">
+      <div style="font-family:var(--serif);font-size:21px;font-weight:700;margin-bottom:4px;">Choose your seeds 🌱</div>
+      <div style="font-size:13px;color:var(--tx2);">Pick the activities that spark your curiosity.</div>
     </div>
-    <div style="padding:0 16px 24px;">
+    <div style="padding:12px 16px 24px;">
       <div style="background:var(--sul);border:1px solid var(--sum);border-radius:var(--rad);padding:12px 14px;margin-bottom:13px;font-size:13px;color:#6B4A00;line-height:1.55;">
         🌾 <strong>Tip:</strong> Choose 1-3 activities per category that genuinely interest you.<br>Don't see what you're looking for? Don't worry, you can always add more later.
       </div>
@@ -1403,6 +1416,7 @@ document.getElementById('btn-lib-save').addEventListener('click',function(){
 document.getElementById('btn-ed-save').addEventListener('click',saveEd);
 document.getElementById('btn-add-save').addEventListener('click',saveAdd);
 document.getElementById('ob-btn').addEventListener('click',goOQ);
+document.getElementById('ob0-next').addEventListener('click',function(){show('s-ob1');});
 document.getElementById('obs').addEventListener('input',function(){obSearch=this.value.toLowerCase();rObGrid();});
 
 // ── SEASONS ───────────────────────────────────────────
@@ -4053,7 +4067,7 @@ async function checkProfile(){
         // Brand new account — nav stays hidden until onboarding is complete
         myActs.splice(0);sessions.splice(0);archivedActs.splice(0);active=null;weeklyFocus={weekKey:'',actIds:[]};
         document.body.classList.add('ob-mode');
-        show('s-ob1');rObCats();rObGrid();
+        show('s-ob0');rObCats();rObGrid();
       }
     }
   }catch(e){console.error('checkProfile error:',e);throw e;}
@@ -4069,7 +4083,7 @@ function bootApp(){
     launch();checkNewWeek();
   }else{
     document.body.classList.add('ob-mode');
-    show('s-ob1');rObCats();rObGrid();
+    show('s-ob0');rObCats();rObGrid();
   }
 }
 
