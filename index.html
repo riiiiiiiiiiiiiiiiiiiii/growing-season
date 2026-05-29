@@ -998,6 +998,7 @@ var ACTS = [
 ];
 
 // ── STATE ─────────────────────────────────────────────
+function genUUID(){if(crypto.randomUUID)return crypto.randomUUID();return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=crypto.getRandomValues(new Uint8Array(1))[0]&15;return(c==='x'?r:(r&0x3|0x8)).toString(16);});}
 function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[],collection:{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]},activityNotes:{},darkMode:false,customCats:[],colorPalette:'green'};}
 function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({userId:supaUser?supaUser.id:null,myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,darkMode:darkMode,customCats:customCats,colorPalette:colorPalette}));}catch(e){}if(supaUser)syncToSupabase();}
 var st=ld(), myActs=st.myActs, sessions=st.sessions, onboarded=st.onboarded, profile=st.profile, active=st.active;
@@ -2917,7 +2918,7 @@ function saveLog(){
   var logDateVal=document.getElementById('log-date').value;
   var _todayActive=document.getElementById('log-today-btn').textContent.indexOf('✓')>-1;
   var logTs=_todayActive?Date.now():(logDateVal?new Date(logDateVal+'T12:00:00').getTime():Date.now());
-  var _sid=(supaUser?supaUser.id.slice(0,8):'gs')+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+  var _sid=genUUID();
   sessions.push({id:_sid,actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:logTs,hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
   var stageAfter=getStage(getHours(logId));
   for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(logId,s);
@@ -3863,7 +3864,7 @@ function saveAdd(){
     cat=catEl.dataset.cat;
     emoji=CEM[cat]||'🌱';
   }
-  myActs.push({id:'c'+Date.now(),name:name,emoji:emoji,cat:cat,type:typeEl?typeEl.dataset.type:'recreational',level:lvlEl?lvlEl.dataset.level:'beginner',tags:[]});
+  myActs.push({id:genUUID(),name:name,emoji:emoji,cat:cat,type:typeEl?typeEl.dataset.type:'recreational',level:lvlEl?lvlEl.dataset.level:'beginner',tags:[]});
   checkTrophies();sv();closeAdd();rMy();
 }
 
@@ -4084,7 +4085,7 @@ async function syncToSupabase(){
   var uid=supaUser.id;
   try{
     // Assign stable IDs to any sessions that don't have one
-    sessions.forEach(function(s,i){if(!s.id)s.id=uid.slice(0,8)+'-'+(s.date||Date.now())+'-'+i;});
+    sessions.forEach(function(s){if(!s.id)s.id=genUUID();});
 
     var _r;
     _r=await _supa.from('user_state').upsert({
