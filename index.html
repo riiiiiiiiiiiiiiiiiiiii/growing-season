@@ -4050,7 +4050,7 @@ async function syncToSupabase(){
 
     if(myActs.length){
       _r=await _supa.from('activities').upsert(
-        myActs.map(function(a){return{id:a.id,user_id:uid,name:a.name,emoji:a.emoji,cat:a.cat||'',type:a.type||'recreational',level:a.level||'beginner',data:a};}),
+        myActs.map(function(a){return{id:a.id,user_id:uid,username:profile&&profile.username||null,name:a.name,emoji:a.emoji,cat:a.cat||'',type:a.type||'recreational',level:a.level||'beginner',data:a};}),
         {onConflict:'id,user_id'}
       );
       if(_r&&_r.error)console.warn('Supabase sync: activities',_r.error.message,_r.error.code);
