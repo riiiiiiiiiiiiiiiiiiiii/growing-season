@@ -718,19 +718,19 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div class="lh"><div class="le" id="le"></div><div><div class="lt" id="lt"></div><div class="ls" id="ls"></div></div></div>
     <div id="lbadge-wrap"></div>
     <div class="fl">
-      <div style="display:flex;gap:16px;align-items:flex-start;">
-        <div style="flex:1;min-width:0;">
-          <div class="fl-lbl">Date</div>
-          <button id="log-today-btn" style="display:inline-flex;align-items:center;gap:6px;background:var(--grl);border:1.5px solid var(--grm);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--gr2);cursor:pointer;white-space:nowrap;">✓ Today</button>
-          <input type="date" id="log-date" class="sinp" style="width:100%;margin-top:8px;display:none;">
-        </div>
-        <div style="flex-shrink:0;">
-          <div class="fl-lbl">Time spent <span class="au" id="au-btn"></span></div>
-          <div class="dr">
-            <input type="number" class="di" id="lh" min="0" max="24" value="0"><span class="du">h</span>
-            <input type="number" class="di" id="lm" min="0" max="59" value="30"><span class="du">min</span>
-          </div>
-        </div>
+      <div class="fl-lbl">Date</div>
+      <button id="log-today-btn" style="display:inline-flex;align-items:center;gap:6px;background:var(--grl);border:1.5px solid var(--grm);border-radius:20px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--gr2);cursor:pointer;white-space:nowrap;">✓ Today</button>
+      <input type="date" id="log-date" class="sinp" style="width:100%;margin-top:8px;display:none;">
+    </div>
+    <div class="fl">
+      <div class="fl-lbl">When</div>
+      <div class="fr" id="log-timeofday"></div>
+    </div>
+    <div class="fl">
+      <div class="fl-lbl">Time spent <span class="au" id="au-btn"></span></div>
+      <div class="dr">
+        <input type="number" class="di" id="lh" min="0" max="24" value="0"><span class="du">h</span>
+        <input type="number" class="di" id="lm" min="0" max="59" value="30"><span class="du">min</span>
       </div>
     </div>
     <div class="fl">
@@ -1345,9 +1345,73 @@ document.getElementById('sb-palette').addEventListener('click',function(e){
   applyPalette();
   sv();
 });
+function openGardenQuickLog(){
+  if(!myActs.length){openAdd();return;}
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
+  var qlCat='all',qlSearch='';
+  function render(){
+    sh.innerHTML='';
+    var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:4px;';title.textContent='Log a session';sh.appendChild(title);
+    var sub=document.createElement('div');sub.style.cssText='font-size:13px;color:var(--tx2);margin-bottom:12px;';sub.textContent='Which activity?';sh.appendChild(sub);
+    var sw=document.createElement('div');sw.className='sw';sw.style.marginBottom='8px';
+    var sic=document.createElement('span');sic.className='sic';sic.textContent='🔍';sw.appendChild(sic);
+    var inp=document.createElement('input');inp.className='si';inp.placeholder='Search...';inp.value=qlSearch;
+    inp.addEventListener('input',function(){qlSearch=this.value.toLowerCase();render();});
+    sw.appendChild(inp);sh.appendChild(sw);
+    var pills=document.createElement('div');pills.style.cssText='display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;';
+    function mkPill(label,cat){
+      var p=document.createElement('div');p.className='pill'+(qlCat===cat?'':' off');
+      if(cat==='all'){p.style.background='var(--gr)';p.style.color='#fff';}
+      else{var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg3)','var(--tx)'];p.style.background=cc[0];p.style.color=cc[1];}
+      p.textContent=label;p.addEventListener('click',function(){qlCat=cat;render();});pills.appendChild(p);
+    }
+    mkPill('All','all');CATS.forEach(function(c){mkPill(CEM[c],c);});
+    sh.appendChild(pills);
+    var list=myActs.filter(function(a){return(qlCat==='all'||a.cat===qlCat)&&(!qlSearch||a.name.toLowerCase().includes(qlSearch));});
+    var grid=document.createElement('div');grid.style.cssText='display:flex;flex-direction:column;gap:7px;max-height:50vh;overflow-y:auto;';
+    list.forEach(function(a){
+      var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
+      var card=document.createElement('div');card.className='bp-card';
+      card.innerHTML='<span style="font-size:22px;">'+a.emoji+'</span><div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+a.name+'</div><div style="font-size:11px;color:var(--tx2);">'+a.cat+'</div></div><span style="font-size:11px;color:var(--tx3);">'+cnt+'x</span>';
+      card.addEventListener('click',function(){closeEd();openLogDirect(a.id,'garden');});
+      grid.appendChild(card);
+    });
+    if(!list.length){var empty=document.createElement('div');empty.style.cssText='font-size:13px;color:var(--tx2);padding:12px 0;';empty.textContent='No activities found';grid.appendChild(empty);}
+    sh.appendChild(grid);
+    var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;position:sticky;bottom:-26px;background:var(--bg);padding:12px 22px 26px;margin:8px -22px -26px;border-top:0.5px solid var(--bg3);';
+    var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.flex='1';cancel.textContent='Cancel';cancel.addEventListener('click',closeEd);row.appendChild(cancel);
+    sh.appendChild(row);
+    setTimeout(function(){if(inp)inp.focus();},80);
+  }
+  render();
+  document.getElementById('ed-ov').classList.add('on');
+}
+function openGardenFabMenu(){
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
+  var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:4px;';title.textContent='What would you like to do?';sh.appendChild(title);
+  var sub=document.createElement('div');sub.style.cssText='font-size:13px;color:var(--tx2);margin-bottom:18px;';sub.textContent='Choose an action for your garden.';sh.appendChild(sub);
+  [{em:'🌱',title:'Plant a new seed',desc:'Add a new activity to your garden',fn:function(){closeEd();openAdd();}},
+   {em:'📋',title:'Log a session',desc:'Record time you grew today',fn:function(){closeEd();openGardenQuickLog();}}
+  ].forEach(function(opt){
+    var card=document.createElement('div');
+    card.style.cssText='display:flex;align-items:center;gap:14px;background:#fff;border:var(--br);border-radius:var(--rad);padding:16px;cursor:pointer;margin-bottom:10px;box-shadow:var(--sh);transition:transform .12s cubic-bezier(.34,1.56,.64,1);';
+    card.innerHTML='<div style="font-size:30px;flex-shrink:0;">'+opt.em+'</div>'
+      +'<div><div style="font-size:15px;font-weight:600;margin-bottom:2px;">'+opt.title+'</div>'
+      +'<div style="font-size:12px;color:var(--tx2);">'+opt.desc+'</div></div>';
+    card.addEventListener('click',opt.fn);
+    card.addEventListener('touchstart',function(){card.style.transform='scale(.97)';},{passive:true});
+    card.addEventListener('touchend',function(){card.style.transform='';},{passive:true});
+    sh.appendChild(card);
+  });
+  var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.marginTop='4px';cancel.textContent='Cancel';cancel.addEventListener('click',closeEd);sh.appendChild(cancel);
+  document.getElementById('ed-ov').classList.add('on');
+}
 document.getElementById('fab').addEventListener('click',function(){
   var onHist=document.getElementById('s-hist').classList.contains('on');
-  if(onHist)openHarvestQuickLog();else openAdd();
+  var onGarden=document.getElementById('s-garden').classList.contains('on');
+  if(onHist)openHarvestQuickLog();
+  else if(onGarden)openGardenFabMenu();
+  else openAdd();
 });
 // Harvest filters
 document.getElementById('hist-search').addEventListener('input',function(){histSearch=this.value;rHist();});
@@ -1616,7 +1680,7 @@ function rHome(){
     if(_activeTimerInt){clearInterval(_activeTimerInt);_activeTimerInt=null;}
     ipW.innerHTML='';
     var hsEl=document.querySelector('#s-home .hs');if(hsEl)hsEl.style.display='';
-    pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-lbl">Ready to grow?</div><div class="pc-title">What should I grow today?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-suggest" style="flex:1;background:var(--bg2);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">🎲 Surprise me</button><button id="btn-quick-log" style="flex:1;background:var(--bg2);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">Already done? Log it</button></div>';
+    pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-lbl">Ready to grow?</div><div class="pc-title">What should I tend to today?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-suggest" style="flex:1;background:var(--bg2);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">🎲 Surprise me</button><button id="btn-quick-log" style="flex:1;background:var(--bg2);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--tx2);cursor:pointer;">Already done? Log it</button></div>';
     document.getElementById('pc-card').addEventListener('click',openPicker);
     document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
     document.getElementById('btn-suggest').addEventListener('click',suggestAct);
@@ -2783,7 +2847,8 @@ function showQuickLog(){
 }
 
 // ── LOG SESSION ───────────────────────────────────────
-var logId=null, logRating=0, logFeels=[], logMomentum='';
+var logId=null, logRating=0, logFeels=[], logMomentum='', logTimeOfDay='morning';
+function _currentPeriod(){var h=new Date().getHours();if(h<12)return'morning';if(h<17)return'afternoon';return'evening';}
 var STAR_LBLS={0.5:'Rough session',1:'Not great',1.5:'Okay-ish',2:'Decent',2.5:'Pretty good',3:'Good session',3.5:'Really good',4:'Great session',4.5:'Excellent',5:'Perfect ⭐'};
 function normRating(r){if(!r)return 0;return r>5?Math.round(r/2*2)/2:r;}
 function makeStarRating(wrap,initVal,onChg){
@@ -2856,6 +2921,13 @@ function setupLogScreen(id,from,startedAt){
     if(_logToday){logDateInp.style.display='none';logTodayBtn.textContent='✓ Today';logTodayBtn.style.background='var(--grl)';logTodayBtn.style.color='var(--gr2)';logTodayBtn.style.borderColor='var(--grm)';}
     else{logDateInp.style.display='block';logDateInp.value=new Date().toLocaleDateString('en-CA');logTodayBtn.textContent='Pick a date';logTodayBtn.style.background='var(--bg2)';logTodayBtn.style.color='var(--tx2)';logTodayBtn.style.borderColor='var(--bg3)';}
   };
+  logTimeOfDay=_currentPeriod();
+  var todWrap=document.getElementById('log-timeofday');todWrap.innerHTML='';
+  [{v:'morning',l:'🌅 Morning'},{v:'afternoon',l:'☀️ Afternoon'},{v:'evening',l:'🌙 Evening'}].forEach(function(p){
+    var b=document.createElement('div');b.className='fb'+(logTimeOfDay===p.v?' on':'');b.textContent=p.l;
+    b.addEventListener('click',function(){logTimeOfDay=p.v;todWrap.querySelectorAll('.fb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
+    todWrap.appendChild(b);
+  });
   document.getElementById('ln').value='';
   document.getElementById('ln-well').value='';
   document.getElementById('ln-diff').value='';
@@ -2982,7 +3054,11 @@ function saveLog(){
   var _logAct=myActs.find(function(x){return x.id===logId;})||{};
   var logDateVal=document.getElementById('log-date').value;
   var _todayActive=document.getElementById('log-today-btn').textContent.indexOf('✓')>-1;
-  var logTs=_todayActive?Date.now():(logDateVal?new Date(logDateVal+'T12:00:00').getTime():Date.now());
+  var _ph={morning:'09',afternoon:'14',evening:'19'}[logTimeOfDay]||'12';
+  var logTs;
+  if(startedAt&&_todayActive){logTs=startedAt;}
+  else if(_todayActive){var _d=new Date();_d.setHours(parseInt(_ph),0,0,0);logTs=_d.getTime();}
+  else{logTs=logDateVal?new Date(logDateVal+'T'+_ph+':00:00').getTime():Date.now();}
   var _sid=genUUID();
   sessions.push({id:_sid,actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:logTs,hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
   var stageAfter=getStage(getHours(logId));
