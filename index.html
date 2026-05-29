@@ -753,21 +753,8 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <button class="btn btn-s" style="margin-top:8px;" id="btn-discard">Cancel</button>
   </div>
 
-  </div><!-- /screen-wrap -->
-
-  <nav id="main-nav" class="nav">
-    <button class="nb on" id="nb-home"><div class="nb-wrap"><span class="nb-ic">🏡</span></div>Home</button>
-    <button class="nb" id="nb-my"><div class="nb-wrap"><span class="nb-ic">🌾</span></div>Seeds</button>
-    <button class="nb" id="nb-garden"><div class="nb-wrap"><span class="nb-ic">🌸</span></div>Garden</button>
-    <button class="nb" id="nb-hist"><div class="nb-wrap"><span class="nb-ic">📋</span></div>Logbook</button>
-    <button class="nb" id="nb-friends"><div class="nb-wrap"><span class="nb-ic">👥</span></div>Neighbours<span id="nb-friends-badge" style="display:none;position:absolute;top:2px;right:6px;background:#E53E3E;color:#fff;border-radius:10px;font-size:9px;min-width:14px;padding:1px 4px;text-align:center;line-height:14px;pointer-events:none;"></span></button>
-  </nav>
-</div>
-
-<button class="fab" id="fab"><span style="display:block;line-height:1;transform:translateY(-1px);">+</span></button>
-
-<!-- FRIENDS PAGE -->
-<div id="s-friends" class="scr">
+  <!-- FRIENDS PAGE -->
+  <div id="s-friends" class="scr">
   <div id="friends-panel">
     <div style="padding:18px 20px 0;flex-shrink:0;">
       <div style="display:flex;align-items:center;margin-bottom:14px;">
@@ -783,7 +770,20 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     </div>
     <div id="fr-body" style="flex:1;overflow-y:auto;padding:12px 20px 80px;"></div>
   </div>
+  </div>
+
+  </div><!-- /screen-wrap -->
+
+  <nav id="main-nav" class="nav">
+    <button class="nb on" id="nb-home"><div class="nb-wrap"><span class="nb-ic">🏡</span></div>Home</button>
+    <button class="nb" id="nb-my"><div class="nb-wrap"><span class="nb-ic">🌾</span></div>Seeds</button>
+    <button class="nb" id="nb-garden"><div class="nb-wrap"><span class="nb-ic">🌸</span></div>Garden</button>
+    <button class="nb" id="nb-hist"><div class="nb-wrap"><span class="nb-ic">📋</span></div>Logbook</button>
+    <button class="nb" id="nb-friends"><div class="nb-wrap"><span class="nb-ic">👥</span></div>Neighbours<span id="nb-friends-badge" style="display:none;position:absolute;top:2px;right:6px;background:#E53E3E;color:#fff;border-radius:10px;font-size:9px;min-width:14px;padding:1px 4px;text-align:center;line-height:14px;pointer-events:none;"></span></button>
+  </nav>
 </div>
+
+<button class="fab" id="fab"><span style="display:block;line-height:1;transform:translateY(-1px);">+</span></button>
 
 <!-- CONVERSATION OVERLAY -->
 <div id="conv-ov">
@@ -3488,7 +3488,7 @@ function openSessionDetail(s,a){
   var deleteBtn=document.createElement('button');deleteBtn.className='btn btn-s';deleteBtn.style.cssText='width:100%;margin-top:6px;color:var(--co);border-color:var(--co);';deleteBtn.textContent='Remove this session';
   deleteBtn.addEventListener('click',function(){
     var idx=sessions.findIndex(function(x){return x.date===s.date&&x.actId===s.actId;});
-    if(idx>-1){var removed=sessions.splice(idx,1)[0];sv();rHist();closeEd();showToast('Session removed',function(){sessions.splice(idx,0,removed);sv();rHist();});}
+    if(idx>-1){var removed=sessions.splice(idx,1)[0];if(supaUser&&removed.id)_supa.from('sessions').delete().eq('id',removed.id).eq('user_id',supaUser.id);sv();rHist();closeEd();showToast('Session removed',function(){sessions.splice(idx,0,removed);sv();rHist();});}
   });
   sh.appendChild(deleteBtn);
   document.getElementById('ed-ov').classList.add('on');
