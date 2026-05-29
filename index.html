@@ -2873,7 +2873,8 @@ function saveLog(){
   var logDateVal=document.getElementById('log-date').value;
   var _todayActive=document.getElementById('log-today-btn').textContent.indexOf('✓')>-1;
   var logTs=_todayActive?Date.now():(logDateVal?new Date(logDateVal+'T12:00:00').getTime():Date.now());
-  sessions.push({actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:logTs,hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
+  var _sid=(supaUser?supaUser.id.slice(0,8):'gs')+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+  sessions.push({id:_sid,actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:logTs,hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
   var stageAfter=getStage(getHours(logId));
   for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(logId,s);
   checkTrophies();
@@ -3451,15 +3452,13 @@ function rHist(){
     var plantCol=plantInner?'<div style="width:'+tW+'px;flex-shrink:0;background:'+plantBg[stage]+';display:flex;align-items:flex-end;border-radius:0 var(--rad) var(--rad) 0;overflow:hidden;"><svg style="'+plantOff+'" viewBox="0 0 '+tW+' '+tH+'" width="'+tW+'" height="'+tH+'" xmlns="http://www.w3.org/2000/svg">'+plantInner+'</svg></div>':'';
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms';_hi++;
     hc.innerHTML='<div style="flex:1;padding:14px;min-width:0;">'
-      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+'<button class="hc-edit-btn" title="Edit session">✏️</button></div></div>'
+      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+'</div></div>'
       +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
       +(s.notes?'<div class="hc-note">'+s.notes+'</div>':'')
       +'</div>'
       +plantCol;
     (function(sess,act){
       hc.addEventListener('click',function(){openSessionDetail(sess,act);});
-      var editBtn=hc.querySelector('.hc-edit-btn');
-      if(editBtn)editBtn.addEventListener('click',function(e){e.stopPropagation();openSessionEdit(sess,act);});
     })(s,a);
     el.appendChild(hc);
   });
@@ -4092,8 +4091,11 @@ async function loadFromSupabase(){
     var sessRes=await _tq(_supa.from('sessions').select('*').eq('user_id',uid).order('date',{ascending:false}),8000);
     if(sessRes&&sessRes.data&&sessRes.data.length){
       gotData=true;
+      var _supaIds=new Set(sessRes.data.map(function(s){return s.id;}));
+      var _pending=sessions.filter(function(s){return s.id&&!_supaIds.has(s.id);}); // local sessions not yet in Supabase
       sessions.splice(0,sessions.length);
       sessRes.data.forEach(function(s){sessions.push(Object.assign({},s.data||{},{id:s.id,actId:s.act_id,date:new Date(s.date).getTime(),hours:s.hours||0,mins:s.mins||0,rating:s.rating,notes:s.note||'',feel:s.feels||[],momentum:s.momentum||''}));});
+      _pending.forEach(function(s){sessions.push(s);}); // keep sessions pending their first sync
     }
 
     if(gotData){
