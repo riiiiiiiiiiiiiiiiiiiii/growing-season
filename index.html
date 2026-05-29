@@ -2861,7 +2861,10 @@ function openActInfo(actId,from){
   var sessBtn=document.createElement('button');sessBtn.className='btn btn-s';sessBtn.style.cssText='flex:1;margin-top:0;font-size:13px;';sessBtn.textContent='📋 Sessions';
   sessBtn.addEventListener('click',function(){closeEd();show('s-hist');['home','my','garden','hist'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t==='hist');});document.getElementById('fab').style.display='flex';histSearch='';histPeriod='all';histActId=actId;rHist();});
   row.appendChild(sessBtn);sh.appendChild(row);
-  var logBtn=document.createElement('button');logBtn.className='btn btn-p';logBtn.textContent='+ Log a session';
+  var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start activity';
+  startBtn.addEventListener('click',function(){closeEd();startFrom(actId);});
+  sh.appendChild(startBtn);
+  var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='+ Log a session';
   logBtn.addEventListener('click',function(){closeEd();openLogDirect(actId,from);});
   sh.appendChild(logBtn);
   var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
