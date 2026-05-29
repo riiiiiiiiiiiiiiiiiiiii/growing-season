@@ -4017,6 +4017,30 @@ async function loadFromSupabase(){
   }catch(e){console.warn('Supabase load error:',e);}
 }
 
+// ── BACKGROUND SYNC ───────────────────────────────────
+var _bgSyncing=false;
+async function _bgRefresh(){
+  if(!supaUser||_guestMode)return;
+  var cur=document.querySelector('.scr.on');
+  if(!cur)return;
+  if(['s-auth','s-ob1','s-ob2','s-ob3','s-log'].indexOf(cur.id)>-1)return;
+  if(_bgSyncing)return;
+  _bgSyncing=true;
+  try{
+    await loadFromSupabase();
+    var id=cur.id;
+    if(id==='s-home'){applyDark();applyPalette();rHome();}
+    else if(id==='s-my')rMy();
+    else if(id==='s-garden')rGarden();
+    else if(id==='s-hist')rHist();
+  }catch(e){}
+  finally{_bgSyncing=false;}
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='visible')_bgRefresh();
+});
+setInterval(function(){if(document.visibilityState==='visible')_bgRefresh();},120000);
+
 async function checkProfile(){
   if(!supaUser){console.error('checkProfile called with no supaUser');return;}
   try{
