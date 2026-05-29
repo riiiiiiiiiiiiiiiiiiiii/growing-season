@@ -1,4 +1,4 @@
-const CACHE = 'growing-season-v6';
+const CACHE = 'growing-season-v7';
 const LOCAL_ASSETS = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
