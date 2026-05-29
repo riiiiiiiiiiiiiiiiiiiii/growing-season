@@ -615,6 +615,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div id="home-menu" class="hmenu off">
       <div class="hmenu-row" id="hmenu-signin" style="display:none;color:var(--gr);font-weight:600;"><span class="hmenu-em">🔑</span><span>Sign in / Sign up</span></div>
       <div class="hmenu-row" id="hmenu-collect"><span class="hmenu-em">🫙</span><span>Collections</span><span id="hmenu-badge" class="hmenu-dot" style="display:none;"></span></div>
+      <div class="hmenu-row" id="hmenu-cal"><span class="hmenu-em">📅</span><span>Calendar</span></div>
       <div class="hmenu-row" id="hmenu-notes"><span class="hmenu-em">📓</span><span>Notes</span></div>
       <div class="hmenu-row" id="hmenu-palette" style="flex-direction:column;align-items:flex-start;gap:8px;">
         <span style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;">Theme</span>
@@ -838,6 +839,17 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <button id="btn-notes-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;">×</button>
     </div>
     <div id="notes-body"></div>
+  </div>
+</div>
+
+<!-- CALENDAR OVERLAY -->
+<div class="ov" id="cal-ov">
+  <div class="sh" id="cal-sh" style="max-width:480px;padding:22px 18px 28px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div style="font-family:var(--serif);font-size:20px;font-weight:700;" id="cal-title">Calendar</div>
+      <button id="btn-cal-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;">×</button>
+    </div>
+    <div id="cal-body"></div>
   </div>
 </div>
 
@@ -1988,6 +2000,178 @@ var PERSONAL_NOTE_SECTIONS=[
   {key:'freewrite',emoji:'📓', label:'Free write',     placeholder:'Open space — no structure needed…'},
 ];
 var _noteSaveTimer=null;
+// ── CALENDAR ──────────────────────────────────────────
+var _calYear=new Date().getFullYear(),_calMonth=new Date().getMonth();
+var _CAT_DOT={Creative:'#D946A8',Active:'#EA580C',Learning:'#2563EB',Social:'#059669',Mindfulness:'#7C3AED',Productive:'#D97706',Digital:'#4338CA',Outdoor:'#16A34A',Entertainment:'#CA8A04',Personal:'#E11D48'};
+
+function openCalendar(){
+  _calYear=new Date().getFullYear();_calMonth=new Date().getMonth();
+  renderCalendar();
+  document.getElementById('cal-ov').classList.add('on');
+}
+
+function renderCalendar(){
+  var body=document.getElementById('cal-body');
+  body.innerHTML='';
+  var today=new Date();
+  var todayStr=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+
+  // Month nav header
+  var nav=document.createElement('div');
+  nav.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;';
+  var MNAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var prevBtn=document.createElement('button');
+  prevBtn.style.cssText='background:var(--bg2);border:var(--br);border-radius:10px;width:34px;height:34px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+  prevBtn.textContent='‹';
+  prevBtn.addEventListener('click',function(){_calMonth--;if(_calMonth<0){_calMonth=11;_calYear--;}renderCalendar();});
+  var nextBtn=document.createElement('button');
+  nextBtn.style.cssText=prevBtn.style.cssText;
+  nextBtn.textContent='›';
+  nextBtn.addEventListener('click',function(){_calMonth++;if(_calMonth>11){_calMonth=0;_calYear++;}renderCalendar();});
+  var mLabel=document.createElement('div');
+  mLabel.style.cssText='font-family:var(--serif);font-size:17px;font-weight:700;color:var(--tx);';
+  mLabel.textContent=MNAMES[_calMonth]+' '+_calYear;
+  nav.appendChild(prevBtn);nav.appendChild(mLabel);nav.appendChild(nextBtn);
+  body.appendChild(nav);
+
+  // Day-of-week header (Mon–Sun)
+  var DOWS=['M','T','W','T','F','S','S'];
+  var hdr=document.createElement('div');
+  hdr.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:4px;';
+  DOWS.forEach(function(d,i){
+    var c=document.createElement('div');
+    c.style.cssText='text-align:center;font-size:11px;font-weight:600;color:var(--tx3);padding:4px 0;';
+    c.textContent=d;
+    hdr.appendChild(c);
+  });
+  body.appendChild(hdr);
+
+  // Build sessions-by-day map for this month
+  var sessMap={};
+  sessions.forEach(function(s){
+    var d=new Date(s.date);
+    if(d.getFullYear()!==_calYear||d.getMonth()!==_calMonth)return;
+    var key=d.getDate();
+    if(!sessMap[key])sessMap[key]=[];
+    var act=myActs.find(function(a){return a.id===s.actId;})||{cat:'',emoji:'🌱',name:s.actName||''};
+    sessMap[key].push({cat:act.cat||'',emoji:act.emoji||'🌱',name:act.name||s.actName||'',hours:s.hours||0,mins:s.mins||0,rating:s.rating,id:s.id});
+  });
+
+  // Calendar grid
+  var grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:4px;';
+
+  // First day of month (0=Sun → convert to Mon-based offset)
+  var firstDay=new Date(_calYear,_calMonth,1).getDay();
+  var offset=(firstDay===0)?6:firstDay-1; // Mon=0
+  var daysInMonth=new Date(_calYear,_calMonth+1,0).getDate();
+
+  // Empty leading cells
+  for(var i=0;i<offset;i++){
+    var empty=document.createElement('div');
+    empty.style.cssText='border-radius:10px;';
+    grid.appendChild(empty);
+  }
+
+  // Day cells
+  for(var day=1;day<=daysInMonth;day++){
+    (function(d){
+      var isToday=(_calYear===today.getFullYear()&&_calMonth===today.getMonth()&&d===today.getDate());
+      var hasSess=sessMap[d]&&sessMap[d].length>0;
+
+      var cell=document.createElement('div');
+      cell.style.cssText='border-radius:10px;padding:5px 3px 5px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:'+(hasSess?'pointer':'default')+';transition:transform .12s;min-height:48px;'
+        +(isToday?'background:var(--gr);':'background:var(--bg2);');
+      cell.addEventListener('touchstart',function(){if(hasSess)cell.style.transform='scale(.94)';},{passive:true});
+      cell.addEventListener('touchend',function(){cell.style.transform='';},{passive:true});
+
+      // Day number
+      var num=document.createElement('div');
+      num.style.cssText='font-size:13px;font-weight:'+(isToday?'700':'500')+';color:'+(isToday?'#fff':'var(--tx)')+';line-height:1;';
+      num.textContent=d;
+      cell.appendChild(num);
+
+      // Category dots
+      if(hasSess){
+        var cats=[...new Set(sessMap[d].map(function(s){return s.cat;}))].slice(0,4);
+        var dotsWrap=document.createElement('div');
+        dotsWrap.style.cssText='display:flex;flex-wrap:wrap;justify-content:center;gap:2px;';
+        cats.forEach(function(cat){
+          var dot=document.createElement('div');
+          var dotColor=_CAT_DOT[cat]||'var(--gr)';
+          dot.style.cssText='width:5px;height:5px;border-radius:2px;background:'+dotColor+';flex-shrink:0;'+(isToday?'opacity:.85;':'');
+          dotsWrap.appendChild(dot);
+        });
+        cell.appendChild(dotsWrap);
+      }
+
+      if(hasSess){
+        cell.addEventListener('click',function(){showCalDay(d,sessMap[d]);});
+      }
+      grid.appendChild(cell);
+    })(day);
+  }
+  body.appendChild(grid);
+
+  // Legend
+  var usedCats=[...new Set(sessions.filter(function(s){
+    var d=new Date(s.date);return d.getFullYear()===_calYear&&d.getMonth()===_calMonth;
+  }).map(function(s){var a=myActs.find(function(x){return x.id===s.actId;});return a?a.cat:'';}).filter(Boolean))];
+  if(usedCats.length){
+    var leg=document.createElement('div');
+    leg.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;';
+    usedCats.forEach(function(cat){
+      var item=document.createElement('div');
+      item.style.cssText='display:flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2);';
+      var dot=document.createElement('div');
+      dot.style.cssText='width:8px;height:8px;border-radius:3px;background:'+(_CAT_DOT[cat]||'var(--gr)')+';flex-shrink:0;';
+      item.appendChild(dot);
+      item.appendChild(document.createTextNode(cat));
+      leg.appendChild(item);
+    });
+    body.appendChild(leg);
+  }
+}
+
+function showCalDay(day,sessList){
+  var body=document.getElementById('cal-body');
+  body.innerHTML='';
+  var MNAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  var back=document.createElement('button');
+  back.style.cssText='background:none;border:none;font-size:14px;color:var(--gr);font-weight:600;cursor:pointer;padding:0;margin-bottom:14px;display:flex;align-items:center;gap:4px;';
+  back.innerHTML='‹ '+MNAMES[_calMonth]+' '+_calYear;
+  back.addEventListener('click',renderCalendar);
+  body.appendChild(back);
+
+  var title=document.createElement('div');
+  title.style.cssText='font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:14px;color:var(--tx);';
+  var dayDate=new Date(_calYear,_calMonth,day);
+  var DAYNAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  title.textContent=DAYNAMES[dayDate.getDay()]+', '+MNAMES[_calMonth]+' '+day;
+  body.appendChild(title);
+
+  var totalMins=sessList.reduce(function(t,s){return t+(s.hours||0)*60+(s.mins||0);},0);
+  var totalEl=document.createElement('div');
+  totalEl.style.cssText='font-size:12px;color:var(--tx3);margin-bottom:14px;';
+  totalEl.textContent=sessList.length+' session'+(sessList.length!==1?'s':'')+' · '+_fmtMins(totalMins)+' total';
+  body.appendChild(totalEl);
+
+  sessList.forEach(function(s){
+    var cc=CAT_COLORS[s.cat]?CAT_COLORS[s.cat].split(','):['var(--bg2)','var(--tx)'];
+    var card=document.createElement('div');
+    card.style.cssText='display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;background:'+cc[0]+';margin-bottom:8px;';
+    var timeStr=(s.hours?s.hours+'h ':'')+((s.mins&&!(s.hours&&!s.mins))?s.mins+'min':'');
+    if(!timeStr)timeStr='—';
+    card.innerHTML='<div style="font-size:24px;flex-shrink:0;">'+s.emoji+'</div>'
+      +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:14px;font-weight:600;color:'+cc[1]+';">'+s.name+'</div>'
+        +'<div style="font-size:12px;color:'+cc[1]+';opacity:.75;">'+timeStr+(s.rating?' · ★ '+normRating(s.rating):'')+'</div>'
+      +'</div>';
+    body.appendChild(card);
+  });
+}
+
 function openNotes(){rNotesList();document.getElementById('notes-ov').classList.add('on');}
 function closeNotes(){document.getElementById('notes-ov').classList.remove('on');}
 function rNotesList(){
@@ -2117,6 +2301,8 @@ function rNoteHistory(a,sections){
 document.getElementById('btn-notes-close').addEventListener('click',closeNotes);
 document.getElementById('btn-notes-back').addEventListener('click',function(){if(_noteBackFn)_noteBackFn();else rNotesList();});
 document.getElementById('hmenu-notes').addEventListener('click',function(){closeHomeMenu();openNotes();});
+document.getElementById('hmenu-cal').addEventListener('click',function(){closeHomeMenu();openCalendar();});
+document.getElementById('btn-cal-close').addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
 
 function openHomeMenu(){
   var m=document.getElementById('home-menu'),ov=document.getElementById('home-menu-ov');
