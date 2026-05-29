@@ -2226,8 +2226,13 @@ async function renderFeed(){
       body.appendChild(card);
     });
   }catch(e){
-    var isSetup=e&&e.message&&e.message.indexOf('does not exist')>-1;
-    body.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;">'+(isSetup?'Feed needs a <code>feed_events</code> table — see code comment for SQL.':'Error loading feed.')+'</div>';
+    var msg=e&&e.message||'';var code=e&&e.code||'';
+    var isMissing=code==='42P01'||msg.indexOf('does not exist')>-1||msg.indexOf('relation')>-1;
+    body.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;">'
+      +(isMissing
+        ?'The <b>feed_events</b> table doesn\'t exist yet.<br><br>Run the SQL from the code comment in your Supabase SQL editor to create it.'
+        :'Error loading feed: '+(msg||'unknown error'))
+      +'</div>';
   }
 }
 var _frTab='friends';
