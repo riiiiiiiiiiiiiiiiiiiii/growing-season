@@ -2481,9 +2481,9 @@ async function renderConv(){
       var el=document.createElement('div');
       if(isWave||isClap){
         el.className='msg-wave';
-        el.textContent=(isWave?'👋':'👏')+(isOut?' You waved':' Waved at you');
-        if(isClap)el.textContent=(isOut?' You cheered':'👏 Cheered for you');
-        if(isWave)el.textContent=isOut?'👋 You waved':'👋 Waved at you';
+        var other=_convName||'them';
+        if(isWave)el.textContent=isOut?'👋 You waved at '+other:'👋 '+other+' waved at you';
+        else el.textContent=isOut?'👏 You cheered for '+other:'👏 '+other+' cheered for you';
       } else {el.className=isOut?'msg-out':'msg-in';el.textContent=m.content;}
       container.appendChild(el);
     });
