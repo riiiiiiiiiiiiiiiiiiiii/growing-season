@@ -4097,7 +4097,7 @@ async function loadFromSupabase(){
     }
 
     if(gotData){
-      sv();
+      // Callers handle sv() after they've applied authoritative profile fields (e.g. username)
     } else {
       // Nothing in Supabase — restore from localStorage only if it belongs to this user
       var loc=ld();
@@ -4131,6 +4131,7 @@ async function _bgRefresh(){
   _bgSyncing=true;
   try{
     await loadFromSupabase();
+    sv(); // Persist refreshed data to localStorage
     var id=cur.id;
     if(id==='s-home'){applyDark();applyPalette();rHome();}
     else if(id==='s-my')rMy();
@@ -4154,6 +4155,7 @@ async function checkProfile(){
       if(res.data.display_name)profile.name=res.data.display_name;
       if(res.data.emoji)profile.emoji=res.data.emoji;
       if(res.data.username)profile.username=res.data.username;
+      sv(); // Save with correct username before booting
       bootApp();
     } else {
       _needsProfile=true;
