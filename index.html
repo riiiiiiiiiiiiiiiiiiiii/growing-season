@@ -928,9 +928,9 @@ function _tq(promise,ms){return Promise.race([promise,new Promise(function(_,rej
 
 
 // ── DATA ──────────────────────────────────────────────
-var CATS = ['Creative','Active','Learning','Social','Mindfulness','Productive','Digital','Outdoor','Entertainment'];
-var CEM = {Creative:'🎨',Active:'💪',Learning:'📚',Social:'👯',Mindfulness:'🧘',Productive:'🔧',Digital:'💻',Outdoor:'🌿',Entertainment:'🎬'};
-var CAT_COLORS = {Creative:'#FCE7F3,#9D174D',Active:'#FFE4D9,#9A3412',Learning:'#DBEAFE,#1E40AF',Social:'#D1FAE5,#065F46',Mindfulness:'#EDE9FE,#5B21B6',Productive:'#FEF3C7,#92400E',Digital:'#EEF2FF,#3730A3',Outdoor:'#D4F2E4,#0F6040',Entertainment:'#FEF9C3,#854D0E'};
+var CATS = ['Creative','Active','Learning','Social','Mindfulness','Productive','Digital','Outdoor','Entertainment','Personal'];
+var CEM = {Creative:'🎨',Active:'💪',Learning:'📚',Social:'👯',Mindfulness:'🧘',Productive:'🔧',Digital:'💻',Outdoor:'🌿',Entertainment:'🎬',Personal:'🏡'};
+var CAT_COLORS = {Creative:'#FCE7F3,#9D174D',Active:'#FFE4D9,#9A3412',Learning:'#DBEAFE,#1E40AF',Social:'#D1FAE5,#065F46',Mindfulness:'#EDE9FE,#5B21B6',Productive:'#FEF3C7,#92400E',Digital:'#EEF2FF,#3730A3',Outdoor:'#D4F2E4,#0F6040',Entertainment:'#FEF9C3,#854D0E',Personal:'#FFF1F2,#BE123C'};
 var ACTS = [
   {id:'drawing',name:'Drawing',emoji:'✏️',cat:'Creative',tags:['solo','mental','creative','calm']},
   {id:'painting',name:'Painting',emoji:'🖌️',cat:'Creative',tags:['solo','mental','creative','calm']},
@@ -1673,7 +1673,7 @@ function rObCats(){
     wrap.appendChild(p);
   }
   makePill('All','all');
-  CATS.forEach(function(c){makePill(CEM[c]+' '+c,c);});
+  CATS.forEach(function(c){if(ACTS.some(function(a){return a.cat===c;}))makePill(CEM[c]+' '+c,c);});
 }
 
 function rObGrid(){
@@ -3521,9 +3521,8 @@ function openEd(id){
   document.getElementById('ed-emoji').value=a.emoji;
 
   var catWrap=document.getElementById('ed-cat');catWrap.innerHTML='';
-  CATS.forEach(function(cat){
-    var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg2)','var(--tx)'];
-    var b=document.createElement('div');b.className='sop'+(edTmp.cat===cat?' on':'');b.textContent=CEM[cat]+' '+cat;
+  function addEdCat(cat,label,cc){
+    var b=document.createElement('div');b.className='sop'+(edTmp.cat===cat?' on':'');b.textContent=label;
     if(edTmp.cat===cat){b.style.background=cc[0];b.style.color=cc[1];b.style.borderColor=cc[1];}
     b.addEventListener('click',function(){
       edTmp.cat=cat;
@@ -3531,7 +3530,9 @@ function openEd(id){
       b.classList.add('on');b.style.background=cc[0];b.style.color=cc[1];b.style.borderColor=cc[1];
     });
     catWrap.appendChild(b);
-  });
+  }
+  CATS.forEach(function(cat){var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg2)','var(--tx)'];addEdCat(cat,CEM[cat]+' '+cat,cc);});
+  customCats.forEach(function(cat){addEdCat(cat,'🌱 '+cat,['var(--bg3)','var(--tx)']);});
 
   var typeWrap=document.getElementById('ed-type');typeWrap.innerHTML='';
   [{v:'recreational',lbl:'Growing for joy'},{v:'serious',lbl:'Growing seriously'}].forEach(function(opt){
@@ -3701,7 +3702,17 @@ function openAdd(){
       catWrap.appendChild(b);return b;
     }
     CATS.forEach(function(cat){var cc=CAT_COLORS[cat].split(',');addCatPill(cat,CEM[cat]+' '+cat,cc[0],cc[1]);});
-    customCats.forEach(function(cat){addCatPill(cat,'🌱 '+cat,'var(--bg3)','var(--tx)');});
+    customCats.forEach(function(cat){
+      var pill=addCatPill(cat,'🌱 '+cat,'var(--bg3)','var(--tx)');
+      var del=document.createElement('span');
+      del.textContent='×';del.style.cssText='margin-left:5px;opacity:.5;font-size:13px;cursor:pointer;line-height:1;';
+      del.addEventListener('click',function(e){
+        e.stopPropagation();
+        customCats.splice(customCats.indexOf(cat),1);
+        sv();renderCats(null);
+      });
+      pill.appendChild(del);
+    });
     var newPill=document.createElement('div');newPill.className='sop';newPill.dataset.cat='__new__';
     newPill.style.background='var(--bg2)';newPill.style.color='var(--tx2)';
     newPill.textContent='＋ New';
