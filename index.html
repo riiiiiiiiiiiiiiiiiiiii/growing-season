@@ -1959,7 +1959,7 @@ async function openProfileEdit(){
     profile.name=document.getElementById('pe-name').value.trim();
     profile.emoji=tmpEmoji;
     if(supaUser&&supaProfile){
-      await _supa.from('profiles').update({display_name:profile.name}).eq('id',supaUser.id);
+      await _supa.from('profiles').update({display_name:profile.name,emoji:tmpEmoji}).eq('id',supaUser.id);
     }
     sv();closeEd();rHome();
   });
@@ -2228,9 +2228,13 @@ async function renderFeed(){
   }catch(e){
     var msg=e&&e.message||'';var code=e&&e.code||'';
     var isMissing=code==='42P01'||msg.indexOf('does not exist')>-1||msg.indexOf('relation')>-1;
-    body.innerHTML='<div style="text-align:center;padding:30px;color:var(--tx3);font-size:13px;">'
+    var isPerm=msg.indexOf('permission denied')>-1||msg.indexOf('insufficient privilege')>-1||code==='42501';
+    var sql='DROP POLICY IF EXISTS &quot;Users can insert their own events&quot; ON feed_events;\nDROP POLICY IF EXISTS &quot;Users can read friends events&quot; ON feed_events;\nDROP POLICY IF EXISTS &quot;Authenticated users can read feed events&quot; ON feed_events;\n\nALTER TABLE feed_events ENABLE ROW LEVEL SECURITY;\nCREATE POLICY &quot;insert_own&quot; ON feed_events FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);\nCREATE POLICY &quot;read_all&quot; ON feed_events FOR SELECT TO authenticated USING (true);';
+    body.innerHTML='<div style="padding:20px;color:var(--tx3);font-size:13px;">'
       +(isMissing
-        ?'The <b>feed_events</b> table doesn\'t exist yet.<br><br>Run the SQL from the code comment in your Supabase SQL editor to create it.'
+        ?'<b>feed_events table not found.</b><br><br>Run this in Supabase → SQL Editor:<br><pre style="background:var(--bg2);padding:10px;border-radius:8px;font-size:11px;margin-top:8px;white-space:pre-wrap;text-align:left;overflow-x:auto;">CREATE TABLE feed_events (id uuid DEFAULT gen_random_uuid() PRIMARY KEY, user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE, username text, user_emoji text, type text NOT NULL, act_name text, act_emoji text, stage text, created_at timestamptz DEFAULT now());\nALTER TABLE feed_events ENABLE ROW LEVEL SECURITY;\nCREATE POLICY &quot;insert_own&quot; ON feed_events FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);\nCREATE POLICY &quot;read_all&quot; ON feed_events FOR SELECT TO authenticated USING (true);</pre>'
+        :isPerm
+        ?'<b>Permission error.</b><br><br>Run this in Supabase → SQL Editor to fix:<br><pre style="background:var(--bg2);padding:10px;border-radius:8px;font-size:11px;margin-top:8px;white-space:pre-wrap;text-align:left;overflow-x:auto;">'+sql+'</pre>'
         :'Error loading feed: '+(msg||'unknown error'))
       +'</div>';
   }
