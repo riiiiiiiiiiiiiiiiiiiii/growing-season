@@ -5110,6 +5110,16 @@ if('serviceWorker' in navigator){
   window.addEventListener('load', function(){
     navigator.serviceWorker.register('./sw.js');
   });
+  navigator.serviceWorker.addEventListener('message', function(e){
+    if(e.data&&e.data.type==='SW_UPDATED'){
+      // Show banner then reload — sv() already persisted all state to localStorage
+      var banner=document.createElement('div');
+      banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--gr);color:#fff;font-size:13px;font-weight:600;text-align:center;padding:10px 16px;box-shadow:0 2px 12px rgba(0,0,0,.2);';
+      banner.textContent='✨ New update — refreshing…';
+      document.body.appendChild(banner);
+      setTimeout(function(){window.location.reload(true);},1400);
+    }
+  });
 }
 </script>
 <!-- TERMINATE CONFIRM -->
