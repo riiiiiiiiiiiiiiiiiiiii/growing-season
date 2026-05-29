@@ -4022,9 +4022,9 @@ function saveAdd(){
 
 // ── GARDEN ────────────────────────────────────────────
 function getHours(actId){return sessions.filter(function(s){return s.actId===actId;}).reduce(function(t,s){return t+(s.hours||0)+((s.mins||0)/60);},0);}
-function getStage(hrs){if(hrs>=12)return 4;if(hrs>=8)return 3;if(hrs>=3)return 2;if(hrs>=0.5)return 1;return 0;}
+function getStage(hrs){if(hrs>=12)return 4;if(hrs>=7)return 3;if(hrs>=3)return 2;if(hrs>=0.5)return 1;return 0;}
 var STAGE_LABELS=['Seed','Sprout','Seedling','Flowering','In full bloom'];
-var NEXT_THRESH=[0.5,3,8,12,null];
+var NEXT_THRESH=[0.5,3,7,12,null];
 
 function drawPlant(stage,w,h){
   var ids=['gs-img-seed','gs-img-sprout','gs-img-seedling','gs-img-flowering','gs-img-bloom'];
