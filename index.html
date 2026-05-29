@@ -749,6 +749,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <button class="nb" id="nb-my"><div class="nb-wrap"><span class="nb-ic">🌾</span></div>Plot</button>
     <button class="nb" id="nb-garden"><div class="nb-wrap"><span class="nb-ic">🌸</span></div>Garden</button>
     <button class="nb" id="nb-hist"><div class="nb-wrap"><span class="nb-ic">📋</span></div>Logbook</button>
+    <button class="nb" id="nb-prof"><div class="nb-wrap"><span class="nb-ic">👤</span></div>Profile</button>
   </nav>
 </div>
 
@@ -1305,6 +1306,7 @@ document.getElementById('nb-home').addEventListener('click',function(){nav('home
 document.getElementById('nb-my').addEventListener('click',function(){nav('my');});
 document.getElementById('nb-garden').addEventListener('click',function(){nav('garden');});
 document.getElementById('nb-hist').addEventListener('click',function(){nav('hist');});
+document.getElementById('nb-prof').addEventListener('click',function(){openProfileEdit();});
 // Sidebar toggle
 function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('sb-backdrop').classList.add('on');document.getElementById('sb-toggle').textContent='×';}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-backdrop').classList.remove('on');document.getElementById('sb-toggle').textContent='☰';}
