@@ -992,7 +992,7 @@ var ACTS = [
 
 // ── STATE ─────────────────────────────────────────────
 function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[],collection:{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]},activityNotes:{},darkMode:false,customCats:[],colorPalette:'green'};}
-function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,darkMode:darkMode,customCats:customCats,colorPalette:colorPalette}));}catch(e){}if(supaUser)syncToSupabase();}
+function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({userId:supaUser?supaUser.id:null,myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,darkMode:darkMode,customCats:customCats,colorPalette:colorPalette}));}catch(e){}if(supaUser)syncToSupabase();}
 var st=ld(), myActs=st.myActs, sessions=st.sessions, onboarded=st.onboarded, profile=st.profile, active=st.active;
 var weeklyFocus=st.weeklyFocus||{weekKey:'',actIds:[]};
 var archivedActs=st.archivedActs||[];
@@ -4106,10 +4106,10 @@ async function loadFromSupabase(){
     if(gotData){
       sv();
     } else {
-      // Nothing in Supabase — restore from localStorage so local-only data isn't lost
+      // Nothing in Supabase — restore from localStorage only if it belongs to this user
       var loc=ld();
-      // Rescue even if onboarded flag is missing but activities exist locally
-      if(loc.onboarded||(loc.myActs&&loc.myActs.length)){
+      var locOwned=!loc.userId||loc.userId===uid; // treat old entries without userId as owned
+      if(locOwned&&(loc.onboarded||(loc.myActs&&loc.myActs.length))){
         if(loc.onboarded!==undefined)onboarded=loc.onboarded;
         if(loc.myActs&&loc.myActs.length){onboarded=true;myActs.splice(0);loc.myActs.forEach(function(a){myActs.push(a);});}
         if(loc.sessions&&loc.sessions.length){sessions.splice(0);loc.sessions.forEach(function(s){sessions.push(s);});}
@@ -4308,6 +4308,7 @@ async function doSignOut(){
   if(load){load.style.display='flex';load.style.opacity='0';requestAnimationFrame(function(){load.style.opacity='1';});}
   await _supa.auth.signOut();
   supaUser=null;
+  try{localStorage.removeItem('gs-v3');}catch(e){}
   myActs.splice(0);sessions.splice(0);archivedActs.splice(0);
   onboarded=false;profile={};active=null;
   weeklyFocus={weekKey:'',actIds:[]};activityNotes={};
