@@ -453,7 +453,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div class="sb-divider"></div>
     <div class="sb-menu">
       <button class="sb-mr" id="sb-signin-btn" style="display:none;color:var(--gr);font-weight:600;"><span class="sb-mr-em">🔑</span><span>Sign in / Sign up</span></button>
-      <button class="sb-mr" id="sb-profile-btn"><span class="sb-mr-em" id="sb-prof-em">👤</span><span id="sb-prof-name">Profile</span></button>
+      <button class="sb-mr" id="sb-profile-btn"><span class="sb-mr-em" id="sb-prof-em">👤</span><span id="sb-prof-name">Gardener</span></button>
       <button class="sb-mr" id="sb-collect-btn"><span class="sb-mr-em">🫙</span><span>Collections</span><span id="sb-collect-dot" style="display:none;width:7px;height:7px;background:#E53E3E;border-radius:50%;margin-left:auto;flex-shrink:0;"></span></button>
       <button class="sb-mr" id="sb-notes-btn"><span class="sb-mr-em">📓</span><span>Notes</span></button>
       <button class="sb-mr" id="sb-dark-btn"><span class="sb-mr-em" id="sb-dark-em">🌙</span><span id="sb-dark-lbl">Dark mode</span></button>
@@ -614,7 +614,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <!-- Hamburger dropdown -->
     <div id="home-menu" class="hmenu off">
       <div class="hmenu-row" id="hmenu-signin" style="display:none;color:var(--gr);font-weight:600;"><span class="hmenu-em">🔑</span><span>Sign in / Sign up</span></div>
-      <div class="hmenu-row" id="hmenu-profile"><span class="hmenu-em" id="hmenu-em">👤</span><span id="hmenu-name">Profile</span></div>
+      <div class="hmenu-row" id="hmenu-profile"><span class="hmenu-em" id="hmenu-em">👤</span><span id="hmenu-name">Gardener</span></div>
       <div class="hmenu-row" id="hmenu-signout" style="display:none;color:var(--co);"><span class="hmenu-em">🚪</span><span>Sign out</span></div>
       <div class="hmenu-row" id="hmenu-collect"><span class="hmenu-em">🫙</span><span>Collections</span><span id="hmenu-badge" class="hmenu-dot" style="display:none;"></span></div>
       <div class="hmenu-row" id="hmenu-notes"><span class="hmenu-em">📓</span><span>Notes</span></div>
@@ -1583,9 +1583,9 @@ function rHome(){
   document.getElementById('sb-title').textContent=sea.title;
   document.getElementById('sb-sub').textContent=sea.sub;
   var hmenuEm=document.getElementById('hmenu-em');if(hmenuEm)hmenuEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
-  var hmenuName=document.getElementById('hmenu-name');if(hmenuName)hmenuName.textContent=profile&&profile.name?profile.name:'Profile';
+  var hmenuName=document.getElementById('hmenu-name');if(hmenuName)hmenuName.textContent=profile&&profile.name?profile.name:'Gardener';
   var sbEm=document.getElementById('sb-prof-em');if(sbEm)sbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
-  var sbName=document.getElementById('sb-prof-name');if(sbName)sbName.textContent=profile&&profile.name?profile.name:'Profile';
+  var sbName=document.getElementById('sb-prof-name');if(sbName)sbName.textContent=profile&&profile.name?profile.name:'Gardener';
   var pbEm=document.getElementById('profile-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
