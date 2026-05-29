@@ -43,6 +43,7 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 @keyframes scrIn{from{opacity:0;}to{opacity:1;}}
 @keyframes gspin{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
 body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode #sidebar,body.auth-mode #sb-backdrop,body.auth-mode #profile-btn{display:none!important;}
+body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #fab{display:none!important;}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(244,250,246,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:var(--br);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
 .nb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--tx3);padding:6px 4px;user-select:none;position:relative;}
@@ -637,8 +638,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div id="focus-banner-wrap"></div>
     <div id="my-tabs" style="display:flex;gap:6px;margin-bottom:12px;"></div>
     <div id="my-list"></div>
-    <div style="text-align:center;margin-top:24px;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;">
-      <button id="btn-backup" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">📤 Back up my data</button>
+    <div style="text-align:center;margin-top:24px;">
       <button id="btn-terminate" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">☠️ Terminate field</button>
     </div>
   </div>
@@ -1276,6 +1276,7 @@ function nav(v){
 }
 function goBack(){nav(backFrom);}
 function launch(){
+  document.body.classList.remove('ob-mode');
   show('s-home');
   document.getElementById('main-nav').classList.add('on');
   document.getElementById('fab').style.display='none';
@@ -1340,24 +1341,9 @@ document.getElementById('btn-save-log').addEventListener('click',saveLog);
 document.getElementById('btn-foc-cancel').addEventListener('click',closeFocus);
 document.getElementById('btn-foc-save').addEventListener('click',saveFocus);
 // ── BACKUP / RESTORE ──────────────────────────────────
-function encodeBackup(){
-  var data=JSON.stringify({myActs:myActs,sessions:sessions,profile:profile,weeklyFocus:weeklyFocus,archivedActs:archivedActs,onboarded:onboarded});
-  return btoa(unescape(encodeURIComponent(data)));
-}
 function decodeBackup(str){return JSON.parse(decodeURIComponent(escape(atob(str))));}
-function getBackupUrl(){return location.origin+location.pathname+'#backup='+encodeBackup();}
 
 var pendingImport=null;
-document.getElementById('btn-backup').addEventListener('click',function(){
-  document.getElementById('backup-url').textContent=getBackupUrl();
-  document.getElementById('backup-ov').classList.add('on');
-});
-document.getElementById('btn-backup-close').addEventListener('click',function(){document.getElementById('backup-ov').classList.remove('on');});
-document.getElementById('btn-copy-backup').addEventListener('click',function(){
-  navigator.clipboard.writeText(getBackupUrl()).then(function(){
-    var btn=document.getElementById('btn-copy-backup');btn.textContent='Copied!';setTimeout(function(){btn.textContent='Copy link';},2000);
-  });
-});
 document.getElementById('btn-import-no').addEventListener('click',function(){
   document.getElementById('import-ov').classList.remove('on');
   history.replaceState(null,'',location.pathname);
@@ -4066,6 +4052,7 @@ async function checkProfile(){
       }else{
         // Brand new account — nav stays hidden until onboarding is complete
         myActs.splice(0);sessions.splice(0);archivedActs.splice(0);active=null;weeklyFocus={weekKey:'',actIds:[]};
+        document.body.classList.add('ob-mode');
         show('s-ob1');rObCats();rObGrid();
       }
     }
@@ -4081,7 +4068,7 @@ function bootApp(){
     document.getElementById('profile-btn').style.display='flex';
     launch();checkNewWeek();
   }else{
-    // Nav stays hidden — launch() will show it after onboarding completes
+    document.body.classList.add('ob-mode');
     show('s-ob1');rObCats();rObGrid();
   }
 }
@@ -4344,18 +4331,6 @@ if('serviceWorker' in navigator){
   </div>
 </div>
 <div id="toast" class="toast"><span id="toast-msg"></span><button class="toast-undo" id="toast-undo">Undo</button></div>
-
-<!-- BACKUP SHARE OVERLAY -->
-<div class="ov" id="backup-ov">
-  <div class="sh" style="text-align:center;">
-    <div style="font-size:32px;margin-bottom:10px;">📤</div>
-    <div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:6px;">Back up your data</div>
-    <div style="font-size:13px;color:var(--tx2);line-height:1.6;margin-bottom:16px;">Copy this link and open it on any device to restore your full garden, plot, and harvest log.</div>
-    <div id="backup-url" style="background:var(--bg2);border:var(--br);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--tx2);word-break:break-all;text-align:left;max-height:80px;overflow-y:auto;margin-bottom:14px;"></div>
-    <button class="btn btn-p" id="btn-copy-backup" style="margin-top:0;">Copy link</button>
-    <button class="btn btn-s" id="btn-backup-close" style="margin-top:8px;">Close</button>
-  </div>
-</div>
 
 <!-- IMPORT CONFIRM OVERLAY -->
 <div class="ov" id="import-ov">
