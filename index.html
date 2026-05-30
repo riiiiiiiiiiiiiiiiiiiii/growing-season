@@ -665,7 +665,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div id="garden-tabs" style="display:flex;gap:6px;"></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div id="garden-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
-        <button onclick="openGardenHelp()" style="background:none;border:1.5px solid var(--tx3);border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</button>
+        <button id="garden-help-btn" style="background:none;border:1.5px solid var(--tx3);border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</button>
       </div>
     </div>
     <div id="garden-svg-wrap"></div>
@@ -4570,6 +4570,7 @@ function openGardenHelp(){
     return '<div style="display:flex;align-items:center;gap:14px;padding:11px 0;'+(i<4?'border-bottom:1px solid var(--bg3);':'')+'">'+svg+'<div><div style="font-weight:600;font-size:14px;">'+s.label+'</div><div style="font-size:12px;color:var(--tx3);margin-top:2px;">'+s.range+'</div></div></div>';
   }).join('');
   sh.innerHTML='<div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:14px;">Plant stages</div>'+rows;
+  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.cssText='width:100%;margin-top:16px;';closeBtn.textContent='Close';closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
 }
 
 function rGarden(){
@@ -4686,6 +4687,8 @@ function rGarden(){
     });
     wrap.appendChild(grid);
   }
+  var helpBtn=document.getElementById('garden-help-btn');
+  if(helpBtn){helpBtn.onclick=null;helpBtn.addEventListener('click',openGardenHelp);}
 }
 
 function showPlantInfo(id){
