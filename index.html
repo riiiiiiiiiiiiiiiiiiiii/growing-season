@@ -874,7 +874,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       </div>
     </div>
     <div class="sf"><div class="sl">Category</div><div class="so" id="ed-cat"></div></div>
-    <div class="sf"><div class="sl">Commitment</div><div class="so" id="ed-type"></div></div>
     <div class="sf"><div class="sl">Level</div><div class="so" id="ed-level"></div></div>
     <div class="srow">
       <button class="btn btn-s" style="flex:1;margin-top:0;" id="btn-ed-cancel">Cancel</button>
@@ -905,7 +904,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div class="sf"><div class="sl">Name</div><input class="sinp" id="an" placeholder="e.g. Pottery, Archery..."></div>
       <div class="sf"><div class="sl">Category</div><div class="so" id="ac-opts"></div></div>
       <div class="sf" id="ac-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:stretch;"><input class="sinp" id="ac-custom-name" placeholder="e.g. Gaming, Cooking..." style="flex:1;min-width:0;"><button id="btn-add-cat" type="button" style="padding:0 16px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save</button></div></div>
-      <div class="sf"><div class="sl">Commitment</div><div class="so" id="add-type"></div></div>
       <div class="sf"><div class="sl">Level</div><div class="so" id="add-level"></div></div>
       <button class="btn btn-p" id="btn-add-save" style="margin-top:4px;">Plant it</button>
       <button class="btn btn-s" id="btn-add-cancel-custom" style="margin-top:6px;width:100%;">Cancel</button>
@@ -1788,12 +1786,6 @@ function rObGrid(){
     var togs=document.createElement('div');
     togs.className='oc-togs';
     togs.addEventListener('click',function(e){e.stopPropagation();});
-
-    var typeTog=document.createElement('div');
-    typeTog.className='oc-tog'+(my.type==='serious'?' p':'');
-    typeTog.textContent=my.type==='serious'?'Seriously':'For joy';
-    typeTog.addEventListener('click',function(e){e.stopPropagation();togInline(a.id,'type',my.type==='serious'?'recreational':'serious');});
-    togs.appendChild(typeTog);
 
     var lvlTog=document.createElement('div');
     lvlTog.className='oc-tog'+(my.level!=='beginner'?' t':'');
@@ -3963,8 +3955,9 @@ function rMy(){
       inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
         +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+''+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
-        +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
+        +(isAct?'<span class="badge badge-ip">active</span>':'')
         +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
+        +'<span style="font-size:11px;color:var(--tx3);">'+STAGE_LABELS[getStage(getHours(a.id))]+'</span>'
         +'</div>';
       card.appendChild(inner);
       card.addEventListener('click',function(e){if(e.target.classList.contains('drag-handle'))return;if(isAct)resumeSess();else openActInfo(a.id,'my');});
@@ -4019,8 +4012,9 @@ function rMy(){
       inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
         +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+''+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
-        +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
+        +(isAct?'<span class="badge badge-ip">active</span>':'')
         +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
+        +'<span style="font-size:11px;color:var(--tx3);">'+STAGE_LABELS[getStage(getHours(a.id))]+'</span>'
         +'</div>';
       card.appendChild(inner);
       card.addEventListener('click',function(e){if(e.target.classList.contains('drag-handle'))return;if(isAct)resumeSess();else openActInfo(a.id,'my');});
@@ -4300,7 +4294,7 @@ function openEd(id){
   edId=id;
   var a=myActs.find(function(x){return x.id===id;});
   document.getElementById('ed-title').textContent='Tend: '+a.name;
-  edTmp={name:a.name,emoji:a.emoji,cat:a.cat||CATS[0],type:a.type||'recreational',level:a.level||'beginner'};
+  edTmp={name:a.name,emoji:a.emoji,cat:a.cat||CATS[0],level:a.level||'beginner'};
 
   document.getElementById('ed-name').value=a.name;
   document.getElementById('ed-emoji').value=a.emoji;
@@ -4318,13 +4312,6 @@ function openEd(id){
   }
   CATS.forEach(function(cat){var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg2)','var(--tx)'];addEdCat(cat,CEM[cat]+' '+cat,cc);});
   customCats.forEach(function(cat){addEdCat(cat,'🌱 '+cat,['var(--bg3)','var(--tx)']);});
-
-  var typeWrap=document.getElementById('ed-type');typeWrap.innerHTML='';
-  [{v:'recreational',lbl:'Growing for joy'},{v:'serious',lbl:'Growing seriously'}].forEach(function(opt){
-    var b=document.createElement('div');b.className='sop'+(edTmp.type===opt.v?' on':'');b.textContent=opt.lbl;
-    b.addEventListener('click',function(){edTmp.type=opt.v;typeWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
-    typeWrap.appendChild(b);
-  });
 
   var lvlWrap=document.getElementById('ed-level');lvlWrap.innerHTML='';
   [{v:'beginner',lbl:'Just planted'},{v:'intermediate',lbl:'Taking root'},{v:'comfortable',lbl:'In season'}].forEach(function(opt){
@@ -4384,7 +4371,7 @@ function saveEd(){
     var newEmoji=document.getElementById('ed-emoji').value.trim();
     if(newName)a.name=newName;
     if(newEmoji)a.emoji=newEmoji;
-    a.cat=edTmp.cat;a.type=edTmp.type;a.level=edTmp.level;
+    a.cat=edTmp.cat;a.level=edTmp.level;
   }
   sv();closeEd();rMy();rHome();
 }
@@ -4511,12 +4498,6 @@ function openAdd(){
   }
   _renderCats=renderCats;
   renderCats(null);
-  var typeWrap=document.getElementById('add-type');typeWrap.innerHTML='';
-  [{v:'recreational',lbl:'Growing for joy'},{v:'serious',lbl:'Growing seriously'}].forEach(function(opt){
-    var b=document.createElement('div');b.className='sop';b.dataset.type=opt.v;b.textContent=opt.lbl;
-    b.addEventListener('click',function(){typeWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
-    typeWrap.appendChild(b);
-  });
   var lvlWrap=document.getElementById('add-level');lvlWrap.innerHTML='';
   [{v:'beginner',lbl:'Just planted'},{v:'intermediate',lbl:'Taking root'},{v:'comfortable',lbl:'In season'}].forEach(function(opt){
     var b=document.createElement('div');b.className='sop';b.dataset.level=opt.v;b.textContent=opt.lbl;
@@ -4530,7 +4511,6 @@ function closeAdd(){document.getElementById('add-ov').classList.remove('on');}
 function saveAdd(){
   var name=document.getElementById('an').value.trim();
   var catEl=document.querySelector('#ac-opts .sop.on');
-  var typeEl=document.querySelector('#add-type .sop.on');
   var lvlEl=document.querySelector('#add-level .sop.on');
   if(!name||!catEl)return;
   var cat,emoji;
@@ -4542,7 +4522,7 @@ function saveAdd(){
     cat=catEl.dataset.cat;
     emoji=CEM[cat]||'🌱';
   }
-  var _newAct={id:genUUID(),name:name,emoji:emoji,cat:cat,type:typeEl?typeEl.dataset.type:'recreational',level:lvlEl?lvlEl.dataset.level:'beginner',tags:[]};
+  var _newAct={id:genUUID(),name:name,emoji:emoji,cat:cat,level:lvlEl?lvlEl.dataset.level:'beginner',tags:[]};
   myActs.push(_newAct);
   pushFeedEvent('plant',name,emoji,null);
   checkTrophies();sv();closeAdd();rMy();
