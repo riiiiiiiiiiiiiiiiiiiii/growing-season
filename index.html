@@ -3930,6 +3930,8 @@ function initDrag(handle,wrap,actId,cat){
 var catOpen={};
 var myTab='all';
 var mySearch='';
+var focusCatFilter='all';
+var focusCatOpen={};
 var gardenTab='all';
 function rMy(){
   var el=document.getElementById('my-list');
@@ -3975,46 +3977,75 @@ function rMy(){
   el.innerHTML='';
   var _mySrch=mySearch.trim().toLowerCase();
 
-  // Focus tab: flat list of focused activities only
+  // Focus tab: grouped by category with filter chips and collapse
   if(myTab==='focus'&&hasFocusSet()){
     var focused=myActs.filter(function(a){return isFocused(a.id)&&(!_mySrch||a.name.toLowerCase().includes(_mySrch)||a.emoji.includes(_mySrch));});
     if(!focused.length){
       el.innerHTML='<p style="color:var(--tx2);font-size:14px;text-align:center;padding:24px 0;">No activities in focus this week.<br><span style="font-size:12px;">Swipe right on a card in All seeds to add one.</span></p>';
       return;
     }
-    focused.forEach(function(a,_fi){
-      var isAct=active&&active.actId===a.id;
-      var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
-      var wrap=document.createElement('div');wrap.className='mc-wrap';wrap.dataset.dragId=a.id;wrap.dataset.dragCat=a.cat||'Other';
-      var del=document.createElement('div');del.className='mc-del';del.textContent='🗃️';wrap.appendChild(del);
-      var focEl=document.createElement('div');focEl.className='mc-foc';focEl.textContent='🎯';wrap.appendChild(focEl);
-      var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
-      var dragHandle=document.createElement('div');dragHandle.className='drag-handle';dragHandle.textContent='⠿';card.appendChild(dragHandle);
-      var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
-      var streak=getStreakAt(a.id,Date.now());
-      inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
-        +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+''+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
-        +'<div class="mc-r">'
-        +(isAct?'<span class="badge badge-ip">active</span>':'')
-        +'<span style="font-size:11px;color:var(--tx3);">'+STAGE_LABELS[getStage(getHours(a.id))]+'</span>'
-        +'</div>';
-      card.appendChild(inner);
-      card.addEventListener('click',function(e){if(e.target.classList.contains('drag-handle'))return;if(isAct)resumeSess();else openActInfo(a.id,'my');});
-      if(!isAct){(function(act){var nb=inner.querySelector('.mc-notes-btn');if(nb)nb.addEventListener('click',function(e){e.stopPropagation();openNotes();rNoteEditor(act);});})(a);}
-      if(!isAct){(function(act){
-        addSwipe(wrap,card,function(){
-          var idx=myActs.findIndex(function(x){return x.id===act.id;});
-          if(idx>-1){myActs.splice(idx,1);archivedActs.push(act);sv();rMy();
-            showToast(act.emoji+' '+act.name+' archived',function(){archivedActs.splice(archivedActs.indexOf(act),1);myActs.splice(idx,0,act);sv();rMy();});}
-        },function(){
-          var fi=weeklyFocus.actIds.indexOf(act.id);
-          if(fi>-1){weeklyFocus.actIds.splice(fi,1);showToast(act.emoji+' '+act.name+' removed from focus',null);}
-          else{weeklyFocus.actIds.push(act.id);showToast('🎯 '+act.name+' added to focus',null);}
-          sv();rMy();rHome();
+    // Build category groups from focused activities
+    var fGroups={};
+    focused.forEach(function(a){var c=a.cat||'Other';if(!fGroups[c])fGroups[c]=[];fGroups[c].push(a);});
+    var fCats=Object.keys(fGroups);
+    // Category filter chips
+    var chipRow=document.createElement('div');chipRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;';
+    var allChip=document.createElement('div');allChip.className='pill'+(focusCatFilter==='all'?'':' off');
+    allChip.style.cssText='cursor:pointer;'+(focusCatFilter==='all'?'background:var(--gr);color:#fff;':'background:var(--bg2);color:var(--tx2);');
+    allChip.textContent='All';allChip.addEventListener('click',function(){focusCatFilter='all';rMy();});
+    chipRow.appendChild(allChip);
+    fCats.forEach(function(cat){
+      var chip=document.createElement('div');chip.className='pill'+(focusCatFilter===cat?'':' off');
+      chip.style.cssText='cursor:pointer;'+(focusCatFilter===cat?'background:var(--gr);color:#fff;':'background:var(--bg2);color:var(--tx2);');
+      chip.textContent=cat;chip.addEventListener('click',function(){focusCatFilter=cat;rMy();});
+      chipRow.appendChild(chip);
+    });
+    el.appendChild(chipRow);
+    // Render each category section
+    var visibleCats=focusCatFilter==='all'?fCats:[focusCatFilter].filter(function(c){return fGroups[c];});
+    visibleCats.forEach(function(cat){
+      var acts=fGroups[cat];
+      var isOpen=focusCatOpen[cat]!==false;
+      var section=document.createElement('div');section.className='cat-section';
+      var secHdr=document.createElement('div');
+      secHdr.style.cssText='display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0 6px;margin-bottom:'+(isOpen?'6px':'0')+';';
+      secHdr.innerHTML='<span style="font-size:12px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;">'+cat+'</span>'
+        +'<span style="font-size:16px;color:var(--tx3);line-height:1;">'+(isOpen?'▴':'▾')+'</span>';
+      secHdr.addEventListener('click',function(){focusCatOpen[cat]=!isOpen;rMy();});
+      section.appendChild(secHdr);
+      if(isOpen){
+        acts.forEach(function(a){
+          var isAct=active&&active.actId===a.id;
+          var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
+          var wrap=document.createElement('div');wrap.className='mc-wrap';wrap.dataset.dragId=a.id;wrap.dataset.dragCat=a.cat||'Other';
+          var del=document.createElement('div');del.className='mc-del';del.textContent='🗃️';wrap.appendChild(del);
+          var focEl=document.createElement('div');focEl.className='mc-foc';focEl.textContent='🎯';wrap.appendChild(focEl);
+          var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
+          var dragHandle=document.createElement('div');dragHandle.className='drag-handle';dragHandle.textContent='⠿';card.appendChild(dragHandle);
+          var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
+          var streak=getStreakAt(a.id,Date.now());
+          inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
+            +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
+            +'<div class="mc-r">'+(isAct?'<span class="badge badge-ip">active</span>':'')+'<span style="font-size:11px;color:var(--tx3);">'+STAGE_LABELS[getStage(getHours(a.id))]+'</span></div>';
+          card.appendChild(inner);
+          card.addEventListener('click',function(e){if(e.target.classList.contains('drag-handle'))return;if(isAct)resumeSess();else openActInfo(a.id,'my');});
+          if(!isAct){(function(act){
+            addSwipe(wrap,card,function(){
+              var idx=myActs.findIndex(function(x){return x.id===act.id;});
+              if(idx>-1){myActs.splice(idx,1);archivedActs.push(act);sv();rMy();
+                showToast(act.emoji+' '+act.name+' archived',function(){archivedActs.splice(archivedActs.indexOf(act),1);myActs.splice(idx,0,act);sv();rMy();});}
+            },function(){
+              var fi=weeklyFocus.actIds.indexOf(act.id);
+              if(fi>-1){weeklyFocus.actIds.splice(fi,1);showToast(act.emoji+' '+act.name+' removed from focus',null);}
+              else{weeklyFocus.actIds.push(act.id);showToast('🎯 '+act.name+' added to focus',null);}
+              sv();rMy();rHome();
+            });
+            initDrag(dragHandle,wrap,act.id,act.cat||'Other');
+          })(a);}
+          wrap.appendChild(card);section.appendChild(wrap);
         });
-        initDrag(dragHandle,wrap,act.id,act.cat||'Other');
-      })(a);}
-      wrap.appendChild(card);el.appendChild(wrap);
+      }
+      el.appendChild(section);
     });
     return;
   }
