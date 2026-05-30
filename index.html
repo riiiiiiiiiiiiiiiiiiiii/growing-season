@@ -186,7 +186,6 @@ body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #fab,body.ob-mode
 .badge-s{background:#EDE9FE;color:#5B21B6;}
 .badge-r{background:#D1FAE5;color:#065F46;}
 .badge-ip{background:var(--co);color:#fff;}
-.el{font-size:11px;color:var(--gr);cursor:pointer;}
 .hc{background:#fff;border:var(--br);border-radius:var(--rad);padding:14px;margin-bottom:8px;box-shadow:var(--sh);animation:cardIn .22s cubic-bezier(.25,.46,.45,.94) both;}
 @keyframes cardIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
@@ -3966,11 +3965,9 @@ function rMy(){
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
         +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
-        +(!isAct?'<span class="el">Tend</span>':'')
         +'</div>';
       card.appendChild(inner);
       card.addEventListener('click',function(e){if(e.target.classList.contains('drag-handle'))return;if(isAct)resumeSess();else openActInfo(a.id,'my');});
-      if(!isAct){var tend=inner.querySelector('.el');if(tend)tend.addEventListener('click',function(e){e.stopPropagation();openEd(a.id);});}
       if(!isAct){(function(act){var nb=inner.querySelector('.mc-notes-btn');if(nb)nb.addEventListener('click',function(e){e.stopPropagation();openNotes();rNoteEditor(act);});})(a);}
       if(!isAct){(function(act){
         addSwipe(wrap,card,function(){
@@ -4024,11 +4021,9 @@ function rMy(){
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'<span class="badge '+(a.type==='serious'?'badge-s':'badge-r')+'">'+(a.type==='serious'?'Seriously':'For joy')+'</span>')
         +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
-        +(!isAct?'<span class="el">Tend</span>':'')
         +'</div>';
       card.appendChild(inner);
       card.addEventListener('click',function(e){if(e.target.classList.contains('drag-handle'))return;if(isAct)resumeSess();else openActInfo(a.id,'my');});
-      if(!isAct){var tend=inner.querySelector('.el');if(tend)tend.addEventListener('click',function(e){e.stopPropagation();openEd(a.id);});}
       if(!isAct){(function(act){var nb=inner.querySelector('.mc-notes-btn');if(nb)nb.addEventListener('click',function(e){e.stopPropagation();openNotes();rNoteEditor(act);});})(a);}
       if(!isAct){(function(act){
         addSwipe(wrap,card,function(){
