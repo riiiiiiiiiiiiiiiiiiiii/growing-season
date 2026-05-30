@@ -4123,7 +4123,7 @@ function getStreakAt(actId, date){
   while(actDays.indexOf(check)>-1){streak++;check-=dayMs;}
   return streak;
 }
-var histSearch='', histPeriod='all', histCustomFrom=null, histCustomTo=null;
+var histSearch='', histPeriod='all', histCustomFrom=null, histCustomTo=null, histExpanded={};
 
 function rHist(){
   // Sync period pills
@@ -4191,16 +4191,24 @@ function rHist(){
     var plantBg=['linear-gradient(180deg,#D8E8D8,#A8C8A0)','linear-gradient(180deg,#C8E8D0,#7EB890)','linear-gradient(180deg,#B0D8B8,#56A870)','linear-gradient(180deg,#F0C8D0,#C07090)','linear-gradient(180deg,#F8E8A0,#D4A830)'];
     var plantOff=stage===3?'margin-top:6px;':stage===4?'margin-top:10px;':'';
     var plantCol=plantInner?'<div style="width:'+tW+'px;flex-shrink:0;background:'+plantBg[stage]+';display:flex;align-items:flex-end;border-radius:0 var(--rad) var(--rad) 0;overflow:hidden;"><svg style="'+plantOff+'" viewBox="0 0 '+tW+' '+tH+'" width="'+tW+'" height="'+tH+'" xmlns="http://www.w3.org/2000/svg">'+plantInner+'</svg></div>':'';
+    var isExp=!!histExpanded[s.id];
+    var hasText=!!(s.notes||s.well||s.diff);
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms';_hi++;
-    hc.innerHTML='<div style="flex:1;padding:14px;min-width:0;">'
-      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+'</div></div>'
+    hc.innerHTML='<div class="hc-main" style="flex:1;padding:14px;min-width:0;">'
+      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 4px;line-height:1;flex-shrink:0;">'+(isExp?'▴':'▾')+'</button>':'')+'</div></div>'
       +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
-      +(s.notes?'<div class="hc-note">'+s.notes+'</div>':'')
-      +'</div>'
-      +plantCol;
-    (function(sess,act){
-      hc.addEventListener('click',function(){openSessionDetail(sess,act);});
-    })(s,a);
+      +'</div>'+plantCol;
+    if(hasText){
+      var _main=hc.querySelector('.hc-main');
+      var _nd=document.createElement('div');_nd.style.cssText='overflow:hidden;';_nd.style.display=isExp?'':'none';
+      if(s.notes){var _n=document.createElement('div');_n.className='hc-note';_n.textContent=s.notes;_nd.appendChild(_n);}
+      if(s.well){var _w=document.createElement('div');_w.style.cssText='font-size:12px;color:var(--tx2);margin-top:6px;padding-top:6px;border-top:.5px solid var(--bg3);';_w.innerHTML='<span style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;">Went well · </span>';_w.appendChild(document.createTextNode(s.well));_nd.appendChild(_w);}
+      if(s.diff){var _d=document.createElement('div');_d.style.cssText='font-size:12px;color:var(--tx2);margin-top:6px;';_d.innerHTML='<span style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;">Next time · </span>';_d.appendChild(document.createTextNode(s.diff));_nd.appendChild(_d);}
+      _main.appendChild(_nd);
+      var _arr=_main.querySelector('.hc-arr');
+      (function(nd,arr,sid){arr.addEventListener('click',function(e){e.stopPropagation();histExpanded[sid]=!histExpanded[sid];nd.style.display=histExpanded[sid]?'':'none';arr.textContent=histExpanded[sid]?'▴':'▾';});})(  _nd,_arr,s.id);
+    }
+    (function(sess,act){hc.addEventListener('click',function(){openSessionDetail(sess,act);});})(s,a);
     el.appendChild(hc);
   });
 }
