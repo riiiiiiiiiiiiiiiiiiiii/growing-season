@@ -3973,6 +3973,13 @@ function rMy(){
     var fGroups={};
     focused.forEach(function(a){var c=a.cat||'Other';if(!fGroups[c])fGroups[c]=[];fGroups[c].push(a);});
     var fCats=Object.keys(fGroups);
+    // Collapse/expand all
+    var _fAllOpen=fCats.every(function(c){return focusCatOpen[c]!==false;});
+    var _fToggleBtn=document.createElement('button');
+    _fToggleBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:0 0 10px;display:block;text-align:left;';
+    _fToggleBtn.textContent=_fAllOpen?'Collapse all':'Expand all';
+    _fToggleBtn.addEventListener('click',function(){fCats.forEach(function(c){focusCatOpen[c]=!_fAllOpen;});rMy();});
+    el.appendChild(_fToggleBtn);
     // Category filter chips
     var chipRow=document.createElement('div');chipRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;';
     var allChip=document.createElement('div');allChip.className='pill'+(focusCatFilter==='all'?'':' off');
@@ -3992,14 +3999,20 @@ function rMy(){
       var acts=fGroups[cat];
       var isOpen=focusCatOpen[cat]!==false;
       var section=document.createElement('div');section.className='cat-section';
-      var secHdr=document.createElement('div');
-      secHdr.style.cssText='display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:6px 0 6px;margin-bottom:'+(isOpen?'6px':'0')+';';
-      secHdr.innerHTML='<span style="font-size:12px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;">'+cat+'</span>'
-        +'<span style="font-size:16px;color:var(--tx3);line-height:1;">'+(isOpen?'▴':'▾')+'</span>';
-      secHdr.addEventListener('click',function(){focusCatOpen[cat]=!isOpen;rMy();});
-      section.appendChild(secHdr);
-      if(isOpen){
-        acts.forEach(function(a){
+      var secHdr=document.createElement('div');secHdr.className='cat-hdr';
+      secHdr.innerHTML='<span class="cat-hdr-label">'+(CEM[cat]||'🌱')+' '+cat+'</span>'
+        +'<span class="cat-hdr-count">'+acts.length+'</span>'
+        +'<span class="cat-arrow'+(isOpen?' open':'')+'">›</span>';
+      var secBody=document.createElement('div');secBody.className='cat-body';secBody.style.display=isOpen?'block':'none';
+      secHdr.addEventListener('click',function(){
+        var nowOpen=secBody.style.display==='none';
+        secBody.style.display=nowOpen?'block':'none';
+        focusCatOpen[cat]=nowOpen;
+        var arrow=secHdr.querySelector('.cat-arrow');
+        if(nowOpen)arrow.classList.add('open');else arrow.classList.remove('open');
+      });
+      section.appendChild(secHdr);section.appendChild(secBody);
+      acts.forEach(function(a){
           var isAct=active&&active.actId===a.id;
           var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
           var wrap=document.createElement('div');wrap.className='mc-wrap';wrap.dataset.dragId=a.id;wrap.dataset.dragCat=a.cat||'Other';
@@ -4027,9 +4040,8 @@ function rMy(){
             });
             initDrag(dragHandle,wrap,act.id,act.cat||'Other');
           })(a);}
-          wrap.appendChild(card);section.appendChild(wrap);
+          wrap.appendChild(card);secBody.appendChild(wrap);
         });
-      }
       el.appendChild(section);
     });
     return;
