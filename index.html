@@ -4186,7 +4186,7 @@ function rHist(){
     var hasText=!!(s.notes||s.well||s.diff);
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms';_hi++;
     hc.innerHTML='<div class="hc-main" style="flex:1;padding:14px;min-width:0;">'
-      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx3);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-4px;">'+(isExp?'▴':'▾')+'</button>':'')+'</div></div>'
+      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx3);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-2px;">'+(isExp?'▴':'▾')+'</button>':'')+'</div></div>'
       +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
       +'</div>'+plantCol;
     if(hasText){
