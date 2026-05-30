@@ -1015,7 +1015,7 @@ function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);
 function sv(){try{localStorage.setItem('gs-v3',JSON.stringify({userId:supaUser?supaUser.id:null,myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,darkMode:darkMode,customCats:customCats,colorPalette:colorPalette,calPlanned:calPlanned}));}catch(e){}if(supaUser)syncToSupabase();}
 var st=ld(), myActs=st.myActs, sessions=st.sessions, onboarded=st.onboarded, profile=st.profile, active=st.active;
 var calPlanned=st.calPlanned||[];
-var weeklyFocus=st.weeklyFocus||{weekKey:'',actIds:[]};
+var weeklyFocus=st.weeklyFocus||{actIds:[]};
 var archivedActs=st.archivedActs||[];
 var activityNotes=st.activityNotes||{};
 var customCats=st.customCats||[];
@@ -1483,7 +1483,7 @@ document.getElementById('btn-import-yes').addEventListener('click',function(){
 document.getElementById('btn-term-no').addEventListener('click',function(){document.getElementById('term-ov').classList.remove('on');});
 document.getElementById('btn-term-yes').addEventListener('click',function(){
   myActs.forEach(function(a){archivedActs.push(Object.assign({},a,{_terminated:true}));});
-  myActs.length=0;active=null;weeklyFocus={weekKey:'',actIds:[]};onboarded=false;sv();
+  myActs.length=0;active=null;weeklyFocus={actIds:[]};onboarded=false;sv();
   document.getElementById('term-ov').classList.remove('on');
   document.getElementById('main-nav').classList.remove('on');
   document.getElementById('fab').style.display='none';
@@ -2538,7 +2538,7 @@ function rNoteHistory(a,sections,tas,refreshHistBtn,onEdit){
     var hdrLeft=document.createElement('div');hdrLeft.style.cssText='font-size:12px;font-weight:600;color:var(--tx2);';hdrLeft.textContent=dateStr;
     var hdrBtns=document.createElement('div');hdrBtns.style.cssText='display:flex;gap:8px;align-items:center;';
     var editBtn=document.createElement('button');editBtn.type='button';editBtn.style.cssText='background:none;border:none;font-size:12px;font-weight:600;color:var(--gr);cursor:pointer;padding:0;';editBtn.textContent='Edit';
-    var del=document.createElement('button');del.type='button';del.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:0;line-height:1;';del.textContent='🗑️';
+    var del=document.createElement('button');del.type='button';del.style.cssText='background:none;border:none;font-size:10px;color:var(--tx3);cursor:pointer;padding:0;line-height:1;';del.textContent='🗑️';
     (function(i,e){
       editBtn.addEventListener('click',function(){
         if(tas){sections.forEach(function(sec){tas[sec.key].value=e[sec.key]||'';});}
@@ -3750,20 +3750,9 @@ function openFocus(){
 }
 function closeFocus(){document.getElementById('foc-ov').classList.remove('on');}
 function saveFocus(){
-  weeklyFocus={weekKey:getWeekKey(),actIds:focusTmp.slice()};
+  weeklyFocus={actIds:focusTmp.slice()};
   if(weeklyFocus.actIds.length>0)myTab='focus';
   checkTrophies();sv();closeFocus();rMy();rHome();
-}
-function checkNewWeek(){
-  if(weeklyFocus.weekKey&&weeklyFocus.weekKey!==getWeekKey()&&weeklyFocus.actIds.length>0){
-    showToast('New week — update your focus?',null);
-    setTimeout(function(){
-      var t=document.getElementById('toast');
-      if(t.classList.contains('on')){
-        var u=document.getElementById('toast-undo');u.textContent='Update';u.onclick=function(){document.getElementById('toast').classList.remove('on');openFocus();};
-      }
-    },100);
-  }
 }
 
 // ── TOAST ─────────────────────────────────────────────
@@ -3959,16 +3948,12 @@ function rMy(){
   // Focus banner
   var bw=document.getElementById('focus-banner-wrap');
   if(bw){
-    var newWeek=weeklyFocus.weekKey&&weeklyFocus.weekKey!==getWeekKey();
     if(!hasFocusSet()){
-      bw.innerHTML='<div class="focus-banner" style="cursor:pointer;" id="focus-set-cta"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>Set this week\'s focus</strong><br><span style="font-weight:400;">Pick a few activities to prioritise</span></div><button class="focus-banner-edit">Choose</button></div>';
+      bw.innerHTML='<div class="focus-banner" style="cursor:pointer;" id="focus-set-cta"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>Set your focus</strong><br><span style="font-weight:400;">Pick a few activities to prioritise</span></div><button class="focus-banner-edit">Choose</button></div>';
       document.getElementById('focus-set-cta').addEventListener('click',openFocus);
-    } else if(newWeek){
-      bw.innerHTML='<div class="focus-new-week" style="cursor:pointer;" id="focus-new-week-cta"><span style="font-size:18px;">🗓️</span><div class="focus-new-week-text"><strong>New week!</strong> Update your focus?</div><button class="focus-banner-edit" style="background:#F59E0B;">Update</button></div>';
-      document.getElementById('focus-new-week-cta').addEventListener('click',openFocus);
     } else {
       var fCount=weeklyFocus.actIds.length;
-      bw.innerHTML='<div class="focus-banner"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>This week: '+fCount+' in focus</strong></div><button class="focus-banner-edit" id="focus-edit-btn">Edit</button></div>';
+      bw.innerHTML='<div class="focus-banner"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>'+fCount+' in focus</strong></div><button class="focus-banner-edit" id="focus-edit-btn">Edit</button></div>';
       document.getElementById('focus-edit-btn').addEventListener('click',openFocus);
     }
   }
@@ -4094,7 +4079,6 @@ function rMy(){
           if(idx>-1){myActs.splice(idx,1);archivedActs.push(act);sv();rMy();
             showToast(act.emoji+' '+act.name+' archived',function(){archivedActs.splice(archivedActs.indexOf(act),1);myActs.splice(idx,0,act);sv();rMy();});}
         },function(){
-          if(!weeklyFocus.weekKey)weeklyFocus.weekKey=getWeekKey();
           var fi=weeklyFocus.actIds.indexOf(act.id);
           if(fi>-1){weeklyFocus.actIds.splice(fi,1);showToast(act.emoji+' '+act.name+' removed from focus',null);}
           else{weeklyFocus.actIds.push(act.id);showToast('🎯 '+act.name+' added to focus',null);}
@@ -4637,16 +4621,10 @@ function rGarden(){
   var gbw=document.getElementById('garden-focus-banner-wrap');
   var gtabs=document.getElementById('garden-tabs');
   if(gbw){
-    var newWeek=weeklyFocus.weekKey&&weeklyFocus.weekKey!==getWeekKey();
     if(!hasFocusSet()){
       gardenTab='all';
-      gbw.innerHTML='<div class="focus-banner" style="cursor:pointer;" id="garden-focus-set-cta"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>Set this week\'s focus</strong><br><span style="font-weight:400;">Pick a few activities to prioritise</span></div><button class="focus-banner-edit">Choose</button></div>';
+      gbw.innerHTML='<div class="focus-banner" style="cursor:pointer;" id="garden-focus-set-cta"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>Set your focus</strong><br><span style="font-weight:400;">Pick a few activities to prioritise</span></div><button class="focus-banner-edit">Choose</button></div>';
       document.getElementById('garden-focus-set-cta').addEventListener('click',openFocus);
-      if(gtabs){gtabs.innerHTML='';gtabs.style.display='none';}
-    } else if(newWeek){
-      gardenTab='all';
-      gbw.innerHTML='<div class="focus-new-week" style="cursor:pointer;" id="garden-focus-new-week-cta"><span style="font-size:18px;">🗓️</span><div class="focus-new-week-text"><strong>New week!</strong> Update your focus?</div><button class="focus-banner-edit" style="background:#F59E0B;">Update</button></div>';
-      document.getElementById('garden-focus-new-week-cta').addEventListener('click',openFocus);
       if(gtabs){gtabs.innerHTML='';gtabs.style.display='none';}
     } else {
       gbw.innerHTML='';
@@ -4999,7 +4977,7 @@ function bootApp(){
   if(onboarded){
     document.getElementById('main-nav').classList.add('on');
     document.getElementById('profile-btn').style.display='flex';
-    launch();checkNewWeek();
+    launch();
   }else{
     document.body.classList.add('ob-mode');
     show('s-ob0');rObCats();rObGrid();
