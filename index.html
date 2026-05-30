@@ -651,6 +651,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div id="my-tabs" style="display:flex;gap:6px;"></div>
       <div id="plot-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
     </div>
+    <div class="sw" style="margin-bottom:12px;"><span class="sic">🔍</span><input class="si" id="my-search" placeholder="Search activities…" autocomplete="off"></div>
     <div id="my-list"></div>
   </div>
 
@@ -1303,7 +1304,7 @@ function nav(v){
   document.getElementById('fab').style.display=(v==='my'||v==='garden'||v==='hist')?'flex':'none';
   var pb=document.getElementById('profile-btn');if(pb)pb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist')?'flex':'none';
   if(v==='home')rHome();
-  if(v==='my')rMy();
+  if(v==='my'){mySearch='';var ms=document.getElementById('my-search');if(ms)ms.value='';rMy();}
   if(v==='garden')rGarden();
   if(v==='hist'){histSearch='';histPeriod='all';histCustomFrom=null;histCustomTo=null;var hs=document.getElementById('hist-search');if(hs)hs.value='';var cr=document.getElementById('hist-custom-range');if(cr)cr.style.display='none';rHist();}
   if(v==='friends'){_frTab='friends';['friends','feed','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='friends');});renderFriends();}
@@ -1427,6 +1428,7 @@ document.getElementById('fab').addEventListener('click',function(){
 });
 // Harvest filters
 document.getElementById('hist-search').addEventListener('input',function(){histSearch=this.value;rHist();});
+document.getElementById('my-search').addEventListener('input',function(){mySearch=this.value;rMy();});
 document.getElementById('hist-period-row').addEventListener('click',function(e){
   var btn=e.target.closest('.hist-fp');if(!btn)return;
   histPeriod=btn.dataset.p;
@@ -2134,9 +2136,9 @@ function _calSetSheetDay(){
 }
 function _calSetSheetMonth(){
   var sh=document.getElementById('cal-sh');
-  sh.style.padding='22px 18px 28px';sh.style.maxHeight='';sh.style.height='';sh.style.overflow='';sh.style.display='';sh.style.flexDirection='';
+  sh.style.cssText='max-width:480px;padding:22px 18px 28px;';
   var calHdr=sh.querySelector(':scope>div');if(calHdr)calHdr.style.display='';
-  var body=document.getElementById('cal-body');body.style.flex='';body.style.display='';body.style.flexDirection='';body.style.overflow='';body.style.margin='';
+  var body=document.getElementById('cal-body');body.style.cssText='';
 }
 
 function renderCalendarDayView(dateObj){
@@ -3905,6 +3907,7 @@ function initDrag(handle,wrap,actId,cat){
 // ── PLOT (MY LIST) ─────────────────────────────────────
 var catOpen={};
 var myTab='all';
+var mySearch='';
 var gardenTab='all';
 function rMy(){
   var el=document.getElementById('my-list');
@@ -3948,10 +3951,11 @@ function rMy(){
 
   if(!myActs.length){el.innerHTML='<p style="color:var(--tx2);font-size:14px;">Nothing planted yet</p>';return;}
   el.innerHTML='';
+  var _mySrch=mySearch.trim().toLowerCase();
 
   // Focus tab: flat list of focused activities only
   if(myTab==='focus'&&hasFocusSet()){
-    var focused=myActs.filter(function(a){return isFocused(a.id);});
+    var focused=myActs.filter(function(a){return isFocused(a.id)&&(!_mySrch||a.name.toLowerCase().includes(_mySrch)||a.emoji.includes(_mySrch));});
     if(!focused.length){
       el.innerHTML='<p style="color:var(--tx2);font-size:14px;text-align:center;padding:24px 0;">No activities in focus this week.<br><span style="font-size:12px;">Swipe right on a card in All seeds to add one.</span></p>';
       return;
@@ -3994,7 +3998,7 @@ function rMy(){
   }
 
   var groups={};
-  myActs.forEach(function(a){var c=a.cat||'Other';if(!groups[c])groups[c]=[];groups[c].push(a);});
+  myActs.filter(function(a){return !_mySrch||a.name.toLowerCase().includes(_mySrch)||a.emoji.includes(_mySrch);}).forEach(function(a){var c=a.cat||'Other';if(!groups[c])groups[c]=[];groups[c].push(a);});
   var _cats=Object.keys(groups);
   var _allOpen=_cats.every(function(c){return catOpen[c]!==false;});
   var _toggleAllBtn=document.createElement('button');
