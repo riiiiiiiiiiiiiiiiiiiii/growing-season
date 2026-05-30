@@ -1972,8 +1972,8 @@ async function openProfileEdit(){
     var signOutBtn=document.createElement('button');signOutBtn.className='btn btn-s';signOutBtn.style.cssText='margin-top:8px;color:var(--co);';signOutBtn.textContent='Sign out';
     signOutBtn.addEventListener('click',function(){closeEd();doSignOut();});
     sh.appendChild(signOutBtn);
-    var resetBtn=document.createElement('button');resetBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:8px 0;width:100%;';resetBtn.textContent='Start fresh';
-    resetBtn.addEventListener('click',function(){document.getElementById('term-ov').classList.add('on');});
+    var resetBtn=document.createElement('button');resetBtn.style.cssText='background:none;border:1px solid rgba(239,68,68,0.25);border-radius:10px;font-size:13px;color:#EF4444;cursor:pointer;padding:10px 0;width:100%;margin-top:4px;opacity:0.7;';resetBtn.textContent='Erase my data';
+    resetBtn.addEventListener('click',function(){closeEd();document.getElementById('term-ov').classList.add('on');});
     sh.appendChild(resetBtn);
   }
   document.getElementById('ed-ov').classList.add('on');
@@ -5228,12 +5228,12 @@ if('serviceWorker' in navigator){
 <!-- TERMINATE CONFIRM -->
 <div class="ov" id="term-ov">
   <div class="sh" style="text-align:center;">
-    <div style="font-size:36px;margin-bottom:10px;">🌱</div>
-    <div style="font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:8px;">Start fresh?</div>
-    <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:22px;">All your seeds will be cleared and you'll start from scratch. Your logbook will be kept.</div>
+    <div style="font-size:36px;margin-bottom:10px;">🗑️</div>
+    <div style="font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:8px;">Erase everything?</div>
+    <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:22px;">Your activities, sessions, and progress will be permanently deleted. This cannot be undone.</div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-s" style="flex:1;margin-top:0;" id="btn-term-no">Cancel</button>
-      <button class="btn" style="flex:1;margin-top:0;background:#EF4444;color:#fff;" id="btn-term-yes">Start fresh</button>
+      <button class="btn" style="flex:1;margin-top:0;background:#EF4444;color:#fff;" id="btn-term-yes">Yes, erase</button>
     </div>
   </div>
 </div>
