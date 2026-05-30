@@ -683,7 +683,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <button class="hist-fp" data-p="week">This week</button>
       <button class="hist-fp" data-p="month">This month</button>
       <button class="hist-fp" data-p="custom">Custom</button>
-      <button class="hist-fp" data-p="rated">High rated</button>
     </div>
     <div id="hist-custom-range" style="display:none;background:var(--bg2);border:var(--br);border-radius:12px;padding:10px 12px;margin-bottom:8px;display:none;">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -4141,7 +4140,6 @@ function rHist(){
     var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||(s.actName?{name:s.actName}:{name:'Deleted activity'});
     if(histPeriod==='week'&&s.date<weekAgo.getTime())return false;
     if(histPeriod==='month'&&s.date<monthAgo.getTime())return false;
-    if(histPeriod==='rated'&&(!s.rating||normRating(s.rating)<3.5))return false;
     if(histPeriod==='custom'){
       if(histCustomFrom&&s.date<new Date(histCustomFrom+'T00:00:00').getTime())return false;
       if(histCustomTo&&s.date>new Date(histCustomTo+'T23:59:59').getTime())return false;
@@ -4195,7 +4193,7 @@ function rHist(){
     var hasText=!!(s.notes||s.well||s.diff);
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms';_hi++;
     hc.innerHTML='<div class="hc-main" style="flex:1;padding:14px;min-width:0;">'
-      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx3);padding:4px 6px;line-height:1;flex-shrink:0;">'+(isExp?'▴':'▾')+'</button>':'')+'</div></div>'
+      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx3);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;">'+(isExp?'▴':'▾')+'</button>':'')+'</div></div>'
       +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
       +'</div>'+plantCol;
     if(hasText){
