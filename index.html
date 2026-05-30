@@ -2095,7 +2095,7 @@ function renderCalendar(){
         var cats=[...new Set(sessMap[d].map(function(s){return s.cat;}))].slice(0,3);
         cats.forEach(function(cat){var dot=document.createElement('div');dot.style.cssText='width:5px;height:5px;border-radius:2px;background:'+(_CAT_DOT[cat]||'var(--gr)')+';flex-shrink:0;'+(isToday?'opacity:.85;':'');dotsWrap.appendChild(dot);});
       }
-      if(plannedMap[d]){var pdot=document.createElement('div');pdot.style.cssText='width:5px;height:5px;border-radius:2px;border:1.5px dashed '+(_CAT_DOT[calPlanned.find(function(e){return new Date(e.date).getDate()===d;})||{cat:''}].cat||'var(--gr)')+';flex-shrink:0;';dotsWrap.appendChild(pdot);}
+      if(plannedMap[d]){var pdot=document.createElement('div');var _pev=calPlanned.find(function(e){return new Date(e.date).getDate()===d;});pdot.style.cssText='width:5px;height:5px;border-radius:2px;border:1.5px dashed '+(_CAT_DOT[_pev?_pev.cat:'']||'var(--gr)')+';flex-shrink:0;';dotsWrap.appendChild(pdot);}
       if(dotsWrap.children.length)cell.appendChild(dotsWrap);
 
       cell.addEventListener('click',function(){renderCalendarDayView(new Date(_calYear,_calMonth,d));});
