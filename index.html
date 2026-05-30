@@ -93,7 +93,7 @@ body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #fab,body.ob-mode
 .oq-lbl{font-size:14px;font-weight:600;}
 .oq-slbl{font-size:12px;color:var(--tx2);margin-top:2px;}
 .oq-opt.on .oq-lbl{color:var(--gr2);}
-.sb{padding:72px 20px 68px;position:relative;overflow:hidden;}
+.sb{padding:72px 20px 32px;position:relative;overflow:hidden;}
 .sb-bg{position:absolute;inset:0;z-index:0;}
 .sb-fade{position:absolute;bottom:0;left:0;right:0;height:80px;z-index:1;pointer-events:none;}
 .sb-c{position:relative;z-index:2;}
@@ -113,11 +113,11 @@ body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #fab,body.ob-mode
 .pc-title{font-family:var(--serif);font-size:20px;font-weight:700;color:#fff;margin-bottom:4px;}
 .pc-sub{font-size:13px;color:rgba(255,255,255,.72);margin-bottom:18px;line-height:1.5;}
 .pc-btn{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.32);border-radius:24px;padding:10px 18px;color:#fff;font-size:13px;font-weight:600;display:inline-block;}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-top:20px;margin-bottom:16px;}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-top:24px;margin-bottom:20px;}
 .sc{background:#fff;border-radius:var(--rad);padding:14px 16px;border:var(--br);box-shadow:var(--sh);}
 .sc-n{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--gr);margin-bottom:2px;}
 .sc-l{font-size:11px;color:var(--tx3);font-weight:500;}
-.hs{padding:0 16px;margin-bottom:4px;}
+.hs{padding:0 16px;margin-top:20px;margin-bottom:4px;}
 .dq{margin:12px 16px 0;background:var(--grl);border:1px solid var(--grm);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
 .dq-em{font-size:15px;flex-shrink:0;margin-top:1px;}
 .dq-txt{font-size:13px;color:var(--gr2);line-height:1.5;font-style:italic;}
@@ -668,7 +668,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
         <button onclick="openGardenHelp()" style="background:none;border:1.5px solid var(--tx3);border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</button>
       </div>
     </div>
-    <div id="garden-legend" style="display:flex;gap:10px;padding:0 16px 12px;flex-wrap:wrap;"></div>
     <div id="garden-svg-wrap"></div>
     <div id="garden-empty" style="display:none;padding:40px 16px;text-align:center;color:var(--tx2);font-size:14px;">Add activities and log hours to see your garden grow</div>
   </div>
@@ -4607,15 +4606,6 @@ function rGarden(){
     }
   }
 
-  var legend=document.getElementById('garden-legend');
-  var clrs=['#C8D8C8','#7EC8A8','#56AB74','#D4537E','#F5C842'];
-  var thresh=['0h'].concat(NEXT_THRESH.slice(0,4).map(function(t){return t+'h+';}));
-  legend.innerHTML='';
-  STAGE_LABELS.forEach(function(l,i){
-    var item=document.createElement('div');item.className='legend-item';
-    item.innerHTML='<div class="legend-dot" style="background:'+clrs[i]+'"></div>'+l+' ('+thresh[i]+')';
-    legend.appendChild(item);
-  });
 
   var visibleActs=(gardenTab==='focus'&&hasFocusSet())?myActs.filter(function(a){return isFocused(a.id);}):myActs;
 
