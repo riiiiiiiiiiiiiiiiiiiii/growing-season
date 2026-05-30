@@ -657,15 +657,16 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
   <!-- GARDEN -->
   <div id="s-garden" class="scr">
     <div style="padding:20px 16px 14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div style="font-family:var(--serif);font-size:23px;font-weight:700;">Garden</div>
-        <button onclick="openGardenHelp()" style="background:none;border:1.5px solid var(--tx3);border-radius:50%;width:22px;height:22px;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</button>
-      </div>
+      <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:4px;">Garden</div>
       <div style="font-size:13px;color:var(--tx2);">Plants grow as you log more hours</div>
     </div>
     <div id="garden-focus-banner-wrap" style="padding:0 16px 4px;"></div>
-    <div style="padding:0 16px 8px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px 8px;">
       <div id="garden-tabs" style="display:flex;gap:6px;"></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div id="garden-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
+        <button onclick="openGardenHelp()" style="background:none;border:1.5px solid var(--tx3);border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</button>
+      </div>
     </div>
     <div id="garden-legend" style="display:flex;gap:10px;padding:0 16px 12px;flex-wrap:wrap;"></div>
     <div id="garden-svg-wrap"></div>
