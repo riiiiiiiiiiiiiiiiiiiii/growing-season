@@ -2672,6 +2672,7 @@ async function renderFeed(){
 }
 var _frTab='friends';
 var _convUserId=null,_convName=null,_convUn=null,_convEmoji=null;
+var GIFTS=['🍎','🍊','🍋','🍓','🍇','🌸','🌻','⭐','🌿','🫧'];
 var _activeTimerInt=null;
 function _fmtElapsed(ms){var s=Math.floor(ms/1000);var h=Math.floor(s/3600);var m=Math.floor((s%3600)/60);var sec=s%60;if(h>0)return h+'h '+(m<10?'0':'')+m+'m '+(sec<10?'0':'')+sec+'s';return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;}
 var _frSearchTimer=null;
@@ -2796,7 +2797,7 @@ async function openFriendProfile(fid,p,fshipId){
 
   // Gift picker
   var giftLbl=document.createElement('div');giftLbl.style.cssText='font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;';giftLbl.textContent='Send a gift';sh.appendChild(giftLbl);
-  var gifts=['🍎','🍊','🍋','🍓','🍇','🌸','🌻','⭐','🌿','🫧'];
+  var gifts=GIFTS;
   var giftRow=document.createElement('div');giftRow.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;';
   gifts.forEach(function(g){
     var btn=document.createElement('button');
@@ -2985,11 +2986,30 @@ async function renderConv(){
         container.appendChild(td);
       }
       var el=document.createElement('div');
+      var isGift=GIFTS.indexOf(m.content)>-1;
       if(isWave||isClap){
         el.className='msg-wave';
         var other=_convName||'them';
         if(isWave)el.textContent=isOut?'👋 You waved at '+other:'👋 '+other+' waved at you';
         else el.textContent=isOut?'👏 You cheered for '+other:'👏 '+other+' cheered for you';
+      } else if(isGift){
+        el.className='msg-wave';
+        el.style.cssText='text-align:center;padding:10px 0;';
+        var gname=_convName||'them';
+        var gEmoji=m.content;
+        var gBig=document.createElement('div');gBig.style.cssText='font-size:34px;margin-bottom:4px;';gBig.textContent=gEmoji;el.appendChild(gBig);
+        var gLine=document.createElement('div');gLine.style.cssText='font-size:13px;color:var(--tx2);margin-bottom:6px;';
+        gLine.textContent=isOut?'You sent '+gname+' a '+gEmoji+'!':(gname+' sent you a '+gEmoji+'!');
+        el.appendChild(gLine);
+        if(!isOut){
+          var others=GIFTS.filter(function(g){return g!==gEmoji;});
+          var sug=others[Math.floor(Math.random()*others.length)];
+          var sbBtn=document.createElement('button');
+          sbBtn.style.cssText='background:var(--grl);border:1px solid var(--grm);border-radius:16px;padding:4px 12px;font-size:12px;color:var(--gr2);cursor:pointer;font-weight:600;';
+          sbBtn.textContent='Send back a '+sug+'?';
+          (function(s){sbBtn.addEventListener('click',async function(){await _supa.from('messages').insert({from_id:supaUser.id,to_id:_convUserId,content:s});renderConv();});})(sug);
+          el.appendChild(sbBtn);
+        }
       } else {el.className=isOut?'msg-out':'msg-in';el.textContent=m.content;}
       container.appendChild(el);
     });
