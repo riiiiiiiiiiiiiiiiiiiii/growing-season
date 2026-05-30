@@ -645,16 +645,12 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
       <div style="font-family:var(--serif);font-size:23px;font-weight:700;">Seed packet</div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div style="font-size:13px;color:var(--tx2);">Tap to start or log a session</div>
+    <div id="focus-banner-wrap"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <div id="my-tabs" style="display:flex;gap:6px;"></div>
       <div id="plot-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
     </div>
-    <div id="focus-banner-wrap"></div>
-    <div id="my-tabs" style="display:flex;gap:6px;margin-bottom:12px;"></div>
     <div id="my-list"></div>
-    <div style="text-align:center;margin-top:24px;">
-      <button id="btn-terminate" style="background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:6px 10px;">☠️ Terminate field</button>
-    </div>
   </div>
 
   <!-- GARDEN -->
@@ -873,7 +869,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       </div>
     </div>
     <div class="sf"><div class="sl">Category</div><div class="so" id="ed-cat"></div></div>
-    <div class="sf"><div class="sl">Level</div><div class="so" id="ed-level"></div></div>
     <div class="srow">
       <button class="btn btn-s" style="flex:1;margin-top:0;" id="btn-ed-cancel">Cancel</button>
       <button class="btn btn-p" style="flex:1;margin-top:0;" id="btn-ed-save">Save</button>
@@ -903,7 +898,6 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div class="sf"><div class="sl">Name</div><input class="sinp" id="an" placeholder="e.g. Pottery, Archery..."></div>
       <div class="sf"><div class="sl">Category</div><div class="so" id="ac-opts"></div></div>
       <div class="sf" id="ac-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:stretch;"><input class="sinp" id="ac-custom-name" placeholder="e.g. Gaming, Cooking..." style="flex:1;min-width:0;"><button id="btn-add-cat" type="button" style="padding:0 16px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save</button></div></div>
-      <div class="sf"><div class="sl">Level</div><div class="so" id="add-level"></div></div>
       <button class="btn btn-p" id="btn-add-save" style="margin-top:4px;">Plant it</button>
       <button class="btn btn-s" id="btn-add-cancel-custom" style="margin-top:6px;width:100%;">Cancel</button>
     </div>
@@ -1478,7 +1472,6 @@ document.getElementById('btn-import-yes').addEventListener('click',function(){
   }catch(e){history.replaceState(null,'',location.pathname);}
 })();
 
-document.getElementById('btn-terminate').addEventListener('click',function(){document.getElementById('term-ov').classList.add('on');});
 document.getElementById('btn-term-no').addEventListener('click',function(){document.getElementById('term-ov').classList.remove('on');});
 document.getElementById('btn-term-yes').addEventListener('click',function(){
   myActs.forEach(function(a){archivedActs.push(Object.assign({},a,{_terminated:true}));});
@@ -1767,7 +1760,6 @@ function rObCats(){
 function rObGrid(){
   var ids=myActs.map(function(a){return a.id;});
   var list=ACTS.filter(function(a){return(obCat==='all'||a.cat===obCat)&&(!obSearch||a.name.toLowerCase().includes(obSearch));});
-  var lvlL={beginner:'Just planted',intermediate:'Taking root',comfortable:'In season'};
   var grid=document.getElementById('ob-grid');
   grid.innerHTML='';
   list.forEach(function(a){
@@ -1786,11 +1778,6 @@ function rObGrid(){
     togs.className='oc-togs';
     togs.addEventListener('click',function(e){e.stopPropagation();});
 
-    var lvlTog=document.createElement('div');
-    lvlTog.className='oc-tog'+(my.level!=='beginner'?' t':'');
-    lvlTog.textContent=lvlL[my.level]||my.level;
-    lvlTog.addEventListener('click',function(e){e.stopPropagation();cycLvl(a.id);});
-    togs.appendChild(lvlTog);
 
     inner.querySelector('div[style]').appendChild(togs);
     card.appendChild(inner);
@@ -1977,6 +1964,9 @@ async function openProfileEdit(){
     var signOutBtn=document.createElement('button');signOutBtn.className='btn btn-s';signOutBtn.style.cssText='margin-top:8px;color:var(--co);';signOutBtn.textContent='Sign out';
     signOutBtn.addEventListener('click',function(){closeEd();doSignOut();});
     sh.appendChild(signOutBtn);
+    var resetBtn=document.createElement('button');resetBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:8px 0;width:100%;';resetBtn.textContent='Start fresh';
+    resetBtn.addEventListener('click',function(){document.getElementById('term-ov').classList.add('on');});
+    sh.appendChild(resetBtn);
   }
   document.getElementById('ed-ov').classList.add('on');
 }
@@ -3951,7 +3941,6 @@ function rMy(){
   }
 
   if(!myActs.length){el.innerHTML='<p style="color:var(--tx2);font-size:14px;">Nothing planted yet</p>';return;}
-  var lvlL={beginner:'Just planted',intermediate:'Taking root',comfortable:'In season'};
   el.innerHTML='';
 
   // Focus tab: flat list of focused activities only
@@ -3975,7 +3964,6 @@ function rMy(){
         +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+''+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'')
-        +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
         +'<span style="font-size:11px;color:var(--tx3);">'+STAGE_LABELS[getStage(getHours(a.id))]+'</span>'
         +'</div>';
       card.appendChild(inner);
@@ -4032,7 +4020,6 @@ function rMy(){
         +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+''+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'')
-        +'<span style="font-size:11px;color:var(--tx2);">'+(lvlL[a.level]||a.level)+'</span>'
         +'<span style="font-size:11px;color:var(--tx3);">'+STAGE_LABELS[getStage(getHours(a.id))]+'</span>'
         +'</div>';
       card.appendChild(inner);
@@ -4320,7 +4307,7 @@ function openEd(id){
   edId=id;
   var a=myActs.find(function(x){return x.id===id;});
   document.getElementById('ed-title').textContent='Tend: '+a.name;
-  edTmp={name:a.name,emoji:a.emoji,cat:a.cat||CATS[0],level:a.level||'beginner'};
+  edTmp={name:a.name,emoji:a.emoji,cat:a.cat||CATS[0]};
 
   document.getElementById('ed-name').value=a.name;
   document.getElementById('ed-emoji').value=a.emoji;
@@ -4338,13 +4325,6 @@ function openEd(id){
   }
   CATS.forEach(function(cat){var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg2)','var(--tx)'];addEdCat(cat,CEM[cat]+' '+cat,cc);});
   customCats.forEach(function(cat){addEdCat(cat,'🌱 '+cat,['var(--bg3)','var(--tx)']);});
-
-  var lvlWrap=document.getElementById('ed-level');lvlWrap.innerHTML='';
-  [{v:'beginner',lbl:'Just planted'},{v:'intermediate',lbl:'Taking root'},{v:'comfortable',lbl:'In season'}].forEach(function(opt){
-    var b=document.createElement('div');b.className='sop'+(edTmp.level===opt.v?' on':'');b.textContent=opt.lbl;
-    b.addEventListener('click',function(){edTmp.level=opt.v;lvlWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
-    lvlWrap.appendChild(b);
-  });
 
   document.getElementById('ed-ov').classList.add('on');
 }
@@ -4397,7 +4377,7 @@ function saveEd(){
     var newEmoji=document.getElementById('ed-emoji').value.trim();
     if(newName)a.name=newName;
     if(newEmoji)a.emoji=newEmoji;
-    a.cat=edTmp.cat;a.level=edTmp.level;
+    a.cat=edTmp.cat;
   }
   sv();closeEd();rMy();rHome();
 }
@@ -4524,20 +4504,12 @@ function openAdd(){
   }
   _renderCats=renderCats;
   renderCats(null);
-  var lvlWrap=document.getElementById('add-level');lvlWrap.innerHTML='';
-  [{v:'beginner',lbl:'Just planted'},{v:'intermediate',lbl:'Taking root'},{v:'comfortable',lbl:'In season'}].forEach(function(opt){
-    var b=document.createElement('div');b.className='sop';b.dataset.level=opt.v;b.textContent=opt.lbl;
-    b.addEventListener('click',function(){lvlWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
-    lvlWrap.appendChild(b);
-  });
-
   document.getElementById('add-ov').classList.add('on');
 }
 function closeAdd(){document.getElementById('add-ov').classList.remove('on');}
 function saveAdd(){
   var name=document.getElementById('an').value.trim();
   var catEl=document.querySelector('#ac-opts .sop.on');
-  var lvlEl=document.querySelector('#add-level .sop.on');
   if(!name||!catEl)return;
   var cat,emoji;
   if(catEl.dataset.cat==='__new__'||catEl.dataset.cat==='__custom__'){
@@ -4548,7 +4520,7 @@ function saveAdd(){
     cat=catEl.dataset.cat;
     emoji=CEM[cat]||'🌱';
   }
-  var _newAct={id:genUUID(),name:name,emoji:emoji,cat:cat,level:lvlEl?lvlEl.dataset.level:'beginner',tags:[]};
+  var _newAct={id:genUUID(),name:name,emoji:emoji,cat:cat,tags:[]};
   myActs.push(_newAct);
   pushFeedEvent('plant',name,emoji,null);
   checkTrophies();sv();closeAdd();rMy();
@@ -5204,12 +5176,12 @@ if('serviceWorker' in navigator){
 <!-- TERMINATE CONFIRM -->
 <div class="ov" id="term-ov">
   <div class="sh" style="text-align:center;">
-    <div style="font-size:36px;margin-bottom:10px;">☠️</div>
-    <div style="font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:8px;">Terminate the field?</div>
-    <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:22px;">All your seeds will be destroyed and you'll start from scratch. Your logbook will be kept.<br><br>Do you want to proceed?</div>
+    <div style="font-size:36px;margin-bottom:10px;">🌱</div>
+    <div style="font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:8px;">Start fresh?</div>
+    <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:22px;">All your seeds will be cleared and you'll start from scratch. Your logbook will be kept.</div>
     <div style="display:flex;gap:10px;">
-      <button class="btn btn-s" style="flex:1;margin-top:0;" id="btn-term-no">No, keep it</button>
-      <button class="btn" style="flex:1;margin-top:0;background:#EF4444;color:#fff;" id="btn-term-yes">Yes, terminate</button>
+      <button class="btn btn-s" style="flex:1;margin-top:0;" id="btn-term-no">Cancel</button>
+      <button class="btn" style="flex:1;margin-top:0;background:#EF4444;color:#fff;" id="btn-term-yes">Start fresh</button>
     </div>
   </div>
 </div>
