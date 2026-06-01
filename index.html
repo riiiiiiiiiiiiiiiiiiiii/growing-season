@@ -40,15 +40,15 @@
 html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);overflow:hidden;-webkit-font-smoothing:antialiased;}
 #app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;}
 .scr{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(100px + env(safe-area-inset-bottom));display:none;}
-#s-my,#s-hist,#s-log{padding-top:60px;padding-left:16px;padding-right:16px;}
+#s-my,#s-hist,#s-log{padding-top:56px;padding-left:16px;padding-right:16px;}
 #s-garden{padding-top:0;padding-left:0;padding-right:0;}
 .scr.on{display:block;animation:scrIn .22s ease;}
 @keyframes scrIn{from{opacity:0;}to{opacity:1;}}
 @keyframes gspin{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
 @keyframes obFadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 .ob0-anim{opacity:0;animation:obFadeUp .7s cubic-bezier(.22,1,.36,1) both;}
-body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode #sidebar,body.auth-mode #sb-backdrop,body.auth-mode #profile-btn,body.auth-mode #btn-menu{display:none!important;}
-body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #btn-menu,body.ob-mode #fab,body.ob-mode .nav{display:none!important;}
+body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode #sidebar,body.auth-mode #sb-backdrop,body.auth-mode #profile-btn,body.auth-mode #btn-menu,body.auth-mode #top-bar{display:none!important;}
+body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #btn-menu,body.ob-mode #fab,body.ob-mode .nav,body.ob-mode #top-bar{display:none!important;}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(244,250,246,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:var(--br);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
 .nb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--tx3);padding:6px 4px;user-select:none;position:relative;white-space:nowrap;}
@@ -94,7 +94,7 @@ body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #btn-menu,body.ob
 .oq-lbl{font-size:14px;font-weight:600;}
 .oq-slbl{font-size:12px;color:var(--tx2);margin-top:2px;}
 .oq-opt.on .oq-lbl{color:var(--gr2);}
-.sb{padding:72px 20px 32px;position:relative;overflow:hidden;}
+.sb{padding:56px 20px 32px;position:relative;overflow:hidden;}
 .sb-bg{position:absolute;inset:0;z-index:0;}
 .sb-fade{position:absolute;bottom:0;left:0;right:0;height:80px;z-index:1;pointer-events:none;}
 .sb-c{position:relative;z-index:2;}
@@ -356,7 +356,7 @@ body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #btn-menu,body.ob
   #sb-backdrop{display:block;}
   .nav{display:flex!important;max-width:none;left:0;transform:none;width:100%;}
   .fab{right:24px;bottom:calc(82px + env(safe-area-inset-bottom));}
-  #btn-menu,#home-menu,#home-menu-ov{display:none!important;}
+  #btn-menu,#home-menu,#home-menu-ov,#top-bar{display:none!important;}
   /* Offset sidebar toggle button (36px @ top:14px = 50px, +20px breathing) */
   #s-my,#s-hist,#s-log{padding-top:70px;}
   #s-garden{padding-top:50px;}/* inner header div adds 20px, totals 70px */
@@ -374,6 +374,7 @@ html.dark{
 html.dark body{background:var(--bg);}
 html.dark #sidebar{background:var(--bg);border-color:var(--br);}
 html.dark #sb-toggle,html.dark #profile-btn,html.dark #btn-menu{background:var(--bg2);border-color:var(--br2);color:var(--tx);}
+html.dark #top-bar{background:var(--bg);border-color:var(--br2);}
 html.dark .nav{background:var(--bg2);}
 html.dark .sh{background:var(--bg);}
 html.dark .si,html.dark .di,html.dark .nta,html.dark .sinp{background:var(--bg2);border-color:var(--br2);color:var(--tx);}
@@ -401,6 +402,10 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 #profile-btn:hover{background:var(--bg3);}
 #btn-menu{position:fixed;top:14px;left:16px;z-index:200;background:var(--bg2);border:var(--br);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--sh);transition:background .14s;}
 #btn-menu:hover{background:var(--bg3);}
+#top-bar{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;height:56px;display:none;align-items:center;justify-content:center;z-index:150;background:var(--bg);border-bottom:var(--br);transition:background .2s;}
+#top-bar.on{display:flex;}
+#top-bar.transparent{background:transparent!important;border-bottom:none!important;}
+#top-bar-title{font-size:16px;font-weight:600;color:var(--tx);font-family:var(--serif);}
 #s-friends{overflow:hidden!important;padding-bottom:0!important;}
 #s-friends.on{display:flex!important;flex-direction:column;}
 #friends-panel{width:100%;display:flex;flex-direction:column;flex:1;min-height:0;}
@@ -492,6 +497,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
     <div class="hmenu-row" id="hmenu-dark"><span class="hmenu-em" id="hmenu-dark-em">🌙</span><span id="hmenu-dark-lbl">Dark mode</span></div>
   </div>
   <div id="home-menu-ov" style="display:none;position:fixed;inset:0;z-index:499;"></div>
+<div id="top-bar"><span id="top-bar-title"></span></div>
 
   <div id="screen-wrap">
 
@@ -655,7 +661,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
 
   <!-- GARDEN -->
   <div id="s-garden" class="scr">
-    <div style="padding:60px 16px 14px;">
+    <div style="padding:56px 16px 14px;">
       <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:4px;">Garden</div>
       <div style="font-size:13px;color:var(--tx2);">Plants grow as you log more hours</div>
     </div>
@@ -764,7 +770,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
   <!-- FRIENDS PAGE -->
   <div id="s-friends" class="scr">
   <div id="friends-panel">
-    <div style="padding:58px 20px 0;flex-shrink:0;">
+    <div style="padding:56px 20px 0;flex-shrink:0;">
       <div style="display:flex;align-items:center;margin-bottom:14px;">
         <div style="flex:1;">
           <div style="font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:4px;">Neighbours</div>
@@ -1307,8 +1313,11 @@ function nav(v){
   show('s-'+v);
   ['home','my','garden','hist','friends'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
   document.getElementById('fab').style.display=(v==='my'||v==='garden'||v==='hist')?'flex':'none';
-  var pb=document.getElementById('profile-btn');if(pb)pb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist')?'flex':'none';
-  var mb=document.getElementById('btn-menu');if(mb)mb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist')?'flex':'none';
+  var pb=document.getElementById('profile-btn');if(pb)pb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist'||v==='friends')?'flex':'none';
+  var mb=document.getElementById('btn-menu');if(mb)mb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist'||v==='friends')?'flex':'none';
+  var _titles={home:'',my:'Seeds',garden:'Garden',hist:'Logbook',friends:'Neighbours'};
+  var tb=document.getElementById('top-bar'),tbt=document.getElementById('top-bar-title');
+  if(tb){tb.classList.add('on');if(v==='home'){tb.classList.add('transparent');}else{tb.classList.remove('transparent');}if(tbt)tbt.textContent=_titles[v]||'';}
   if(v==='home')rHome();
   if(v==='my'){mySearch='';var ms=document.getElementById('my-search');if(ms)ms.value='';rMy();}
   if(v==='garden')rGarden();
@@ -1323,6 +1332,7 @@ function launch(){
   document.getElementById('fab').style.display='none';
   document.getElementById('profile-btn').style.display='flex';
   document.getElementById('btn-menu').style.display='flex';
+  var tb=document.getElementById('top-bar');if(tb){tb.classList.add('on','transparent');}
   var isGuest=!supaUser;
   document.getElementById('sb-signin-btn').style.display=isGuest?'flex':'none';
   document.getElementById('hmenu-signin').style.display=isGuest?'flex':'none';
@@ -1342,6 +1352,7 @@ function goToSignIn(){
   document.getElementById('main-nav').classList.remove('on');
   document.getElementById('profile-btn').style.display='none';
   document.getElementById('btn-menu').style.display='none';
+  var tb=document.getElementById('top-bar');if(tb)tb.classList.remove('on');
 }
 
 // Nav buttons
@@ -1498,6 +1509,7 @@ document.getElementById('btn-term-yes').addEventListener('click',function(){
   document.getElementById('fab').style.display='none';
   document.getElementById('profile-btn').style.display='none';
   document.getElementById('btn-menu').style.display='none';
+  var tb=document.getElementById('top-bar');if(tb)tb.classList.remove('on');
   document.getElementById('ob-back-btn').style.display='block';
   show('s-ob1');rObCats();rObGrid();
 });
@@ -3516,6 +3528,7 @@ function setupLogScreen(id,from,startedAt){
     mom.appendChild(b);
   });
   show('s-log');
+  var tbt=document.getElementById('top-bar-title');if(tbt)tbt.textContent='Log session';
 }
 
 function _fmtMins(m){if(m===0)return '0m';return(m>=60?Math.floor(m/60)+'h ':'')+(m%60?m%60+'m':'');}
@@ -5180,6 +5193,7 @@ function _showAuth(){
   document.getElementById('main-nav').classList.remove('on');
   document.getElementById('profile-btn').style.display='none';
   document.getElementById('btn-menu').style.display='none';
+  var tb=document.getElementById('top-bar');if(tb)tb.classList.remove('on');
   // Quick connection test — only show banner on true network failure (not non-2xx)
   var banner=document.getElementById('auth-conn-banner');
   if(banner)banner.style.display='none';
