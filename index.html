@@ -4717,7 +4717,7 @@ function rGarden(){
     while(items.length%flatCols!==0)items.push(null);
     var container=document.createElement('div');container.style.cssText='padding:0 16px 20px;';
     var plotCard=document.createElement('div');plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
-    var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,flatCols,tileW,tileH,bgSrc);
+    var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,flatCols,tileW,tileH,plotBg);
     svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
     plotCard.appendChild(svgWrap);container.appendChild(plotCard);wrap.appendChild(container);
   } else {
@@ -4733,7 +4733,7 @@ function rGarden(){
       var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;padding:5px 10px;background:var(--bg2);';
       lbl.textContent='Patch '+(pi+1);plotCard.appendChild(lbl);
       var items=chunk.slice();while(items.length<perPatch)items.push(null);
-      var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,patchCols,tileW,tileH,bgSrc);
+      var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,patchCols,tileW,tileH,plotBg);
       svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
       plotCard.appendChild(svgWrap);grid.appendChild(plotCard);
     });
