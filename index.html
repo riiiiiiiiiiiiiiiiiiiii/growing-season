@@ -1734,8 +1734,9 @@ function rHome(){
       chip.style.opacity=dim?'0.4':'1';
       if(isAct)chip.style.border='2px solid var(--co)';
       var chipStreak=getStreakAt(a.id,Date.now());
-      chip.innerHTML='<div class="ac-em">'+a.emoji+'</div><div class="ac-n">'+a.name+(chipStreak>=2?'<span style="margin-left:4px;font-size:10px;background:var(--grm);color:#fff;border-radius:7px;padding:1px 5px;font-weight:600;">🔥'+chipStreak+'</span>':'')+'</div><div class="ac-foot"><div class="ac-c">'+(isAct?'active':cnt>0?cnt+'x':'new')+'</div></div>';
+      chip.innerHTML='<div class="ac-em">'+a.emoji+'</div><div class="ac-n">'+a.name+(chipStreak>=2?'<span style="margin-left:4px;font-size:10px;background:var(--grm);color:#fff;border-radius:7px;padding:1px 5px;font-weight:600;">🔥'+chipStreak+'</span>':'')+'</div><div class="ac-foot"><div class="ac-c">'+(isAct?'active':cnt>0?cnt+'x':'new')+'</div>'+(isAct?'':'<button class="ac-log">+</button>')+'</div>';
       chip.addEventListener('click',function(){if(isAct)resumeSess();else openActInfo(a.id,'home');});
+      var logBtnEl=chip.querySelector('.ac-log');if(logBtnEl)logBtnEl.addEventListener('click',function(e){e.stopPropagation();openLogDirect(a.id,'home');});
       ar.appendChild(chip);
     });
     if(hasFocusSet()&&rest.length>0){
