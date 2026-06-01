@@ -1322,6 +1322,7 @@ function launch(){
   var isGuest=!supaUser;
   document.getElementById('sb-signin-btn').style.display=isGuest?'flex':'none';
   document.getElementById('hmenu-signin').style.display=isGuest?'flex':'none';
+  syncSeasonPalette();
   applyDark();
   applyPalette();
   rHome();
@@ -1529,6 +1530,8 @@ var SEAS = {
 };
 function getSeason(){var m=new Date().getMonth();return Object.values(SEAS).find(function(s){return s.m.includes(m);})||SEAS.winter;}
 function getSeasonKey(){var m=new Date().getMonth();return Object.keys(SEAS).find(function(k){return SEAS[k].m.includes(m);})||'winter';}
+var SEASON_PALETTES={spring:'green',summer:'blue',autumn:'yellow',winter:'pink'};
+function syncSeasonPalette(){colorPalette=SEASON_PALETTES[getSeasonKey()]||'green';}
 
 // ── HOME DECORATION ───────────────────────────────────
 function homeDecoSVG(sk){
