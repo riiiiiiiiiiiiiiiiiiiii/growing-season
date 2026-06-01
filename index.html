@@ -2016,6 +2016,8 @@ function _transitionSheet(sh,fn){
 }
 function openCalendar(){
   _calYear=new Date().getFullYear();_calMonth=new Date().getMonth();
+  var sh=document.getElementById('cal-sh');
+  sh.style.opacity='';sh.style.transform='';sh.style.transition='';
   _calSetSheetMonth();renderCalendar();setTimeout(checkCalPlanned,400);
   document.getElementById('cal-ov').classList.add('on');
 }
@@ -2156,7 +2158,7 @@ function _calSetSheetMonth(){
   var sh=document.getElementById('cal-sh');
   sh.style.padding='22px 18px 28px';sh.style.maxWidth='480px';
   sh.style.maxHeight='';sh.style.height='';sh.style.overflow='';sh.style.display='';sh.style.flexDirection='';
-  var calHdr=sh.querySelector(':scope>div');if(calHdr)calHdr.style.display='';
+  var calHdr=sh.querySelector(':scope>div');if(calHdr)calHdr.style.display='flex';
   var body=document.getElementById('cal-body');body.style.cssText='';
 }
 
