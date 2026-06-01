@@ -94,7 +94,7 @@ body.ob-mode #sb-toggle,body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .n
 .oq-lbl{font-size:14px;font-weight:600;}
 .oq-slbl{font-size:12px;color:var(--tx2);margin-top:2px;}
 .oq-opt.on .oq-lbl{color:var(--gr2);}
-.sb{padding:72px 20px 32px;position:relative;overflow:hidden;}
+.sb{padding:20px 20px 32px;position:relative;overflow:hidden;}
 .sb-bg{position:absolute;inset:0;z-index:0;}
 .sb-fade{position:absolute;bottom:0;left:0;right:0;height:80px;z-index:1;pointer-events:none;}
 .sb-c{position:relative;z-index:2;}
@@ -119,7 +119,7 @@ body.ob-mode #sb-toggle,body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .n
 .sc-n{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--gr);margin-bottom:2px;}
 .sc-l{font-size:11px;color:var(--tx3);font-weight:500;}
 .hs{padding:0 16px;margin-top:20px;margin-bottom:4px;}
-.dq{margin:12px 16px 0;background:var(--col);border:1px solid var(--co);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
+.dq{margin:12px 16px 0;background:var(--col);border:0.5px solid var(--co);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
 .dq-em{font-size:15px;flex-shrink:0;margin-top:1px;}
 .dq-txt{font-size:13px;color:var(--co2);line-height:1.5;font-style:italic;}
 .hs-t{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
@@ -1700,7 +1700,7 @@ function rHome(){
     if(_activeTimerInt){clearInterval(_activeTimerInt);_activeTimerInt=null;}
     ipW.innerHTML='';
     var hsEl=document.querySelector('#s-home .hs');if(hsEl)hsEl.style.display='';
-    pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-title">What should I tend to today?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-suggest" style="flex:1;background:var(--col);border:1px solid var(--co);border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--co2);cursor:pointer;">🎲 Surprise me</button><button id="btn-quick-log" style="flex:1;background:var(--col);border:1px solid var(--co);border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--co2);cursor:pointer;">Already done? Log it</button></div>';
+    pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-title">What should I tend to today?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-suggest" style="flex:1;background:var(--col);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--co2);cursor:pointer;">🎲 Surprise me</button><button id="btn-quick-log" style="flex:1;background:var(--col);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--co2);cursor:pointer;">Already done? Log it</button></div>';
     document.getElementById('pc-card').addEventListener('click',openPicker);
     document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
     document.getElementById('btn-suggest').addEventListener('click',suggestAct);
