@@ -40,15 +40,15 @@
 html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);overflow:hidden;-webkit-font-smoothing:antialiased;}
 #app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;}
 .scr{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(100px + env(safe-area-inset-bottom));display:none;}
-#s-my,#s-hist,#s-log{padding-top:60px;padding-left:16px;padding-right:16px;}
+#s-my,#s-hist,#s-log{padding-top:20px;padding-left:16px;padding-right:16px;}
 #s-garden{padding-top:0;padding-left:0;padding-right:0;}
 .scr.on{display:block;animation:scrIn .22s ease;}
 @keyframes scrIn{from{opacity:0;}to{opacity:1;}}
 @keyframes gspin{0%,100%{transform:scale(1);}50%{transform:scale(1.12);}}
 @keyframes obFadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
 .ob0-anim{opacity:0;animation:obFadeUp .7s cubic-bezier(.22,1,.36,1) both;}
-body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode #sidebar,body.auth-mode #sb-backdrop,body.auth-mode #profile-btn,body.auth-mode #btn-menu{display:none!important;}
-body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #btn-menu,body.ob-mode #fab,body.ob-mode .nav{display:none!important;}
+body.auth-mode .nav,body.auth-mode #sb-toggle,body.auth-mode #fab,body.auth-mode #sidebar,body.auth-mode #sb-backdrop,body.auth-mode #menu-btn{display:none!important;}
+body.ob-mode #sb-toggle,body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!important;}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(244,250,246,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:var(--br);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
 .nb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--tx3);padding:6px 4px;user-select:none;position:relative;white-space:nowrap;}
@@ -119,9 +119,9 @@ body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #btn-menu,body.ob
 .sc-n{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--gr);margin-bottom:2px;}
 .sc-l{font-size:11px;color:var(--tx3);font-weight:500;}
 .hs{padding:0 16px;margin-top:20px;margin-bottom:4px;}
-.dq{margin:12px 16px 0;background:var(--grl);border:1px solid var(--grm);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
+.dq{margin:12px 16px 0;background:var(--col);border:1px solid var(--co);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
 .dq-em{font-size:15px;flex-shrink:0;margin-top:1px;}
-.dq-txt{font-size:13px;color:var(--gr2);line-height:1.5;font-style:italic;}
+.dq-txt{font-size:13px;color:var(--co2);line-height:1.5;font-style:italic;}
 .hs-t{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
 .ar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
 .ar::-webkit-scrollbar{display:none;}
@@ -257,13 +257,9 @@ body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #btn-menu,body.ob
 .notes-act-preview{font-size:12px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
 .notes-section{margin-bottom:18px;}
 .notes-section-lbl{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
-.hmenu{position:fixed;top:66px;left:14px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.18);z-index:500;min-width:180px;overflow:hidden;transition:transform .26s cubic-bezier(.34,1.4,.64,1),opacity .2s ease;}
-.hmenu.off{transform:translateY(-10px);opacity:0;pointer-events:none;}
-.hmenu-row{display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;font-size:14px;font-weight:500;border-bottom:.5px solid var(--bg2);}
-.hmenu-row:last-child{border-bottom:none;}
-.hmenu-row:active{background:var(--bg2);}
-.hmenu-em{font-size:20px;flex-shrink:0;}
-.hmenu-dot{width:7px;height:7px;background:#E53E3E;border-radius:50%;margin-left:auto;flex-shrink:0;}
+.mp-row{display:flex;align-items:center;gap:10px;padding:11px 8px;cursor:pointer;font-size:14px;font-weight:500;border-radius:10px;transition:background .14s;}
+.mp-row:active{background:var(--bg2);}
+.mp-em{font-size:20px;flex-shrink:0;}
 .collect-pending-banner{background:var(--sul);border:1px solid var(--sum);border-radius:14px;padding:14px 16px;margin-bottom:18px;}
 .collect-pending-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px;}
 .collect-item{background:#fff;border:2px solid var(--sum);border-radius:14px;padding:12px 8px;cursor:pointer;text-align:center;box-shadow:var(--sh);transition:transform .18s cubic-bezier(.34,1.56,.64,1),opacity .18s ease;}
@@ -356,11 +352,7 @@ body.ob-mode #sb-toggle,body.ob-mode #profile-btn,body.ob-mode #btn-menu,body.ob
   #sb-backdrop{display:block;}
   .nav{display:flex!important;max-width:none;left:0;transform:none;width:100%;}
   .fab{right:24px;bottom:calc(82px + env(safe-area-inset-bottom));}
-  #btn-menu,#home-menu,#home-menu-ov{display:none!important;}
-  /* Offset sidebar toggle button (36px @ top:14px = 50px, +20px breathing) */
-  #s-my,#s-hist,#s-log{padding-top:70px;}
-  #s-garden{padding-top:50px;}/* inner header div adds 20px, totals 70px */
-  #s-garden>div:first-child{padding-top:20px;}/* reset mobile bump */
+  #s-my,#s-hist,#s-log{padding-top:30px;}
 }
 
 /* ── DARK MODE ──────────────────────────────────────── */
@@ -373,13 +365,13 @@ html.dark{
 }
 html.dark body{background:var(--bg);}
 html.dark #sidebar{background:var(--bg);border-color:var(--br);}
-html.dark #sb-toggle,html.dark #profile-btn,html.dark #btn-menu{background:var(--bg2);border-color:var(--br2);color:var(--tx);}
+html.dark #sb-toggle,html.dark #menu-btn{background:var(--bg2);border-color:var(--br2);color:var(--tx);}
 html.dark .nav{background:var(--bg2);}
 html.dark .sh{background:var(--bg);}
 html.dark .si,html.dark .di,html.dark .nta,html.dark .sinp{background:var(--bg2);border-color:var(--br2);color:var(--tx);}
 html.dark .btn-s{background:var(--bg2);color:var(--tx);}
 html.dark .mc,html.dark .hc,html.dark .rc,html.dark .bp-card,html.dark .oc,html.dark .notes-act-card,html.dark .sc,html.dark .ac{background:var(--bg2);}
-html.dark .hmenu{background:var(--bg2);box-shadow:0 8px 32px rgba(0,0,0,.4);}
+html.dark #menu-sh{background:var(--bg2);}
 html.dark .toast{background:var(--bg2);}
 html.dark .sb{background:var(--bg);}
 html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
@@ -397,10 +389,8 @@ html.dark .oq-opt,html.dark .pq-opt{background:var(--bg2);}
 @keyframes suPop{0%{transform:scale(.3) rotate(-10deg);opacity:0;}70%{transform:scale(1.15) rotate(4deg);}100%{transform:scale(1) rotate(0deg);opacity:1;}}
 @keyframes suFloat{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(-110px) rotate(360deg);opacity:0;}}
 /* ── FRIENDS ──────────────────────────────────────── */
-#profile-btn{position:fixed;top:14px;right:16px;z-index:200;background:var(--bg2);border:var(--br);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--sh);transition:background .14s;}
-#profile-btn:hover{background:var(--bg3);}
-#btn-menu{position:fixed;top:14px;left:16px;z-index:200;background:var(--bg2);border:var(--br);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--sh);transition:background .14s;}
-#btn-menu:hover{background:var(--bg3);}
+#menu-btn{position:fixed;top:14px;right:16px;z-index:200;background:var(--bg2);border:var(--br);border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:var(--sh);transition:background .14s;}
+#menu-btn:hover{background:var(--bg3);}
 #s-friends{overflow:hidden!important;padding-bottom:0!important;}
 #s-friends.on{display:flex!important;flex-direction:column;}
 #friends-panel{width:100%;display:flex;flex-direction:column;flex:1;min-height:0;}
@@ -473,25 +463,33 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
   </div>
   <div id="sb-backdrop"></div>
   <button id="sb-toggle">☰</button>
-  <button id="profile-btn" title="Profile"><span id="profile-btn-em" style="font-size:18px;line-height:1;">👤</span></button>
-  <button id="btn-menu">☰</button>
-  <div id="home-menu" class="hmenu off">
-    <div class="hmenu-row" id="hmenu-signin" style="display:none;color:var(--gr);font-weight:600;"><span class="hmenu-em">🔑</span><span>Sign in / Sign up</span></div>
-    <div class="hmenu-row" id="hmenu-collect"><span class="hmenu-em">🫙</span><span>Collections</span><span id="hmenu-badge" class="hmenu-dot" style="display:none;"></span></div>
-    <div class="hmenu-row" id="hmenu-cal"><span class="hmenu-em">📅</span><span>Calendar</span></div>
-    <div class="hmenu-row" id="hmenu-notes"><span class="hmenu-em">📓</span><span>Notes</span></div>
-    <div class="hmenu-row" id="hmenu-palette" style="flex-direction:column;align-items:flex-start;gap:8px;">
-      <span style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;">Theme</span>
-      <div style="display:flex;gap:9px;">
-        <div class="pal-dot" data-pal="green" data-season="Spring" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-        <div class="pal-dot" data-pal="blue" data-season="Winter" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-        <div class="pal-dot" data-pal="pink" data-season="Summer" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#F07090,#D44870);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-        <div class="pal-dot" data-pal="yellow" data-season="Autumn" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#E88030,#A04010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+  <button id="menu-btn" title="Menu"><span id="menu-btn-em" style="font-size:18px;line-height:1;">👤</span></button>
+  <div class="ov" id="menu-ov">
+    <div class="sh" id="menu-sh">
+      <div id="mp-profile" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;cursor:pointer;padding:4px;border-radius:12px;transition:background .14s;" onclick="closeMenuPanel();openProfileEdit();">
+        <div id="mp-em" style="font-size:26px;width:44px;height:44px;border-radius:50%;background:var(--bg2);border:var(--br);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🌱</div>
+        <div style="flex:1;min-width:0;">
+          <div id="mp-name" style="font-size:15px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">My profile</div>
+          <div style="font-size:12px;color:var(--tx3);">Edit profile →</div>
+        </div>
       </div>
+      <div style="height:.5px;background:var(--bg3);margin-bottom:6px;"></div>
+      <div id="mp-signin" class="mp-row" style="display:none;color:var(--gr);font-weight:600;"><span class="mp-em">🔑</span><span>Sign in / Sign up</span></div>
+      <div id="mp-collect" class="mp-row"><span class="mp-em">🫙</span><span>Collections</span><span id="mp-collect-dot" style="display:none;width:7px;height:7px;background:#E53E3E;border-radius:50%;margin-left:auto;flex-shrink:0;"></span></div>
+      <div id="mp-cal" class="mp-row"><span class="mp-em">📅</span><span>Calendar</span></div>
+      <div id="mp-notes" class="mp-row"><span class="mp-em">📓</span><span>Notes</span></div>
+      <div id="mp-palette" class="mp-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;">Theme</span>
+        <div style="display:flex;gap:9px;">
+          <div class="pal-dot" data-pal="green" data-season="Spring" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#50C898,#18835A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="blue" data-season="Winter" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#50A8D8,#1870B0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="pink" data-season="Summer" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#F07090,#D44870);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="yellow" data-season="Autumn" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#E88030,#A04010);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+        </div>
+      </div>
+      <div id="mp-dark" class="mp-row"><span class="mp-em" id="mp-dark-em">🌙</span><span id="mp-dark-lbl">Dark mode</span></div>
     </div>
-    <div class="hmenu-row" id="hmenu-dark"><span class="hmenu-em" id="hmenu-dark-em">🌙</span><span id="hmenu-dark-lbl">Dark mode</span></div>
   </div>
-  <div id="home-menu-ov" style="display:none;position:fixed;inset:0;z-index:499;"></div>
 
   <div id="screen-wrap">
 
@@ -655,7 +653,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
 
   <!-- GARDEN -->
   <div id="s-garden" class="scr">
-    <div style="padding:60px 16px 14px;">
+    <div style="padding:20px 16px 14px;">
       <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:4px;">Garden</div>
       <div style="font-size:13px;color:var(--tx2);">Plants grow as you log more hours</div>
     </div>
@@ -1023,14 +1021,14 @@ if(!collection.awarded)collection.awarded=[];
 var darkMode=!!st.darkMode;
 var colorPalette=st.colorPalette||'green';
 var PALETTES={
-  green:{gr:'#18835A',gr2:'#0F6040',grl:'#D4F2E4',grm:'#50C898',bg:'#F4FAF6',bg2:'#E6F5EC',bg3:'#C8E8D6',tx:'#0A1F14',tx2:'#2D6045',tx3:'#68A882',brC:'#BCDECE',br2C:'#9CCAB8',sh:'0 1px 4px rgba(22,36,24,.08)',pcGrad:'linear-gradient(150deg,#18835A,#0F6040,#074028)',mfGrad:'linear-gradient(90deg,#18835A,#50C898)',fabSh:'0 4px 16px rgba(24,131,90,.4)',btnSh:'0 3px 10px rgba(24,131,90,.28)',fabActSh:'0 1px 6px rgba(24,131,90,.25)',pcSh:'0 4px 18px rgba(24,131,90,.3)',homeBg:'linear-gradient(135deg,#A8D8A8,#56AB74)',homeTc:'#0D3320',decoGround:'#4A8A40',decoGrass1:'#2D7A2A',decoGrass2:'#3D9A3A',decoStem:'#3A7A30',
-    d_gr:'#2EC87C',d_gr2:'#4ED890',d_grl:'#1E3828',d_grm:'#2E5840',d_bg:'#1A2420',d_bg2:'#232E28',d_bg3:'#2C3A30',d_tx:'#E4F0E8',d_tx2:'#86B096',d_tx3:'#4C7460',d_brC:'#2A3830',d_br2C:'#344A3C',d_sh:'0 1px 4px rgba(0,0,0,.3)',d_pcGrad:'linear-gradient(150deg,#1E5A3A,#102E20,#081810)',d_mfGrad:'linear-gradient(90deg,#2EC87C,#1E7848)',d_fabSh:'0 4px 16px rgba(46,200,124,.35)',d_btnSh:'0 3px 10px rgba(46,200,124,.22)',d_fabActSh:'0 1px 6px rgba(46,200,124,.2)',d_pcSh:'0 4px 18px rgba(46,200,124,.25)',d_decoGround:'#1A4028',d_decoGrass1:'#1A5828',d_decoGrass2:'#246835',d_decoStem:'#1A5020'},
+  green:{gr:'#18835A',gr2:'#0F6040',grl:'#D4F2E4',grm:'#50C898',bg:'#F4FAF6',bg2:'#E6F5EC',bg3:'#C8E8D6',tx:'#0A1F14',tx2:'#2D6045',tx3:'#68A882',brC:'#BCDECE',br2C:'#9CCAB8',sh:'0 1px 4px rgba(22,36,24,.08)',pcGrad:'linear-gradient(150deg,#18835A,#0F6040,#074028)',mfGrad:'linear-gradient(90deg,#18835A,#50C898)',fabSh:'0 4px 16px rgba(24,131,90,.4)',btnSh:'0 3px 10px rgba(24,131,90,.28)',fabActSh:'0 1px 6px rgba(24,131,90,.25)',pcSh:'0 4px 18px rgba(24,131,90,.3)',homeBg:'linear-gradient(135deg,#A8D8A8,#56AB74)',homeTc:'#0D3320',co:'#C95C3A',co2:'#9E3E20',col:'#FDEAE0',decoGround:'#4A8A40',decoGrass1:'#2D7A2A',decoGrass2:'#3D9A3A',decoStem:'#3A7A30',
+    d_gr:'#2EC87C',d_gr2:'#4ED890',d_grl:'#1E3828',d_grm:'#2E5840',d_bg:'#1A2420',d_bg2:'#232E28',d_bg3:'#2C3A30',d_tx:'#E4F0E8',d_tx2:'#86B096',d_tx3:'#4C7460',d_brC:'#2A3830',d_br2C:'#344A3C',d_sh:'0 1px 4px rgba(0,0,0,.3)',d_pcGrad:'linear-gradient(150deg,#1E5A3A,#102E20,#081810)',d_mfGrad:'linear-gradient(90deg,#2EC87C,#1E7848)',d_fabSh:'0 4px 16px rgba(46,200,124,.35)',d_btnSh:'0 3px 10px rgba(46,200,124,.22)',d_fabActSh:'0 1px 6px rgba(46,200,124,.2)',d_pcSh:'0 4px 18px rgba(46,200,124,.25)',d_co:'#E88860',d_co2:'#F0A880',d_col:'#261006',d_decoGround:'#1A4028',d_decoGrass1:'#1A5828',d_decoGrass2:'#246835',d_decoStem:'#1A5020'},
   blue:{gr:'#1870B0',gr2:'#0D4E80',grl:'#D0E8F4',grm:'#50A8D8',bg:'#F4F8FC',bg2:'#E4EEF8',bg3:'#C4D8EC',tx:'#0A1520',tx2:'#284870',tx3:'#6088A8',brC:'#B0CCDE',br2C:'#90AECA',sh:'0 1px 4px rgba(20,32,42,.08)',pcGrad:'linear-gradient(150deg,#1870B0,#0D4E80,#072840)',mfGrad:'linear-gradient(90deg,#1870B0,#50A8D8)',fabSh:'0 4px 16px rgba(24,112,176,.4)',btnSh:'0 3px 10px rgba(24,112,176,.28)',fabActSh:'0 1px 6px rgba(24,112,176,.25)',pcSh:'0 4px 18px rgba(24,112,176,.3)',homeBg:'linear-gradient(135deg,#87CEEB,#4A90D9)',homeTc:'#0A1E3A',co:'#E8556A',co2:'#C43455',col:'#FDE8EC',decoGround:'#3A6A8A',decoGrass1:'#2A5A7A',decoGrass2:'#3A789A',decoStem:'#2A608A',
     d_gr:'#5AAEE8',d_gr2:'#78C4FF',d_grl:'#0C1E38',d_grm:'#2870B0',d_bg:'#101828',d_bg2:'#1A2638',d_bg3:'#243450',d_tx:'#D8ECF8',d_tx2:'#6898C8',d_tx3:'#3A6090',d_brC:'#1E3050',d_br2C:'#2A4060',d_sh:'0 1px 4px rgba(0,0,0,.3)',d_pcGrad:'linear-gradient(150deg,#0E4080,#082058,#040E28)',d_mfGrad:'linear-gradient(90deg,#5AAEE8,#2870B0)',d_fabSh:'0 4px 16px rgba(90,174,232,.35)',d_btnSh:'0 3px 10px rgba(90,174,232,.22)',d_fabActSh:'0 1px 6px rgba(90,174,232,.2)',d_pcSh:'0 4px 18px rgba(90,174,232,.25)',d_co:'#F07088',d_co2:'#F09AAE',d_col:'#3A0E18',d_decoGround:'#162848',d_decoGrass1:'#102038',d_decoGrass2:'#1A3050',d_decoStem:'#0E2838'},
-  pink:{gr:'#D44870',gr2:'#A02850',grl:'#FDE8EE',grm:'#F07090',bg:'#FDF7F9',bg2:'#FAE8EC',bg3:'#F2D4DA',tx:'#200810',tx2:'#7A3048',tx3:'#B07080',brC:'#ECBAC8',br2C:'#DCA0B4',sh:'0 1px 4px rgba(40,8,20,.08)',pcGrad:'linear-gradient(150deg,#D44870,#A02850,#600025)',mfGrad:'linear-gradient(90deg,#D44870,#F07090)',fabSh:'0 4px 16px rgba(212,72,112,.4)',btnSh:'0 3px 10px rgba(212,72,112,.28)',fabActSh:'0 1px 6px rgba(212,72,112,.25)',pcSh:'0 4px 18px rgba(212,72,112,.3)',homeBg:'linear-gradient(135deg,#F5C8D8,#D44870)',homeTc:'#38081A',decoGround:'#8A4860',decoGrass1:'#7A3050',decoGrass2:'#9A5070',decoStem:'#7A4060',
-    d_gr:'#E87AAE',d_gr2:'#F8A0C8',d_grl:'#2A0818',d_grm:'#A84878',d_bg:'#1C0C18',d_bg2:'#281824',d_bg3:'#342030',d_tx:'#F4D8E8',d_tx2:'#C87898',d_tx3:'#885068',d_brC:'#3A1E2E',d_br2C:'#4C283C',d_sh:'0 1px 4px rgba(0,0,0,.3)',d_pcGrad:'linear-gradient(150deg,#8A1840,#560820,#2C0010)',d_mfGrad:'linear-gradient(90deg,#E87AAE,#A84878)',d_fabSh:'0 4px 16px rgba(232,122,174,.35)',d_btnSh:'0 3px 10px rgba(232,122,174,.22)',d_fabActSh:'0 1px 6px rgba(232,122,174,.2)',d_pcSh:'0 4px 18px rgba(232,122,174,.25)',d_decoGround:'#3A1028',d_decoGrass1:'#2C0820',d_decoGrass2:'#3E1430',d_decoStem:'#2A0818'},
-  yellow:{gr:'#B04810',gr2:'#7A2800',grl:'#FDE8D4',grm:'#E88030',bg:'#FBF6F1',bg2:'#F7EAD8',bg3:'#EDD0AC',tx:'#201008',tx2:'#6A3010',tx3:'#A06030',brC:'#DDB890',br2C:'#C8986A',sh:'0 1px 4px rgba(42,20,8,.08)',pcGrad:'linear-gradient(150deg,#B04810,#7A2800,#4A1000)',mfGrad:'linear-gradient(90deg,#B04810,#E88030)',fabSh:'0 4px 16px rgba(176,72,16,.4)',btnSh:'0 3px 10px rgba(176,72,16,.28)',fabActSh:'0 1px 6px rgba(176,72,16,.25)',pcSh:'0 4px 18px rgba(176,72,16,.3)',homeBg:'linear-gradient(135deg,#F5C890,#B04810)',homeTc:'#2E0E00',decoGround:'#8A5030',decoGrass1:'#7A3820',decoGrass2:'#9A6038',decoStem:'#884020',
-    d_gr:'#E88040',d_gr2:'#F0A060',d_grl:'#281400',d_grm:'#A04810',d_bg:'#1C1008',d_bg2:'#281C10',d_bg3:'#342618',d_tx:'#F4E0C4',d_tx2:'#C87838',d_tx3:'#885028',d_brC:'#3A2010',d_br2C:'#4C2E18',d_sh:'0 1px 4px rgba(0,0,0,.3)',d_pcGrad:'linear-gradient(150deg,#783008,#4A1A00,#280A00)',d_mfGrad:'linear-gradient(90deg,#E88040,#A04810)',d_fabSh:'0 4px 16px rgba(232,128,64,.35)',d_btnSh:'0 3px 10px rgba(232,128,64,.22)',d_fabActSh:'0 1px 6px rgba(232,128,64,.2)',d_pcSh:'0 4px 18px rgba(232,128,64,.25)',d_decoGround:'#3A1A08',d_decoGrass1:'#2C1000',d_decoGrass2:'#401808',d_decoStem:'#281000'}
+  pink:{gr:'#D44870',gr2:'#A02850',grl:'#FDE8EE',grm:'#F07090',bg:'#FDF7F9',bg2:'#FAE8EC',bg3:'#F2D4DA',tx:'#200810',tx2:'#7A3048',tx3:'#B07080',brC:'#ECBAC8',br2C:'#DCA0B4',sh:'0 1px 4px rgba(40,8,20,.08)',pcGrad:'linear-gradient(150deg,#D44870,#A02850,#600025)',mfGrad:'linear-gradient(90deg,#D44870,#F07090)',fabSh:'0 4px 16px rgba(212,72,112,.4)',btnSh:'0 3px 10px rgba(212,72,112,.28)',fabActSh:'0 1px 6px rgba(212,72,112,.25)',pcSh:'0 4px 18px rgba(212,72,112,.3)',homeBg:'linear-gradient(135deg,#F5C8D8,#D44870)',homeTc:'#38081A',co:'#2A9888',co2:'#1A7068',col:'#CFFAF4',decoGround:'#8A4860',decoGrass1:'#7A3050',decoGrass2:'#9A5070',decoStem:'#7A4060',
+    d_gr:'#E87AAE',d_gr2:'#F8A0C8',d_grl:'#2A0818',d_grm:'#A84878',d_bg:'#1C0C18',d_bg2:'#281824',d_bg3:'#342030',d_tx:'#F4D8E8',d_tx2:'#C87898',d_tx3:'#885068',d_brC:'#3A1E2E',d_br2C:'#4C283C',d_sh:'0 1px 4px rgba(0,0,0,.3)',d_pcGrad:'linear-gradient(150deg,#8A1840,#560820,#2C0010)',d_mfGrad:'linear-gradient(90deg,#E87AAE,#A84878)',d_fabSh:'0 4px 16px rgba(232,122,174,.35)',d_btnSh:'0 3px 10px rgba(232,122,174,.22)',d_fabActSh:'0 1px 6px rgba(232,122,174,.2)',d_pcSh:'0 4px 18px rgba(232,122,174,.25)',d_co:'#3ECAB8',d_co2:'#60D8C8',d_col:'#071814',d_decoGround:'#3A1028',d_decoGrass1:'#2C0820',d_decoGrass2:'#3E1430',d_decoStem:'#2A0818'},
+  yellow:{gr:'#B04810',gr2:'#7A2800',grl:'#FDE8D4',grm:'#E88030',bg:'#FBF6F1',bg2:'#F7EAD8',bg3:'#EDD0AC',tx:'#201008',tx2:'#6A3010',tx3:'#A06030',brC:'#DDB890',br2C:'#C8986A',sh:'0 1px 4px rgba(42,20,8,.08)',pcGrad:'linear-gradient(150deg,#B04810,#7A2800,#4A1000)',mfGrad:'linear-gradient(90deg,#B04810,#E88030)',fabSh:'0 4px 16px rgba(176,72,16,.4)',btnSh:'0 3px 10px rgba(176,72,16,.28)',fabActSh:'0 1px 6px rgba(176,72,16,.25)',pcSh:'0 4px 18px rgba(176,72,16,.3)',homeBg:'linear-gradient(135deg,#F5C890,#B04810)',homeTc:'#2E0E00',co:'#5048D8',co2:'#3028B8',col:'#EEEAFF',decoGround:'#8A5030',decoGrass1:'#7A3820',decoGrass2:'#9A6038',decoStem:'#884020',
+    d_gr:'#E88040',d_gr2:'#F0A060',d_grl:'#281400',d_grm:'#A04810',d_bg:'#1C1008',d_bg2:'#281C10',d_bg3:'#342618',d_tx:'#F4E0C4',d_tx2:'#C87838',d_tx3:'#885028',d_brC:'#3A2010',d_br2C:'#4C2E18',d_sh:'0 1px 4px rgba(0,0,0,.3)',d_pcGrad:'linear-gradient(150deg,#783008,#4A1A00,#280A00)',d_mfGrad:'linear-gradient(90deg,#E88040,#A04810)',d_fabSh:'0 4px 16px rgba(232,128,64,.35)',d_btnSh:'0 3px 10px rgba(232,128,64,.22)',d_fabActSh:'0 1px 6px rgba(232,128,64,.2)',d_pcSh:'0 4px 18px rgba(232,128,64,.25)',d_co:'#8880F8',d_co2:'#A89AF8',d_col:'#0C0A2A',d_decoGround:'#3A1A08',d_decoGrass1:'#2C1000',d_decoGrass2:'#401808',d_decoStem:'#281000'}
 };
 function applyPalette(){
   var pal=PALETTES[colorPalette]||PALETTES.green;
@@ -1055,7 +1053,7 @@ function applyPalette(){
 }
 function applyDark(){
   document.documentElement.classList.toggle('dark',darkMode);
-  var em=document.getElementById('hmenu-dark-em');var lbl=document.getElementById('hmenu-dark-lbl');
+  var em=document.getElementById('mp-dark-em');var lbl=document.getElementById('mp-dark-lbl');
   if(em)em.textContent=darkMode?'☀️':'🌙';if(lbl)lbl.textContent=darkMode?'Light mode':'Dark mode';
   var sbEm=document.getElementById('sb-dark-em');var sbLbl=document.getElementById('sb-dark-lbl');
   if(sbEm)sbEm.textContent=darkMode?'☀️':'🌙';if(sbLbl)sbLbl.textContent=darkMode?'Light mode':'Dark mode';
@@ -1198,7 +1196,7 @@ function retroCheckItems(){
 }
 function updateCollectBadge(){
   var show=collection.pending.length>0;
-  var dot=document.getElementById('hmenu-badge');if(dot)dot.style.display=show?'block':'none';
+  var dot=document.getElementById('mp-collect-dot');if(dot)dot.style.display=show?'block':'none';
   var sbDot=document.getElementById('sb-collect-dot');if(sbDot)sbDot.style.display=show?'inline-block':'none';
 }
 function openCollect(){rCollect();document.getElementById('collect-ov').classList.add('on');}
@@ -1307,8 +1305,7 @@ function nav(v){
   show('s-'+v);
   ['home','my','garden','hist','friends'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
   document.getElementById('fab').style.display=(v==='my'||v==='garden'||v==='hist')?'flex':'none';
-  var pb=document.getElementById('profile-btn');if(pb)pb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist')?'flex':'none';
-  var mb=document.getElementById('btn-menu');if(mb)mb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist')?'flex':'none';
+  var mb=document.getElementById('menu-btn');if(mb)mb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist')?'flex':'none';
   if(v==='home')rHome();
   if(v==='my'){mySearch='';var ms=document.getElementById('my-search');if(ms)ms.value='';rMy();}
   if(v==='garden')rGarden();
@@ -1321,11 +1318,10 @@ function launch(){
   show('s-home');
   document.getElementById('main-nav').classList.add('on');
   document.getElementById('fab').style.display='none';
-  document.getElementById('profile-btn').style.display='flex';
-  document.getElementById('btn-menu').style.display='flex';
+  document.getElementById('menu-btn').style.display='flex';
   var isGuest=!supaUser;
   document.getElementById('sb-signin-btn').style.display=isGuest?'flex':'none';
-  document.getElementById('hmenu-signin').style.display=isGuest?'flex':'none';
+  document.getElementById('mp-signin').style.display=isGuest?'flex':'none';
   syncSeasonPalette();
   applyDark();
   applyPalette();
@@ -1340,8 +1336,7 @@ function goToSignIn(){
   show('s-auth');
   showAuthPanel('auth-form');
   document.getElementById('main-nav').classList.remove('on');
-  document.getElementById('profile-btn').style.display='none';
-  document.getElementById('btn-menu').style.display='none';
+  document.getElementById('menu-btn').style.display='none';
 }
 
 // Nav buttons
@@ -1496,8 +1491,7 @@ document.getElementById('btn-term-yes').addEventListener('click',function(){
   document.getElementById('term-ov').classList.remove('on');
   document.getElementById('main-nav').classList.remove('on');
   document.getElementById('fab').style.display='none';
-  document.getElementById('profile-btn').style.display='none';
-  document.getElementById('btn-menu').style.display='none';
+  document.getElementById('menu-btn').style.display='none';
   document.getElementById('ob-back-btn').style.display='block';
   show('s-ob1');rObCats();rObGrid();
 });
@@ -1691,8 +1685,7 @@ function rHome(){
   document.getElementById('sb-label').textContent=greet+nameStr+' · '+sea.label;
   document.getElementById('sb-title').textContent=sea.title;
   document.getElementById('sb-sub').textContent=sea.sub;
-  var pbEm=document.getElementById('profile-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
-  var pbEm=document.getElementById('profile-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
+  var pbEm=document.getElementById('menu-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
   if(active){
@@ -2589,27 +2582,24 @@ function rNoteHistory(a,sections,tas,refreshHistBtn,onEdit){
 }
 document.getElementById('btn-notes-close').addEventListener('click',closeNotes);
 document.getElementById('btn-notes-back').addEventListener('click',function(){if(_noteBackFn)_noteBackFn();else rNotesList();});
-document.getElementById('hmenu-notes').addEventListener('click',function(){closeHomeMenu();openNotes();});
-document.getElementById('hmenu-cal').addEventListener('click',function(){closeHomeMenu();openCalendar();});
 document.getElementById('btn-cal-close').addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
 
-function openHomeMenu(){
-  var m=document.getElementById('home-menu'),ov=document.getElementById('home-menu-ov');
-  m.classList.remove('off');ov.style.display='block';
+function openMenuPanel(){
+  var em=document.getElementById('mp-em');if(em)em.textContent=profile&&profile.emoji?profile.emoji:'🌱';
+  var nm=document.getElementById('mp-name');if(nm)nm.textContent=profile&&profile.name?profile.name:'My profile';
+  document.getElementById('menu-ov').classList.add('on');
 }
-function closeHomeMenu(){
-  var m=document.getElementById('home-menu'),ov=document.getElementById('home-menu-ov');
-  m.classList.add('off');ov.style.display='none';
+function closeMenuPanel(){
+  document.getElementById('menu-ov').classList.remove('on');
 }
-document.getElementById('btn-menu').addEventListener('click',function(){
-  var m=document.getElementById('home-menu');
-  if(m.classList.contains('off'))openHomeMenu();else closeHomeMenu();
-});
-document.getElementById('home-menu-ov').addEventListener('click',closeHomeMenu);
-document.getElementById('hmenu-signin').addEventListener('click',function(){closeHomeMenu();goToSignIn();});
-document.getElementById('hmenu-collect').addEventListener('click',function(){closeHomeMenu();openCollect();});
-document.getElementById('hmenu-dark').addEventListener('click',function(){closeHomeMenu();darkMode=!darkMode;applyDark();sv();});
-document.getElementById('hmenu-palette').addEventListener('click',function(e){
+document.getElementById('menu-btn').addEventListener('click',openMenuPanel);
+document.getElementById('menu-ov').addEventListener('click',function(e){if(e.target===this)closeMenuPanel();});
+document.getElementById('mp-signin').addEventListener('click',function(){closeMenuPanel();goToSignIn();});
+document.getElementById('mp-collect').addEventListener('click',function(){closeMenuPanel();openCollect();});
+document.getElementById('mp-cal').addEventListener('click',function(){closeMenuPanel();openCalendar();});
+document.getElementById('mp-notes').addEventListener('click',function(){closeMenuPanel();openNotes();});
+document.getElementById('mp-dark').addEventListener('click',function(){closeMenuPanel();darkMode=!darkMode;applyDark();sv();});
+document.getElementById('mp-palette').addEventListener('click',function(e){
   var dot=e.target.closest('.pal-dot');
   if(!dot)return;
   e.stopPropagation();
@@ -3145,7 +3135,6 @@ document.getElementById('fr-tab-friends').addEventListener('click',function(){_s
 document.getElementById('fr-tab-feed').addEventListener('click',function(){_switchFrTab('feed');});
 document.getElementById('fr-tab-requests').addEventListener('click',function(){_switchFrTab('requests');});
 document.getElementById('fr-tab-messages').addEventListener('click',function(){_switchFrTab('messages');});
-document.getElementById('profile-btn').addEventListener('click',function(){openProfileEdit();});
 document.getElementById('btn-conv-back').addEventListener('click',closeConv);
 document.getElementById('btn-conv-close').addEventListener('click',function(){closeConv();});
 document.getElementById('btn-conv-send').addEventListener('click',sendMessage);
@@ -4971,8 +4960,7 @@ async function checkProfile(){
       applyDark();applyPalette();
       if(onboarded){
         document.getElementById('main-nav').classList.add('on');
-        document.getElementById('profile-btn').style.display='flex';
-        document.getElementById('btn-menu').style.display='flex';
+        document.getElementById('menu-btn').style.display='flex';
         openProfileStep();
       }else{
         document.body.classList.add('ob-mode');
@@ -5005,8 +4993,7 @@ function bootApp(){
   applyDark();applyPalette();
   if(onboarded){
     document.getElementById('main-nav').classList.add('on');
-    document.getElementById('profile-btn').style.display='flex';
-    document.getElementById('btn-menu').style.display='flex';
+    document.getElementById('menu-btn').style.display='flex';
     launch();
   }else{
     document.body.classList.add('ob-mode');
@@ -5178,8 +5165,7 @@ function _showAuth(){
   show('s-auth');
   showAuthPanel('auth-form');
   document.getElementById('main-nav').classList.remove('on');
-  document.getElementById('profile-btn').style.display='none';
-  document.getElementById('btn-menu').style.display='none';
+  document.getElementById('menu-btn').style.display='none';
   // Quick connection test — only show banner on true network failure (not non-2xx)
   var banner=document.getElementById('auth-conn-banner');
   if(banner)banner.style.display='none';
