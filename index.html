@@ -40,7 +40,7 @@
 html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--tx);overflow:hidden;-webkit-font-smoothing:antialiased;}
 #app{height:100%;display:flex;flex-direction:column;max-width:430px;margin:0 auto;}
 .scr{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(100px + env(safe-area-inset-bottom));display:none;}
-#s-my,#s-hist,#s-log{padding-top:20px;padding-left:16px;padding-right:16px;}
+#s-my,#s-hist,#s-log{padding-top:32px;padding-left:16px;padding-right:16px;}
 #s-garden{padding-top:0;padding-left:0;padding-right:0;}
 .scr.on{display:block;animation:scrIn .22s ease;}
 @keyframes scrIn{from{opacity:0;}to{opacity:1;}}
@@ -94,7 +94,7 @@ body.ob-mode #sb-toggle,body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .n
 .oq-lbl{font-size:14px;font-weight:600;}
 .oq-slbl{font-size:12px;color:var(--tx2);margin-top:2px;}
 .oq-opt.on .oq-lbl{color:var(--gr2);}
-.sb{padding:20px 20px 32px;position:relative;overflow:hidden;}
+.sb{padding:32px 20px 32px;position:relative;overflow:hidden;}
 .sb-bg{position:absolute;inset:0;z-index:0;}
 .sb-fade{position:absolute;bottom:0;left:0;right:0;height:80px;z-index:1;pointer-events:none;}
 .sb-c{position:relative;z-index:2;}
@@ -352,7 +352,7 @@ body.ob-mode #sb-toggle,body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .n
   #sb-backdrop{display:block;}
   .nav{display:flex!important;max-width:none;left:0;transform:none;width:100%;}
   .fab{right:24px;bottom:calc(82px + env(safe-area-inset-bottom));}
-  #s-my,#s-hist,#s-log{padding-top:30px;}
+  #s-my,#s-hist,#s-log{padding-top:32px;}
 }
 
 /* ── DARK MODE ──────────────────────────────────────── */
@@ -653,7 +653,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
 
   <!-- GARDEN -->
   <div id="s-garden" class="scr">
-    <div style="padding:20px 16px 14px;">
+    <div style="padding:32px 16px 14px;">
       <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:4px;">Garden</div>
       <div style="font-size:13px;color:var(--tx2);">Plants grow as you log more hours</div>
     </div>
