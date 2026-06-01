@@ -1684,7 +1684,7 @@ function rHome(){
   var nameStr=profile&&profile.name?', '+(profile.emoji||'')+(profile.emoji?' ':'')+profile.name:'';
   document.getElementById('sb-label').textContent=greet+nameStr+' · '+sea.label;
   document.getElementById('sb-title').textContent=sea.title;
-  document.getElementById('sb-sub').textContent=sea.sub;
+  var sbSub=document.getElementById('sb-sub');sbSub.textContent=sea.sub;sbSub.style.color=colorPalette==='blue'?'var(--co2)':'';
   var pbEm=document.getElementById('menu-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
