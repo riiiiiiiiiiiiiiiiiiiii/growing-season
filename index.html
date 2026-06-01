@@ -116,12 +116,12 @@ body.ob-mode #sb-toggle,body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .n
 .pc-btn{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.32);border-radius:24px;padding:10px 18px;color:#fff;font-size:13px;font-weight:600;display:inline-block;}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-top:24px;margin-bottom:20px;}
 .sc{background:#fff;border-radius:var(--rad);padding:14px 16px;border:var(--br);box-shadow:var(--sh);}
-.sc-n{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--gr);margin-bottom:2px;}
+.sc-n{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--co);margin-bottom:2px;}
 .sc-l{font-size:11px;color:var(--tx3);font-weight:500;}
 .hs{padding:0 16px;margin-top:20px;margin-bottom:4px;}
-.dq{margin:12px 16px 0;background:var(--col);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
+.dq{margin:12px 16px 0;background:var(--grl);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
 .dq-em{font-size:15px;flex-shrink:0;margin-top:1px;}
-.dq-txt{font-size:13px;color:var(--co2);line-height:1.5;font-style:italic;}
+.dq-txt{font-size:13px;color:var(--gr2);line-height:1.5;font-style:italic;}
 .hs-t{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
 .ar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
 .ar::-webkit-scrollbar{display:none;}
@@ -192,7 +192,7 @@ body.ob-mode #sb-toggle,body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .n
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .hc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
 .hc-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;}
-.hc-r{font-size:13px;color:var(--gr);font-weight:700;}
+.hc-r{font-size:13px;color:var(--co);font-weight:700;}
 .hc-edit-btn{background:none;border:none;font-size:14px;cursor:pointer;padding:2px 4px;border-radius:6px;opacity:.5;transition:opacity .15s;}
 .hc-edit-btn:hover,.hc-edit-btn:active{opacity:1;background:var(--bg2);}
 .hc-m{font-size:12px;color:var(--tx2);display:flex;gap:9px;flex-wrap:wrap;line-height:1.6;}
@@ -662,7 +662,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div id="garden-tabs" style="display:flex;gap:6px;"></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div id="garden-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
-        <button id="garden-help-btn" style="background:none;border:1.5px solid var(--tx3);border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</button>
+        <button id="garden-help-btn" style="background:none;border:1.5px solid var(--co);border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:600;color:var(--co);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</button>
       </div>
     </div>
     <div id="garden-svg-wrap"></div>
@@ -798,7 +798,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
 <!-- CONVERSATION OVERLAY -->
 <div id="conv-ov">
   <div id="conv-panel">
-    <div style="padding:14px 18px;border-bottom:.5px solid var(--bg3);display:flex;align-items:center;gap:10px;flex-shrink:0;">
+    <div style="padding:14px 18px;border-bottom:.5px solid var(--bg3);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--col);">
       <button id="btn-conv-back" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;">‹</button>
       <div style="font-size:18px;flex-shrink:0;" id="conv-em"></div>
       <div style="flex:1;min-width:0;">
@@ -1305,7 +1305,7 @@ function nav(v){
   show('s-'+v);
   ['home','my','garden','hist','friends'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
   document.getElementById('fab').style.display=(v==='my'||v==='garden'||v==='hist')?'flex':'none';
-  var mb=document.getElementById('menu-btn');if(mb)mb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist')?'flex':'none';
+  var mb=document.getElementById('menu-btn');if(mb)mb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist'||v==='friends')?'flex':'none';
   if(v==='home')rHome();
   if(v==='my'){mySearch='';var ms=document.getElementById('my-search');if(ms)ms.value='';rMy();}
   if(v==='garden')rGarden();
@@ -4223,7 +4223,7 @@ function rHist(){
     if(key!==lastKey){
       lastKey=key;
       var hdr=document.createElement('div');
-      hdr.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;padding:14px 0 6px;';
+      hdr.style.cssText='font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.7px;padding:14px 0 6px;';
       hdr.textContent=dayLabel(s.date);
       el.appendChild(hdr);
     }
@@ -4244,7 +4244,7 @@ function rHist(){
     var hasText=!!(s.notes||s.well||s.diff);
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms';_hi++;
     hc.innerHTML='<div class="hc-main" style="flex:1;padding:14px;min-width:0;">'
-      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx3);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-2px;">'+(isExp?'▴':'▾')+'</button>':'')+'</div></div>'
+      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--co);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-2px;">'+(isExp?'▴':'▾')+'</button>':'')+'</div></div>'
       +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
       +'</div>'+plantCol;
     if(hasText){
@@ -4676,16 +4676,16 @@ function rGarden(){
   document.getElementById('garden-empty').textContent='Add activities and log hours to see your garden grow';
 
   var tileW=90,tileH=120;
-  var bgEl=document.getElementById('gs-img-background');
-  var bgSrc=bgEl?bgEl.src:'';
   var wrap=document.getElementById('garden-svg-wrap');
   wrap.innerHTML='';
+  var _gpal=PALETTES[colorPalette]||PALETTES.green;
+  var plotBg=darkMode?(_gpal.d_col||_gpal.col||'#FDEAE0'):(_gpal.col||'#FDEAE0');
 
-  function makePlantSVG(items,cols,tileW,tileH,bgSrc){
+  function makePlantSVG(items,cols,tileW,tileH,plotBg){
     var rows=Math.ceil(items.length/cols);
     var plotW=tileW*cols,plotH=tileH*rows;
     var svg='<svg viewBox="0 0 '+plotW+' '+plotH+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
-    for(var ri=0;ri<rows;ri++)svg+='<image href="'+bgSrc+'" x="0" y="'+(ri*tileH)+'" width="'+plotW+'" height="'+tileH+'" preserveAspectRatio="xMidYMid slice"/>';
+    svg+='<rect x="0" y="0" width="'+plotW+'" height="'+plotH+'" fill="'+plotBg+'"/>';
     items.forEach(function(a,idx){
       var c=idx%cols,r=Math.floor(idx/cols),tx=c*tileW,ty=r*tileH;
       if(a){
