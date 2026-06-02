@@ -466,7 +466,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
   <button id="menu-btn" title="Menu"><span id="menu-btn-em" style="font-size:18px;line-height:1;">👤</span></button>
   <div class="ov" id="menu-ov">
     <div class="sh" id="menu-sh">
-      <div id="mp-profile" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;cursor:pointer;padding:4px;border-radius:12px;transition:background .14s;" onclick="closeMenuPanel();openProfileEdit();">
+      <div id="mp-profile" style="display:flex;align-items:center;gap:12px;margin-bottom:14px;cursor:pointer;padding:4px;border-radius:12px;transition:background .14s;">
         <div id="mp-em" style="font-size:26px;width:44px;height:44px;border-radius:50%;background:var(--bg2);border:var(--br);display:flex;align-items:center;justify-content:center;flex-shrink:0;">🌱</div>
         <div style="flex:1;min-width:0;">
           <div id="mp-name" style="font-size:15px;font-weight:600;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">My profile</div>
@@ -2047,13 +2047,13 @@ function renderCalWeek(){
   var nextBtn=document.createElement('button');
   nextBtn.style.cssText=prevBtn.style.cssText;
   nextBtn.textContent='›';
-  nextBtn.style.opacity=_calWeekOffset>=0?'0.3':'1';
-  nextBtn.disabled=_calWeekOffset>=0;
-  nextBtn.addEventListener('click',function(){if(_calWeekOffset<0){_calWeekOffset++;var sh=document.getElementById('cal-sh');_transitionSheet(sh,renderCalWeek);}});
+  nextBtn.style.opacity=_calWeekOffset>=1?'0.3':'1';
+  nextBtn.disabled=_calWeekOffset>=1;
+  nextBtn.addEventListener('click',function(){if(_calWeekOffset<1){_calWeekOffset++;var sh=document.getElementById('cal-sh');_transitionSheet(sh,renderCalWeek);}});
   var sun=new Date(mon);sun.setDate(sun.getDate()+6);
   var wkLbl=document.createElement('div');
   wkLbl.style.cssText='font-family:var(--serif);font-size:16px;font-weight:700;color:var(--tx);';
-  wkLbl.textContent=(_calWeekOffset===0?'This week · ':'')+MNAMES[mon.getMonth()]+' '+mon.getDate()+(mon.getMonth()!==sun.getMonth()?' – '+MNAMES[sun.getMonth()]+' '+sun.getDate():'–'+sun.getDate());
+  wkLbl.textContent=(_calWeekOffset===0?'This week · ':_calWeekOffset===1?'Next week · ':'')+MNAMES[mon.getMonth()]+' '+mon.getDate()+(mon.getMonth()!==sun.getMonth()?' – '+MNAMES[sun.getMonth()]+' '+sun.getDate():'–'+sun.getDate());
   nav.appendChild(prevBtn);nav.appendChild(wkLbl);nav.appendChild(nextBtn);
   body.appendChild(nav);
 
@@ -2259,7 +2259,7 @@ function renderCalDay(dateObj){
     b.addEventListener('click',function(){
       var nd=new Date(_calDayDate);nd.setDate(nd.getDate()+(i===0?-1:1));
       var earliest=_calWeekMon(-3);
-      var latest=today;
+      var latest=new Date(today);latest.setDate(latest.getDate()+7);
       if(nd<earliest||nd>latest)return;
       _transitionSheet(sh,function(){renderCalDay(nd);});
     });
@@ -2625,6 +2625,7 @@ function closeMenuPanel(){
 }
 document.getElementById('menu-btn').addEventListener('click',openMenuPanel);
 document.getElementById('menu-ov').addEventListener('click',function(e){if(e.target===this)closeMenuPanel();});
+document.getElementById('mp-profile').addEventListener('click',function(){closeMenuPanel();openProfileEdit();});
 document.getElementById('mp-signin').addEventListener('click',function(){closeMenuPanel();goToSignIn();});
 document.getElementById('mp-collect').addEventListener('click',function(){closeMenuPanel();openCollect();});
 document.getElementById('mp-cal').addEventListener('click',function(){closeMenuPanel();openCalendar();});
