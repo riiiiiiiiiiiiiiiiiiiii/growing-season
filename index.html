@@ -115,7 +115,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 .pc-sub{font-size:12px;color:rgba(255,255,255,.72);margin-bottom:14px;line-height:1.45;}
 .pc-btn{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.32);border-radius:24px;padding:7px 16px;color:#fff;font-size:12px;font-weight:600;display:inline-block;}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-top:24px;margin-bottom:20px;}
-.hs-hdr{display:flex;align-items:center;margin-bottom:8px;cursor:pointer;user-select:none;}
+.hs-hdr{display:flex;align-items:center;margin-bottom:8px;cursor:pointer;user-select:none;touch-action:manipulation;}
 .hs-t{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;flex:1;}
 .hs-tog{background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;display:inline-block;transition:transform .15s;}
 .ar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
@@ -342,7 +342,8 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 
 /* ── STAGE-UP CELEBRATION ─────────────────────────── */
 #stageup-ov{position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);}
-#stageup-ov.on{display:flex;}
+#stageup-ov.on{display:flex;animation:suFadeIn .3s ease both;}
+@keyframes suFadeIn{from{opacity:0;}to{opacity:1;}}
 .stageup-card{background:var(--bg);border-radius:28px;padding:40px 32px 32px;text-align:center;max-width:340px;width:calc(100% - 32px);position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4);}
 .stageup-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(80,200,152,.18),transparent 65%);pointer-events:none;}
 .stageup-plant{font-size:88px;line-height:1;margin-bottom:12px;animation:suPop .5s cubic-bezier(.34,1.56,.64,1) both;}
@@ -634,7 +635,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     <div class="sh">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <div style="font-family:var(--serif);font-size:20px;font-weight:700;">Collections</div>
-        <button id="btn-collect-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;">×</button>
+        <button id="btn-collect-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;touch-action:manipulation;">×</button>
       </div>
       <div style="font-size:13px;color:var(--tx2);margin-bottom:18px;">Rewards for growing</div>
       <div id="collect-pending-wrap"></div>
@@ -736,20 +737,20 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 <div id="conv-ov">
   <div id="conv-panel">
     <div style="padding:14px 18px;border-bottom:.5px solid var(--bg3);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--col);">
-      <button id="btn-conv-back" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;">‹</button>
+      <button id="btn-conv-back" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;touch-action:manipulation;">‹</button>
       <div style="font-size:18px;flex-shrink:0;" id="conv-em"></div>
       <div style="flex:1;min-width:0;">
         <div id="conv-name" style="font-size:15px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
         <div id="conv-un" style="font-size:12px;color:var(--tx3);"></div>
       </div>
-      <button id="btn-conv-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;">×</button>
+      <button id="btn-conv-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;touch-action:manipulation;">×</button>
     </div>
     <div id="conv-msgs"></div>
     <div style="padding:10px 14px;border-top:.5px solid var(--bg3);display:flex;gap:8px;align-items:center;flex-shrink:0;background:var(--bg);padding-bottom:max(10px,env(safe-area-inset-bottom));">
-      <button id="btn-conv-wave" style="background:none;border:1.5px solid var(--bg3);border-radius:10px;padding:0;width:38px;height:38px;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">👋</button>
-      <button id="btn-conv-clap" style="background:none;border:1.5px solid var(--bg3);border-radius:10px;padding:0;width:38px;height:38px;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;">👏</button>
+      <button id="btn-conv-wave" style="background:none;border:1.5px solid var(--bg3);border-radius:10px;padding:0;width:38px;height:38px;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">👋</button>
+      <button id="btn-conv-clap" style="background:none;border:1.5px solid var(--bg3);border-radius:10px;padding:0;width:38px;height:38px;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;touch-action:manipulation;">👏</button>
       <input id="conv-input" class="sinp" placeholder="Message…" style="flex:1;margin:0;height:38px;box-sizing:border-box;">
-      <button id="btn-conv-send" style="background:var(--gr);border:none;border-radius:10px;width:38px;height:38px;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><span style="position:relative;top:-1px;">↑</span></button>
+      <button id="btn-conv-send" style="background:var(--gr);border:none;border-radius:10px;width:38px;height:38px;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;touch-action:manipulation;"><span style="position:relative;top:-1px;">↑</span></button>
     </div>
   </div>
 </div>
@@ -770,9 +771,9 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 <div class="ov" id="notes-ov">
   <div class="sh" id="notes-sh">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-      <button id="btn-notes-back" style="display:none;background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;">‹</button>
+      <button id="btn-notes-back" style="display:none;background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;touch-action:manipulation;">‹</button>
       <div style="flex:1;font-family:var(--serif);font-size:20px;font-weight:700;" id="notes-title">Notes</div>
-      <button id="btn-notes-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;">×</button>
+      <button id="btn-notes-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;touch-action:manipulation;">×</button>
     </div>
     <div id="notes-body"></div>
   </div>
@@ -783,7 +784,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
   <div class="sh" id="cal-sh" style="max-width:480px;padding:22px 18px 28px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
       <div style="font-family:var(--serif);font-size:20px;font-weight:700;" id="cal-title">Calendar</div>
-      <button id="btn-cal-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;">×</button>
+      <button id="btn-cal-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;touch-action:manipulation;">×</button>
     </div>
     <div id="cal-body"></div>
   </div>
@@ -1949,7 +1950,7 @@ function renderCalWeek(){
   var nav=document.createElement('div');
   nav.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:16px;';
   var prevBtn=document.createElement('button');
-  prevBtn.style.cssText='background:var(--bg2);border:var(--br);border-radius:10px;width:34px;height:34px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--sh);';
+  prevBtn.style.cssText='background:var(--bg2);border:var(--br);border-radius:10px;width:34px;height:34px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--sh);touch-action:manipulation;';
   prevBtn.textContent='‹';
   prevBtn.style.opacity=_calWeekOffset<=-3?'0.3':'1';
   prevBtn.disabled=_calWeekOffset<=-3;
@@ -1965,7 +1966,7 @@ function renderCalWeek(){
   wkLbl.style.cssText='font-family:var(--serif);font-size:16px;font-weight:700;color:var(--tx);flex:1;';
   wkLbl.textContent=(_calWeekOffset===0?'This week · ':_calWeekOffset===1?'Next week · ':'')+MNAMES[mon.getMonth()]+' '+mon.getDate()+(mon.getMonth()!==sun.getMonth()?' – '+MNAMES[sun.getMonth()]+' '+sun.getDate():'–'+sun.getDate());
   var calCloseBtn=document.createElement('button');
-  calCloseBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;flex-shrink:0;';
+  calCloseBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';
   calCloseBtn.textContent='×';
   calCloseBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
   nav.appendChild(prevBtn);nav.appendChild(wkLbl);nav.appendChild(nextBtn);nav.appendChild(calCloseBtn);
@@ -2072,11 +2073,11 @@ function renderCalWeekDetails(mon,wkSess){
   var navHdr=document.createElement('div');
   navHdr.style.cssText='display:flex;align-items:center;gap:8px;padding:16px 16px 12px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
   var backBtn=document.createElement('button');
-  backBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;flex-shrink:0;';backBtn.textContent='‹';
+  backBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';backBtn.textContent='‹';
   backBtn.addEventListener('click',function(){sh.style.cssText='max-width:480px;padding:28px 20px 28px;';_transitionSheet(sh,renderCalWeek);});
   var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;';
   titleWrap.innerHTML='<div style="font-size:10px;font-weight:700;color:var(--co);text-transform:uppercase;letter-spacing:.8px;">Week breakdown</div><div style="font-family:var(--serif);font-size:16px;font-weight:700;color:var(--tx);">'+MNAMES[mon.getMonth()]+' '+mon.getDate()+'–'+sun.getDate()+'</div>';
-  var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;flex-shrink:0;';closeBtn.textContent='×';
+  var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';closeBtn.textContent='×';
   closeBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
   navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);navHdr.appendChild(closeBtn);
   body.appendChild(navHdr);
@@ -2158,7 +2159,7 @@ function renderCalDay(dateObj){
   var navHdr=document.createElement('div');
   navHdr.style.cssText='display:flex;align-items:center;gap:8px;padding:16px 16px 12px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
   var backBtn=document.createElement('button');
-  backBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;flex-shrink:0;';
+  backBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';
   backBtn.textContent='‹';
   backBtn.addEventListener('click',function(){sh.style.cssText='max-width:480px;padding:20px 18px 28px;';_transitionSheet(sh,renderCalWeek);});
   var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;';
@@ -2168,7 +2169,7 @@ function renderCalDay(dateObj){
   titleWrap.appendChild(dateLbl);
   var navBtns=document.createElement('div');navBtns.style.cssText='display:flex;gap:4px;flex-shrink:0;';
   ['‹','›'].forEach(function(ar,i){
-    var b=document.createElement('button');b.style.cssText='background:var(--bg2);border:var(--br);border-radius:8px;width:30px;height:30px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);';
+    var b=document.createElement('button');b.style.cssText='background:var(--bg2);border:var(--br);border-radius:8px;width:30px;height:30px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);touch-action:manipulation;';
     b.textContent=ar;
     b.addEventListener('click',function(){
       var nd=new Date(_calDayDate);nd.setDate(nd.getDate()+(i===0?-1:1));
@@ -2179,7 +2180,7 @@ function renderCalDay(dateObj){
     });
     navBtns.appendChild(b);
   });
-  var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0 0 0 4px;line-height:1;flex-shrink:0;';closeBtn.textContent='×';
+  var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0 0 0 4px;line-height:1;flex-shrink:0;touch-action:manipulation;';closeBtn.textContent='×';
   closeBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
   navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);navHdr.appendChild(navBtns);navHdr.appendChild(closeBtn);
   body.appendChild(navHdr);
@@ -4194,7 +4195,7 @@ function rHist(){
     var hasText=!!(s.notes||s.well||s.diff);
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms';_hi++;
     hc.innerHTML='<div class="hc-main" style="flex:1;padding:14px;min-width:0;">'
-      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--co);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-1px;"><span style="display:inline-block;transform:rotate('+(isExp?'-90':'90')+'deg);transition:transform .15s;">›</span></button>':'')+'</div></div>'
+      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--co);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-1px;touch-action:manipulation;"><span style="display:inline-block;transform:rotate('+(isExp?'-90':'90')+'deg);transition:transform .15s;">›</span></button>':'')+'</div></div>'
       +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
       +'</div>'+plantCol;
     if(hasText){
@@ -5206,7 +5207,7 @@ if('serviceWorker' in navigator){
 <!-- FOCUS SHEET -->
 <div class="ov" id="foc-ov">
   <div class="sh" style="max-height:80vh;display:flex;flex-direction:column;overflow:hidden;">
-    <div style="display:flex;align-items:center;margin-bottom:4px;"><div style="font-family:var(--serif);font-size:17px;font-weight:700;flex:1;">This week's focus</div><button id="btn-foc-clear" style="background:none;border:none;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;padding:0;line-height:1;">Clear all</button></div>
+    <div style="display:flex;align-items:center;margin-bottom:4px;"><div style="font-family:var(--serif);font-size:17px;font-weight:700;flex:1;">This week's focus</div><button id="btn-foc-clear" style="background:none;border:none;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;padding:0;line-height:1;touch-action:manipulation;">Clear all</button></div>
     <div style="font-size:13px;color:var(--tx2);margin-bottom:12px;">Pick the activities you want to prioritise. Others stay in your seeds but fade into the background.</div>
     <input type="search" id="foc-search" placeholder="Search activities…" style="width:100%;padding:9px 12px;border-radius:10px;border:var(--br);background:#fff;font-size:14px;margin-bottom:12px;outline:none;-webkit-appearance:none;touch-action:manipulation;">
     <div id="foc-list" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
