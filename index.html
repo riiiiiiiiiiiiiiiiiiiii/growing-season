@@ -118,13 +118,9 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 .sc{background:#fff;border-radius:var(--rad);padding:14px 16px;border:var(--br);box-shadow:var(--sh);}
 .sc-n{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--gr2);margin-bottom:2px;}
 .sc-l{font-size:11px;color:var(--gr2);font-weight:500;}
-.hs{padding:0 16px;margin-top:20px;margin-bottom:4px;}
 .dq{margin:12px 16px 0;background:var(--grl);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
 .dq-em{font-size:15px;flex-shrink:0;margin-top:1px;}
 .dq-txt{font-size:13px;color:var(--gr2);line-height:1.5;font-style:italic;}
-.hs-t{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
-.ar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
-.ar::-webkit-scrollbar{display:none;}
 .ac{background:#fff;border:var(--br);border-radius:var(--rad);padding:10px 12px;flex-shrink:0;cursor:pointer;text-align:center;min-width:80px;box-shadow:var(--sh);}
 .ac-em{font-size:20px;margin-bottom:3px;}
 .ac-n{font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px;}
@@ -567,7 +563,6 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     <div id="pc-wrap"></div>
     <div class="stats" id="stats"></div>
     <div id="today-glance" style="margin:0 16px 14px;"></div>
-    <div class="hs"><div class="hs-t">Seeds</div><div class="ar" id="ar"></div></div>
     <div id="daily-quote"></div>
     <div id="home-deco" style="width:100%;overflow:hidden;pointer-events:none;margin-top:4px;"></div>
   </div>
@@ -1598,11 +1593,9 @@ function rHome(){
     if(_activeTimerInt)clearInterval(_activeTimerInt);
     (function(t0){function tick(){var el=document.getElementById('ip-elapsed');if(el)el.textContent=_fmtElapsed(Date.now()-t0);else{clearInterval(_activeTimerInt);_activeTimerInt=null;}}tick();_activeTimerInt=setInterval(tick,1000);})(active.startedAt);
     pcW.innerHTML='';
-    var hsEl=document.querySelector('#s-home .hs');if(hsEl)hsEl.style.display='none';
   } else {
     if(_activeTimerInt){clearInterval(_activeTimerInt);_activeTimerInt=null;}
     ipW.innerHTML='';
-    var hsEl=document.querySelector('#s-home .hs');if(hsEl)hsEl.style.display='';
     pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-deco">'+sea.deco+'</div><div class="pc-title">What should I tend to today?</div><div class="pc-sub">Answer 4 quick questions to find your best match.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-suggest" style="flex:1;background:var(--col);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--co2);cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.06),var(--sh);">🎲 Surprise me</button><button id="btn-quick-log" style="flex:1;background:var(--col);border:none;border-radius:20px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--co2);cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.06),var(--sh);">Already done? Log it</button></div>';
     document.getElementById('pc-card').addEventListener('click',openPicker);
     document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
@@ -1616,38 +1609,6 @@ function rHome(){
 
   updateHomeNudge();
 
-  var catChipBg={Creative:'#FCE7F3',Active:'#FFE4D9',Learning:'#DBEAFE',Social:'#D1FAE5',Mindfulness:'#EDE9FE',Productive:'#FEF3C7',Digital:'#EEF2FF',Outdoor:'#D4F2E4'};
-  var ar=document.getElementById('ar');
-  ar.innerHTML='';
-  var showingAll=false;
-  function renderChips(){
-    ar.innerHTML='';
-    var focused=hasFocusSet()?myActs.filter(function(a){return isFocused(a.id);}):myActs;
-    var rest=hasFocusSet()?myActs.filter(function(a){return !isFocused(a.id);}):[];
-    var toShow=showingAll?myActs:focused;
-    toShow.forEach(function(a){
-      var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
-      var isAct=active&&active.actId===a.id;
-      var dim=hasFocusSet()&&!isFocused(a.id);
-      var chip=document.createElement('div');
-      chip.className='ac';
-      chip.style.background=isAct?'var(--col)':(catChipBg[a.cat]||'#fff');
-      chip.style.opacity=dim?'0.4':'1';
-      if(isAct)chip.style.border='2px solid var(--co)';
-      var chipStreak=getStreakAt(a.id,Date.now());
-      chip.innerHTML='<div class="ac-em">'+a.emoji+'</div><div class="ac-n">'+a.name+(chipStreak>=2?'<span style="margin-left:4px;font-size:10px;background:var(--grm);color:#fff;border-radius:7px;padding:1px 5px;font-weight:600;">🔥'+chipStreak+'</span>':'')+'</div><div class="ac-foot"><div class="ac-c">'+(isAct?'active':cnt>0?cnt+'x':'new')+'</div></div>';
-      chip.addEventListener('click',function(){if(isAct)resumeSess();else openActInfo(a.id,'home');});
-      ar.appendChild(chip);
-    });
-    if(hasFocusSet()&&rest.length>0){
-      var tog=document.createElement('div');tog.className='ac';
-      tog.style.cssText='background:var(--bg2);border:1px dashed var(--tx3);';
-      tog.innerHTML='<div class="ac-n" style="color:var(--tx2);">'+(showingAll?'Less ↑':'+'+rest.length+' more')+'</div>';
-      tog.addEventListener('click',function(){showingAll=!showingAll;renderChips();});
-      ar.appendChild(tog);
-    }
-  }
-  renderChips();
 
   document.getElementById('home-deco').innerHTML=homeDecoSVG(sk);
   var q=getDailyQuote();
