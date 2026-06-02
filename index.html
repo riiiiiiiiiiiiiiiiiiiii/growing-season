@@ -3939,6 +3939,9 @@ function rMy(){
   }
 
   // Focus banner
+  // Prune focus IDs that no longer exist in myActs
+  var _validIds=weeklyFocus.actIds.filter(function(id){return myActs.some(function(a){return a.id===id;});});
+  if(_validIds.length!==weeklyFocus.actIds.length){weeklyFocus.actIds=_validIds;sv();}
   var bw=document.getElementById('focus-banner-wrap');
   if(bw){
     if(!hasFocusSet()){
