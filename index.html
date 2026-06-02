@@ -1014,8 +1014,6 @@ function applyDark(){
   document.documentElement.classList.toggle('dark',darkMode);
   var em=document.getElementById('mp-dark-em');var lbl=document.getElementById('mp-dark-lbl');
   if(em)em.textContent=darkMode?'☀️':'🌙';if(lbl)lbl.textContent=darkMode?'Light mode':'Dark mode';
-  var sbEm=document.getElementById('sb-dark-em');var sbLbl=document.getElementById('sb-dark-lbl');
-  if(sbEm)sbEm.textContent=darkMode?'☀️':'🌙';if(sbLbl)sbLbl.textContent=darkMode?'Light mode':'Dark mode';
   applyPalette();
 }
 function getWeekKey(){var d=new Date(),y=d.getFullYear(),s=new Date(y,0,1),w=Math.ceil(((d-s)/864e5+s.getDay()+1)/7);return y+'-W'+w;}
@@ -1156,7 +1154,6 @@ function retroCheckItems(){
 function updateCollectBadge(){
   var show=collection.pending.length>0;
   var dot=document.getElementById('mp-collect-dot');if(dot)dot.style.display=show?'block':'none';
-  var sbDot=document.getElementById('sb-collect-dot');if(sbDot)sbDot.style.display=show?'inline-block':'none';
 }
 function openCollect(){rCollect();document.getElementById('collect-ov').classList.add('on');}
 function closeCollect(){document.getElementById('collect-ov').classList.remove('on');}
