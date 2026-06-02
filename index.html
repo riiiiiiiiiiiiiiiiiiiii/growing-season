@@ -245,7 +245,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 .og-badge{position:absolute;top:8px;right:8px;font-size:10px;background:rgba(180,100,0,.15);color:#92400E;border-radius:8px;padding:2px 6px;font-weight:600;}
 .suggest-btn{display:block;width:calc(100% - 32px);margin:0 16px 0;background:var(--bg2);border:var(--br);border-radius:20px;padding:10px 16px;font-size:13px;font-weight:600;color:var(--tx2);cursor:pointer;text-align:center;box-shadow:var(--sh);}
 .drag-handle{padding:0 10px 0 4px;color:var(--tx3);font-size:18px;cursor:grab;display:flex;align-items:center;flex-shrink:0;touch-action:none;user-select:none;}
-.focus-banner{background:var(--col);border:0.5px solid var(--co2);border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh);opacity:.9;}
+.focus-banner{background:var(--col);border:none;border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;box-shadow:0 0 0 1px rgba(0,0,0,.06),var(--sh);opacity:.9;}
 .focus-banner-text{flex:1;font-size:13px;color:var(--co2);}
 .focus-banner-edit{background:var(--co);color:#fff;border:none;border-radius:14px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;}
 .focus-new-week{background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
@@ -620,7 +620,7 @@ html.dark #friends-panel,html.dark #conv-panel{background:var(--bg);}
       <div id="garden-tabs" style="display:flex;gap:6px;"></div>
       <div style="display:flex;align-items:center;gap:8px;">
         <div id="garden-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
-        <button id="garden-help-btn" style="background:none;border:1.5px solid var(--co);border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:600;color:var(--co);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</button>
+        <button id="garden-help-btn" style="background:var(--col);border:1px solid var(--co2);border-radius:50%;width:20px;height:20px;font-size:11px;font-weight:600;color:var(--co);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</button>
       </div>
     </div>
     <div id="garden-svg-wrap"></div>
@@ -4219,7 +4219,7 @@ function rHist(){
     var hasText=!!(s.notes||s.well||s.diff);
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms';_hi++;
     hc.innerHTML='<div class="hc-main" style="flex:1;padding:14px;min-width:0;">'
-      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:24px;cursor:pointer;color:var(--co);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-2px;">'+(isExp?'▴':'▾')+'</button>':'')+'</div></div>'
+      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--co);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-1px;">'+(isExp?'▴':'▾')+'</button>':'')+'</div></div>'
       +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
       +'</div>'+plantCol;
     if(hasText){
