@@ -1471,7 +1471,7 @@ function homeDecoSVG(sk){
     s+='<circle cx="'+f.x+'" cy="'+f.y+'" r="'+(f.r*0.42).toFixed(1)+'" fill="'+centerFill+'" opacity="0.95"/>';
     s+='<circle cx="'+f.x+'" cy="'+f.y+'" r="'+(f.r*0.22).toFixed(1)+'" fill="'+centerFill2+'" opacity="0.9"/>';
   });
-  if(sk==='summer'){s+='<circle cx="300" cy="23" r="20" fill="#FFE090" opacity="0.2"/><circle cx="300" cy="23" r="7" fill="#FFC030" opacity="0.45"/>';}
+  if(sk==='summer'){s+='<circle cx="350" cy="23" r="20" fill="#FFE090" opacity="0.2"/><circle cx="350" cy="23" r="7" fill="#FFC030" opacity="0.45"/>';}
   if(sk==='autumn'){[{x:50,y:30,c:'#D4703A'},{x:160,y:20,c:'#C85820'},{x:280,y:28,c:'#B84A18'}].forEach(function(l,i){s+='<ellipse cx="'+l.x+'" cy="'+l.y+'" rx="7" ry="4.5" fill="'+l.c+'" opacity="0.65" transform="rotate('+(i*30-20)+','+l.x+','+l.y+')"/>';});}
   if(sk==='winter'){for(var w2=0;w2<8;w2++){s+='<circle cx="'+(w2*52+18)+'" cy="'+(15+(w2%3)*12)+'" r="2.5" fill="white" opacity="0.6"/>';}}
   s+='</svg>';
