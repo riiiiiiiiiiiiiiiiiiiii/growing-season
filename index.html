@@ -5463,11 +5463,18 @@ if('serviceWorker' in navigator){
   function closePopup() {
     popup.style.display = 'none';
     if (pendingEl) { pendingEl.classList.remove('ag-highlight'); pendingEl = null; }
-    popup.querySelector('#ag-ta').value = '';
+    const ta = popup.querySelector('#ag-ta');
+    ta.value = '';
+    ta.style.display = '';
     popup.querySelector('.ag-actions').style.display = 'flex';
+    const submitBtn = document.getElementById('ag-submit');
+    submitBtn.textContent = 'Send note';
+    submitBtn.disabled = false;
     popup.querySelector('#ag-popup-label').textContent = '';
     const sent = popup.querySelector('.ag-sent');
     if (sent) sent.remove();
+    const err = popup.querySelector('.ag-err');
+    if (err) err.remove();
   }
 
   btn.addEventListener('click', () => {
@@ -5487,9 +5494,12 @@ if('serviceWorker' in navigator){
     const label = elementLabel(el);
     const rect = el.getBoundingClientRect();
 
+    const submitBtn = document.getElementById('ag-submit');
+    submitBtn.textContent = 'Sending…';
+    submitBtn.disabled = true;
     try {
       const sid = await ensureSession();
-      await fetch(ENDPOINT + '/sessions/' + sid + '/annotations', {
+      const res = await fetch(ENDPOINT + '/sessions/' + sid + '/annotations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -5501,6 +5511,7 @@ if('serviceWorker' in navigator){
           url: location.href
         })
       });
+      if (!res.ok) throw new Error('Server error ' + res.status);
       popup.querySelector('.ag-actions').style.display = 'none';
       popup.querySelector('#ag-ta').style.display = 'none';
       const sent = document.createElement('div');
@@ -5510,6 +5521,11 @@ if('serviceWorker' in navigator){
       setTimeout(closePopup, 1000);
       updateCount();
     } catch(e) {
+      submitBtn.textContent = 'Send note';
+      submitBtn.disabled = false;
+      let errEl = popup.querySelector('.ag-err');
+      if (!errEl) { errEl = document.createElement('div'); errEl.className = 'ag-err'; errEl.style.cssText = 'color:#D4614A;font-size:11px;margin-top:6px;'; popup.querySelector('.ag-actions').after(errEl); }
+      errEl.textContent = e.message || 'Could not reach server';
       console.error('Agentation error:', e);
     }
   });
