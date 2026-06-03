@@ -4857,6 +4857,7 @@ async function syncToSupabase(){
   if(!supaUser||_syncInProgress)return;
   _syncInProgress=true;
   var uid=supaUser.id;
+  var _syncHadError=false;
   try{
     // Assign stable IDs to any sessions that don't have one
     sessions.forEach(function(s){if(!s.id)s.id=genUUID();});
@@ -4867,14 +4868,14 @@ async function syncToSupabase(){
       data:{onboarded:onboarded,weeklyFocus:weeklyFocus,collection:collection,activityNotes:activityNotes,colorPalette:colorPalette,customCats:customCats,profile:profile,archivedActs:archivedActs,active:active},
       updated_at:new Date().toISOString()
     },{onConflict:'user_id'});
-    if(_r&&_r.error)console.warn('Supabase sync: user_state',_r.error.message,_r.error.code);
+    if(_r&&_r.error){console.warn('Supabase sync: user_state',_r.error.message,_r.error.code);_syncHadError=true;}
 
     if(myActs.length){
       _r=await _supa.from('activities').upsert(
         myActs.map(function(a){return{id:a.id,user_id:uid,username:profile&&profile.username||null,name:a.name,emoji:a.emoji,cat:a.cat||'',type:a.type||'recreational',level:a.level||'beginner',data:a};}),
         {onConflict:'id,user_id'}
       );
-      if(_r&&_r.error)console.warn('Supabase sync: activities',_r.error.message,_r.error.code);
+      if(_r&&_r.error){console.warn('Supabase sync: activities',_r.error.message,_r.error.code);_syncHadError=true;}
     }
 
     // Sessions: upsert by id, then delete any Supabase rows not present locally
@@ -4883,7 +4884,7 @@ async function syncToSupabase(){
         sessions.map(function(s){return{id:s.id,user_id:uid,username:profile&&profile.username||null,act_id:s.actId,date:new Date(s.date||Date.now()).toISOString(),hours:Math.floor(s.hours||0),mins:Math.round(s.mins||0),rating:s.rating?Math.round(s.rating):null,note:s.notes||'',feels:s.feel||[],momentum:s.momentum||'',data:s};}),
         {onConflict:'id'}
       );
-      if(_r&&_r.error)console.warn('Supabase sync: sessions upsert',_r.error.message,_r.error.code);
+      if(_r&&_r.error){console.warn('Supabase sync: sessions upsert',_r.error.message,_r.error.code);_syncHadError=true;}
     }
     // Remove sessions deleted locally
     var _remoteIds=await _supa.from('sessions').select('id').eq('user_id',uid);
@@ -4892,7 +4893,8 @@ async function syncToSupabase(){
       var _toDelete=_remoteIds.data.filter(function(r){return!_localSet.has(r.id);}).map(function(r){return r.id;});
       if(_toDelete.length)await _supa.from('sessions').delete().in('id',_toDelete);
     }
-  }catch(e){console.warn('Supabase sync error:',e);showToast('Sync failed: '+e.message,null);}finally{_syncInProgress=false;}
+    if(_syncHadError)showToast("Sync failed — your data is saved locally.",null);
+  }catch(e){console.warn('Supabase sync error:',e);showToast("Couldn't sync — your data is saved locally.",null);}finally{_syncInProgress=false;}
 }
 
 async function loadFromSupabase(){
