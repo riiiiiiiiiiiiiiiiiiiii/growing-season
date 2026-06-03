@@ -1458,10 +1458,10 @@ function homeDecoSVG(sk){
   var FC=['#E8A0B0','#C9A0DC','#F2B8A0','#F0D080','#E88090','#A8C898','#DCA0B8','#E0B0D0'];
   var centerFill='#FFF0A0';
   var centerFill2='#E8C040';
-  var fls=[{x:22,y:58,r:7,c:FC[0]},{x:58,y:54,r:5.5,c:FC[2]},{x:95,y:60,r:6,c:FC[1]},{x:132,y:52,r:4.5,c:FC[3]},
-    {x:165,y:57,r:7,c:FC[4]},{x:200,y:50,r:5,c:FC[6]},{x:238,y:59,r:6.5,c:FC[0]},{x:272,y:53,r:5,c:FC[7]},
-    {x:308,y:58,r:6,c:FC[2]},{x:342,y:52,r:4.5,c:FC[3]},{x:375,y:57,r:6,c:FC[4]},{x:115,y:46,r:4,c:FC[5]},
-    {x:255,y:44,r:3.5,c:FC[1]},{x:185,y:42,r:3.5,c:FC[7]}];
+  var fls=[{x:22,y:61,r:7,c:FC[0]},{x:58,y:57,r:5.5,c:FC[2]},{x:95,y:63,r:6,c:FC[1]},{x:132,y:55,r:4.5,c:FC[3]},
+    {x:165,y:60,r:7,c:FC[4]},{x:200,y:53,r:5,c:FC[6]},{x:238,y:62,r:6.5,c:FC[0]},{x:272,y:56,r:5,c:FC[7]},
+    {x:308,y:61,r:6,c:FC[2]},{x:342,y:55,r:4.5,c:FC[3]},{x:375,y:60,r:6,c:FC[4]},{x:115,y:49,r:4,c:FC[5]},
+    {x:255,y:47,r:3.5,c:FC[1]},{x:185,y:45,r:3.5,c:FC[7]}];
   fls.forEach(function(f){
     s+='<line x1="'+f.x+'" y1="'+(f.y+f.r*0.6)+'" x2="'+f.x+'" y2="72" stroke="'+stem+'" stroke-width="1.4" opacity="0.7" stroke-linecap="round"/>';
     [0,60,120,180,240,300].forEach(function(ang){
@@ -1471,7 +1471,7 @@ function homeDecoSVG(sk){
     s+='<circle cx="'+f.x+'" cy="'+f.y+'" r="'+(f.r*0.42).toFixed(1)+'" fill="'+centerFill+'" opacity="0.95"/>';
     s+='<circle cx="'+f.x+'" cy="'+f.y+'" r="'+(f.r*0.22).toFixed(1)+'" fill="'+centerFill2+'" opacity="0.9"/>';
   });
-  if(sk==='summer'){s+='<circle cx="380" cy="18" r="20" fill="#FFE090" opacity="0.2"/><circle cx="380" cy="18" r="7" fill="#FFC030" opacity="0.45"/>';}
+  if(sk==='summer'){s+='<circle cx="300" cy="23" r="20" fill="#FFE090" opacity="0.2"/><circle cx="300" cy="23" r="7" fill="#FFC030" opacity="0.45"/>';}
   if(sk==='autumn'){[{x:50,y:30,c:'#D4703A'},{x:160,y:20,c:'#C85820'},{x:280,y:28,c:'#B84A18'}].forEach(function(l,i){s+='<ellipse cx="'+l.x+'" cy="'+l.y+'" rx="7" ry="4.5" fill="'+l.c+'" opacity="0.65" transform="rotate('+(i*30-20)+','+l.x+','+l.y+')"/>';});}
   if(sk==='winter'){for(var w2=0;w2<8;w2++){s+='<circle cx="'+(w2*52+18)+'" cy="'+(15+(w2%3)*12)+'" r="2.5" fill="white" opacity="0.6"/>';}}
   s+='</svg>';
