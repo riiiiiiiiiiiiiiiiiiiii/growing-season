@@ -5360,15 +5360,22 @@ if('serviceWorker' in navigator){
 
   // --- Session ---
   async function ensureSession() {
-    if (sessionId) return sessionId;
-    const res = await fetch(ENDPOINT + '/sessions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: location.href })
-    });
-    const data = await res.json();
-    sessionId = data.id;
-    sessionStorage.setItem('agentation_session', sessionId);
+    if (sessionId) {
+      // verify session still exists on the server
+      const check = await fetch(ENDPOINT + '/sessions/' + sessionId);
+      if (!check.ok) { sessionId = null; sessionStorage.removeItem('agentation_session'); }
+    }
+    if (!sessionId) {
+      const res = await fetch(ENDPOINT + '/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: location.href })
+      });
+      if (!res.ok) { const b = await res.text(); throw new Error('Session error ' + res.status + ': ' + b); }
+      const data = await res.json();
+      sessionId = data.id;
+      sessionStorage.setItem('agentation_session', sessionId);
+    }
     return sessionId;
   }
 
@@ -5511,7 +5518,7 @@ if('serviceWorker' in navigator){
           url: location.href
         })
       });
-      if (!res.ok) throw new Error('Server error ' + res.status);
+      if (!res.ok) { const body = await res.text(); throw new Error('Server ' + res.status + ': ' + body); }
       popup.querySelector('.ag-actions').style.display = 'none';
       popup.querySelector('#ag-ta').style.display = 'none';
       const sent = document.createElement('div');
