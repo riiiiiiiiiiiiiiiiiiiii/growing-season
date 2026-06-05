@@ -5332,6 +5332,7 @@ if('serviceWorker' in navigator){
 <div id="pal-tip" style="position:fixed;z-index:9999;pointer-events:none;opacity:0;transition:opacity .15s;background:rgba(0,0,0,.72);color:#fff;font-size:11px;font-weight:600;padding:4px 9px;border-radius:20px;letter-spacing:.3px;white-space:nowrap;"></div>
 <script>
 (function(){
+  if (!localStorage.getItem('agentation_admin')) return;
   const ENDPOINT = 'http://localhost:4747';
   let sessionId = sessionStorage.getItem('agentation_session');
   let active = false;
