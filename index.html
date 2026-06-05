@@ -874,7 +874,7 @@ document.body.classList.add('auth-mode');
 var _supa = window.supabase.createClient(
   'https://qeuhuvdyhqynsllfcgyn.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFldWh1dmR5aHF5bnNsbGZjZ3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NzQ1OTUsImV4cCI6MjA5NTI1MDU5NX0.noFoj2eqZr-4A7sLEIxBJWQhycAoiCfy69YJVQxz2S0',
-  {auth:{autoRefreshToken:true,persistSession:true}}
+  {auth:{autoRefreshToken:true,persistSession:true,storage:window.localStorage,storageKey:'gs-auth-token',flowType:'pkce'}}
 );
 var supaUser = null;
 // Wraps any promise with a timeout so hanging Supabase queries don't freeze the UI
