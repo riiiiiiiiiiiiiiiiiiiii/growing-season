@@ -2447,8 +2447,8 @@ function rNotesList(){
     });
   }
 
-  tabWith.addEventListener('click',function(){if(_notesTab==='with')return;_notesTab='with';tabWith.classList.add('on');tabAll.classList.remove('on');listWrap.style.transition='opacity .13s ease';listWrap.style.opacity='0';setTimeout(function(){renderNotesList();listWrap.style.opacity='1';setTimeout(function(){listWrap.style.transition='';},150);},130);});
-  tabAll.addEventListener('click',function(){if(_notesTab==='all')return;_notesTab='all';tabAll.classList.add('on');tabWith.classList.remove('on');listWrap.style.transition='opacity .13s ease';listWrap.style.opacity='0';setTimeout(function(){renderNotesList();listWrap.style.opacity='1';setTimeout(function(){listWrap.style.transition='';},150);},130);});
+  tabWith.addEventListener('click',function(){if(_notesTab==='with')return;_notesTab='with';tabWith.classList.add('on');tabAll.classList.remove('on');renderNotesList();animateIn(listWrap);});
+  tabAll.addEventListener('click',function(){if(_notesTab==='all')return;_notesTab='all';tabAll.classList.add('on');tabWith.classList.remove('on');renderNotesList();animateIn(listWrap);});
   renderNotesList();
 }
 var _noteBackFn=null;
