@@ -2839,7 +2839,7 @@ async function openFriendProfile(fid,p,fshipId){
 
   // Remove friend (small, at bottom)
   var removeBtn=document.createElement('button');
-  removeBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;width:100%;padding:6px 0;text-decoration:underline;';
+  removeBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;width:100%;padding:6px 0;text-decoration:underline;margin-top:16px;';
   removeBtn.textContent='Remove friend';
   removeBtn.addEventListener('click',async function(){
     if(!confirm('Remove '+name+' as a friend?'))return;
