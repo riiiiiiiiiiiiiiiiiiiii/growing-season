@@ -2090,6 +2090,7 @@ function renderCalWeekDetails(mon,wkSess){
   var sh=document.getElementById('cal-sh');
   sh.style.cssText='max-width:480px;padding:0;max-height:88vh;height:88vh;overflow:hidden;display:flex;flex-direction:column;';
   document.getElementById('cal-title').parentElement.style.display='none';
+  var _dynTop=sh.querySelector('#cal-dynamic-top');if(_dynTop)_dynTop.style.display='none';
   var body=document.getElementById('cal-body');body.innerHTML='';
   body.style.cssText='flex:1;overflow-y:auto;display:flex;flex-direction:column;';
 
@@ -2172,6 +2173,7 @@ function renderCalDay(dateObj){
   var sh=document.getElementById('cal-sh');
   sh.style.cssText='max-width:480px;padding:0;max-height:88vh;height:88vh;overflow:hidden;display:flex;flex-direction:column;';
   document.getElementById('cal-title').parentElement.style.display='none';
+  var _dynTop=sh.querySelector('#cal-dynamic-top');if(_dynTop)_dynTop.style.display='none';
   var body=document.getElementById('cal-body');body.innerHTML='';
   body.style.cssText='flex:1;overflow-y:auto;display:flex;flex-direction:column;';
 
