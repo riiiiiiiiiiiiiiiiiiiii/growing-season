@@ -4754,16 +4754,9 @@ function rGarden(){
           btn.addEventListener('click',function(){
             if(gardenTab===t.id)return;
             gardenTab=t.id;
-            var wrap=document.getElementById('garden-svg-wrap');
-            if(wrap){
-              wrap.style.transition='opacity .15s ease';
-              wrap.style.opacity='0';
-              setTimeout(function(){
-                rGarden();
-                var w=document.getElementById('garden-svg-wrap');
-                if(w){w.style.opacity='0';requestAnimationFrame(function(){requestAnimationFrame(function(){w.style.transition='opacity .22s ease';w.style.opacity='1';});});}
-              },150);
-            }else{rGarden();}
+            rGarden();
+            var w=document.getElementById('garden-svg-wrap');
+            if(w){w.style.opacity='0';w.style.transition='';requestAnimationFrame(function(){w.style.transition='opacity .18s ease';w.style.opacity='1';});}
           });
           gtabs.appendChild(btn);
         });
