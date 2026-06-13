@@ -694,7 +694,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     </div>
     <div class="fl" style="margin-top:20px;">
       <div class="fl-lbl">Did this leave you wanting more?</div>
-      <div class="fr" id="momentum"></div>
+      <div id="momentum"></div>
     </div>
     <div class="fl">
       <div class="fl-lbl">Rate this session</div>
@@ -3391,6 +3391,27 @@ var logId=null, logRating=0, logFeels=[], logMomentum='', logTimeOfDay='morning'
 function _currentPeriod(){var h=new Date().getHours();if(h<12)return'morning';if(h<17)return'afternoon';return'evening';}
 var STAR_LBLS={0.5:'Rough session',1:'Not great',1.5:'Okay-ish',2:'Decent',2.5:'Pretty good',3:'Good session',3.5:'Really good',4:'Great session',4.5:'Excellent',5:'Perfect ⭐'};
 function normRating(r){if(!r)return 0;return r>5?Math.round(r/2*2)/2:r;}
+function makeMomentumScale(wrap,current,onChange){
+  var labels=['Not really','Somewhat','Definitely',"Can't stop now"];
+  wrap.innerHTML='';
+  var row=document.createElement('div');
+  row.style.cssText='display:flex;justify-content:space-between;align-items:center;';
+  labels.forEach(function(lbl,i){
+    var circle=document.createElement('div');
+    var isOn=current===lbl;
+    circle.style.cssText='width:40px;height:40px;border-radius:50%;border:1.5px solid '+(isOn?'var(--gr)':'var(--bg3)')+';background:'+(isOn?'var(--gr)':'#fff')+';color:'+(isOn?'#fff':'var(--tx2)')+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s,color .15s;user-select:none;flex-shrink:0;';
+    circle.textContent=i+1;
+    circle.addEventListener('click',function(){onChange(lbl);makeMomentumScale(wrap,lbl,onChange);});
+    row.appendChild(circle);
+  });
+  wrap.appendChild(row);
+  var ends=document.createElement('div');
+  ends.style.cssText='display:flex;justify-content:space-between;margin-top:5px;';
+  var noL=document.createElement('span');noL.style.cssText='font-size:11px;color:var(--tx3);';noL.textContent='No';
+  var yesL=document.createElement('span');yesL.style.cssText='font-size:11px;color:var(--tx3);';yesL.textContent='Yes';
+  ends.appendChild(noL);ends.appendChild(yesL);
+  wrap.appendChild(ends);
+}
 function makeStarRating(wrap,initVal,onChg){
   wrap.innerHTML='';wrap.style.cssText='display:flex;gap:8px;';
   var cur=initVal||0,sEls=[];
@@ -3474,12 +3495,8 @@ function setupLogScreen(id,from,startedAt){
   document.getElementById('reflection-body').style.display='none';
   document.getElementById('reflection-arrow').style.transform='rotate(0deg)';
   document.getElementById('slbl').textContent='';
-  var mom=document.getElementById('momentum');mom.innerHTML='';
-  ['Not really','Somewhat','Definitely','Can\'t stop now'].forEach(function(m){
-    var b=document.createElement('div');b.className='fb';b.textContent=m;
-    b.addEventListener('click',function(){mom.querySelectorAll('.fb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');logMomentum=m;});
-    mom.appendChild(b);
-  });
+  var mom=document.getElementById('momentum');
+  makeMomentumScale(mom,'',function(val){logMomentum=val;});
   show('s-log');
 }
 
@@ -4396,11 +4413,7 @@ function openSessionEdit(s,a){
 
   // momentum
   var momWrap=sh.querySelector('#ses-edit-momentum');
-  ['Not really','Somewhat','Definitely','Can\'t stop now'].forEach(function(m){
-    var b=document.createElement('div');b.className='fb'+(_editSessionMomentum===m?' on':'');b.textContent=m;
-    b.addEventListener('click',function(){_editSessionMomentum=m;momWrap.querySelectorAll('.fb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
-    momWrap.appendChild(b);
-  });
+  makeMomentumScale(momWrap,_editSessionMomentum,function(val){_editSessionMomentum=val;});
 
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-top:8px;';
   var saveBtn=document.createElement('button');saveBtn.className='btn btn-p';saveBtn.style.cssText='flex:1;margin-top:0;';saveBtn.textContent='Save changes';
