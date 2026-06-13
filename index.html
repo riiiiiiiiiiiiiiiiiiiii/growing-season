@@ -4769,9 +4769,9 @@ function rGarden(){
               if(w2){w2.style.transition='none';w2.style.opacity='0';}
               gardenTab=tid;
               rGarden();
-              requestAnimationFrame(function(){requestAnimationFrame(function(){
+              requestAnimationFrame(function(){requestAnimationFrame(function(){requestAnimationFrame(function(){
                 if(w2){w2.style.transition='opacity .2s ease';w2.style.opacity='1';}
-              });});
+              });});});
             };})(t.id));
             gtabs.appendChild(btn);
           });
@@ -4809,7 +4809,8 @@ function rGarden(){
   function makePlantSVG(items,cols,tileW,tileH,bgSrc){
     var rows=Math.ceil(items.length/cols);
     var plotW=tileW*cols,plotH=tileH*rows;
-    var svg='<svg viewBox="0 0 '+plotW+' '+plotH+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;position:relative;">';
+    var svg='<svg viewBox="0 0 '+plotW+' '+plotH+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
+    for(var ri=0;ri<rows;ri++)svg+='<image href="'+bgSrc+'" x="0" y="'+(ri*tileH)+'" width="'+plotW+'" height="'+tileH+'" preserveAspectRatio="xMidYMid slice"/>';
     items.forEach(function(a,idx){
       var c=idx%cols,r=Math.floor(idx/cols),tx=c*tileW,ty=r*tileH;
       if(a){
@@ -4842,7 +4843,7 @@ function rGarden(){
     while(items.length%flatCols!==0)items.push(null);
     var container=document.createElement('div');container.style.cssText='padding:0 16px 20px;';
     var plotCard=document.createElement('div');plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
-    var svgWrap=document.createElement('div');svgWrap.style.cssText='background-image:url("'+bgSrc+'");background-size:cover;background-position:center;';svgWrap.innerHTML=makePlantSVG(items,flatCols,tileW,tileH,bgSrc);
+    var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,flatCols,tileW,tileH,bgSrc);
     svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
     plotCard.appendChild(svgWrap);container.appendChild(plotCard);_newRoot.appendChild(container);
   } else {
@@ -4858,7 +4859,7 @@ function rGarden(){
       var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;padding:5px 10px;background:var(--col);';
       lbl.textContent='Patch '+(pi+1);plotCard.appendChild(lbl);
       var items=chunk.slice();while(items.length<perPatch)items.push(null);
-      var svgWrap=document.createElement('div');svgWrap.style.cssText='background-image:url("'+bgSrc+'");background-size:cover;background-position:center;';svgWrap.innerHTML=makePlantSVG(items,patchCols,tileW,tileH,bgSrc);
+      var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,patchCols,tileW,tileH,bgSrc);
       svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
       plotCard.appendChild(svgWrap);grid.appendChild(plotCard);
     });
