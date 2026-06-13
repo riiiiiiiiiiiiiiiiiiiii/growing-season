@@ -4757,23 +4757,29 @@ function rGarden(){
     } else {
       gbw.innerHTML='';
       if(gtabs){
-        gtabs.innerHTML='';gtabs.style.display='flex';
-        [{id:'focus',label:'🎯 In focus'},{id:'all',label:'🌸 Full garden'}].forEach(function(t){
-          var btn=document.createElement('div');
-          btn.className='pill'+(gardenTab===t.id?'':' off');
-          btn.style.cssText='cursor:pointer;'+(gardenTab===t.id?'background:var(--gr);color:#fff;':'background:var(--bg2);color:var(--tx2);');
-          btn.textContent=t.label;
-          btn.addEventListener('click',(function(tid){return function(){
-            if(gardenTab===tid)return;
-            var w2=document.getElementById('garden-svg-wrap');
-            if(w2){w2.style.transition='none';w2.style.opacity='0';}
-            gardenTab=tid;
-            rGarden();
-            requestAnimationFrame(function(){requestAnimationFrame(function(){
-              if(w2){w2.style.transition='opacity .2s ease';w2.style.opacity='1';}
-            });});
-          };})(t.id));
-          gtabs.appendChild(btn);
+        gtabs.style.display='flex';
+        if(!gtabs.children.length){
+          [{id:'focus',label:'🎯 In focus'},{id:'all',label:'🌸 Full garden'}].forEach(function(t){
+            var btn=document.createElement('div');
+            btn.dataset.tabId=t.id;
+            btn.textContent=t.label;
+            btn.addEventListener('click',(function(tid){return function(){
+              if(gardenTab===tid)return;
+              var w2=document.getElementById('garden-svg-wrap');
+              if(w2){w2.style.transition='none';w2.style.opacity='0';}
+              gardenTab=tid;
+              rGarden();
+              requestAnimationFrame(function(){requestAnimationFrame(function(){
+                if(w2){w2.style.transition='opacity .2s ease';w2.style.opacity='1';}
+              });});
+            };})(t.id));
+            gtabs.appendChild(btn);
+          });
+        }
+        gtabs.querySelectorAll('[data-tab-id]').forEach(function(btn){
+          var isActive=btn.dataset.tabId===gardenTab;
+          btn.className='pill'+(isActive?'':' off');
+          btn.style.cssText='cursor:pointer;'+(isActive?'background:var(--gr);color:#fff;':'background:var(--bg2);color:var(--tx2);');
         });
       }
     }
