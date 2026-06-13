@@ -3433,7 +3433,7 @@ function makeMomentumScale(wrap,current,onChange){
   var labels=['Not really','Somewhat','Definitely',"Can't stop now"];
   wrap.innerHTML='';
   var row=document.createElement('div');
-  row.style.cssText='display:flex;justify-content:space-between;align-items:center;';
+  row.style.cssText='display:flex;justify-content:flex-start;align-items:center;gap:12px;';
   labels.forEach(function(lbl,i){
     var circle=document.createElement('div');
     var isOn=current===lbl;
@@ -3444,10 +3444,12 @@ function makeMomentumScale(wrap,current,onChange){
   });
   wrap.appendChild(row);
   var ends=document.createElement('div');
-  ends.style.cssText='display:flex;justify-content:space-between;margin-top:5px;';
-  var noL=document.createElement('span');noL.style.cssText='font-size:11px;color:var(--tx3);';noL.textContent='No';
-  var yesL=document.createElement('span');yesL.style.cssText='font-size:11px;color:var(--tx3);';yesL.textContent='Yes';
-  ends.appendChild(noL);ends.appendChild(yesL);
+  ends.style.cssText='display:flex;gap:12px;margin-top:5px;';
+  var noL=document.createElement('span');noL.style.cssText='font-size:11px;color:var(--tx3);width:40px;text-align:center;';noL.textContent='No';
+  var midL=document.createElement('span');midL.style.cssText='font-size:11px;color:transparent;width:40px;flex:none;';midL.textContent='.';
+  var mid2L=document.createElement('span');mid2L.style.cssText='font-size:11px;color:transparent;width:40px;flex:none;';mid2L.textContent='.';
+  var yesL=document.createElement('span');yesL.style.cssText='font-size:11px;color:var(--tx3);width:40px;text-align:center;';yesL.textContent='Yes';
+  ends.appendChild(noL);ends.appendChild(midL);ends.appendChild(mid2L);ends.appendChild(yesL);
   wrap.appendChild(ends);
 }
 function makeStarRating(wrap,initVal,onChg){
