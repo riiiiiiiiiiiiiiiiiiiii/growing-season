@@ -1902,7 +1902,7 @@ function openProfileEdit(){
   cancelBtn.addEventListener('click',closeEd);
   sh.appendChild(cancelBtn);
   if(supaUser){
-    var signOutBtn=document.createElement('button');signOutBtn.className='btn btn-s';signOutBtn.style.cssText='margin-top:8px;color:var(--co);';signOutBtn.textContent='Sign out';
+    var signOutBtn=document.createElement('button');signOutBtn.className='btn btn-s';signOutBtn.style.cssText='margin-top:8px;color:#EF4444;';signOutBtn.textContent='Sign out';
     signOutBtn.addEventListener('click',function(){closeEd();doSignOut();});
     sh.appendChild(signOutBtn);
     var resetTxt=document.createElement('div');resetTxt.style.cssText='margin-top:12px;font-size:11px;color:#EF4444;text-align:center;cursor:pointer;';resetTxt.textContent='Erase my data';
