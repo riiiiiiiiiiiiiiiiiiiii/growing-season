@@ -2101,7 +2101,11 @@ function renderCalWeekDetails(mon,wkSess){
   // Header
   var navHdr=document.createElement('div');
   navHdr.style.cssText='padding:16px 16px 18px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
-  var lbl=document.createElement('div');lbl.style.cssText='font-size:13px;font-weight:700;color:var(--gr);margin-bottom:8px;';lbl.textContent='Week breakdown';
+  var topRow=document.createElement('div');topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;';
+  var lbl=document.createElement('div');lbl.style.cssText='font-size:13px;font-weight:700;color:var(--gr);';lbl.textContent='Week breakdown';
+  var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;touch-action:manipulation;';closeBtn.textContent='×';
+  closeBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
+  topRow.appendChild(lbl);topRow.appendChild(closeBtn);
   var dateRow=document.createElement('div');dateRow.style.cssText='display:flex;align-items:center;gap:8px;';
   var backBtn=document.createElement('button');
   backBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';backBtn.textContent='‹';
@@ -2109,7 +2113,7 @@ function renderCalWeekDetails(mon,wkSess){
   var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;font-family:var(--serif);font-size:18px;font-weight:700;color:var(--tx);';
   titleWrap.textContent=MNAMES[mon.getMonth()]+' '+mon.getDate()+'–'+sun.getDate();
   dateRow.appendChild(backBtn);dateRow.appendChild(titleWrap);
-  navHdr.appendChild(lbl);navHdr.appendChild(dateRow);
+  navHdr.appendChild(topRow);navHdr.appendChild(dateRow);
   body.appendChild(navHdr);
 
   var content=document.createElement('div');content.style.cssText='padding:16px;flex:1;';
@@ -2198,6 +2202,8 @@ function renderCalDay(dateObj){
   var dateLbl=document.createElement('div');dateLbl.style.cssText='font-family:var(--serif);font-size:16px;font-weight:700;color:var(--tx);';
   dateLbl.textContent=DNAMES[_calDayDate.getDay()]+', '+_calDayDate.getDate()+' '+MNAMES[_calDayDate.getMonth()];
   titleWrap.appendChild(dateLbl);
+  var calDayCloseBtn=document.createElement('button');calDayCloseBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';calDayCloseBtn.textContent='×';
+  calDayCloseBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
   var navBtns=document.createElement('div');navBtns.style.cssText='display:flex;gap:4px;flex-shrink:0;';
   ['‹','›'].forEach(function(ar,i){
     var b=document.createElement('button');b.style.cssText='background:var(--bg2);border:var(--br);border-radius:8px;width:30px;height:30px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);touch-action:manipulation;';
@@ -2211,7 +2217,7 @@ function renderCalDay(dateObj){
     });
     navBtns.appendChild(b);
   });
-  navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);navHdr.appendChild(navBtns);
+  navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);navHdr.appendChild(navBtns);navHdr.appendChild(calDayCloseBtn);
   body.appendChild(navHdr);
 
   var content=document.createElement('div');content.style.cssText='padding:16px;flex:1;';
