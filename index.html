@@ -2100,9 +2100,9 @@ function renderCalWeekDetails(mon,wkSess){
 
   // Header
   var navHdr=document.createElement('div');
-  navHdr.style.cssText='padding:16px 16px 18px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
-  var topRow=document.createElement('div');topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;';
-  var lbl=document.createElement('div');lbl.style.cssText='font-size:13px;font-weight:700;color:var(--gr);';lbl.textContent='Week breakdown';
+  navHdr.style.cssText='padding:22px 16px 18px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
+  var topRow=document.createElement('div');topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;';
+  var lbl=document.createElement('div');lbl.style.cssText='font-family:var(--serif);font-size:22px;font-weight:700;color:var(--gr);';lbl.textContent='Week breakdown';
   var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;touch-action:manipulation;';closeBtn.textContent='×';
   closeBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
   topRow.appendChild(lbl);topRow.appendChild(closeBtn);
@@ -2110,7 +2110,7 @@ function renderCalWeekDetails(mon,wkSess){
   var backBtn=document.createElement('button');
   backBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';backBtn.textContent='‹';
   backBtn.addEventListener('click',function(){sh.style.cssText='max-width:480px;padding:28px 20px 28px;';_transitionSheet(sh,renderCalWeek);});
-  var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;font-family:var(--serif);font-size:18px;font-weight:700;color:var(--tx);';
+  var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;font-size:14px;font-weight:500;color:var(--tx2);';
   titleWrap.textContent=MNAMES[mon.getMonth()]+' '+mon.getDate()+'–'+sun.getDate();
   dateRow.appendChild(backBtn);dateRow.appendChild(titleWrap);
   navHdr.appendChild(topRow);navHdr.appendChild(dateRow);
