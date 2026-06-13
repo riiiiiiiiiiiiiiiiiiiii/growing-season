@@ -4739,7 +4739,20 @@ function rGarden(){
           btn.className='pill'+(gardenTab===t.id?'':' off');
           btn.style.cssText='cursor:pointer;'+(gardenTab===t.id?'background:var(--gr);color:#fff;':'background:var(--bg2);color:var(--tx2);');
           btn.textContent=t.label;
-          btn.addEventListener('click',function(){gardenTab=t.id;rGarden();});
+          btn.addEventListener('click',function(){
+            if(gardenTab===t.id)return;
+            gardenTab=t.id;
+            var wrap=document.getElementById('garden-svg-wrap');
+            if(wrap){
+              wrap.style.transition='opacity .15s ease';
+              wrap.style.opacity='0';
+              setTimeout(function(){
+                rGarden();
+                var w=document.getElementById('garden-svg-wrap');
+                if(w){w.style.opacity='0';requestAnimationFrame(function(){requestAnimationFrame(function(){w.style.transition='opacity .22s ease';w.style.opacity='1';});});}
+              },150);
+            }else{rGarden();}
+          });
           gtabs.appendChild(btn);
         });
       }
