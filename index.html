@@ -2017,7 +2017,7 @@ function renderCalWeek(){
     if(wkSess.length){
       var wkBadge=document.createElement('div');
       wkBadge.style.cssText='font-size:11px;font-weight:600;color:var(--co);cursor:pointer;padding:2px 0;';
-      wkBadge.textContent=wkSess.length+' session'+(wkSess.length!==1?'s':'');
+      wkBadge.textContent=wkSess.length+' session'+(wkSess.length!==1?'s':'')+' ›';
       (function(m,ws){wkBadge.addEventListener('click',function(){_transitionSheet(sh,function(){renderCalWeekDetails(m,ws);});});})(mon,wkSess);
       wkHeader.appendChild(wkBadge);
     }
