@@ -4798,7 +4798,6 @@ function rGarden(){
   var bgEl=document.getElementById('gs-img-background');
   var bgSrc=bgEl?bgEl.src:'';
   var wrap=document.getElementById('garden-svg-wrap');
-  wrap.innerHTML='';
 
   function makePlantSVG(items,cols,tileW,tileH,bgSrc){
     var rows=Math.ceil(items.length/cols);
@@ -4829,6 +4828,7 @@ function rGarden(){
   }
 
   var isDesktop=window.innerWidth>=768;
+  var _newRoot=document.createElement('div');
   if(visibleActs.length<=8){
     // Flat layout
     var flatCols=isDesktop?8:4;
@@ -4838,7 +4838,7 @@ function rGarden(){
     var plotCard=document.createElement('div');plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
     var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,flatCols,tileW,tileH,bgSrc);
     svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
-    plotCard.appendChild(svgWrap);container.appendChild(plotCard);wrap.appendChild(container);
+    plotCard.appendChild(svgWrap);container.appendChild(plotCard);_newRoot.appendChild(container);
   } else {
     // Patch layout
     var patchCols=isDesktop?2:2;
@@ -4856,8 +4856,9 @@ function rGarden(){
       svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
       plotCard.appendChild(svgWrap);grid.appendChild(plotCard);
     });
-    wrap.appendChild(grid);
+    _newRoot.appendChild(grid);
   }
+  wrap.replaceChildren(_newRoot);
   var helpBtn=document.getElementById('garden-help-btn');
   if(helpBtn){helpBtn.onclick=null;helpBtn.addEventListener('click',openGardenHelp);}
 }
