@@ -3180,7 +3180,7 @@ function rPQ(){
   body.appendChild(grid);
   if(pqStep>0){var back=document.createElement('button');back.className='btn btn-s';back.style.marginTop='10px';back.textContent='Back';back.addEventListener('click',function(){pqStep--;rPQ();});body.appendChild(back);}
   var orDiv=document.createElement('div');orDiv.className='or-div';orDiv.innerHTML='<div class="or-line"></div><div class="or-txt">or</div><div class="or-line"></div>';body.appendChild(orDiv);
-  var browse=document.createElement('button');browse.className='btn btn-s';browse.textContent='Browse all activities directly';browse.addEventListener('click',function(){_transitionPQBody(showBrowse);});body.appendChild(browse);
+  var browse=document.createElement('button');browse.className='btn btn-s';browse.textContent='Browse all activities directly';browse.addEventListener('click',showBrowse);body.appendChild(browse);
   var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.marginTop='6px';cancel.textContent='Cancel';cancel.addEventListener('click',closePicker);body.appendChild(cancel);
   animateIn(body);
 }
@@ -3247,7 +3247,7 @@ function rResults(){
   });
   var tryAgain=document.createElement('button');tryAgain.className='btn btn-s';tryAgain.textContent='← Back';tryAgain.addEventListener('click',function(){pqStep=Math.max(0,pqStep-1);rPQ();});body.appendChild(tryAgain);
   var orDiv=document.createElement('div');orDiv.className='or-div';orDiv.innerHTML='<div class="or-line"></div><div class="or-txt">or</div><div class="or-line"></div>';body.appendChild(orDiv);
-  var browse=document.createElement('button');browse.className='btn btn-s';browse.textContent='Browse all activities';browse.addEventListener('click',function(){_transitionPQBody(showBrowse);});body.appendChild(browse);
+  var browse=document.createElement('button');browse.className='btn btn-s';browse.textContent='Browse all activities';browse.addEventListener('click',showBrowse);body.appendChild(browse);
   var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.marginTop='6px';cancel.textContent='Cancel';cancel.addEventListener('click',closePicker);body.appendChild(cancel);
   animateIn(body);
 }
@@ -3282,6 +3282,7 @@ function showBrowse(){
   var bCat='all', bSearch='', bFocus=false;
   function rBrowse(){
     var body=document.getElementById('pq-body');body.innerHTML='';
+    body.style.animation='none';requestAnimationFrame(function(){body.style.animation='cardIn .2s ease';});
     var h=document.createElement('div');h.style.cssText='font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:10px;';h.textContent='Pick from your seeds';body.appendChild(h);
     var sw=document.createElement('div');sw.className='sw';sw.style.marginBottom='8px';
     var sic=document.createElement('span');sic.className='sic';sic.textContent='🔍';sw.appendChild(sic);
@@ -3318,10 +3319,9 @@ function showBrowse(){
     if(!list.length){var empty=document.createElement('div');empty.style.cssText='font-size:13px;color:var(--tx2);padding:12px 0;';empty.textContent='No activities found';grid.appendChild(empty);}
     body.appendChild(grid);
     var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;position:sticky;bottom:-26px;background:var(--bg);padding:12px 22px 26px;margin:8px -22px -26px;border-top:0.5px solid var(--bg3);';
-    var back=document.createElement('button');back.className='btn btn-s';back.style.cssText='flex:1;margin-top:0;';back.textContent='← Back';back.addEventListener('click',function(){_transitionPQBody(function(){pqStep=0;pqA={};rPQ();});});row.appendChild(back);
+    var back=document.createElement('button');back.className='btn btn-s';back.style.cssText='flex:1;margin-top:0;';back.textContent='← Back';back.addEventListener('click',function(){pqStep=0;pqA={};rPQ();});row.appendChild(back);
     var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.cssText='flex:1;margin-top:0;';cancel.textContent='Cancel';cancel.addEventListener('click',closePicker);row.appendChild(cancel);
     body.appendChild(row);
-    inp.focus();
   }
   rBrowse();
 }
