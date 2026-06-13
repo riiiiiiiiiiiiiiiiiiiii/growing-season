@@ -1905,9 +1905,9 @@ function openProfileEdit(){
     var signOutBtn=document.createElement('button');signOutBtn.className='btn btn-s';signOutBtn.style.cssText='margin-top:8px;color:var(--co);';signOutBtn.textContent='Sign out';
     signOutBtn.addEventListener('click',function(){closeEd();doSignOut();});
     sh.appendChild(signOutBtn);
-    var resetBtn=document.createElement('button');resetBtn.className='btn btn-s';resetBtn.style.cssText='margin-top:4px;color:#EF4444;';resetBtn.textContent='Erase my data';
-    resetBtn.addEventListener('click',function(){closeEd();document.getElementById('term-ov').classList.add('on');});
-    sh.appendChild(resetBtn);
+    var resetTxt=document.createElement('div');resetTxt.style.cssText='margin-top:12px;font-size:11px;color:#EF4444;text-align:center;cursor:pointer;';resetTxt.textContent='Erase my data';
+    resetTxt.addEventListener('click',function(){closeEd();document.getElementById('term-ov').classList.add('on');});
+    sh.appendChild(resetTxt);
     // Async fetch username and insert account section
     _tq(_supa.from('profiles').select('username').eq('id',supaUser.id).single()).then(function(res){
       var sec=document.getElementById('pe-account-section');if(!sec)return;
