@@ -2102,7 +2102,7 @@ function renderCalWeekDetails(mon,wkSess){
   var navHdr=document.createElement('div');
   navHdr.style.cssText='padding:22px 16px 18px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
   var topRow=document.createElement('div');topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;';
-  var lbl=document.createElement('div');lbl.style.cssText='font-family:var(--serif);font-size:20px;font-weight:700;';lbl.textContent='Week breakdown';
+  var lbl=document.createElement('div');lbl.style.cssText='font-family:var(--serif);font-size:17px;font-weight:700;';lbl.textContent='Week breakdown';
   var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;touch-action:manipulation;';closeBtn.textContent='×';
   closeBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
   topRow.appendChild(lbl);topRow.appendChild(closeBtn);
