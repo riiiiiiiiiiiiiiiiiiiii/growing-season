@@ -4894,9 +4894,12 @@ document.addEventListener('pointerdown',function(e){
 
 // ── SUPABASE SYNC ─────────────────────────────────────
 var _syncInProgress=false;
+var _syncPending=false;
 async function syncToSupabase(){
-  if(!supaUser||_syncInProgress)return;
+  if(!supaUser)return;
+  if(_syncInProgress){_syncPending=true;return;}
   _syncInProgress=true;
+  _syncPending=false;
   var uid=supaUser.id;
   var _syncHadError=false;
   try{
@@ -4935,7 +4938,7 @@ async function syncToSupabase(){
       if(_toDelete.length)await _supa.from('sessions').delete().in('id',_toDelete);
     }
     if(_syncHadError)showToast("Sync failed — your data is saved locally.",null);
-  }catch(e){console.warn('Supabase sync error:',e);showToast("Couldn't sync — your data is saved locally.",null);}finally{_syncInProgress=false;}
+  }catch(e){console.warn('Supabase sync error:',e);showToast("Couldn't sync — your data is saved locally.",null);}finally{_syncInProgress=false;if(_syncPending)syncToSupabase();}
 }
 
 async function loadFromSupabase(){
