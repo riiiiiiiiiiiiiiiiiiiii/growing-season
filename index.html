@@ -801,7 +801,6 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 <!-- PICKER SHEET -->
 <div class="ov" id="pq-ov">
   <div class="sh">
-    <div class="sh-prog"><div class="sh-fill" id="sh-fill" style="width:0%"></div></div>
     <div id="pq-body"></div>
   </div>
 </div>
@@ -3162,7 +3161,6 @@ function openPicker(){if(active){resumeSess();return;}pqStep=0;pqA={};document.g
 function closePicker(){document.getElementById('pq-ov').classList.remove('on');}
 
 function rPQ(){
-  document.getElementById('sh-fill').style.width=Math.round((pqStep/PQ.length)*100)+'%';
   if(pqStep>=PQ.length){rResults();return;}
   var q=PQ[pqStep];
   var body=document.getElementById('pq-body');
@@ -3180,7 +3178,7 @@ function rPQ(){
   body.appendChild(grid);
   if(pqStep>0){var back=document.createElement('button');back.className='btn btn-s';back.style.marginTop='10px';back.textContent='Back';back.addEventListener('click',function(){pqStep--;rPQ();});body.appendChild(back);}
   var orDiv=document.createElement('div');orDiv.className='or-div';orDiv.innerHTML='<div class="or-line"></div><div class="or-txt">or</div><div class="or-line"></div>';body.appendChild(orDiv);
-  var browse=document.createElement('button');browse.className='btn btn-s';browse.textContent='Browse all activities directly';browse.addEventListener('click',function(){animateOut(document.getElementById('pq-body'),showBrowse);});body.appendChild(browse);
+  var browse=document.createElement('button');browse.className='btn btn-s';browse.textContent='Browse all activities directly';browse.addEventListener('click',showBrowse);body.appendChild(browse);
   var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.marginTop='6px';cancel.textContent='Cancel';cancel.addEventListener('click',closePicker);body.appendChild(cancel);
   animateIn(body);
 }
@@ -3223,7 +3221,6 @@ function scoreA(a){
 }
 
 function rResults(){
-  document.getElementById('sh-fill').style.width='100%';
   var arr=myActs.slice();
   for(var i=arr.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;}
   var scored=arr.map(scoreA).sort(function(a,b){return b.sc-a.sc;});
@@ -3247,7 +3244,7 @@ function rResults(){
   });
   var tryAgain=document.createElement('button');tryAgain.className='btn btn-s';tryAgain.textContent='← Back';tryAgain.addEventListener('click',function(){pqStep=Math.max(0,pqStep-1);rPQ();});body.appendChild(tryAgain);
   var orDiv=document.createElement('div');orDiv.className='or-div';orDiv.innerHTML='<div class="or-line"></div><div class="or-txt">or</div><div class="or-line"></div>';body.appendChild(orDiv);
-  var browse=document.createElement('button');browse.className='btn btn-s';browse.textContent='Browse all activities';browse.addEventListener('click',function(){animateOut(document.getElementById('pq-body'),showBrowse);});body.appendChild(browse);
+  var browse=document.createElement('button');browse.className='btn btn-s';browse.textContent='Browse all activities';browse.addEventListener('click',showBrowse);body.appendChild(browse);
   var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.marginTop='6px';cancel.textContent='Cancel';cancel.addEventListener('click',closePicker);body.appendChild(cancel);
   animateIn(body);
 }
@@ -3318,7 +3315,7 @@ function showBrowse(){
     if(!list.length){var empty=document.createElement('div');empty.style.cssText='font-size:13px;color:var(--tx2);padding:12px 0;';empty.textContent='No activities found';grid.appendChild(empty);}
     body.appendChild(grid);
     var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;position:sticky;bottom:-26px;background:var(--bg);padding:12px 22px 26px;margin:8px -22px -26px;border-top:0.5px solid var(--bg3);';
-    var back=document.createElement('button');back.className='btn btn-s';back.style.cssText='flex:1;margin-top:0;';back.textContent='← Back';back.addEventListener('click',function(){animateOut(document.getElementById('pq-body'),function(){pqStep=0;pqA={};rPQ();});});row.appendChild(back);
+    var back=document.createElement('button');back.className='btn btn-s';back.style.cssText='flex:1;margin-top:0;';back.textContent='← Back';back.addEventListener('click',function(){pqStep=0;pqA={};rPQ();});row.appendChild(back);
     var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.cssText='flex:1;margin-top:0;';cancel.textContent='Cancel';cancel.addEventListener('click',closePicker);row.appendChild(cancel);
     body.appendChild(row);
     if(!skipAnim) animateIn(body);
