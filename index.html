@@ -570,7 +570,6 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     <div class="stats" id="stats"></div>
     <div id="streak-wrap"></div>
     <div id="today-glance" style="margin:0 16px 14px;"></div>
-    <div id="seeds-wrap" style="padding:0 16px;margin-bottom:8px;"></div>
     <div id="daily-quote"></div>
     <div id="home-deco" style="position:fixed;bottom:calc(76px + env(safe-area-inset-bottom));left:0;right:0;pointer-events:none;z-index:1;"></div>
   </div>
@@ -1640,53 +1639,6 @@ function rHome(){
 
   updateHomeNudge();
 
-  (function(){
-    var wrap=document.getElementById('seeds-wrap');
-    var catChipBg={Creative:'#FCE7F3',Active:'#FFE4D9',Learning:'#DBEAFE',Social:'#D1FAE5',Mindfulness:'#EDE9FE',Productive:'#FEF3C7',Digital:'#EEF2FF',Outdoor:'#D4F2E4'};
-    wrap.innerHTML='';
-    var hdr=document.createElement('div');hdr.className='hs-hdr';
-    var lbl=document.createElement('span');lbl.className='hs-t';lbl.textContent='Seeds';
-    var tog=document.createElement('span');tog.className='hs-tog';tog.textContent='›';tog.style.transform='rotate('+(seedsExpanded?'-90':'90')+'deg)';
-    hdr.appendChild(lbl);hdr.appendChild(tog);
-    wrap.appendChild(hdr);
-    var arWrap=document.createElement('div');
-    arWrap.style.cssText='overflow:hidden;transition:max-height .3s ease,opacity .25s ease;max-height:'+(seedsExpanded?'120px':'0')+';opacity:'+(seedsExpanded?'1':'0')+';';
-    var ar=document.createElement('div');ar.className='ar';
-    var showingAll=false;
-    function renderChips(){
-      ar.innerHTML='';
-      var focused=hasFocusSet()?myActs.filter(function(a){return isFocused(a.id);}):myActs;
-      var rest=hasFocusSet()?myActs.filter(function(a){return !isFocused(a.id);}):[];
-      var toShow=showingAll?myActs:focused;
-      toShow.forEach(function(a){
-        var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
-        var isAct=active&&active.actId===a.id;
-        var chip=document.createElement('div');chip.className='ac';
-        chip.style.background=isAct?'var(--col)':(catChipBg[a.cat]||'#fff');
-        if(isAct)chip.style.border='2px solid var(--co)';
-        var chipStreak=getStreakAt(a.id,Date.now());
-        chip.innerHTML='<div class="ac-em">'+a.emoji+'</div><div class="ac-n">'+a.name+(chipStreak>=2?'<span style="margin-left:4px;font-size:10px;background:var(--grm);color:#fff;border-radius:7px;padding:1px 5px;font-weight:600;">🔥'+chipStreak+'</span>':'')+'</div><div class="ac-foot"><div class="ac-c">'+(isAct?'active':cnt>0?cnt+'x':'new')+'</div></div>';
-        chip.addEventListener('click',function(){if(isAct)resumeSess();else openActInfo(a.id,'home');});
-        ar.appendChild(chip);
-      });
-      if(hasFocusSet()&&rest.length>0){
-        var more=document.createElement('div');more.className='ac';
-        more.style.cssText='background:var(--bg2);border:1px dashed var(--tx3);';
-        more.innerHTML='<div class="ac-n" style="color:var(--tx2);">'+(showingAll?'Less ↑':'+'+rest.length+' more')+'</div>';
-        more.addEventListener('click',function(){showingAll=!showingAll;renderChips();});
-        ar.appendChild(more);
-      }
-    }
-    renderChips();
-    arWrap.appendChild(ar);
-    wrap.appendChild(arWrap);
-    hdr.addEventListener('click',function(){
-      seedsExpanded=!seedsExpanded;
-      tog.style.transform='rotate('+(seedsExpanded?'-90':'90')+'deg)';
-      arWrap.style.maxHeight=seedsExpanded?'120px':'0';
-      arWrap.style.opacity=seedsExpanded?'1':'0';
-    });
-  })();
 
   document.getElementById('home-deco').innerHTML=homeDecoSVG(sk);
   var q=getDailyQuote();
