@@ -2847,11 +2847,10 @@ async function openFriendProfile(fid,p,fshipId){
     await _supa.from('friendships').delete().eq('id',fshipId);
     ov.classList.remove('on');renderFriendsList();
   });
-  sh.appendChild(removeBtn);
-
   var cancelBtn=document.createElement('button');cancelBtn.className='btn btn-s';cancelBtn.style.cssText='width:100%;margin-top:6px;';cancelBtn.textContent='Close';
   cancelBtn.addEventListener('click',function(){ov.classList.remove('on');});
   sh.appendChild(cancelBtn);
+  sh.appendChild(removeBtn);
 }
 
 async function renderRequests(){
