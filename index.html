@@ -2106,9 +2106,7 @@ function renderCalWeekDetails(mon,wkSess){
   backBtn.addEventListener('click',function(){sh.style.cssText='max-width:480px;padding:28px 20px 28px;';_transitionSheet(sh,renderCalWeek);});
   var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;';
   titleWrap.innerHTML='<div style="font-size:10px;font-weight:700;color:var(--co);text-transform:uppercase;letter-spacing:.8px;">Week breakdown</div><div style="font-family:var(--serif);font-size:16px;font-weight:700;color:var(--tx);">'+MNAMES[mon.getMonth()]+' '+mon.getDate()+'–'+sun.getDate()+'</div>';
-  var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';closeBtn.textContent='×';
-  closeBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
-  navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);navHdr.appendChild(closeBtn);
+  navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);
   body.appendChild(navHdr);
 
   var content=document.createElement('div');content.style.cssText='padding:16px;flex:1;';
@@ -2209,9 +2207,7 @@ function renderCalDay(dateObj){
     });
     navBtns.appendChild(b);
   });
-  var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0 0 0 4px;line-height:1;flex-shrink:0;touch-action:manipulation;';closeBtn.textContent='×';
-  closeBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
-  navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);navHdr.appendChild(navBtns);navHdr.appendChild(closeBtn);
+  navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);navHdr.appendChild(navBtns);
   body.appendChild(navHdr);
 
   var content=document.createElement('div');content.style.cssText='padding:16px;flex:1;';
