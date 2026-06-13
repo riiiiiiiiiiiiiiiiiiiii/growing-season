@@ -671,7 +671,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     </div>
     <div class="fl">
       <div class="fl-lbl">Feeling after</div>
-      <div class="fr" id="feels"></div>
+      <div id="feels"></div>
     </div>
     <div class="fl">
       <div class="fl-lbl">Field notes</div>
@@ -3391,6 +3391,37 @@ var logId=null, logRating=0, logFeels=[], logMomentum='', logTimeOfDay='morning'
 function _currentPeriod(){var h=new Date().getHours();if(h<12)return'morning';if(h<17)return'afternoon';return'evening';}
 var STAR_LBLS={0.5:'Rough session',1:'Not great',1.5:'Okay-ish',2:'Decent',2.5:'Pretty good',3:'Good session',3.5:'Really good',4:'Great session',4.5:'Excellent',5:'Perfect ⭐'};
 function normRating(r){if(!r)return 0;return r>5?Math.round(r/2*2)/2:r;}
+var POS_FEELS=['⚡ Energized','😌 Calm','🌟 Proud','✨ Inspired','🎯 Focused','😊 Happy','💪 Accomplished','🥰 Good','🤩 Excited'];
+var NEG_FEELS=['🤔 Unsure','😴 Tired','😵 Distracted','😤 Frustrated','🪫 Drained','🤔 Rusty','😐 Meh'];
+function makeFeelsCategories(wrap,feelsArr){
+  var openPos=false,openNeg=false;
+  function render(){
+    wrap.innerHTML='';
+    var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;';
+    [['+  Positive',POS_FEELS,'pos'],['−  Negative',NEG_FEELS,'neg']].forEach(function(cfg){
+      var lbl=cfg[0],list=cfg[1],key=cfg[2];
+      var isOpen=key==='pos'?openPos:openNeg;
+      var hasSel=list.some(function(f){return feelsArr.indexOf(f)>-1;});
+      var btn=document.createElement('button');btn.type='button';
+      btn.style.cssText='flex:1;padding:9px 0;border-radius:10px;border:1.5px solid '+(isOpen?'var(--gr)':'var(--bg3)')+';background:'+(isOpen?'var(--grl)':'#fff')+';font-size:13px;font-weight:600;color:'+(isOpen?'var(--gr2)':'var(--tx2)')+';cursor:pointer;transition:all .15s;'+(hasSel?'box-shadow:0 0 0 2px var(--grm);':'');
+      btn.textContent=lbl+(hasSel?' ·':'');
+      btn.addEventListener('click',function(){if(key==='pos')openPos=!openPos;else openNeg=!openNeg;render();});
+      row.appendChild(btn);
+    });
+    wrap.appendChild(row);
+    [[openPos,POS_FEELS],[openNeg,NEG_FEELS]].forEach(function(cfg){
+      if(!cfg[0])return;
+      var fr=document.createElement('div');fr.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;';
+      cfg[1].forEach(function(f){
+        var b=document.createElement('div');b.className='fb'+(feelsArr.indexOf(f)>-1?' on':'');b.textContent=f;
+        b.addEventListener('click',function(){var i=feelsArr.indexOf(f);if(i>-1)feelsArr.splice(i,1);else feelsArr.push(f);render();});
+        fr.appendChild(b);
+      });
+      wrap.appendChild(fr);
+    });
+  }
+  render();
+}
 function makeMomentumScale(wrap,current,onChange){
   var labels=['Not really','Somewhat','Definitely',"Can't stop now"];
   wrap.innerHTML='';
@@ -3458,16 +3489,9 @@ function setupLogScreen(id,from,startedAt){
     document.getElementById('au-btn').textContent='';
   }
 
-  var feels=document.getElementById('feels');feels.innerHTML='';
-  ['⚡ Energized','😌 Calm','🌟 Proud','✨ Inspired','🎯 Focused','😊 Happy','💪 Accomplished','🥰 Good','🤩 Excited','🤔 Unsure','😴 Tired','😵 Distracted','😤 Frustrated','🪫 Drained','🤔 Rusty','😐 Meh'].forEach(function(f){
-    var b=document.createElement('div');b.className='fb';b.textContent=f;
-    b.addEventListener('click',function(){
-      var idx=logFeels.indexOf(f);
-      if(idx>-1){logFeels.splice(idx,1);b.classList.remove('on');}
-      else{logFeels.push(f);b.classList.add('on');}
-    });
-    feels.appendChild(b);
-  });
+  logFeels=[];
+  var feels=document.getElementById('feels');
+  makeFeelsCategories(feels,logFeels);
 
   logRating=0;
   makeStarRating(document.getElementById('stars'),0,function(val,lbl){logRating=val;document.getElementById('slbl').textContent=lbl;});
@@ -4386,7 +4410,7 @@ function openSessionEdit(s,a){
     +'<div class="fl"><div class="fl-lbl">Date</div><input type="date" class="sinp" id="ses-edit-date" value="'+_dv+'" style="width:100%;"></div>'
     +'<div class="fl"><div class="fl-lbl">Time spent</div>'
       +'<div class="dr"><input type="number" class="di" id="ses-edit-h" min="0" max="24" value="'+(s.hours||0)+'"><span class="du">h</span><input type="number" class="di" id="ses-edit-m" min="0" max="59" value="'+(s.mins||0)+'"><span class="du">min</span></div></div>'
-    +'<div class="fl"><div class="fl-lbl">Feeling after</div><div class="fr" id="ses-edit-feels"></div></div>'
+    +'<div class="fl"><div class="fl-lbl">Feeling after</div><div id="ses-edit-feels"></div></div>'
     +'<div class="fl"><div class="fl-lbl">Rate this session</div><div class="stars" id="ses-edit-stars"></div><div class="slbl" id="ses-edit-slbl"></div></div>'
     +'<div class="fl"><div class="fl-lbl">Momentum</div><div class="fr" id="ses-edit-momentum"></div></div>'
     +'<div class="fl"><div class="fl-lbl">Field notes</div><textarea class="nta" id="ses-edit-notes" placeholder="What did you work on?">'+(s.notes||'')+'</textarea></div>'
@@ -4395,15 +4419,7 @@ function openSessionEdit(s,a){
 
   // feels
   var feelsWrap=sh.querySelector('#ses-edit-feels');
-  ['😔 Low','😐 Meh','🙂 Okay','😊 Good','🌟 Great'].forEach(function(f){
-    var b=document.createElement('div');b.className='fb'+(_editSessionFeels.indexOf(f)>-1?' on':'');b.textContent=f;
-    b.addEventListener('click',function(){
-      var idx=_editSessionFeels.indexOf(f);
-      if(idx>-1){_editSessionFeels.splice(idx,1);b.classList.remove('on');}
-      else{_editSessionFeels.push(f);b.classList.add('on');}
-    });
-    feelsWrap.appendChild(b);
-  });
+  makeFeelsCategories(feelsWrap,_editSessionFeels);
 
   // stars
   var starsWrap=sh.querySelector('#ses-edit-stars');
