@@ -566,8 +566,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
       </div>
     </div>
     <div id="ip-wrap"></div>
-    <div id="week-bar" style="padding:0 16px 14px;"></div>
-    <div id="pc-wrap"></div>
+<div id="pc-wrap"></div>
     <div class="stats" id="stats"></div>
     <div id="streak-wrap"></div>
     <div id="today-glance" style="margin:0 16px 14px;"></div>
@@ -1638,7 +1637,6 @@ function rHome(){
     document.getElementById('streak-pill').addEventListener('click',openWeeklySummary);
   }else{_swEl.innerHTML='';}
 
-  _renderWeekBar();
   updateHomeNudge();
 
 
@@ -2320,30 +2318,6 @@ function _calScheduleForm(dayDate){
   btnRow.appendChild(cancelB);btnRow.appendChild(saveB);sh.appendChild(btnRow);ov.classList.add('on');
 }
 
-function _renderWeekBar(){
-  var el=document.getElementById('week-bar');if(!el)return;
-  var today=new Date();today.setHours(0,0,0,0);
-  var todayMid=today.getTime();
-  var dayOfWeek=today.getDay()===0?6:today.getDay()-1;
-  var DLBLS=['M','T','W','T','F','S','S'];
-  var html='<div style="display:flex;justify-content:space-between;align-items:flex-end;padding:10px 14px;background:var(--bg2);border-radius:12px;">';
-  for(var d=0;d<7;d++){
-    var offset=d-dayOfWeek;
-    var dayStart=todayMid+offset*86400000;
-    var hasSess=sessions.some(function(s){return s.date>=dayStart&&s.date<dayStart+86400000;});
-    var isToday=offset===0;
-    var isFuture=offset>0;
-    var dotBg=hasSess?'var(--gr)':isFuture?'transparent':'var(--bg3)';
-    var dotBorder=isToday&&!hasSess?'border:2px solid var(--gr);':'';
-    var lblColor=isToday?'var(--gr)':'var(--tx3)';
-    html+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">'
-      +'<div style="width:9px;height:9px;border-radius:50%;background:'+dotBg+';'+dotBorder+'box-sizing:border-box;"></div>'
-      +'<div style="font-size:9px;font-weight:'+(isToday?'700':'500')+';color:'+lblColor+';text-transform:uppercase;">'+DLBLS[d]+'</div>'
-      +'</div>';
-  }
-  html+='</div>';
-  el.innerHTML=html;
-}
 
 function updateHomeNudge(){
   var tgEl=document.getElementById('today-glance');if(!tgEl)return;
