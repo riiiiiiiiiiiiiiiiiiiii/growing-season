@@ -4766,10 +4766,13 @@ function rGarden(){
           btn.textContent=t.label;
           btn.addEventListener('click',(function(tid){return function(){
             if(gardenTab===tid)return;
+            var w2=document.getElementById('garden-svg-wrap');
+            if(w2){w2.style.transition='none';w2.style.opacity='0';}
             gardenTab=tid;
             rGarden();
-            var w2=document.getElementById('garden-svg-wrap');
-            if(w2){w2.style.animation='none';w2.offsetHeight;w2.style.animation='cardIn .22s ease forwards';}
+            requestAnimationFrame(function(){requestAnimationFrame(function(){
+              if(w2){w2.style.transition='opacity .2s ease';w2.style.opacity='1';}
+            });});
           };})(t.id));
           gtabs.appendChild(btn);
         });
