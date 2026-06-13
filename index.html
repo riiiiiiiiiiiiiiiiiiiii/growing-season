@@ -2003,12 +2003,26 @@ function renderCalWeek(){
     var sun=new Date(mon);sun.setDate(mon.getDate()+6);
     var isCurrent=wkOff===0;
 
-    // Week label
+    // Collect week sessions first so we can use count in the label
+    var wkSess=[];
+    for(var wi=0;wi<7;wi++){var wd=new Date(mon);wd.setDate(mon.getDate()+wi);var wMid=wd.getTime();wkSess=wkSess.concat(sessions.filter(function(s){return s.date>=wMid&&s.date<wMid+86400000;}));}
+
+    // Week label row
+    var wkHeader=document.createElement('div');
+    wkHeader.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-top:14px;margin-bottom:6px;';
     var wkLabel=document.createElement('div');
-    wkLabel.style.cssText='font-size:11px;font-weight:700;color:'+(isCurrent?'var(--co)':'var(--tx3)')+';text-transform:uppercase;letter-spacing:.6px;margin-top:14px;margin-bottom:6px;';
+    wkLabel.style.cssText='font-size:11px;font-weight:700;color:'+(isCurrent?'var(--co)':'var(--tx3)')+';text-transform:uppercase;letter-spacing:.6px;';
     wkLabel.textContent=(wkOff===0?'This week · ':wkOff===1?'Next week · ':'')+MNAMES[mon.getMonth()]+' '+mon.getDate()+(mon.getMonth()!==sun.getMonth()?' – '+MNAMES[sun.getMonth()]+' '+sun.getDate():'–'+sun.getDate());
-    if(isCurrent)currentWeekEl=wkLabel;
-    body.appendChild(wkLabel);
+    wkHeader.appendChild(wkLabel);
+    if(wkSess.length){
+      var wkBadge=document.createElement('div');
+      wkBadge.style.cssText='font-size:11px;font-weight:600;color:var(--co);cursor:pointer;padding:2px 0;';
+      wkBadge.textContent=wkSess.length+' session'+(wkSess.length!==1?'s':'');
+      (function(m,ws){wkBadge.addEventListener('click',function(){_transitionSheet(sh,function(){renderCalWeekDetails(m,ws);});});})(mon,wkSess);
+      wkHeader.appendChild(wkBadge);
+    }
+    if(isCurrent)currentWeekEl=wkHeader;
+    body.appendChild(wkHeader);
 
     // 7-day grid
     var grid=document.createElement('div');
@@ -2037,18 +2051,6 @@ function renderCalWeek(){
       })(di);
     }
     body.appendChild(grid);
-
-    // Week summary
-    var wkSess=[];
-    for(var wi=0;wi<7;wi++){var wd=new Date(mon);wd.setDate(mon.getDate()+wi);var wMid=wd.getTime();wkSess=wkSess.concat(sessions.filter(function(s){return s.date>=wMid&&s.date<wMid+86400000;}));}
-    if(wkSess.length){
-      var wkMins=wkSess.reduce(function(t,s){return t+(s.hours||0)*60+(s.mins||0);},0);
-      var wkSum=document.createElement('div');
-      wkSum.style.cssText='margin-top:8px;padding:8px 12px;background:var(--bg2);border-radius:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;';
-      wkSum.innerHTML='<div style="font-size:12px;font-weight:600;color:var(--tx);">'+wkSess.length+' session'+(wkSess.length!==1?'s':'')+' · '+_fmtMins(wkMins)+'</div><div style="font-size:11px;font-weight:600;color:var(--co);">Details ›</div>';
-      (function(m,ws){wkSum.addEventListener('click',function(){_transitionSheet(sh,function(){renderCalWeekDetails(m,ws);});});})(mon,wkSess);
-      body.appendChild(wkSum);
-    }
   });
 
   // Routines section
