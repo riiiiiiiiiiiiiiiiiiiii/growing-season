@@ -2100,13 +2100,16 @@ function renderCalWeekDetails(mon,wkSess){
 
   // Header
   var navHdr=document.createElement('div');
-  navHdr.style.cssText='display:flex;align-items:center;gap:8px;padding:16px 16px 18px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
+  navHdr.style.cssText='padding:16px 16px 18px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
+  var lbl=document.createElement('div');lbl.style.cssText='font-size:13px;font-weight:700;color:var(--gr);margin-bottom:8px;';lbl.textContent='Week breakdown';
+  var dateRow=document.createElement('div');dateRow.style.cssText='display:flex;align-items:center;gap:8px;';
   var backBtn=document.createElement('button');
   backBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';backBtn.textContent='‹';
   backBtn.addEventListener('click',function(){sh.style.cssText='max-width:480px;padding:28px 20px 28px;';_transitionSheet(sh,renderCalWeek);});
-  var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;';
-  titleWrap.innerHTML='<div style="font-size:13px;font-weight:700;color:#3B82F6;margin-bottom:2px;">Week breakdown</div><div style="font-family:var(--serif);font-size:16px;font-weight:700;color:var(--tx);">'+MNAMES[mon.getMonth()]+' '+mon.getDate()+'–'+sun.getDate()+'</div>';
-  navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);
+  var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;font-family:var(--serif);font-size:18px;font-weight:700;color:var(--tx);';
+  titleWrap.textContent=MNAMES[mon.getMonth()]+' '+mon.getDate()+'–'+sun.getDate();
+  dateRow.appendChild(backBtn);dateRow.appendChild(titleWrap);
+  navHdr.appendChild(lbl);navHdr.appendChild(dateRow);
   body.appendChild(navHdr);
 
   var content=document.createElement('div');content.style.cssText='padding:16px;flex:1;';
