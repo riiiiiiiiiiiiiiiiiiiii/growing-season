@@ -677,13 +677,20 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
       <div class="fl-lbl">Field notes</div>
       <textarea class="nta" id="ln" placeholder="What did you work on? What grew today?"></textarea>
     </div>
-    <div class="fl">
-      <div class="fl-lbl">What went well? <span style="font-weight:400;color:var(--tx3);">optional</span></div>
-      <textarea class="nta" id="ln-well" placeholder="A small win, something that clicked…" style="min-height:56px;"></textarea>
+    <div class="fl" id="reflection-toggle-wrap" style="margin-bottom:0;">
+      <button id="reflection-toggle" type="button" style="background:none;border:none;padding:0;font-size:13px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;gap:5px;user-select:none;">
+        <span id="reflection-arrow" style="display:inline-block;transition:transform .2s;font-size:11px;">›</span> Reflection <span style="font-weight:400;">optional</span>
+      </button>
     </div>
-    <div class="fl">
-      <div class="fl-lbl">Do differently next time? <span style="font-weight:400;color:var(--tx3);">optional</span></div>
-      <textarea class="nta" id="ln-diff" placeholder="One thing to adjust or try…" style="min-height:56px;"></textarea>
+    <div id="reflection-body" style="display:none;overflow:hidden;">
+      <div class="fl">
+        <div class="fl-lbl">What went well?</div>
+        <textarea class="nta" id="ln-well" placeholder="A small win, something that clicked…" style="min-height:56px;"></textarea>
+      </div>
+      <div class="fl">
+        <div class="fl-lbl">Do differently next time?</div>
+        <textarea class="nta" id="ln-diff" placeholder="One thing to adjust or try…" style="min-height:56px;"></textarea>
+      </div>
     </div>
     <div class="fl">
       <div class="fl-lbl">Momentum — did this leave you wanting more?</div>
@@ -1361,6 +1368,13 @@ document.getElementById('hist-period-row').addEventListener('click',function(e){
 })();
 document.getElementById('btn-back').addEventListener('click',goBack);
 document.getElementById('btn-save-log').addEventListener('click',saveLog);
+document.getElementById('reflection-toggle').addEventListener('click',function(){
+  var body=document.getElementById('reflection-body');
+  var arrow=document.getElementById('reflection-arrow');
+  var open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  arrow.style.transform=open?'rotate(90deg)':'rotate(0deg)';
+});
 document.getElementById('btn-foc-cancel').addEventListener('click',closeFocus);
 document.getElementById('btn-foc-save').addEventListener('click',saveFocus);
 // ── BACKUP / RESTORE ──────────────────────────────────
@@ -3457,6 +3471,8 @@ function setupLogScreen(id,from,startedAt){
   document.getElementById('ln').value='';
   document.getElementById('ln-well').value='';
   document.getElementById('ln-diff').value='';
+  document.getElementById('reflection-body').style.display='none';
+  document.getElementById('reflection-arrow').style.transform='rotate(0deg)';
   document.getElementById('slbl').textContent='';
   var mom=document.getElementById('momentum');mom.innerHTML='';
   ['Not really','Somewhat','Definitely','Can\'t stop now'].forEach(function(m){
