@@ -3250,18 +3250,8 @@ function rResults(){
 }
 
 function _transitionNotesBody(fn){
-  var body=document.getElementById('notes-body');
-  body.style.transition='opacity .13s ease,transform .13s ease';
-  body.style.opacity='0';body.style.transform='translateY(6px)';
-  setTimeout(function(){
-    fn();
-    var b=document.getElementById('notes-body');
-    b.style.opacity='0';b.style.transform='translateY(6px)';
-    requestAnimationFrame(function(){
-      b.style.opacity='1';b.style.transform='translateY(0)';
-      setTimeout(function(){b.style.transition='';b.style.opacity='';b.style.transform='';},150);
-    });
-  },130);
+  fn();
+  animateIn(document.getElementById('notes-body'));
 }
 function _transitionPQBody(fn){
   var body=document.getElementById('pq-body');
