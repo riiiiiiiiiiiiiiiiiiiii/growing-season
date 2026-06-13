@@ -566,6 +566,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
       </div>
     </div>
     <div id="ip-wrap"></div>
+    <div id="week-bar" style="padding:0 16px 14px;"></div>
     <div id="pc-wrap"></div>
     <div class="stats" id="stats"></div>
     <div id="streak-wrap"></div>
@@ -1637,6 +1638,7 @@ function rHome(){
     document.getElementById('streak-pill').addEventListener('click',openWeeklySummary);
   }else{_swEl.innerHTML='';}
 
+  _renderWeekBar();
   updateHomeNudge();
 
 
@@ -2318,18 +2320,13 @@ function _calScheduleForm(dayDate){
   btnRow.appendChild(cancelB);btnRow.appendChild(saveB);sh.appendChild(btnRow);ov.classList.add('on');
 }
 
-function updateHomeNudge(){
-  var tgEl=document.getElementById('today-glance');if(!tgEl)return;
+function _renderWeekBar(){
+  var el=document.getElementById('week-bar');if(!el)return;
   var today=new Date();today.setHours(0,0,0,0);
-  var todayMid=today.getTime(),todayEnd=todayMid+86400000;
-
-  // Today's logged sessions
-  var todaySess=sessions.filter(function(s){return s.date>=todayMid&&s.date<todayEnd;});
-
-  // Weekly dots: Mon–Sun of current week
+  var todayMid=today.getTime();
   var dayOfWeek=today.getDay()===0?6:today.getDay()-1;
   var DLBLS=['M','T','W','T','F','S','S'];
-  var weekDots='';
+  var html='<div style="display:flex;justify-content:space-between;align-items:flex-end;padding:10px 14px;background:var(--bg2);border-radius:12px;">';
   for(var d=0;d<7;d++){
     var offset=d-dayOfWeek;
     var dayStart=todayMid+offset*86400000;
@@ -2339,16 +2336,22 @@ function updateHomeNudge(){
     var dotBg=hasSess?'var(--gr)':isFuture?'transparent':'var(--bg3)';
     var dotBorder=isToday&&!hasSess?'border:2px solid var(--gr);':'';
     var lblColor=isToday?'var(--gr)':'var(--tx3)';
-    weekDots+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">'
+    html+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">'
       +'<div style="width:9px;height:9px;border-radius:50%;background:'+dotBg+';'+dotBorder+'box-sizing:border-box;"></div>'
       +'<div style="font-size:9px;font-weight:'+(isToday?'700':'500')+';color:'+lblColor+';text-transform:uppercase;">'+DLBLS[d]+'</div>'
       +'</div>';
   }
+  html+='</div>';
+  el.innerHTML=html;
+}
 
-  var html='';
+function updateHomeNudge(){
+  var tgEl=document.getElementById('today-glance');if(!tgEl)return;
+  var today=new Date();today.setHours(0,0,0,0);
+  var todayMid=today.getTime(),todayEnd=todayMid+86400000;
+  var todaySess=sessions.filter(function(s){return s.date>=todayMid&&s.date<todayEnd;});
 
-  // Today section
-  html+='<div style="margin-bottom:10px;">';
+  var html='<div style="margin-bottom:10px;">';
   html+='<div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Today</div>';
   if(todaySess.length){
     todaySess.forEach(function(s){
@@ -2364,12 +2367,6 @@ function updateHomeNudge(){
     html+='<div style="font-size:13px;color:var(--tx3);padding:2px 0 6px;">Nothing logged yet today.</div>';
   }
   html+='</div>';
-
-  // Week bar
-  html+='<div style="display:flex;justify-content:space-between;align-items:flex-end;padding:10px 14px;background:var(--bg2);border-radius:12px;">';
-  html+=weekDots;
-  html+='</div>';
-
   tgEl.innerHTML=html;
 }
 
