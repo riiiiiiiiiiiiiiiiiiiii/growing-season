@@ -2408,7 +2408,7 @@ function rNotesList(){
       +(meHas?'<div class="notes-act-preview">'+mePreview+'</div>':'<div class="notes-act-preview" style="color:var(--tx3);">Your personal space</div>')
     +'</div>'
     +'<span style="font-size:16px;color:var(--tx3);">›</span>';
-  meCard.addEventListener('click',function(){rNoteEditor(meAct);});
+  meCard.addEventListener('click',function(){_transitionNotesBody(function(){rNoteEditor(meAct);});});
   body.appendChild(meCard);
   // Activity tabs + list
   var tabRow=document.createElement('div');
@@ -2443,13 +2443,13 @@ function rNotesList(){
           +(hasNotes?'<div class="notes-act-preview">'+preview+'</div>':'<div class="notes-act-preview" style="color:var(--bg3);">No notes yet</div>')
         +'</div>'
         +'<span style="font-size:16px;color:var(--tx3);">›</span>';
-      card.addEventListener('click',function(){rNoteEditor(a);});
+      card.addEventListener('click',function(){_transitionNotesBody(function(){rNoteEditor(a);});});
       listWrap.appendChild(card);
     });
   }
 
-  tabWith.addEventListener('click',function(){_notesTab='with';tabWith.classList.add('on');tabAll.classList.remove('on');renderNotesList();});
-  tabAll.addEventListener('click',function(){_notesTab='all';tabAll.classList.add('on');tabWith.classList.remove('on');renderNotesList();});
+  tabWith.addEventListener('click',function(){if(_notesTab==='with')return;_notesTab='with';tabWith.classList.add('on');tabAll.classList.remove('on');listWrap.style.transition='opacity .13s ease';listWrap.style.opacity='0';setTimeout(function(){renderNotesList();listWrap.style.opacity='1';setTimeout(function(){listWrap.style.transition='';},150);},130);});
+  tabAll.addEventListener('click',function(){if(_notesTab==='all')return;_notesTab='all';tabAll.classList.add('on');tabWith.classList.remove('on');listWrap.style.transition='opacity .13s ease';listWrap.style.opacity='0';setTimeout(function(){renderNotesList();listWrap.style.opacity='1';setTimeout(function(){listWrap.style.transition='';},150);},130);});
   renderNotesList();
 }
 var _noteBackFn=null;
@@ -2491,7 +2491,7 @@ function rNoteEditor(a){
   var histBtn=document.createElement('button');histBtn.type='button';histBtn.className='btn btn-s';histBtn.style.cssText='flex:1;margin-top:0;';
   function _refreshHistBtn(){var d=_getNoteData(a.id);histBtn.textContent=d.entries.length?'History ('+d.entries.length+')':'History';}
   _refreshHistBtn();
-  histBtn.addEventListener('click',function(){_editingIdx=null;rNoteHistory(a,sections,tas,_refreshHistBtn,function(idx){_editingIdx=idx;});}  );
+  histBtn.addEventListener('click',function(){_transitionNotesBody(function(){_editingIdx=null;rNoteHistory(a,sections,tas,_refreshHistBtn,function(idx){_editingIdx=idx;});});});
   var saveBtn=document.createElement('button');saveBtn.type='button';saveBtn.className='btn btn-p';saveBtn.style.cssText='flex:1;margin-top:0;';saveBtn.textContent='Save';
   saveBtn.addEventListener('click',function(){
     var entry={date:Date.now()};var hasContent=false;
@@ -2533,11 +2533,13 @@ function rNoteHistory(a,sections,tas,refreshHistBtn,onEdit){
     var del=document.createElement('button');del.type='button';del.style.cssText='background:none;border:none;font-size:10px;color:var(--tx3);cursor:pointer;padding:0;line-height:1;';del.textContent='🗑️';
     (function(i,e){
       editBtn.addEventListener('click',function(){
-        if(tas){sections.forEach(function(sec){tas[sec.key].value=e[sec.key]||'';});}
-        if(onEdit)onEdit(i);
-        _noteBackFn();
+        _transitionNotesBody(function(){
+          if(tas){sections.forEach(function(sec){tas[sec.key].value=e[sec.key]||'';});}
+          if(onEdit)onEdit(i);
+          _noteBackFn();
+        });
       });
-      del.addEventListener('click',function(){data.entries.splice(i,1);sv();if(refreshHistBtn)refreshHistBtn();rNoteHistory(a,sections,tas,refreshHistBtn,onEdit);});
+      del.addEventListener('click',function(){data.entries.splice(i,1);sv();if(refreshHistBtn)refreshHistBtn();_transitionNotesBody(function(){rNoteHistory(a,sections,tas,refreshHistBtn,onEdit);});});
     })(idx,entry);
     hdrBtns.appendChild(editBtn);hdrBtns.appendChild(del);
     hdr.appendChild(hdrLeft);hdr.appendChild(hdrBtns);card.appendChild(hdr);
@@ -2552,7 +2554,7 @@ function rNoteHistory(a,sections,tas,refreshHistBtn,onEdit){
   });
 }
 document.getElementById('btn-notes-close').addEventListener('click',closeNotes);
-document.getElementById('btn-notes-back').addEventListener('click',function(){if(_noteBackFn)_noteBackFn();else rNotesList();});
+document.getElementById('btn-notes-back').addEventListener('click',function(){_transitionNotesBody(function(){if(_noteBackFn)_noteBackFn();else rNotesList();});});
 document.getElementById('btn-cal-close').addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
 
 function openMenuPanel(){
@@ -3250,6 +3252,20 @@ function rResults(){
   animateIn(body);
 }
 
+function _transitionNotesBody(fn){
+  var body=document.getElementById('notes-body');
+  body.style.transition='opacity .13s ease,transform .13s ease';
+  body.style.opacity='0';body.style.transform='translateY(6px)';
+  setTimeout(function(){
+    fn();
+    var b=document.getElementById('notes-body');
+    b.style.opacity='0';b.style.transform='translateY(6px)';
+    requestAnimationFrame(function(){
+      b.style.opacity='1';b.style.transform='translateY(0)';
+      setTimeout(function(){b.style.transition='';b.style.opacity='';b.style.transform='';},150);
+    });
+  },130);
+}
 function _transitionPQBody(fn){
   var body=document.getElementById('pq-body');
   body.style.transition='opacity .13s ease,transform .13s ease';
