@@ -3419,12 +3419,16 @@ function makeFeelsCategories(wrap,feelsArr){
     [[openPos,POS_FEELS],[openNeg,NEG_FEELS]].forEach(function(cfg){
       if(!cfg[0])return;
       var fr=document.createElement('div');fr.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;';
-      cfg[1].forEach(function(f){
+      cfg[1].forEach(function(f,idx){
         var b=document.createElement('div');b.className='fb'+(feelsArr.indexOf(f)>-1?' on':'');b.textContent=f;
+        b.style.cssText+='opacity:0;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease;transition-delay:'+(idx*28)+'ms;';
         b.addEventListener('click',function(){var i=feelsArr.indexOf(f);if(i>-1)feelsArr.splice(i,1);else feelsArr.push(f);render();});
         fr.appendChild(b);
       });
       wrap.appendChild(fr);
+      requestAnimationFrame(function(){
+        fr.querySelectorAll('.fb').forEach(function(b){b.style.opacity='1';b.style.transform='translateY(0)';});
+      });
     });
   }
   render();
