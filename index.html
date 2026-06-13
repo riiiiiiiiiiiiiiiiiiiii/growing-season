@@ -1930,7 +1930,7 @@ var PERSONAL_NOTE_SECTIONS=[
 ];
 var _noteSaveTimer=null;
 // ── CALENDAR ──────────────────────────────────────────
-var _CAT_DOT={Creative:'#D946A8',Active:'#EA580C',Learning:'#2563EB',Social:'#059669',Mindfulness:'#7C3AED',Productive:'#D97706',Digital:'#4338CA',Outdoor:'#16A34A',Entertainment:'#CA8A04',Personal:'#E11D48'};
+var _CAT_DOT={Creative:'#C97FB8',Active:'#D4845A',Learning:'#5B8FD4',Social:'#4FA88A',Mindfulness:'#9272C8',Productive:'#C9A050',Digital:'#7077C4',Outdoor:'#5AAA76',Entertainment:'#C4A230',Personal:'#CC5272'};
 var _calWeekOffset=0; // 0=current week, -1=last week, min -3
 var _calDayDate=new Date();_calDayDate.setHours(0,0,0,0);
 var _calNowTimer=null;
@@ -4363,8 +4363,8 @@ function rHist(){
     var hasText=!!(s.notes||s.well||s.diff);
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms';_hi++;
     hc.innerHTML='<div class="hc-main" style="flex:1;padding:14px;min-width:0;">'
-      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+stageEl+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--co);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-1px;touch-action:manipulation;"><span style="display:inline-block;transform:rotate('+(isExp?'-90':'90')+'deg);transition:transform .15s;">›</span></button>':'')+'</div></div>'
-      +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel.join(', '):s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
+      +'<div class="hc-top"><div class="hc-name">'+a.emoji+' '+a.name+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">★ '+normRating(s.rating)+'</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--co);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-1px;touch-action:manipulation;"><span style="display:inline-block;transform:rotate('+(isExp?'-90':'90')+'deg);transition:transform .15s;">›</span></button>':'')+'</div></div>'
+      +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel[0]:s.feel)+'</span>':'')+(s.momentum?'<span>'+s.momentum+'</span>':'')+streakEl+'</div>'
       +'</div>'+plantCol;
     if(hasText){
       var _main=hc.querySelector('.hc-main');
