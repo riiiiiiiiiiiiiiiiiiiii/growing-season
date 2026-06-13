@@ -2217,7 +2217,7 @@ function renderCalDay(dateObj){
     });
     navBtns.appendChild(b);
   });
-  navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);navHdr.appendChild(navBtns);navHdr.appendChild(calDayCloseBtn);
+  navHdr.appendChild(backBtn);navHdr.appendChild(titleWrap);navHdr.appendChild(calDayCloseBtn);
   body.appendChild(navHdr);
 
   var content=document.createElement('div');content.style.cssText='padding:16px;flex:1;';
@@ -2284,6 +2284,12 @@ function renderCalDay(dateObj){
   content.appendChild(addBtn);
 
   body.appendChild(content);
+
+  var bottomNav=document.createElement('div');
+  bottomNav.style.cssText='display:flex;justify-content:center;gap:16px;padding:12px 16px 20px;flex-shrink:0;border-top:.5px solid var(--bg2);background:var(--bg);';
+  navBtns.style.cssText='display:flex;gap:16px;';
+  bottomNav.appendChild(navBtns);
+  body.appendChild(bottomNav);
 }
 
 function _calScheduleForm(dayDate){
