@@ -2322,18 +2322,54 @@ function updateHomeNudge(){
   var tgEl=document.getElementById('today-glance');if(!tgEl)return;
   var today=new Date();today.setHours(0,0,0,0);
   var todayMid=today.getTime(),todayEnd=todayMid+86400000;
-  var dow=today.getDay()===0?6:today.getDay()-1;
-  var todayPlanned=calPlanned.filter(function(ev){return _calMidnight(new Date(ev.date)).getTime()===todayMid;});
-  var todayRoutines=calRoutines.filter(function(r){return r.days.indexOf(dow)>-1;});
-  var items=[];
-  todayRoutines.forEach(function(r){items.push({emoji:r.actEmoji,name:r.actName,hour:r.hour,isRoutine:true});});
-  todayPlanned.forEach(function(ev){items.push({emoji:ev.actEmoji,name:ev.actName,hour:ev.hour,isRoutine:false});});
-  items.sort(function(a,b){return a.hour-b.hour;});
-  if(!items.length){tgEl.innerHTML='';return;}
-  var html='<div style="margin:0 0 14px;padding:10px 14px;background:var(--col);border-radius:12px;display:flex;flex-direction:column;gap:6px;">';
-  html+='<div style="font-size:10px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px;">Today\'s plan</div>';
-  items.forEach(function(it){html+='<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--co2);"><span>'+it.emoji+'</span><span style="font-weight:600;">'+it.name+'</span><span style="opacity:.65;margin-left:auto;">'+_fmtHour(it.hour)+'</span></div>';});
+
+  // Today's logged sessions
+  var todaySess=sessions.filter(function(s){return s.date>=todayMid&&s.date<todayEnd;});
+
+  // Weekly dots: Mon–Sun of current week
+  var dayOfWeek=today.getDay()===0?6:today.getDay()-1;
+  var DLBLS=['M','T','W','T','F','S','S'];
+  var weekDots='';
+  for(var d=0;d<7;d++){
+    var offset=d-dayOfWeek;
+    var dayStart=todayMid+offset*86400000;
+    var hasSess=sessions.some(function(s){return s.date>=dayStart&&s.date<dayStart+86400000;});
+    var isToday=offset===0;
+    var isFuture=offset>0;
+    var dotBg=hasSess?'var(--gr)':isFuture?'transparent':'var(--bg3)';
+    var dotBorder=isToday&&!hasSess?'border:2px solid var(--gr);':'';
+    var lblColor=isToday?'var(--gr)':'var(--tx3)';
+    weekDots+='<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">'
+      +'<div style="width:9px;height:9px;border-radius:50%;background:'+dotBg+';'+dotBorder+'box-sizing:border-box;"></div>'
+      +'<div style="font-size:9px;font-weight:'+(isToday?'700':'500')+';color:'+lblColor+';text-transform:uppercase;">'+DLBLS[d]+'</div>'
+      +'</div>';
+  }
+
+  var html='';
+
+  // Today section
+  html+='<div style="margin-bottom:10px;">';
+  html+='<div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Today</div>';
+  if(todaySess.length){
+    todaySess.forEach(function(s){
+      var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||(s.actName?{emoji:s.actEmoji||'📋',name:s.actName}:{emoji:'📋',name:'Unknown'});
+      var dur=_fmtMins((s.hours||0)*60+(s.mins||0));
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg2);border-radius:10px;margin-bottom:5px;">'
+        +'<span style="font-size:18px;">'+a.emoji+'</span>'
+        +'<span style="font-size:13px;font-weight:600;flex:1;color:var(--tx);">'+a.name+'</span>'
+        +'<span style="font-size:12px;color:var(--tx3);">'+dur+'</span>'
+        +'</div>';
+    });
+  } else {
+    html+='<div style="font-size:13px;color:var(--tx3);padding:2px 0 6px;">Nothing logged yet today.</div>';
+  }
   html+='</div>';
+
+  // Week bar
+  html+='<div style="display:flex;justify-content:space-between;align-items:flex-end;padding:10px 14px;background:var(--bg2);border-radius:12px;">';
+  html+=weekDots;
+  html+='</div>';
+
   tgEl.innerHTML=html;
 }
 
