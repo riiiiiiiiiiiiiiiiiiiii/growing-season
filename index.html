@@ -729,7 +729,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 
   </div><!-- /screen-wrap -->
 
-  <div id="home-deco" style="position:fixed;bottom:calc(76px + env(safe-area-inset-bottom));left:0;right:0;pointer-events:none;z-index:1;"></div>
+  <div id="home-deco" style="position:fixed;bottom:calc(76px + env(safe-area-inset-bottom));left:0;right:0;pointer-events:none;z-index:1;display:none;"></div>
 
   <nav id="main-nav" class="nav">
     <button class="nb on" id="nb-home"><div class="nb-wrap"><span class="nb-ic">🏡</span></div>Home</button>
@@ -1235,7 +1235,7 @@ function rCollect(){
 
 // ── NAVIGATION ────────────────────────────────────────
 var backFrom = 'home';
-function show(id){document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('on');});document.getElementById(id).classList.add('on');}
+function show(id){document.querySelectorAll('.scr').forEach(function(s){s.classList.remove('on');});document.getElementById(id).classList.add('on');var deco=document.getElementById('home-deco');if(deco)deco.style.display=id==='s-home'?'block':'none';}
 function nav(v){
   show('s-'+v);
   ['home','my','garden','hist','friends'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
