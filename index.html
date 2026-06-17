@@ -2804,11 +2804,14 @@ async function openFriendProfile(fid,p,fshipId){
     +'<div id="fp-seed-lbl" style="font-size:11px;color:var(--tx2);margin-top:2px;">seeds planted</div>'
     +'</div>';
   sh.appendChild(stat);
-  _supa.from('activities').select('id').eq('user_id',fid).then(function(aRes){
-    var c=(aRes.data||[]).length;
-    var cEl=document.getElementById('fp-seed-count');var lEl=document.getElementById('fp-seed-lbl');
-    if(cEl)cEl.textContent=c;if(lEl)lEl.textContent='seed'+(c!==1?'s':'')+' planted';
-  }).catch(function(){});
+  (async function(){
+    try{
+      var aRes=await _tq(_supa.from('activities').select('id').eq('user_id',fid));
+      var c=(aRes.data||[]).length;
+      var cEl=document.getElementById('fp-seed-count');var lEl=document.getElementById('fp-seed-lbl');
+      if(cEl)cEl.textContent=c;if(lEl)lEl.textContent='seed'+(c!==1?'s':'')+' planted';
+    }catch(e){}
+  })();
 
   // Action buttons row
   var actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;margin-bottom:18px;';
