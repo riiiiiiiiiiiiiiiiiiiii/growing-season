@@ -4084,7 +4084,7 @@ function rMy(){
     // Collapse/expand all
     var _fAllOpen=fCats.every(function(c){return focusCatOpen[c]!==false;});
     var _fToggleBtn=document.createElement('button');
-    _fToggleBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:0 0 10px;display:block;text-align:right;width:100%;';
+    _fToggleBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:0 0 10px;display:block;text-align:left;width:100%;';
     _fToggleBtn.textContent=_fAllOpen?'Collapse all':'Expand all';
     _fToggleBtn.addEventListener('click',function(){fCats.forEach(function(c){focusCatOpen[c]=!_fAllOpen;});rMy();});
     el.appendChild(_fToggleBtn);
@@ -4147,7 +4147,7 @@ function rMy(){
   var _cats=Object.keys(groups);
   var _allOpen=_cats.every(function(c){return catOpen[c]!==false;});
   var _toggleAllBtn=document.createElement('button');
-  _toggleAllBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:0 0 10px;display:block;text-align:right;width:100%;';
+  _toggleAllBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:0 0 10px;display:block;text-align:left;width:100%;';
   _toggleAllBtn.textContent=_allOpen?'Collapse all':'Expand all';
   _toggleAllBtn.addEventListener('click',function(){_cats.forEach(function(c){catOpen[c]=!_allOpen;});rMy();});
   el.appendChild(_toggleAllBtn);
