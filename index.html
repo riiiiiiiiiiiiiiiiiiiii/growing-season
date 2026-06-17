@@ -569,6 +569,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 <div id="pc-wrap"></div>
     <div id="streak-wrap"></div>
     <div class="stats" id="stats" style="margin-top:23px;"></div>
+    <div id="home-extras" style="margin:23px 16px 0;display:flex;flex-direction:column;gap:8px;"></div>
     <div id="weekly-bar" style="margin:23px 16px 0;"></div>
     <div id="daily-quote"></div>
   </div>
@@ -1628,6 +1629,45 @@ function rHome(){
   document.getElementById('stats').innerHTML='<div class="sc" id="stat-sess" style="cursor:pointer;"><div class="sc-n">'+todayCnt+'</div><div class="sc-l">Sessions today</div></div><div class="sc" id="stat-time" style="cursor:pointer;"><div class="sc-n">'+Math.floor(todayTm/60)+'h '+(todayTm%60)+'m</div><div class="sc-l">Time today</div></div>';
   document.getElementById('stat-sess').addEventListener('click',openSessionsStats);
   document.getElementById('stat-time').addEventListener('click',openTimeStats);
+
+  // Feature 3: days since first session
+  (function(){
+    var ex=document.getElementById('home-extras');if(!ex)return;
+    ex.innerHTML='';
+    if(!sessions.length)return;
+    var first=sessions.reduce(function(m,s){return s.date<m?s.date:m;},sessions[0].date);
+    var days=Math.floor((Date.now()-first)/86400000);
+    if(days<1)return;
+    var pill=document.createElement('div');
+    pill.style.cssText='display:inline-flex;align-items:center;gap:6px;background:var(--grl);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--gr);align-self:flex-start;';
+    pill.textContent='🌱 Growing for '+days+' day'+(days!==1?'s':'');
+    ex.appendChild(pill);
+  })();
+
+  // Feature 6: friend growing recently (background fetch)
+  (function(){
+    if(!supaUser)return;
+    var ex=document.getElementById('home-extras');if(!ex)return;
+    var twoHAgo=new Date(Date.now()-2*3600000).toISOString();
+    _tq(_supa.from('friendships').select('requester_id,addressee_id').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','accepted')).then(function(fRes){
+      var fids=(fRes.data||[]).map(function(f){return f.requester_id===supaUser.id?f.addressee_id:f.requester_id;});
+      if(!fids.length)return;
+      return _tq(_supa.from('feed_events').select('username,user_emoji,act_name,created_at').in('user_id',fids).eq('type','session').gte('created_at',twoHAgo).order('created_at',{ascending:false}).limit(1));
+    }).then(function(evRes){
+      if(!evRes||!evRes.data||!evRes.data.length)return;
+      var ev=evRes.data[0];
+      var name=ev.username?('@'+ev.username):'A friend';
+      var em=ev.user_emoji||'🌱';
+      var mins=Math.floor((Date.now()-new Date(ev.created_at).getTime())/60000);
+      var ago=mins<2?'just now':mins<60?mins+'m ago':Math.floor(mins/60)+'h ago';
+      var exEl=document.getElementById('home-extras');if(!exEl)return;
+      var nudge=document.createElement('div');
+      nudge.style.cssText='display:inline-flex;align-items:center;gap:8px;background:var(--col);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--co2);align-self:flex-start;animation:fadeIn .3s ease both;';
+      nudge.innerHTML='<span>'+em+'</span><span>'+name+' grew '+ev.act_name+' · '+ago+'</span>';
+      exEl.appendChild(nudge);
+    }).catch(function(){});
+  })();
+
   (function(){
     var wb=document.getElementById('weekly-bar');if(!wb)return;
     var now=new Date();
