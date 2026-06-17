@@ -4304,10 +4304,11 @@ function rHist(){
     var plantCol=plantInner?'<div style="width:'+tW+'px;flex-shrink:0;background:'+plantBg[stage]+';display:flex;align-items:flex-end;border-radius:0 var(--rad) var(--rad) 0;overflow:hidden;"><svg style="'+plantOff+'" viewBox="0 0 '+pW+' '+pH+'" width="'+tW+'" height="'+tH+'" xmlns="http://www.w3.org/2000/svg">'+plantInner+'</svg></div>':'';
     var isExp=!!histExpanded[s.id];
     var hasText=!!(s.notes||s.well||s.diff);
-    var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms';_hi++;
-    hc.innerHTML='<div class="hc-main" style="flex:1;padding:14px;min-width:0;">'
-      +'<div class="hc-top"><div class="hc-name">'+a.name+'</div><div style="display:flex;align-items:center;gap:6px;">'+(s.rating?'<span class="hc-r">'+normRating(s.rating)+' ★</span>':'')+(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--co);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;position:relative;top:-1px;touch-action:manipulation;"><span style="display:inline-block;transform:rotate('+(isExp?'-90':'90')+'deg);transition:transform .15s;">›</span></button>':'')+'</div></div>'
-      +'<div class="hc-m"><span>'+dur+'</span>'+(s.feel&&(Array.isArray(s.feel)?s.feel.length:s.feel)?'<span>'+(Array.isArray(s.feel)?s.feel[0]:s.feel)+'</span>':'')+streakEl+'</div>'
+    var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms;margin-left:8px;margin-right:8px;';_hi++;
+    hc.innerHTML='<div class="hc-main" style="flex:1;padding:10px 14px;min-width:0;display:flex;align-items:center;gap:8px;">'
+      +'<div style="flex:1;text-align:center;"><span style="font-size:13px;font-weight:600;color:var(--tx);">'+a.name+'</span><span style="font-size:12px;color:var(--tx3);"> · '+dur+'</span></div>'
+      +(s.rating?'<span class="hc-r" style="flex-shrink:0;">'+normRating(s.rating)+' ★</span>':'')
+      +(hasText?'<button class="hc-arr" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--co);padding:0 2px;line-height:1;flex-shrink:0;display:flex;align-items:center;touch-action:manipulation;"><span style="display:inline-block;transform:rotate('+(isExp?'-90':'90')+'deg);transition:transform .15s;">›</span></button>':'')
       +'</div>'+plantCol;
     if(hasText){
       var _main=hc.querySelector('.hc-main');
