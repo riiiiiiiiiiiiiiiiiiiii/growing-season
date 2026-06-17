@@ -570,8 +570,8 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 <div id="pc-wrap"></div>
     <div id="streak-wrap"></div>
     <div class="stats" id="stats" style="margin-top:23px;"></div>
-    <div id="home-extras" style="display:flex;flex-direction:column;gap:8px;"></div>
     <div id="weekly-bar" style="margin:23px 16px 0;"></div>
+    <div id="home-extras" style="display:flex;flex-direction:column;gap:8px;"></div>
     <div id="daily-quote"></div>
   </div>
 
@@ -1648,7 +1648,7 @@ function rHome(){
     var ex=document.getElementById('home-extras');if(!ex||!hasFocusSet())return;
     var focusActs=myActs.filter(function(a){return weeklyFocus.actIds.indexOf(a.id)>-1;});
     if(!focusActs.length)return;
-    ex.style.margin='20px 0 0';
+    ex.style.margin='20px 0 0';ex.style.paddingBottom='4px';
     var wrap=document.createElement('div');
     wrap.style.cssText='display:flex;flex-direction:column;gap:8px;';
     var lbl=document.createElement('div');
