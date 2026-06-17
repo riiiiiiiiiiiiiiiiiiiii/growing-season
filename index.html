@@ -569,6 +569,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 <div id="pc-wrap"></div>
     <div id="streak-wrap"></div>
     <div class="stats" id="stats" style="margin-top:32px;"></div>
+    <div id="weekly-bar" style="margin:16px 16px 0;"></div>
     <div id="daily-quote"></div>
   </div>
 
@@ -1627,6 +1628,33 @@ function rHome(){
   document.getElementById('stats').innerHTML='<div class="sc" id="stat-sess" style="cursor:pointer;"><div class="sc-n">'+todayCnt+'</div><div class="sc-l">Sessions today</div></div><div class="sc" id="stat-time" style="cursor:pointer;"><div class="sc-n">'+Math.floor(todayTm/60)+'h '+(todayTm%60)+'m</div><div class="sc-l">Time today</div></div>';
   document.getElementById('stat-sess').addEventListener('click',openSessionsStats);
   document.getElementById('stat-time').addEventListener('click',openTimeStats);
+  (function(){
+    var wb=document.getElementById('weekly-bar');if(!wb)return;
+    var now=new Date();
+    var dow=now.getDay();
+    var weekStart=new Date(now);weekStart.setDate(now.getDate()-(dow===0?6:dow-1));weekStart.setHours(0,0,0,0);
+    var days=['M','T','W','T','F','S','S'];
+    var html='<div style="display:flex;justify-content:space-between;align-items:center;">';
+    for(var i=0;i<7;i++){
+      var d=new Date(weekStart);d.setDate(weekStart.getDate()+i);
+      var dStart=d.getTime(),dEnd=dStart+86400000;
+      var isToday=d.toDateString()===now.toDateString();
+      var hasLog=sessions.some(function(s){return s.date>=dStart&&s.date<dEnd;});
+      var isFuture=d>now&&!isToday;
+      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">'
+        +'<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;'
+        +(isToday?'background:var(--gr);box-shadow:0 0 0 2px var(--grl);':hasLog?'background:var(--grl);border:1.5px solid var(--gr);':'background:var(--bg2);border:1px solid var(--bg3);')
+        +(isFuture?'opacity:.35;':'')
+        +'">'
+        +(hasLog&&!isToday?'<div style="width:8px;height:8px;border-radius:50%;background:var(--gr);"></div>':'')
+        +(isToday?'<div style="width:8px;height:8px;border-radius:50%;background:#fff;"></div>':'')
+        +'</div>'
+        +'<div style="font-size:10px;font-weight:600;color:'+(isToday?'var(--gr)':isFuture?'var(--tx3)':'var(--tx3)')+';">'+days[i]+'</div>'
+        +'</div>';
+    }
+    html+='</div>';
+    wb.innerHTML=html;
+  })();
   var _streak=calcStreak();
   var _swEl=document.getElementById('streak-wrap');
   if(_streak>=2){
