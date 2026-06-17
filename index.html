@@ -563,7 +563,6 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
       <div class="sb-c">
         <div class="sb-label" id="sb-label"></div>
         <div class="sb-title" id="sb-title"></div>
-        <div class="sb-sub" id="sb-sub"></div>
       </div>
     </div>
     <div id="ip-wrap"></div>
@@ -1603,7 +1602,6 @@ function rHome(){
   var nameStr=profile&&profile.name?', '+(profile.emoji||'')+(profile.emoji?' ':'')+profile.name:'';
   document.getElementById('sb-label').textContent=greet+nameStr+' · '+sea.label;
   document.getElementById('sb-title').textContent=sea.title;
-  document.getElementById('sb-sub').textContent=sea.sub;
   var pbEm=document.getElementById('menu-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
