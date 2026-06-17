@@ -1647,7 +1647,7 @@ function rHome(){
 
   document.getElementById('home-deco').innerHTML=homeDecoSVG(sk);
   var q=getDailyQuote();
-  document.getElementById('daily-quote').innerHTML='<div class="dq"><span class="dq-txt">'+q.text+'</span></div>';
+  document.getElementById('daily-quote').innerHTML='<div class="dq"><span class="dq-em">'+q.emoji+'</span><span class="dq-txt">'+q.text+'</span></div>';
 }
 
 // ── ONBOARDING ────────────────────────────────────────
