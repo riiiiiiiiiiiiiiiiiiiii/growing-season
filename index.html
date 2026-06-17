@@ -3981,9 +3981,8 @@ function addSwipe(wrap,card,onArchive,onFocus){
 
   // Mouse — attach move/up to document so drag works even when cursor leaves the card
   card.addEventListener('mousedown',function(e){
-    e.preventDefault();
     onStart(e.clientX,e.clientY);
-    function onMouseMove(e){onMove(e.clientX,e.clientY);}
+    function onMouseMove(e){if(isSwipe)e.preventDefault();onMove(e.clientX,e.clientY);}
     function onMouseUp(){document.removeEventListener('mousemove',onMouseMove);document.removeEventListener('mouseup',onMouseUp);onEnd();}
     document.addEventListener('mousemove',onMouseMove);
     document.addEventListener('mouseup',onMouseUp);
