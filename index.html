@@ -2786,14 +2786,8 @@ async function renderFriendsList(){
 async function openFriendProfile(fid,p,fshipId){
   var ov=document.getElementById('ed-ov'),sh=document.getElementById('ed-sh');
   var em=p.emoji||'🌱';var name=p.display_name||p.username||'?';var un=p.username||'';
-  sh.innerHTML='<div style="text-align:center;color:var(--tx3);font-size:13px;padding:16px 0;">Loading profile…</div>';
-  ov.classList.add('on');
-  var seedCount=0;
-  try{
-    var aRes=await _supa.from('activities').select('id').eq('user_id',fid);
-    seedCount=(aRes.data||[]).length;
-  }catch(e){}
   sh.innerHTML='';
+  ov.classList.add('on');
 
   // Avatar + name
   var avatar=document.createElement('div');avatar.style.cssText='text-align:center;margin-bottom:14px;';
@@ -2802,14 +2796,19 @@ async function openFriendProfile(fid,p,fshipId){
     +'<div style="font-size:13px;color:var(--tx3);margin-top:2px;">@'+un+'</div>';
   sh.appendChild(avatar);
 
-  // Seed count stat
+  // Seed count stat — renders immediately with placeholder, fills in after fetch
   var stat=document.createElement('div');
   stat.style.cssText='display:flex;justify-content:center;margin-bottom:20px;';
   stat.innerHTML='<div style="background:var(--grl);border-radius:12px;padding:10px 22px;text-align:center;">'
-    +'<div style="font-size:22px;font-weight:700;color:var(--gr);">'+seedCount+'</div>'
-    +'<div style="font-size:11px;color:var(--tx2);margin-top:2px;">seed'+(seedCount!==1?'s':'')+' planted</div>'
+    +'<div id="fp-seed-count" style="font-size:22px;font-weight:700;color:var(--gr);">·</div>'
+    +'<div id="fp-seed-lbl" style="font-size:11px;color:var(--tx2);margin-top:2px;">seeds planted</div>'
     +'</div>';
   sh.appendChild(stat);
+  _supa.from('activities').select('id').eq('user_id',fid).then(function(aRes){
+    var c=(aRes.data||[]).length;
+    var cEl=document.getElementById('fp-seed-count');var lEl=document.getElementById('fp-seed-lbl');
+    if(cEl)cEl.textContent=c;if(lEl)lEl.textContent='seed'+(c!==1?'s':'')+' planted';
+  }).catch(function(){});
 
   // Action buttons row
   var actions=document.createElement('div');actions.style.cssText='display:flex;gap:8px;margin-bottom:18px;';
