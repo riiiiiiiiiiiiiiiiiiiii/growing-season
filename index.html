@@ -2632,7 +2632,7 @@ async function renderFeed(){
       else text=ev.type;
       var card=document.createElement('div');
       card.style.cssText='display:flex;gap:11px;padding:12px 0;border-bottom:.5px solid var(--bg2);align-items:flex-start;';
-      card.innerHTML='<div style="font-size:26px;flex-shrink:0;width:36px;text-align:center;">'+em+'</div>'
+      card.innerHTML='<div class="fr-em">'+em+'</div>'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:2px;">'+name+'</div>'
           +'<div style="font-size:13px;color:var(--tx2);line-height:1.45;">'+text+'</div>'
