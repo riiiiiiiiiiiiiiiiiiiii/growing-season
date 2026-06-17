@@ -4067,7 +4067,7 @@ function rMy(){
       var isOpen=focusCatOpen[cat]!==false;
       var section=document.createElement('div');section.className='cat-section';
       var secHdr=document.createElement('div');secHdr.className='cat-hdr';
-      secHdr.innerHTML='<span class="cat-hdr-label">'+cat+'</span>'
+      secHdr.innerHTML='<span class="cat-hdr-label">'+(CEM[cat]||'🌱')+' '+cat+'</span>'
         +'<span class="cat-hdr-count">'+acts.length+'</span>'
         +'<span class="cat-arrow'+(isOpen?' open':'')+'">›</span>';
       var secBody=document.createElement('div');secBody.className='cat-body';secBody.style.display=isOpen?'block':'none';
@@ -4128,7 +4128,7 @@ function rMy(){
     var isOpen=catOpen[cat]!==false;
     var section=document.createElement('div');section.className='cat-section';
     var hdr=document.createElement('div');hdr.className='cat-hdr';
-    hdr.innerHTML='<span class="cat-hdr-label">'+cat+'</span>'
+    hdr.innerHTML='<span class="cat-hdr-label">'+(CEM[cat]||'🌱')+' '+cat+'</span>'
       +'<span class="cat-hdr-count">'+acts.length+'</span>'
       +'<span class="cat-arrow'+(isOpen?' open':'')+'">›</span>';
     var body=document.createElement('div');body.className='cat-body';body.style.display=isOpen?'block':'none';
