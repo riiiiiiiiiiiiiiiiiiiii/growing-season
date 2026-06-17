@@ -2924,7 +2924,7 @@ async function renderConvList(){
       var timeStr=t.toDateString()===now.toDateString()?t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):t.toLocaleDateString([],{month:'short',day:'numeric'});
       var row=document.createElement('div');
       row.style.cssText='display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:.5px solid var(--bg3);cursor:pointer;';
-      row.innerHTML='<div style="font-size:26px;width:36px;text-align:center;flex-shrink:0;">'+em+'</div>'
+      row.innerHTML='<div class="fr-em">'+em+'</div>'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-size:14px;font-weight:'+(conv.unread?700:500)+';color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+name+'</div>'
           +'<div style="font-size:12px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(isOut?'You: ':'')+last+'</div>'
