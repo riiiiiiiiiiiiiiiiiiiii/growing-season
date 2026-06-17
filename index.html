@@ -570,7 +570,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     <div id="streak-wrap"></div>
     <div class="stats" id="stats" style="margin-top:32px;"></div>
     <div id="weekly-bar" style="margin:16px 16px 0;"></div>
-    <div id="daily-quote"></div>
+    <div id="daily-quote" style="margin-top:24px;"></div>
   </div>
 
   <!-- PLOT -->
@@ -1634,26 +1634,31 @@ function rHome(){
     var dow=now.getDay();
     var weekStart=new Date(now);weekStart.setDate(now.getDate()-(dow===0?6:dow-1));weekStart.setHours(0,0,0,0);
     var days=['M','T','W','T','F','S','S'];
-    var html='<div style="display:flex;justify-content:space-between;align-items:center;">';
+    var row=document.createElement('div');row.style.cssText='display:flex;justify-content:space-between;align-items:center;';
     for(var i=0;i<7;i++){
-      var d=new Date(weekStart);d.setDate(weekStart.getDate()+i);
-      var dStart=d.getTime(),dEnd=dStart+86400000;
-      var isToday=d.toDateString()===now.toDateString();
-      var hasLog=sessions.some(function(s){return s.date>=dStart&&s.date<dEnd;});
-      var isFuture=d>now&&!isToday;
-      html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">'
-        +'<div style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;'
-        +(isToday?'background:var(--gr);box-shadow:0 0 0 2px var(--grl);':hasLog?'background:var(--grl);border:1.5px solid var(--gr);':'background:var(--bg2);border:1px solid var(--bg3);')
-        +(isFuture?'opacity:.35;':'')
-        +'">'
-        +(hasLog&&!isToday?'<div style="width:8px;height:8px;border-radius:50%;background:var(--gr);"></div>':'')
-        +(isToday?'<div style="width:8px;height:8px;border-radius:50%;background:#fff;"></div>':'')
-        +'</div>'
-        +'<div style="font-size:10px;font-weight:600;color:'+(isToday?'var(--gr)':isFuture?'var(--tx3)':'var(--tx3)')+';">'+days[i]+'</div>'
-        +'</div>';
+      (function(idx){
+        var d=new Date(weekStart);d.setDate(weekStart.getDate()+idx);
+        var dStart=d.getTime(),dEnd=dStart+86400000;
+        var isToday=d.toDateString()===now.toDateString();
+        var hasLog=sessions.some(function(s){return s.date>=dStart&&s.date<dEnd;});
+        var isFuture=d>now&&!isToday;
+        var col=document.createElement('div');
+        col.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:'+(isFuture?'default':'pointer')+';';
+        var circle=document.createElement('div');
+        circle.style.cssText='width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;'
+          +(isToday?'background:var(--gr);box-shadow:0 0 0 2px var(--grl);':hasLog?'background:var(--grl);border:1.5px solid var(--gr);':'background:var(--bg2);border:1px solid var(--bg3);')
+          +(isFuture?'opacity:.35;':'');
+        if(hasLog&&!isToday){var dot=document.createElement('div');dot.style.cssText='width:8px;height:8px;border-radius:50%;background:var(--gr);';circle.appendChild(dot);}
+        if(isToday){var dot2=document.createElement('div');dot2.style.cssText='width:8px;height:8px;border-radius:50%;background:#fff;';circle.appendChild(dot2);}
+        var lbl=document.createElement('div');
+        lbl.style.cssText='font-size:10px;font-weight:600;color:'+(isToday?'var(--gr)':'var(--tx3)')+';';
+        lbl.textContent=days[idx];
+        col.appendChild(circle);col.appendChild(lbl);
+        if(!isFuture){col.addEventListener('click',function(){openDayRecap(d,dStart,dEnd);});}
+        row.appendChild(col);
+      })(i);
     }
-    html+='</div>';
-    wb.innerHTML=html;
+    wb.innerHTML='';wb.appendChild(row);
   })();
   var _streak=calcStreak();
   var _swEl=document.getElementById('streak-wrap');
@@ -1673,6 +1678,36 @@ function rHome(){
   document.getElementById('home-deco').innerHTML=homeDecoSVG(sk);
   var q=getDailyQuote();
   document.getElementById('daily-quote').innerHTML='<div class="dq"><span class="dq-em">'+q.emoji+'</span><span class="dq-txt">'+q.text+'</span></div>';
+}
+
+function openDayRecap(d,dStart,dEnd){
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
+  var isToday=d.toDateString()===new Date().toDateString();
+  var dateLabel=isToday?'Today':d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:14px;';title.textContent=dateLabel;sh.appendChild(title);
+  var daySess=sessions.filter(function(s){return s.date>=dStart&&s.date<dEnd;}).sort(function(a,b){return a.date-b.date;});
+  if(!daySess.length){
+    var empty=document.createElement('div');empty.style.cssText='font-size:14px;color:var(--tx3);padding:8px 0 16px;';empty.textContent='Nothing logged this day.';sh.appendChild(empty);
+  } else {
+    var totalMins=daySess.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
+    var summary=document.createElement('div');summary.style.cssText='font-size:12px;color:var(--tx3);margin-bottom:14px;';
+    summary.textContent=daySess.length+' session'+(daySess.length!==1?'s':'')+' · '+(totalMins>=60?Math.floor(totalMins/60)+'h '+(totalMins%60)+'m':totalMins+'m');
+    sh.appendChild(summary);
+    daySess.forEach(function(s){
+      var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||(s.actName?{emoji:s.actEmoji||'',name:s.actName}:{emoji:'',name:'Deleted activity'});
+      var dur=(s.hours||0)*60+(s.mins||0);var durStr=dur>=60?Math.floor(dur/60)+'h '+(dur%60)+'m':dur+'m';
+      var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--bg3);';
+      var name=document.createElement('div');name.style.cssText='font-size:13px;font-weight:600;color:var(--tx);';name.textContent=a.name;
+      var right=document.createElement('div');right.style.cssText='display:flex;align-items:center;gap:10px;flex-shrink:0;';
+      var durEl=document.createElement('span');durEl.style.cssText='font-size:12px;color:var(--tx3);';durEl.textContent=durStr;
+      right.appendChild(durEl);
+      if(s.rating){var rEl=document.createElement('span');rEl.style.cssText='font-size:12px;font-weight:700;color:var(--co);';rEl.textContent=normRating(s.rating)+' ★';right.appendChild(rEl);}
+      row.appendChild(name);row.appendChild(right);sh.appendChild(row);
+    });
+  }
+  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='16px';closeBtn.textContent='Close';
+  closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
+  document.getElementById('ed-ov').classList.add('on');
 }
 
 // ── ONBOARDING ────────────────────────────────────────
