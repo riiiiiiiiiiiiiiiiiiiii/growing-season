@@ -668,11 +668,11 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
       </div>
     </div>
     <div class="fl">
-      <div class="fl-lbl">Feeling after</div>
+      <div class="fl-lbl">Feeling after <span style="font-size:11px;font-weight:400;color:var(--tx3);">optional</span></div>
       <div id="feels"></div>
     </div>
     <div class="fl">
-      <div class="fl-lbl">Field notes</div>
+      <div class="fl-lbl">Field notes <span style="font-size:11px;font-weight:400;color:var(--tx3);">optional</span></div>
       <textarea class="nta" id="ln" placeholder="What did you work on? What grew today?"></textarea>
     </div>
     <div class="fl" id="reflection-toggle-wrap" style="margin-bottom:0;">
@@ -4437,10 +4437,10 @@ function openSessionEdit(s,a){
     +'<div class="fl"><div class="fl-lbl">Date</div><input type="date" class="sinp" id="ses-edit-date" value="'+_dv+'" style="width:100%;"></div>'
     +'<div class="fl"><div class="fl-lbl">Time spent</div>'
       +'<div class="dr"><input type="number" class="di" id="ses-edit-h" min="0" max="24" value="'+(s.hours||0)+'"><span class="du">h</span><input type="number" class="di" id="ses-edit-m" min="0" max="59" value="'+(s.mins||0)+'"><span class="du">min</span></div></div>'
-    +'<div class="fl"><div class="fl-lbl">Feeling after</div><div id="ses-edit-feels"></div></div>'
+    +'<div class="fl"><div class="fl-lbl">Feeling after <span style="font-size:11px;font-weight:400;color:var(--tx3);">optional</span></div><div id="ses-edit-feels"></div></div>'
     +'<div class="fl"><div class="fl-lbl">Rate this session</div><div class="stars" id="ses-edit-stars"></div><div class="slbl" id="ses-edit-slbl"></div></div>'
     +'<div class="fl"><div class="fl-lbl">Momentum</div><div class="fr" id="ses-edit-momentum"></div></div>'
-    +'<div class="fl"><div class="fl-lbl">Field notes</div><textarea class="nta" id="ses-edit-notes" placeholder="What did you work on?">'+(s.notes||'')+'</textarea></div>'
+    +'<div class="fl"><div class="fl-lbl">Field notes <span style="font-size:11px;font-weight:400;color:var(--tx3);">optional</span></div><textarea class="nta" id="ses-edit-notes" placeholder="What did you work on?">'+(s.notes||'')+'</textarea></div>'
     +'<div class="fl"><div class="fl-lbl">What went well? <span style="font-weight:400;color:var(--tx3);">optional</span></div><textarea class="nta" id="ses-edit-well" style="min-height:56px;" placeholder="A small win…">'+(s.well||'')+'</textarea></div>'
     +'<div class="fl"><div class="fl-lbl">Do differently next time? <span style="font-weight:400;color:var(--tx3);">optional</span></div><textarea class="nta" id="ses-edit-diff" style="min-height:56px;" placeholder="One thing to adjust…">'+(s.diff||'')+'</textarea></div>';
 
