@@ -561,6 +561,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
       <div class="sb-bg" id="sb-bg"></div>
       <div class="sb-fade" id="sb-fade"></div>
       <div class="sb-c">
+        <div id="growing-days"></div>
         <div class="sb-label" id="sb-label"></div>
         <div class="sb-title" id="sb-title"></div>
       </div>
@@ -1630,18 +1631,16 @@ function rHome(){
   document.getElementById('stat-sess').addEventListener('click',openSessionsStats);
   document.getElementById('stat-time').addEventListener('click',openTimeStats);
 
-  // Feature 3: days since first session
+  // Feature 3: days since first session — shown above greeting in banner
   (function(){
-    var ex=document.getElementById('home-extras');if(!ex)return;
-    ex.innerHTML='';
+    var el=document.getElementById('growing-days');if(!el)return;
+    el.innerHTML='';
+    var ex=document.getElementById('home-extras');if(ex)ex.innerHTML='';
     if(!sessions.length)return;
     var first=sessions.reduce(function(m,s){return s.date<m?s.date:m;},sessions[0].date);
     var days=Math.floor((Date.now()-first)/86400000);
     if(days<1)return;
-    var pill=document.createElement('div');
-    pill.style.cssText='display:inline-flex;align-items:center;gap:6px;background:var(--grl);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--gr);align-self:flex-start;';
-    pill.textContent='🌱 Growing for '+days+' day'+(days!==1?'s':'');
-    ex.appendChild(pill);
+    el.innerHTML='<div style="font-size:11px;font-weight:600;opacity:.75;margin-bottom:8px;letter-spacing:.4px;">Day '+days+'</div>';
   })();
 
   // Feature 6: friend growing recently (background fetch)
