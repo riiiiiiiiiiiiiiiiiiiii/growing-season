@@ -4323,7 +4323,7 @@ function rHist(){
     var stageEl='<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:9px;margin-left:6px;background:'+stageBgs[stage]+';color:'+stageClrs[stage]+';">'+STAGE_LABELS[stage]+'</span>';
     var streak=getStreakAt(s.actId,s.date);
     var streakEl=streak>=3?'<span style="font-size:11px;font-weight:600;color:#C05C00;">🔥 '+streak+' days</span>':'';
-    var tW=52,tH=68;
+    var tW=72,tH=96;
     var plantInner=drawPlant(stage,tW,tH);
     var plantBg=['linear-gradient(180deg,#D8E8D8,#A8C8A0)','linear-gradient(180deg,#C8E8D0,#7EB890)','linear-gradient(180deg,#B0D8B8,#56A870)','linear-gradient(180deg,#F0C8D0,#C07090)','linear-gradient(180deg,#F8E8A0,#D4A830)'];
     var plantOff=stage===3?'margin-top:6px;':stage===4?'margin-top:10px;':'';
