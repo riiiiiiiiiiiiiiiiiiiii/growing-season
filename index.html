@@ -114,7 +114,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 .pc-title{font-family:var(--serif);font-size:19px;font-weight:700;color:#fff;margin-top:2px;margin-bottom:4px;}
 .pc-sub{font-size:13px;color:rgba(255,255,255,.72);margin-bottom:16px;line-height:1.45;}
 .pc-btn{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.32);border-radius:24px;padding:7px 16px;color:#fff;font-size:12px;font-weight:600;display:inline-block;}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:20px;}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;margin-bottom:0;}
 .hs-hdr{display:flex;align-items:center;margin-bottom:8px;cursor:pointer;user-select:none;touch-action:manipulation;}
 .hs-t{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;flex:1;}
 .hs-tog{background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;display:inline-block;transition:transform .22s cubic-bezier(.25,.46,.45,.94);}
@@ -123,7 +123,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 .sc{background:#fff;border-radius:var(--rad);padding:14px 16px;border:var(--br);box-shadow:var(--sh);}
 .sc-n{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--gr2);margin-bottom:2px;}
 .sc-l{font-size:11px;color:var(--gr2);font-weight:500;}
-.dq{margin:12px 16px 0;background:var(--grl);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
+.dq{margin:16px 16px 0;background:var(--grl);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
 .dq-em{font-size:15px;flex-shrink:0;margin-top:1px;}
 .dq-txt{font-size:13px;color:var(--gr2);line-height:1.5;font-style:italic;}
 .ac{background:#fff;border:var(--br);border-radius:var(--rad);padding:8px 10px;flex-shrink:0;cursor:pointer;text-align:center;min-width:72px;box-shadow:var(--sh);}
@@ -568,9 +568,9 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     <div id="ip-wrap"></div>
 <div id="pc-wrap"></div>
     <div id="streak-wrap"></div>
-    <div class="stats" id="stats" style="margin-top:32px;"></div>
+    <div class="stats" id="stats" style="margin-top:16px;"></div>
     <div id="weekly-bar" style="margin:16px 16px 0;"></div>
-    <div id="daily-quote" style="margin-top:24px;"></div>
+    <div id="daily-quote"></div>
   </div>
 
   <!-- PLOT -->
@@ -1663,7 +1663,7 @@ function rHome(){
   var _streak=calcStreak();
   var _swEl=document.getElementById('streak-wrap');
   if(_streak>=2){
-    _swEl.innerHTML='<div id="streak-pill" style="margin:-8px 16px 16px;display:flex;align-items:center;gap:10px;background:var(--col);border-radius:16px;padding:10px 14px;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.05),var(--sh);touch-action:manipulation;">'
+    _swEl.innerHTML='<div id="streak-pill" style="margin:0 16px 16px;display:flex;align-items:center;gap:10px;background:var(--col);border-radius:16px;padding:10px 14px;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.05),var(--sh);touch-action:manipulation;">'
       +'<span style="font-size:20px;line-height:1;">🔥</span>'
       +'<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--co2);">'+_streak+'-day streak</div>'
       +'<div style="font-size:11px;color:var(--co2);opacity:.7;">Keep the momentum going</div></div>'
