@@ -4366,7 +4366,7 @@ function rHist(){
     var plantCol=plantInner?'<div style="width:'+tW+'px;flex-shrink:0;background:'+plantBg[stage]+';display:flex;align-items:flex-end;border-radius:0 var(--rad) var(--rad) 0;overflow:hidden;"><svg style="'+plantOff+'" viewBox="0 0 '+pW+' '+pH+'" width="'+tW+'" height="'+tH+'" xmlns="http://www.w3.org/2000/svg">'+plantInner+'</svg></div>':'';
     var isExp=!!histExpanded[s.id];
     var hasText=!!(s.notes||s.well||s.diff);
-    var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms;margin-left:8px;margin-right:8px;';_hi++;
+    var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;padding:0;overflow:hidden;animation-delay:'+(_hi*36)+'ms;margin-left:10px;margin-right:10px;';_hi++;
     hc.innerHTML='<div class="hc-main" style="flex:1;padding:8px 14px;min-width:0;display:flex;align-items:flex-start;gap:8px;">'
       +'<div style="flex:1;"><div style="font-size:15px;font-weight:600;color:var(--tx);line-height:1.2;">'+a.name+'</div><div style="font-size:12px;color:var(--tx3);margin-top:2px;">'+dur+'</div></div>'
       +(s.rating?'<span class="hc-r" style="flex-shrink:0;padding-top:1px;">'+normRating(s.rating)+' ★</span>':'')
