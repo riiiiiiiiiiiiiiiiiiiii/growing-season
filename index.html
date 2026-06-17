@@ -1624,7 +1624,9 @@ function rHome(){
   }
 
   var tm=sessions.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
-  document.getElementById('stats').innerHTML='<div class="sc" id="stat-sess" style="cursor:pointer;"><div class="sc-n">'+sessions.length+'</div><div class="sc-l">Sessions logged</div></div><div class="sc" id="stat-time" style="cursor:pointer;"><div class="sc-n">'+Math.floor(tm/60)+'h '+(tm%60)+'m</div><div class="sc-l">Time growing</div></div>';
+  var todayStr=new Date().toDateString();
+  var todayCnt=sessions.filter(function(s){return new Date(s.date).toDateString()===todayStr;}).length;
+  document.getElementById('stats').innerHTML='<div class="sc" id="stat-sess" style="cursor:pointer;"><div class="sc-n">'+todayCnt+'</div><div class="sc-l">Sessions today</div></div><div class="sc" id="stat-time" style="cursor:pointer;"><div class="sc-n">'+Math.floor(tm/60)+'h '+(tm%60)+'m</div><div class="sc-l">Time growing</div></div>';
   document.getElementById('stat-sess').addEventListener('click',openSessionsStats);
   document.getElementById('stat-time').addEventListener('click',openTimeStats);
   var _streak=calcStreak();
