@@ -1726,12 +1726,6 @@ function rHome(){
       +'<span style="font-size:11px;font-weight:600;color:var(--co2);opacity:.55;">See week ›</span>'
       +'</div>';
     document.getElementById('streak-pill').addEventListener('click',openWeeklySummary);
-  }else if(_streak===1){
-    _swEl.innerHTML='<div style="margin:0 16px 23px;display:flex;align-items:center;gap:10px;background:var(--col);border-radius:16px;padding:10px 14px;box-shadow:0 0 0 1px rgba(0,0,0,.05),var(--sh);">'
-      +'<span style="font-size:20px;line-height:1;">🌱</span>'
-      +'<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--co2);">Day 1 — started today</div>'
-      +'<div style="font-size:11px;color:var(--co2);opacity:.7;">Every great streak starts here</div></div>'
-      +'</div>';
   }else{_swEl.innerHTML='';}
 
   updateHomeNudge();
@@ -2458,7 +2452,7 @@ function updateHomeNudge(){
   wrap.style.cssText='margin:20px 16px 0;';
   var lbl=document.createElement('div');
   lbl.style.cssText='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--tx3);margin-bottom:8px;';
-  lbl.textContent='Due today';
+  lbl.textContent="Today's schedule";
   wrap.appendChild(lbl);
   var list=document.createElement('div');
   list.style.cssText='display:flex;flex-direction:column;gap:6px;';
