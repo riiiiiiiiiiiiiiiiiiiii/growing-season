@@ -4009,7 +4009,7 @@ function rMy(){
     tabsEl.innerHTML='';
     if(hasFocusSet()){
       tabsEl.style.display='flex';
-      [{id:'focus',label:'Focus'},{id:'all',label:'All seeds'}].forEach(function(t){
+      [{id:'focus',label:'🎯 Focus'},{id:'all',label:'🌱 All seeds'}].forEach(function(t){
         var btn=document.createElement('div');
         btn.className='pill'+(myTab===t.id?'':' off');
         btn.style.cssText='cursor:pointer;'+(myTab===t.id?'background:var(--gr);color:#fff;':'background:var(--bg2);color:var(--tx2);');
