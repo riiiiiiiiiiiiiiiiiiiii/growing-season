@@ -4116,7 +4116,7 @@ function rMy(){
     focused.forEach(function(a){var c=a.cat||'Other';if(!fGroups[c])fGroups[c]=[];fGroups[c].push(a);});
     var fCats=Object.keys(fGroups);
     // Collapse/expand all
-    var _fAllOpen=fCats.every(function(c){return focusCatOpen[c]!==false;});
+    var _fAllOpen=fCats.every(function(c){return focusCatOpen[c]===true;});
     var _fToggleBtn=document.createElement('button');
     _fToggleBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:0 0 10px;display:block;text-align:left;width:100%;';
     _fToggleBtn.textContent=_fAllOpen?'Collapse all':'Expand all';
@@ -4126,7 +4126,7 @@ function rMy(){
     var visibleCats=fCats;
     visibleCats.forEach(function(cat){
       var acts=fGroups[cat];
-      var isOpen=focusCatOpen[cat]!==false;
+      var isOpen=focusCatOpen[cat]===true;
       var section=document.createElement('div');section.className='cat-section';
       var secHdr=document.createElement('div');secHdr.className='cat-hdr';
       secHdr.innerHTML='<span class="cat-hdr-label">'+(CEM[cat]||'🌱')+' '+cat+'</span>'
@@ -4179,7 +4179,7 @@ function rMy(){
   var groups={};
   myActs.filter(function(a){return !_mySrch||a.name.toLowerCase().includes(_mySrch)||a.emoji.includes(_mySrch);}).forEach(function(a){var c=a.cat||'Other';if(!groups[c])groups[c]=[];groups[c].push(a);});
   var _cats=Object.keys(groups);
-  var _allOpen=_cats.every(function(c){return catOpen[c]!==false;});
+  var _allOpen=_cats.every(function(c){return catOpen[c]===true;});
   var _toggleAllBtn=document.createElement('button');
   _toggleAllBtn.style.cssText='background:none;border:none;font-size:12px;color:var(--tx3);cursor:pointer;padding:0 0 10px;display:block;text-align:left;width:100%;';
   _toggleAllBtn.textContent=_allOpen?'Collapse all':'Expand all';
@@ -4187,7 +4187,7 @@ function rMy(){
   el.appendChild(_toggleAllBtn);
   _cats.forEach(function(cat){
     var acts=groups[cat];
-    var isOpen=catOpen[cat]!==false;
+    var isOpen=catOpen[cat]===true;
     var section=document.createElement('div');section.className='cat-section';
     var hdr=document.createElement('div');hdr.className='cat-hdr';
     hdr.innerHTML='<span class="cat-hdr-label">'+(CEM[cat]||'🌱')+' '+cat+'</span>'
@@ -4241,7 +4241,7 @@ function rMy(){
   // Archived section (hide _terminated acts — kept only for harvest log name lookup)
   var visibleArchived=archivedActs.filter(function(a){return !a._terminated;});
   if(visibleArchived.length){
-    var arcOpen=catOpen['__archived']!==false;
+    var arcOpen=catOpen['__archived']===true;
     var arcSection=document.createElement('div');arcSection.className='cat-section';arcSection.style.marginTop='8px';
     var arcHdr=document.createElement('div');arcHdr.className='cat-hdr';arcHdr.style.opacity='.6';
     arcHdr.innerHTML='<span class="cat-hdr-label">🗃️ Archived</span>'
