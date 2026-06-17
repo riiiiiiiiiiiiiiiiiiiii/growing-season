@@ -4115,7 +4115,7 @@ function rMy(){
           var dragHandle=document.createElement('div');dragHandle.className='drag-handle';dragHandle.textContent='⠿';card.appendChild(dragHandle);
           var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
           var streak=getStreakAt(a.id,Date.now());
-          inner.innerHTML='<div class="mc-em">'+a.emoji+'</div>'
+          inner.innerHTML=''
             +'<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
             +'<div class="mc-r">'+(isAct?'<span class="badge badge-ip">active</span>':'')+'<span style="font-size:11px;color:var(--tx3);">'+STAGE_LABELS[getStage(getHours(a.id))]+'</span></div>';
           card.appendChild(inner);
