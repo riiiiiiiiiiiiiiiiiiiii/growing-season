@@ -101,14 +101,14 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 .sb-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px;opacity:.8;}
 .sb-title{font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:6px;line-height:1.22;}
 .sb-sub{font-size:12px;opacity:.78;}
-.ip{margin:0 16px 20px;border-radius:20px;padding:18px 20px;cursor:pointer;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--co),var(--co2));box-shadow:0 4px 16px rgba(242,78,30,.3);}
+.ip{margin:0 16px 23px;border-radius:20px;padding:18px 20px;cursor:pointer;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--co),var(--co2));box-shadow:0 4px 16px rgba(242,78,30,.3);}
 .ip-dot{position:absolute;top:14px;right:16px;width:9px;height:9px;border-radius:50%;background:#fff;animation:pulse 1.8s infinite;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.45;transform:scale(1.5);}}
 .ip-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:rgba(255,255,255,.7);margin-bottom:4px;}
 .ip-name{font-family:var(--serif);font-size:20px;font-weight:700;color:#fff;margin-bottom:2px;}
 .ip-time{font-size:12px;color:rgba(255,255,255,.78);margin-bottom:10px;}
 .ip-btn{background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);border-radius:24px;padding:8px 18px;color:#fff;font-size:13px;font-weight:600;display:inline-block;}
-.pc{margin:0 16px 20px;background:var(--pc-grad);border-radius:20px;padding:20px 20px;cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--pc-sh);}
+.pc{margin:0 16px 23px;background:var(--pc-grad);border-radius:20px;padding:20px 20px;cursor:pointer;position:relative;overflow:hidden;box-shadow:var(--pc-sh);}
 .pc-deco{position:absolute;right:-6px;bottom:-6px;font-size:54px;opacity:.1;line-height:1;}
 .pc-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:rgba(255,255,255,.65);margin-bottom:4px;}
 .pc-title{font-family:var(--serif);font-size:19px;font-weight:700;color:#fff;margin-top:2px;margin-bottom:4px;}
@@ -123,7 +123,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 .sc{background:#fff;border-radius:var(--rad);padding:14px 16px;border:var(--br);box-shadow:var(--sh);}
 .sc-n{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--gr2);margin-bottom:2px;}
 .sc-l{font-size:11px;color:var(--gr2);font-weight:500;}
-.dq{margin:20px 16px 0;background:var(--grl);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
+.dq{margin:23px 16px 0;background:var(--grl);border-radius:16px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;}
 .dq-em{font-size:15px;flex-shrink:0;margin-top:1px;}
 .dq-txt{font-size:13px;color:var(--gr2);line-height:1.5;font-style:italic;}
 .ac{background:#fff;border:var(--br);border-radius:var(--rad);padding:8px 10px;flex-shrink:0;cursor:pointer;text-align:center;min-width:72px;box-shadow:var(--sh);}
@@ -568,8 +568,8 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     <div id="ip-wrap"></div>
 <div id="pc-wrap"></div>
     <div id="streak-wrap"></div>
-    <div class="stats" id="stats" style="margin-top:20px;"></div>
-    <div id="weekly-bar" style="margin:20px 16px 0;"></div>
+    <div class="stats" id="stats" style="margin-top:23px;"></div>
+    <div id="weekly-bar" style="margin:23px 16px 0;"></div>
     <div id="daily-quote"></div>
   </div>
 
@@ -1663,7 +1663,7 @@ function rHome(){
   var _streak=calcStreak();
   var _swEl=document.getElementById('streak-wrap');
   if(_streak>=2){
-    _swEl.innerHTML='<div id="streak-pill" style="margin:0 16px 20px;display:flex;align-items:center;gap:10px;background:var(--col);border-radius:16px;padding:10px 14px;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.05),var(--sh);touch-action:manipulation;">'
+    _swEl.innerHTML='<div id="streak-pill" style="margin:0 16px 23px;display:flex;align-items:center;gap:10px;background:var(--col);border-radius:16px;padding:10px 14px;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.05),var(--sh);touch-action:manipulation;">'
       +'<span style="font-size:20px;line-height:1;">🔥</span>'
       +'<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--co2);">'+_streak+'-day streak</div>'
       +'<div style="font-size:11px;color:var(--co2);opacity:.7;">Keep the momentum going</div></div>'
