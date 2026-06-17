@@ -568,7 +568,6 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     <div id="ip-wrap"></div>
 <div id="pc-wrap"></div>
     <div id="streak-wrap"></div>
-    <div id="today-glance" style="margin:16px 16px 14px;"></div>
     <div class="stats" id="stats" style="margin-top:32px;"></div>
     <div id="daily-quote"></div>
   </div>
@@ -2322,30 +2321,7 @@ function _calScheduleForm(dayDate){
 }
 
 
-function updateHomeNudge(){
-  var tgEl=document.getElementById('today-glance');if(!tgEl)return;
-  var today=new Date();today.setHours(0,0,0,0);
-  var todayMid=today.getTime(),todayEnd=todayMid+86400000;
-  var todaySess=sessions.filter(function(s){return s.date>=todayMid&&s.date<todayEnd;});
-
-  var html='<div style="margin-bottom:10px;">';
-  html+='<div style="font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Today</div>';
-  if(todaySess.length){
-    todaySess.forEach(function(s){
-      var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||(s.actName?{emoji:s.actEmoji||'📋',name:s.actName}:{emoji:'📋',name:'Unknown'});
-      var dur=_fmtMins((s.hours||0)*60+(s.mins||0));
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg2);border-radius:10px;margin-bottom:5px;">'
-        +'<span style="font-size:18px;">'+a.emoji+'</span>'
-        +'<span style="font-size:13px;font-weight:600;flex:1;color:var(--tx);">'+a.name+'</span>'
-        +'<span style="font-size:12px;color:var(--tx3);">'+dur+'</span>'
-        +'</div>';
-    });
-  } else {
-    html+='<div style="font-size:13px;color:var(--tx3);padding:2px 0 6px;">Nothing logged yet today.</div>';
-  }
-  html+='</div>';
-  tgEl.innerHTML=html;
-}
+function updateHomeNudge(){}
 
 function checkCalPlanned(){
   var now=Date.now();
