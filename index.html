@@ -570,7 +570,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 <div id="pc-wrap"></div>
     <div id="streak-wrap"></div>
     <div class="stats" id="stats" style="margin-top:23px;"></div>
-    <div id="home-extras" style="margin:23px 16px 0;display:flex;flex-direction:column;gap:8px;"></div>
+    <div id="home-extras" style="display:flex;flex-direction:column;gap:8px;"></div>
     <div id="weekly-bar" style="margin:23px 16px 0;"></div>
     <div id="daily-quote"></div>
   </div>
@@ -1640,7 +1640,7 @@ function rHome(){
     var first=sessions.reduce(function(m,s){return s.date<m?s.date:m;},sessions[0].date);
     var days=Math.floor((Date.now()-first)/86400000);
     if(days<1)return;
-    el.innerHTML='<div style="font-size:11px;font-weight:600;opacity:.75;margin-bottom:8px;letter-spacing:.4px;">Day '+days+'</div>';
+    el.innerHTML='<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px;opacity:.8;">Day '+days+'</div>';
   })();
 
   // Feature 6: friend growing recently (background fetch)
@@ -1660,6 +1660,7 @@ function rHome(){
       var mins=Math.floor((Date.now()-new Date(ev.created_at).getTime())/60000);
       var ago=mins<2?'just now':mins<60?mins+'m ago':Math.floor(mins/60)+'h ago';
       var exEl=document.getElementById('home-extras');if(!exEl)return;
+      exEl.style.margin='23px 16px 0';
       var nudge=document.createElement('div');
       nudge.style.cssText='display:inline-flex;align-items:center;gap:8px;background:var(--col);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--co2);align-self:flex-start;animation:fadeIn .3s ease both;';
       nudge.innerHTML='<span>'+em+'</span><span>'+name+' grew '+ev.act_name+' · '+ago+'</span>';
