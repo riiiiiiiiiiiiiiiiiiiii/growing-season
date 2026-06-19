@@ -393,6 +393,19 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 .msg-in{align-self:flex-start;background:var(--bg2);color:var(--tx);padding:9px 13px;border-radius:18px 18px 18px 4px;font-size:14px;max-width:76%;line-height:1.45;word-break:break-word;}
 .msg-wave{align-self:center;font-size:13px;color:var(--tx3);padding:3px 0;}
 .msg-time{align-self:center;font-size:10px;color:var(--tx3);margin:4px 0;}
+@keyframes gSpin{to{transform:rotate(360deg);}}
+@keyframes gDrift{0%,100%{transform:translateX(0);}50%{transform:translateX(28px);}}
+@keyframes gDrift2{0%,100%{transform:translateX(0);}50%{transform:translateX(-18px);}}
+@keyframes gBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+@keyframes gWiggle{0%,100%{transform:translateX(-50%) scale(1);}50%{transform:translateX(-50%) scale(1.06);}}
+.gp{position:absolute;text-align:center;cursor:pointer;transform:translateX(-50%);touch-action:manipulation;}
+.gp:active{filter:brightness(1.18);}
+.gp-img{display:block;margin:0 auto;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));}
+.gp-lbl{font-size:9px;font-weight:800;color:#fff;text-shadow:0 1px 5px rgba(0,0,0,.55);margin-top:4px;line-height:1.2;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.2px;}
+.gp-bar-wrap{height:3px;background:rgba(255,255,255,.22);border-radius:2px;margin:3px auto 0;width:44px;overflow:hidden;}
+.gp-bar-fill{height:3px;border-radius:2px;background:rgba(255,255,255,.82);}
+.gp-dormant .gp-img{filter:grayscale(.75) brightness(.78);}
+.gp-dormant .gp-lbl{opacity:.5;}
 </style>
 </head>
 <body class="auth-mode">
@@ -594,8 +607,8 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
   <!-- GARDEN -->
   <div id="s-garden" class="scr">
     <div style="padding:32px 16px 14px;">
-      <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:4px;">Garden</div>
-      <div style="font-size:13px;color:var(--tx2);">Plants grow as you log more sessions</div>
+      <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:4px;">🌿 Garden</div>
+      <div style="font-size:13px;color:var(--tx2);">Your plants grow every time you log a session</div>
     </div>
     <div id="garden-focus-banner-wrap" style="padding:0 16px 4px;"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:0 16px 8px;">
@@ -4878,84 +4891,132 @@ function rGarden(){
 
   var visibleActs=(gardenTab==='focus'&&hasFocusSet())?myActs.filter(function(a){return isFocused(a.id);}):myActs;
 
+  // Update stats label
+  var totalHrs=myActs.reduce(function(t,a){return t+getHours(a.id);},0);
+  var bloomCount=myActs.filter(function(a){return getStage(getHours(a.id))>=4;}).length;
+  var gc=document.getElementById('garden-count');
+  if(gc){var gParts=[];if(bloomCount)gParts.push(bloomCount+' blooming');gParts.push(Math.round(totalHrs)+'h grown');gc.textContent=gParts.join(' · ');}
+
   if(!visibleActs.length){
     document.getElementById('garden-svg-wrap').innerHTML='';
-    if(!myActs.length){
-      document.getElementById('garden-empty').style.display='block';
-    } else {
-      document.getElementById('garden-empty').style.display='block';
-      document.getElementById('garden-empty').textContent='No activities in focus this week.';
-    }
+    var ge=document.getElementById('garden-empty');ge.style.display='block';
+    ge.textContent=myActs.length?'No activities in focus this week.':'Add activities and log hours to see your garden grow';
     return;
   }
   document.getElementById('garden-empty').style.display='none';
-  document.getElementById('garden-empty').textContent='Add activities and log hours to see your garden grow';
 
-  var tileW=90,tileH=120;
-  var bgEl=document.getElementById('gs-img-background');
-  var bgSrc=bgEl?bgEl.src:'';
   var wrap=document.getElementById('garden-svg-wrap');
+  var pal=PALETTES[colorPalette]||PALETTES.green;
 
-  function makePlantSVG(items,cols,tileW,tileH,bgSrc){
-    var rows=Math.ceil(items.length/cols);
-    var plotW=tileW*cols,plotH=tileH*rows;
-    var svg='<svg viewBox="0 0 '+plotW+' '+plotH+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">';
-    for(var ri=0;ri<rows;ri++)svg+='<image href="'+bgSrc+'" x="0" y="'+(ri*tileH)+'" width="'+plotW+'" height="'+tileH+'" preserveAspectRatio="xMidYMid slice"/>';
-    items.forEach(function(a,idx){
-      var c=idx%cols,r=Math.floor(idx/cols),tx=c*tileW,ty=r*tileH;
-      if(a){
-        var hrs=getHours(a.id),stage=getStage(hrs);
-        var lastSess=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
-        var og=lastSess&&(Date.now()-lastSess.date>14*24*3600*1000);
-        var dormant=gardenTab==='all'&&hasFocusSet()&&!isFocused(a.id);
-        svg+='<g transform="translate('+tx+','+ty+')" data-pid="'+a.id+'" style="cursor:pointer;">'
-          +drawPlant(stage,tileW,tileH)
-          +(dormant?'<rect x="0" y="0" width="'+tileW+'" height="'+tileH+'" fill="rgba(200,210,220,0.55)"/>':'')
-          +(og&&!dormant?'<text x="'+(tileW/2)+'" y="14" text-anchor="middle" font-size="9" font-family="sans-serif">🍂</text><rect x="1" y="1" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(120,80,0,0.12)" rx="3"/>':'')
-          +'</g>';
-        svg+='<text x="'+(tx+tileW/2)+'" y="'+(ty+tileH-4)+'" text-anchor="middle" font-size="8" font-weight="600" fill="'+(dormant?'rgba(150,160,170,.8)':'rgba(255,255,255,.9)')+'" font-family="sans-serif">'+(a.name.length>9?a.name.slice(0,8)+'…':a.name)+'</text>';
-      } else {
-        svg+='<rect x="'+(tx+1)+'" y="'+(ty+1)+'" width="'+(tileW-2)+'" height="'+(tileH-2)+'" fill="rgba(0,0,0,.07)" rx="3"/>';
+  // Plant image heights per stage
+  var STAGE_H=[30,52,78,108,140];
+  // Plant images
+  var IMG_IDS=['gs-img-seed','gs-img-sprout','gs-img-seedling','gs-img-flowering','gs-img-bloom'];
+
+  // Stable position hash from activity id
+  function gpHash(s,salt){var h=0,str=(s||'')+(salt||'');for(var i=0;i<str.length;i++)h=(31*h+str.charCodeAt(i))|0;return Math.abs(h);}
+
+  var n=visibleActs.length;
+  // Two rows max: front (row 0) and back (row 1)
+  var COLS=n<=6?n:Math.ceil(n/2);
+  var numRows=Math.ceil(n/COLS);
+  var sceneH=numRows>1?480:400;
+
+  // Sky + ground colours
+  var skies=['#8EC8E4','#B2DCEE'];
+  var g1=pal.decoGrass2||'#3D9A50';
+  var g2=pal.decoGrass1||'#2D7A38';
+  var gnd=pal.decoGround||'#4A8A50';
+
+  var scene=document.createElement('div');
+  scene.style.cssText='position:relative;overflow:hidden;height:'+sceneH+'px;background:linear-gradient(to bottom,'+skies[0]+' 0%,'+skies[1]+' 50%,#cce8cc 68%,'+g1+' 80%,'+gnd+' 100%);margin:0 16px 20px;border-radius:22px;box-shadow:0 6px 28px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.06);';
+
+  // Sun
+  var sun=document.createElement('div');
+  sun.style.cssText='position:absolute;top:12px;right:16px;font-size:32px;line-height:1;pointer-events:none;animation:gSpin 28s linear infinite;';
+  sun.textContent='☀️';scene.appendChild(sun);
+
+  // Clouds
+  [['12px','24px','gDrift 15s','26px'],['36%','40px','gDrift2 20s','20px']].forEach(function(c){
+    var cl=document.createElement('div');
+    cl.style.cssText='position:absolute;top:'+c[1]+';left:'+c[0]+';font-size:'+c[3]+';line-height:1;pointer-events:none;animation:'+c[2]+' ease-in-out infinite;opacity:.85;';
+    cl.textContent='☁️';scene.appendChild(cl);
+  });
+
+  // Butterfly — appears near bloom plants
+  if(bloomCount>0){
+    var bf=document.createElement('div');
+    bf.style.cssText='position:absolute;top:'+(sceneH*0.36)+'px;left:15%;font-size:16px;line-height:1;pointer-events:none;animation:gBob 3.2s ease-in-out infinite;';
+    bf.textContent='🦋';scene.appendChild(bf);
+  }
+
+  // Rolling ground hills (SVG overlay at bottom)
+  var hillSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  hillSvg.setAttribute('viewBox','0 0 400 70');hillSvg.setAttribute('preserveAspectRatio','none');
+  hillSvg.style.cssText='position:absolute;bottom:0;left:0;width:100%;height:70px;pointer-events:none;';
+  hillSvg.innerHTML='<path d="M0,70 L0,28 Q60,8 120,20 Q180,32 240,16 Q300,0 360,14 Q390,21 400,18 L400,70 Z" fill="'+g1+'"/>'
+    +'<path d="M0,70 L0,38 Q70,22 140,30 Q200,36 260,26 Q320,16 380,28 L400,32 L400,70 Z" fill="'+g2+'"/>';
+  scene.appendChild(hillSvg);
+
+  // Plant rows
+  for(var ri=0;ri<numRows;ri++){
+    var rowActs=visibleActs.slice(ri*COLS,(ri+1)*COLS);
+    // Front row (ri=0) sits low; back row (ri=1) sits higher and scaled down
+    var groundOff=ri===0?44:180;
+    var scaleF=ri===0?1:0.74;
+
+    rowActs.forEach(function(a,ci){
+      var hrs=getHours(a.id),stage=getStage(hrs);
+      var next=NEXT_THRESH[stage],prev=stage>0?NEXT_THRESH[stage-1]:0;
+      var pct=next?Math.min((hrs-prev)/(next-prev),1):1;
+      var imgH=Math.round(STAGE_H[stage]*scaleF);
+
+      // Stable x with slight jitter per plant
+      var slotPct=(ci+0.5)/rowActs.length*100;
+      var jitter=(gpHash(a.id,'x')%14)-7;
+      var xPct=Math.max(7,Math.min(93,slotPct+jitter));
+      var yJitter=(gpHash(a.id,'y')%10)-5;
+      var botPx=groundOff+yJitter;
+
+      var dormant=gardenTab==='all'&&hasFocusSet()&&!isFocused(a.id);
+      var lastSess=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
+      var og=lastSess&&(Date.now()-lastSess.date>14*24*3600*1000);
+
+      var imgEl=document.getElementById(IMG_IDS[stage]);
+      var imgSrc=imgEl?imgEl.src:'';
+
+      var pw=document.createElement('div');
+      pw.className='gp'+(dormant?' gp-dormant':'');
+      pw.style.cssText='left:'+xPct+'%;bottom:'+botPx+'px;';
+      pw.dataset.pid=a.id;
+
+      var img=document.createElement('img');
+      img.src=imgSrc;img.className='gp-img';
+      img.style.cssText='height:'+imgH+'px;width:auto;max-width:64px;';
+      pw.appendChild(img);
+
+      if(og&&!dormant){
+        var ogTag=document.createElement('div');
+        ogTag.style.cssText='position:absolute;top:-6px;right:-2px;font-size:11px;line-height:1;';
+        ogTag.textContent='🍂';pw.appendChild(ogTag);
       }
+
+      var lbl=document.createElement('div');lbl.className='gp-lbl';
+      lbl.textContent=a.name;pw.appendChild(lbl);
+
+      if(stage>0){
+        var bw=document.createElement('div');bw.className='gp-bar-wrap';
+        var bf2=document.createElement('div');bf2.className='gp-bar-fill';
+        bf2.style.width=Math.round(pct*100)+'%';
+        bw.appendChild(bf2);pw.appendChild(bw);
+      }
+
+      pw.addEventListener('click',(function(pid){return function(){showPlantInfo(pid);};})(a.id));
+      scene.appendChild(pw);
     });
-    for(var col=1;col<cols;col++)svg+='<line x1="'+(col*tileW)+'" y1="0" x2="'+(col*tileW)+'" y2="'+plotH+'" stroke="rgba(255,255,255,.2)" stroke-width="1"/>';
-    for(var row=1;row<rows;row++)svg+='<line x1="0" y1="'+(row*tileH)+'" x2="'+plotW+'" y2="'+(row*tileH)+'" stroke="rgba(255,255,255,.2)" stroke-width="1"/>';
-    svg+='</svg>';
-    return svg;
   }
 
-  var isDesktop=window.innerWidth>=768;
-  var _newRoot=document.createElement('div');
-  if(visibleActs.length<=8){
-    // Flat layout
-    var flatCols=isDesktop?8:4;
-    var items=visibleActs.slice();
-    while(items.length%flatCols!==0)items.push(null);
-    var container=document.createElement('div');container.style.cssText='padding:0 16px 20px;';
-    var plotCard=document.createElement('div');plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
-    var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,flatCols,tileW,tileH,bgSrc);
-    svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
-    plotCard.appendChild(svgWrap);container.appendChild(plotCard);_newRoot.appendChild(container);
-  } else {
-    // Patch layout
-    var patchCols=isDesktop?2:2;
-    var perPatch=isDesktop?6:4;
-    var gridCols=isDesktop?6:2;
-    var grid=document.createElement('div');
-    grid.style.cssText='display:grid;grid-template-columns:repeat('+gridCols+',1fr);gap:12px;padding:0 16px 20px;';
-    var chunks=[];for(var ci=0;ci<visibleActs.length;ci+=perPatch)chunks.push(visibleActs.slice(ci,ci+perPatch));
-    chunks.forEach(function(chunk,pi){
-      var plotCard=document.createElement('div');plotCard.style.cssText='border-radius:12px;overflow:hidden;box-shadow:var(--sh);';
-      var lbl=document.createElement('div');lbl.style.cssText='font-size:10px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;padding:5px 10px;background:var(--col);';
-      lbl.textContent='Patch '+(pi+1);plotCard.appendChild(lbl);
-      var items=chunk.slice();while(items.length<perPatch)items.push(null);
-      var svgWrap=document.createElement('div');svgWrap.innerHTML=makePlantSVG(items,patchCols,tileW,tileH,bgSrc);
-      svgWrap.querySelectorAll('[data-pid]').forEach(function(el){el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});});
-      plotCard.appendChild(svgWrap);grid.appendChild(plotCard);
-    });
-    _newRoot.appendChild(grid);
-  }
-  wrap.replaceChildren(_newRoot);
+  wrap.innerHTML='';wrap.appendChild(scene);
   var helpBtn=document.getElementById('garden-help-btn');
   if(helpBtn){helpBtn.onclick=null;helpBtn.addEventListener('click',openGardenHelp);}
 }
