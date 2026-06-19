@@ -393,19 +393,6 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 .msg-in{align-self:flex-start;background:var(--bg2);color:var(--tx);padding:9px 13px;border-radius:18px 18px 18px 4px;font-size:14px;max-width:76%;line-height:1.45;word-break:break-word;}
 .msg-wave{align-self:center;font-size:13px;color:var(--tx3);padding:3px 0;}
 .msg-time{align-self:center;font-size:10px;color:var(--tx3);margin:4px 0;}
-@keyframes gSpin{to{transform:rotate(360deg);}}
-@keyframes gDrift{0%,100%{transform:translateX(0);}50%{transform:translateX(28px);}}
-@keyframes gDrift2{0%,100%{transform:translateX(0);}50%{transform:translateX(-18px);}}
-@keyframes gBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
-@keyframes gWiggle{0%,100%{transform:translateX(-50%) scale(1);}50%{transform:translateX(-50%) scale(1.06);}}
-.gp{position:absolute;text-align:center;cursor:pointer;transform:translateX(-50%);touch-action:manipulation;}
-.gp:active{filter:brightness(1.18);}
-.gp-img{display:block;margin:0 auto;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.22));}
-.gp-lbl{font-size:9px;font-weight:800;color:#fff;text-shadow:0 1px 5px rgba(0,0,0,.55);margin-top:4px;line-height:1.2;max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.2px;}
-.gp-bar-wrap{height:3px;background:rgba(255,255,255,.22);border-radius:2px;margin:3px auto 0;width:44px;overflow:hidden;}
-.gp-bar-fill{height:3px;border-radius:2px;background:rgba(255,255,255,.82);}
-.gp-dormant .gp-img{filter:grayscale(.75) brightness(.78);}
-.gp-dormant .gp-lbl{opacity:.5;}
 </style>
 </head>
 <body class="auth-mode">
@@ -4891,7 +4878,7 @@ function rGarden(){
 
   var visibleActs=(gardenTab==='focus'&&hasFocusSet())?myActs.filter(function(a){return isFocused(a.id);}):myActs;
 
-  // Update stats label
+  // Stats
   var totalHrs=myActs.reduce(function(t,a){return t+getHours(a.id);},0);
   var bloomCount=myActs.filter(function(a){return getStage(getHours(a.id))>=4;}).length;
   var gc=document.getElementById('garden-count');
@@ -4907,116 +4894,133 @@ function rGarden(){
 
   var wrap=document.getElementById('garden-svg-wrap');
   var pal=PALETTES[colorPalette]||PALETTES.green;
-
-  // Plant image heights per stage
-  var STAGE_H=[30,52,78,108,140];
-  // Plant images
-  var IMG_IDS=['gs-img-seed','gs-img-sprout','gs-img-seedling','gs-img-flowering','gs-img-bloom'];
-
-  // Stable position hash from activity id
-  function gpHash(s,salt){var h=0,str=(s||'')+(salt||'');for(var i=0;i<str.length;i++)h=(31*h+str.charCodeAt(i))|0;return Math.abs(h);}
+  var stemC=pal.decoStem||'#3A7A38';
+  var FC=['#F4A0B8','#D4A0DC','#F8B890','#F8D860','#90D8B8','#B0A8E8','#F8A8A0','#A0C8E0'];
 
   var n=visibleActs.length;
-  // Two rows max: front (row 0) and back (row 1)
-  var COLS=n<=6?n:Math.ceil(n/2);
+  var COLS=Math.min(n,6);
   var numRows=Math.ceil(n/COLS);
-  var sceneH=numRows>1?480:400;
 
-  // Sky + ground colours
-  var skies=['#8EC8E4','#B2DCEE'];
-  var g1=pal.decoGrass2||'#3D9A50';
-  var g2=pal.decoGrass1||'#2D7A38';
-  var gnd=pal.decoGround||'#4A8A50';
+  // SVG layout constants
+  var TW=72;           // tile width per plant
+  var PA=96;           // plant area height above ground line
+  var GH=36;           // ground strip height (name + dots)
+  var RH=PA+GH;        // total row height
+  var SH=44;           // sky header at top
+  var svgW=TW*COLS;
+  var svgH=SH+RH*numRows;
 
-  var scene=document.createElement('div');
-  scene.style.cssText='position:relative;overflow:hidden;height:'+sceneH+'px;background:linear-gradient(to bottom,'+skies[0]+' 0%,'+skies[1]+' 50%,#cce8cc 68%,'+g1+' 80%,'+gnd+' 100%);margin:0 16px 20px;border-radius:22px;box-shadow:0 6px 28px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.06);';
-
-  // Sun
-  var sun=document.createElement('div');
-  sun.style.cssText='position:absolute;top:12px;right:16px;font-size:32px;line-height:1;pointer-events:none;animation:gSpin 28s linear infinite;';
-  sun.textContent='☀️';scene.appendChild(sun);
-
-  // Clouds
-  [['12px','24px','gDrift 15s','26px'],['36%','40px','gDrift2 20s','20px']].forEach(function(c){
-    var cl=document.createElement('div');
-    cl.style.cssText='position:absolute;top:'+c[1]+';left:'+c[0]+';font-size:'+c[3]+';line-height:1;pointer-events:none;animation:'+c[2]+' ease-in-out infinite;opacity:.85;';
-    cl.textContent='☁️';scene.appendChild(cl);
-  });
-
-  // Butterfly — appears near bloom plants
-  if(bloomCount>0){
-    var bf=document.createElement('div');
-    bf.style.cssText='position:absolute;top:'+(sceneH*0.36)+'px;left:15%;font-size:16px;line-height:1;pointer-events:none;animation:gBob 3.2s ease-in-out infinite;';
-    bf.textContent='🦋';scene.appendChild(bf);
+  // Draw a single SVG plant centered at (cx, groundY)
+  function dp(cx,gy,stage,fc){
+    var hs=[0,22,38,56,72][stage];
+    var s='<ellipse cx="'+cx+'" cy="'+gy+'" rx="13" ry="3.5" fill="rgba(0,0,0,.18)"/>';
+    if(stage===0){
+      s+='<circle cx="'+cx+'" cy="'+(gy-3.5)+'" r="4" fill="#8B9A3A" opacity="0.8"/>';
+      s+='<line x1="'+cx+'" y1="'+(gy-7)+'" x2="'+(cx-4)+'" y2="'+(gy-14)+'" stroke="'+stemC+'" stroke-width="1.8" stroke-linecap="round"/>';
+      s+='<ellipse cx="'+(cx-5)+'" cy="'+(gy-16)+'" rx="4" ry="2.5" fill="'+stemC+'" opacity="0.7" transform="rotate(-35,'+(cx-5)+','+(gy-16)+')"/>';
+    } else {
+      var tipY=gy-hs;
+      s+='<line x1="'+cx+'" y1="'+gy+'" x2="'+cx+'" y2="'+tipY+'" stroke="'+stemC+'" stroke-width="2.8" stroke-linecap="round"/>';
+      if(stage>=2){
+        var l1x=(cx+9).toFixed(1),l1y=(gy-hs*0.36).toFixed(1);
+        s+='<ellipse cx="'+l1x+'" cy="'+l1y+'" rx="8" ry="3.5" fill="'+stemC+'" opacity="0.72" transform="rotate(-38,'+l1x+','+l1y+')"/>';
+        var l2x=(cx-8).toFixed(1),l2y=(gy-hs*0.6).toFixed(1);
+        s+='<ellipse cx="'+l2x+'" cy="'+l2y+'" rx="7" ry="3" fill="'+stemC+'" opacity="0.62" transform="rotate(34,'+l2x+','+l2y+')"/>';
+      }
+      if(stage===3){
+        s+='<ellipse cx="'+cx+'" cy="'+(tipY+3)+'" rx="5" ry="8" fill="'+fc+'" opacity="0.88"/>';
+        s+='<ellipse cx="'+cx+'" cy="'+(tipY-1)+'" rx="3.5" ry="4.5" fill="'+fc+'" opacity="0.62"/>';
+      }
+      if(stage===4){
+        var fr=9;
+        [0,60,120,180,240,300].forEach(function(ang){
+          var rad=ang*Math.PI/180;
+          var px=(cx+Math.cos(rad)*fr*1.38).toFixed(1);
+          var py=(tipY+Math.sin(rad)*fr*1.05).toFixed(1);
+          s+='<ellipse cx="'+px+'" cy="'+py+'" rx="'+(fr*0.86).toFixed(1)+'" ry="'+(fr*0.54).toFixed(1)+'" fill="'+fc+'" opacity="0.9" transform="rotate('+ang+','+px+','+py+')"/>';
+        });
+        s+='<circle cx="'+cx+'" cy="'+tipY+'" r="'+(fr*0.42).toFixed(1)+'" fill="#FFF8A0" opacity="0.96"/>';
+        s+='<circle cx="'+cx+'" cy="'+tipY+'" r="'+(fr*0.2).toFixed(1)+'" fill="#F0C830" opacity="0.9"/>';
+      }
+    }
+    return s;
   }
 
-  // Rolling ground hills (SVG overlay at bottom)
-  var hillSvg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  hillSvg.setAttribute('viewBox','0 0 400 70');hillSvg.setAttribute('preserveAspectRatio','none');
-  hillSvg.style.cssText='position:absolute;bottom:0;left:0;width:100%;height:70px;pointer-events:none;';
-  hillSvg.innerHTML='<path d="M0,70 L0,28 Q60,8 120,20 Q180,32 240,16 Q300,0 360,14 Q390,21 400,18 L400,70 Z" fill="'+g1+'"/>'
-    +'<path d="M0,70 L0,38 Q70,22 140,30 Q200,36 260,26 Q320,16 380,28 L400,32 L400,70 Z" fill="'+g2+'"/>';
-  scene.appendChild(hillSvg);
+  // Build SVG string
+  var svg='<svg viewBox="0 0 '+svgW+' '+svgH+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">'
+    +'<defs>'
+    +'<linearGradient id="gsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7DD8F0"/><stop offset="100%" stop-color="#C4EED4"/></linearGradient>'
+    +'<linearGradient id="ggn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+pal.decoGrass1+'"/><stop offset="100%" stop-color="'+pal.decoGround+'"/></linearGradient>'
+    +'</defs>'
+    +'<rect x="0" y="0" width="'+svgW+'" height="'+svgH+'" fill="url(#gsk)"/>'
+    // Sun
+    +'<circle cx="'+(svgW-16)+'" cy="18" r="13" fill="#FFD93D"/><circle cx="'+(svgW-16)+'" cy="18" r="8" fill="#FFF070" opacity="0.6"/>'
+    // Clouds
+    +'<ellipse cx="22" cy="15" rx="15" ry="6" fill="white" opacity="0.82"/><ellipse cx="32" cy="11" rx="10" ry="5" fill="white" opacity="0.75"/>'
+    +'<ellipse cx="'+(svgW*0.46).toFixed(0)+'" cy="21" rx="12" ry="5" fill="white" opacity="0.6"/><ellipse cx="'+(svgW*0.52).toFixed(0)+'" cy="17" rx="8" ry="4" fill="white" opacity="0.55"/>';
 
-  // Plant rows
-  for(var ri=0;ri<numRows;ri++){
+  // Draw rows back-to-front so front row renders on top
+  for(var ri=numRows-1;ri>=0;ri--){
     var rowActs=visibleActs.slice(ri*COLS,(ri+1)*COLS);
-    // Front row (ri=0) sits low; back row (ri=1) sits higher and scaled down
-    var groundOff=ri===0?44:180;
-    var scaleF=ri===0?1:0.74;
+    var gy=svgH-GH-ri*RH; // ground Y for this row
+
+    // Ground strip
+    svg+='<rect x="0" y="'+(gy-4)+'" width="'+svgW+'" height="'+(GH+4)+'" fill="url(#ggn)"/>';
+    // Grass blades
+    for(var gx=2;gx<svgW;gx+=7){
+      var gh=6+(gx%5),gj=(gx*7)%4-2;
+      svg+='<line x1="'+(gx+gj)+'" y1="'+gy+'" x2="'+(gx+gj-2)+'" y2="'+(gy-gh)+'" stroke="'+pal.decoGrass1+'" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>';
+    }
 
     rowActs.forEach(function(a,ci){
       var hrs=getHours(a.id),stage=getStage(hrs);
       var next=NEXT_THRESH[stage],prev=stage>0?NEXT_THRESH[stage-1]:0;
       var pct=next?Math.min((hrs-prev)/(next-prev),1):1;
-      var imgH=Math.round(STAGE_H[stage]*scaleF);
-
-      // Stable x with slight jitter per plant
-      var slotPct=(ci+0.5)/rowActs.length*100;
-      var jitter=(gpHash(a.id,'x')%14)-7;
-      var xPct=Math.max(7,Math.min(93,slotPct+jitter));
-      var yJitter=(gpHash(a.id,'y')%10)-5;
-      var botPx=groundOff+yJitter;
-
+      var cx=ci*TW+TW/2;
+      var fc=FC[(ri*COLS+ci)%FC.length];
       var dormant=gardenTab==='all'&&hasFocusSet()&&!isFocused(a.id);
       var lastSess=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
       var og=lastSess&&(Date.now()-lastSess.date>14*24*3600*1000);
+      var shortName=a.name.length>9?a.name.slice(0,8)+'…':a.name;
+      var hs=[0,22,38,56,72][stage];
 
-      var imgEl=document.getElementById(IMG_IDS[stage]);
-      var imgSrc=imgEl?imgEl.src:'';
+      svg+='<g data-pid="'+a.id+'" style="cursor:pointer;"'+(dormant?' opacity="0.38"':'')+'>';
+      svg+=dp(cx,gy,stage,fc);
 
-      var pw=document.createElement('div');
-      pw.className='gp'+(dormant?' gp-dormant':'');
-      pw.style.cssText='left:'+xPct+'%;bottom:'+botPx+'px;';
-      pw.dataset.pid=a.id;
-
-      var img=document.createElement('img');
-      img.src=imgSrc;img.className='gp-img';
-      img.style.cssText='height:'+imgH+'px;width:auto;max-width:64px;';
-      pw.appendChild(img);
-
+      // Activity emoji floating above plant tip
+      if(stage>=1){
+        svg+='<text x="'+cx+'" y="'+(gy-hs-9)+'" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">'+a.emoji+'</text>';
+      }
+      // OG indicator
       if(og&&!dormant){
-        var ogTag=document.createElement('div');
-        ogTag.style.cssText='position:absolute;top:-6px;right:-2px;font-size:11px;line-height:1;';
-        ogTag.textContent='🍂';pw.appendChild(ogTag);
+        svg+='<text x="'+(cx+14)+'" y="'+(gy-hs-2)+'" font-size="9" text-anchor="middle" font-family="system-ui">🍂</text>';
       }
-
-      var lbl=document.createElement('div');lbl.className='gp-lbl';
-      lbl.textContent=a.name;pw.appendChild(lbl);
-
-      if(stage>0){
-        var bw=document.createElement('div');bw.className='gp-bar-wrap';
-        var bf2=document.createElement('div');bf2.className='gp-bar-fill';
-        bf2.style.width=Math.round(pct*100)+'%';
-        bw.appendChild(bf2);pw.appendChild(bw);
+      // Name label in ground strip
+      svg+='<text x="'+cx+'" y="'+(gy+14)+'" text-anchor="middle" font-size="7.5" font-weight="700" fill="rgba(255,255,255,.92)" font-family="system-ui,sans-serif" paint-order="stroke" stroke="rgba(0,0,0,.28)" stroke-width="2">'+shortName+'</text>';
+      // Stage progress dots
+      var ds=5,totalD=4,startDX=cx-(totalD-1)*ds/2;
+      for(var di=0;di<totalD;di++){
+        svg+='<circle cx="'+(startDX+di*ds)+'" cy="'+(gy+25)+'" r="1.8" fill="'+(di<stage?'rgba(255,255,255,.9)':'rgba(255,255,255,.28)')+'"/>';
       }
-
-      pw.addEventListener('click',(function(pid){return function(){showPlantInfo(pid);};})(a.id));
-      scene.appendChild(pw);
+      svg+='</g>';
     });
   }
 
-  wrap.innerHTML='';wrap.appendChild(scene);
+  // Butterfly if any blooms
+  if(bloomCount>0){
+    svg+='<text x="'+(svgW*0.18).toFixed(0)+'" y="'+(SH+PA*0.45).toFixed(0)+'" font-size="13" font-family="system-ui" opacity="0.8">🦋</text>';
+  }
+
+  svg+='</svg>';
+
+  var container=document.createElement('div');
+  container.style.cssText='margin:0 16px 20px;border-radius:22px;overflow:hidden;box-shadow:0 6px 28px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.06);';
+  container.innerHTML=svg;
+  container.querySelectorAll('[data-pid]').forEach(function(el){
+    el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});
+  });
+
+  wrap.innerHTML='';wrap.appendChild(container);
   var helpBtn=document.getElementById('garden-help-btn');
   if(helpBtn){helpBtn.onclick=null;helpBtn.addEventListener('click',openGardenHelp);}
 }
