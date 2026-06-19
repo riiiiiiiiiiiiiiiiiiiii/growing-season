@@ -4913,26 +4913,41 @@ function rGarden(){
   // Stem heights per stage
   var HS=[0,30,54,78,104];
 
-  // Draw a single SVG plant centered at (cx, groundY)
-  function dp(cx,gy,stage,fc){
+  // Stable per-plant hash for stem sway direction
+  function phash(s){var h=0;for(var i=0;i<s.length;i++)h=(31*h+s.charCodeAt(i))|0;return Math.abs(h);}
+
+  // Draw a single SVG plant centered at (cx, groundY) with organic curves
+  function dp(cx,gy,stage,fc,sw){
     var hs=HS[stage];
-    var s='<ellipse cx="'+cx+'" cy="'+gy+'" rx="16" ry="4.5" fill="rgba(0,0,0,.18)"/>';
+    var s='';
     if(stage===0){
-      s+='<circle cx="'+cx+'" cy="'+(gy-4)+'" r="5.5" fill="#8B9A3A" opacity="0.82"/>';
-      s+='<line x1="'+cx+'" y1="'+(gy-9)+'" x2="'+(cx-5)+'" y2="'+(gy-19)+'" stroke="'+stemC+'" stroke-width="2.2" stroke-linecap="round"/>';
-      s+='<ellipse cx="'+(cx-6)+'" cy="'+(gy-22)+'" rx="5.5" ry="3" fill="'+stemC+'" opacity="0.72" transform="rotate(-35,'+(cx-6)+','+(gy-22)+')"/>';
+      // Sprouting seed — small dome + first tiny leaf
+      s+='<path d="M '+(cx-7)+','+gy+' C '+(cx-10)+','+(gy-20)+' '+(cx+10)+','+(gy-20)+' '+(cx+7)+','+gy+' Z" fill="'+stemC+'" opacity="0.75"/>';
+      s+='<path d="M '+(cx-2)+','+(gy-17)+' C '+(cx-10)+','+(gy-24)+' '+(cx-12)+','+(gy-30)+' '+(cx-7)+','+(gy-29)+' C '+(cx-2)+','+(gy-28)+' '+(cx)+','+(gy-22)+' '+(cx-2)+','+(gy-17)+' Z" fill="'+stemC+'" opacity="0.82"/>';
     } else {
       var tipY=gy-hs;
-      s+='<line x1="'+cx+'" y1="'+gy+'" x2="'+cx+'" y2="'+tipY+'" stroke="'+stemC+'" stroke-width="3.5" stroke-linecap="round"/>';
+      var mx=cx+sw; // curve midpoint for stem sway
+      // Curved stem (quadratic bezier)
+      s+='<path d="M '+cx+','+gy+' Q '+mx+','+(gy-hs*0.5)+' '+cx+','+tipY+'" fill="none" stroke="'+stemC+'" stroke-width="3.5" stroke-linecap="round"/>';
+      if(stage===1){
+        // Two small leaves fanning from tip
+        s+='<path d="M '+cx+','+tipY+' C '+(cx-16)+','+(tipY-5)+' '+(cx-15)+','+(tipY+7)+' '+cx+','+(tipY+5)+' Z" fill="'+stemC+'" opacity="0.82"/>';
+        s+='<path d="M '+cx+','+tipY+' C '+(cx+16)+','+(tipY-5)+' '+(cx+15)+','+(tipY+7)+' '+cx+','+(tipY+5)+' Z" fill="'+stemC+'" opacity="0.78"/>';
+      }
       if(stage>=2){
-        var l1x=(cx+12).toFixed(1),l1y=(gy-hs*0.36).toFixed(1);
-        s+='<ellipse cx="'+l1x+'" cy="'+l1y+'" rx="11" ry="4.5" fill="'+stemC+'" opacity="0.72" transform="rotate(-40,'+l1x+','+l1y+')"/>';
-        var l2x=(cx-11).toFixed(1),l2y=(gy-hs*0.6).toFixed(1);
-        s+='<ellipse cx="'+l2x+'" cy="'+l2y+'" rx="9" ry="4" fill="'+stemC+'" opacity="0.62" transform="rotate(36,'+l2x+','+l2y+')"/>';
+        // Organic bezier leaves
+        var lh=hs*0.28;
+        var ly1=gy-hs*0.38;
+        s+='<path d="M '+cx+','+ly1+' C '+(cx+22)+','+(ly1-lh*0.4)+' '+(cx+20)+','+(ly1+lh*0.65)+' '+cx+','+(ly1+lh*0.1)+' Z" fill="'+stemC+'" opacity="0.7"/>';
+        var ly2=gy-hs*0.62;
+        s+='<path d="M '+cx+','+ly2+' C '+(cx-20)+','+(ly2-lh*0.4)+' '+(cx-18)+','+(ly2+lh*0.65)+' '+cx+','+(ly2+lh*0.1)+' Z" fill="'+stemC+'" opacity="0.6"/>';
       }
       if(stage===3){
-        s+='<ellipse cx="'+cx+'" cy="'+(tipY+4)+'" rx="7" ry="11" fill="'+fc+'" opacity="0.88"/>';
-        s+='<ellipse cx="'+cx+'" cy="'+(tipY-2)+'" rx="5" ry="6" fill="'+fc+'" opacity="0.6"/>';
+        // Elegant teardrop bud
+        s+='<path d="M '+cx+','+(tipY+13)+' C '+(cx-10)+','+(tipY+7)+' '+(cx-10)+','+(tipY-7)+' '+cx+','+(tipY-11)+' C '+(cx+10)+','+(tipY-7)+' '+(cx+10)+','+(tipY+7)+' '+cx+','+(tipY+13)+' Z" fill="'+fc+'" opacity="0.9"/>';
+        // Sepal hints
+        s+='<path d="M '+cx+','+(tipY+13)+' C '+(cx-7)+','+(tipY+18)+' '+(cx-9)+','+(tipY+15)+' '+(cx-5)+','+(tipY+13)+'" fill="none" stroke="'+stemC+'" stroke-width="1.5" stroke-linecap="round"/>';
+        s+='<path d="M '+cx+','+(tipY+13)+' C '+(cx+7)+','+(tipY+18)+' '+(cx+9)+','+(tipY+15)+' '+(cx+5)+','+(tipY+13)+'" fill="none" stroke="'+stemC+'" stroke-width="1.5" stroke-linecap="round"/>';
       }
       if(stage===4){
         var fr=13;
@@ -4940,10 +4955,10 @@ function rGarden(){
           var rad=ang*Math.PI/180;
           var px=(cx+Math.cos(rad)*fr*1.38).toFixed(1);
           var py=(tipY+Math.sin(rad)*fr*1.05).toFixed(1);
-          s+='<ellipse cx="'+px+'" cy="'+py+'" rx="'+(fr*0.86).toFixed(1)+'" ry="'+(fr*0.55).toFixed(1)+'" fill="'+fc+'" opacity="0.9" transform="rotate('+ang+','+px+','+py+')"/>';
+          s+='<ellipse cx="'+px+'" cy="'+py+'" rx="'+(fr*0.86).toFixed(1)+'" ry="'+(fr*0.55).toFixed(1)+'" fill="'+fc+'" opacity="0.92" transform="rotate('+ang+','+px+','+py+')"/>';
         });
         s+='<circle cx="'+cx+'" cy="'+tipY+'" r="'+(fr*0.42).toFixed(1)+'" fill="#FFF8A0" opacity="0.97"/>';
-        s+='<circle cx="'+cx+'" cy="'+tipY+'" r="'+(fr*0.2).toFixed(1)+'" fill="#F0C830" opacity="0.9"/>';
+        s+='<circle cx="'+cx+'" cy="'+tipY+'" r="'+(fr*0.2).toFixed(1)+'" fill="#F0C830" opacity="0.92"/>';
       }
     }
     return s;
@@ -4972,10 +4987,11 @@ function rGarden(){
 
     // Ground strip
     svg+='<rect x="0" y="'+(gy-4)+'" width="'+svgW+'" height="'+(GH+4)+'" fill="url(#ggn)"/>';
-    // Grass blades
+    // Grass blades (two-layer)
     for(var gx=2;gx<svgW;gx+=8){
-      var gh=8+(gx%6),gj=(gx*7)%5-2;
-      svg+='<line x1="'+(gx+gj)+'" y1="'+gy+'" x2="'+(gx+gj-2)+'" y2="'+(gy-gh)+'" stroke="'+pal.decoGrass1+'" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>';
+      var gh1=10+(gx%7),gh2=7+(gx%5),gj=(gx*7)%4-2;
+      svg+='<line x1="'+(gx+gj)+'" y1="'+gy+'" x2="'+(gx+gj-2)+'" y2="'+(gy-gh1)+'" stroke="'+pal.decoGrass1+'" stroke-width="1.6" stroke-linecap="round" opacity="0.65"/>';
+      svg+='<line x1="'+(gx+gj+4)+'" y1="'+gy+'" x2="'+(gx+gj+6)+'" y2="'+(gy-gh2)+'" stroke="'+pal.decoGrass2+'" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>';
     }
 
     rowActs.forEach(function(a,ci){
@@ -4988,7 +5004,8 @@ function rGarden(){
       var shortName=a.name.length>10?a.name.slice(0,9)+'.':a.name;
 
       svg+='<g data-pid="'+a.id+'" style="cursor:pointer;"'+(dormant?' opacity="0.32"':'')+'>';
-      svg+=dp(cx,gy,stage,fc);
+      var sw=((phash(a.id)%3)-1)*10;
+      svg+=dp(cx,gy,stage,fc,sw);
 
       // Name label — bigger and clearly readable
       svg+='<text x="'+cx+'" y="'+(gy+18)+'" text-anchor="middle" font-size="10" font-weight="700" fill="rgba(255,255,255,.95)" font-family="system-ui,sans-serif" paint-order="stroke" stroke="rgba(0,0,0,.35)" stroke-width="2.5">'+shortName+'</text>';
