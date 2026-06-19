@@ -4898,78 +4898,84 @@ function rGarden(){
   var FC=['#F4A0B8','#D4A0DC','#F8B890','#F8D860','#90D8B8','#B0A8E8','#F8A8A0','#A0C8E0'];
 
   var n=visibleActs.length;
-  var COLS=Math.min(n,6);
+  var COLS=Math.min(n,4);      // max 4 per row — bigger plants
   var numRows=Math.ceil(n/COLS);
 
   // SVG layout constants
-  var TW=72;           // tile width per plant
-  var PA=96;           // plant area height above ground line
-  var GH=36;           // ground strip height (name + dots)
-  var RH=PA+GH;        // total row height
-  var SH=44;           // sky header at top
+  var TW=90;           // tile width per plant
+  var PA=130;          // plant area height above ground line
+  var GH=46;           // ground strip height (name + dots)
+  var RH=PA+GH;
+  var SH=52;           // sky header at top
   var svgW=TW*COLS;
   var svgH=SH+RH*numRows;
 
+  // Stem heights per stage
+  var HS=[0,30,54,78,104];
+
   // Draw a single SVG plant centered at (cx, groundY)
   function dp(cx,gy,stage,fc){
-    var hs=[0,22,38,56,72][stage];
-    var s='<ellipse cx="'+cx+'" cy="'+gy+'" rx="13" ry="3.5" fill="rgba(0,0,0,.18)"/>';
+    var hs=HS[stage];
+    var s='<ellipse cx="'+cx+'" cy="'+gy+'" rx="16" ry="4.5" fill="rgba(0,0,0,.18)"/>';
     if(stage===0){
-      s+='<circle cx="'+cx+'" cy="'+(gy-3.5)+'" r="4" fill="#8B9A3A" opacity="0.8"/>';
-      s+='<line x1="'+cx+'" y1="'+(gy-7)+'" x2="'+(cx-4)+'" y2="'+(gy-14)+'" stroke="'+stemC+'" stroke-width="1.8" stroke-linecap="round"/>';
-      s+='<ellipse cx="'+(cx-5)+'" cy="'+(gy-16)+'" rx="4" ry="2.5" fill="'+stemC+'" opacity="0.7" transform="rotate(-35,'+(cx-5)+','+(gy-16)+')"/>';
+      s+='<circle cx="'+cx+'" cy="'+(gy-4)+'" r="5.5" fill="#8B9A3A" opacity="0.82"/>';
+      s+='<line x1="'+cx+'" y1="'+(gy-9)+'" x2="'+(cx-5)+'" y2="'+(gy-19)+'" stroke="'+stemC+'" stroke-width="2.2" stroke-linecap="round"/>';
+      s+='<ellipse cx="'+(cx-6)+'" cy="'+(gy-22)+'" rx="5.5" ry="3" fill="'+stemC+'" opacity="0.72" transform="rotate(-35,'+(cx-6)+','+(gy-22)+')"/>';
     } else {
       var tipY=gy-hs;
-      s+='<line x1="'+cx+'" y1="'+gy+'" x2="'+cx+'" y2="'+tipY+'" stroke="'+stemC+'" stroke-width="2.8" stroke-linecap="round"/>';
+      s+='<line x1="'+cx+'" y1="'+gy+'" x2="'+cx+'" y2="'+tipY+'" stroke="'+stemC+'" stroke-width="3.5" stroke-linecap="round"/>';
       if(stage>=2){
-        var l1x=(cx+9).toFixed(1),l1y=(gy-hs*0.36).toFixed(1);
-        s+='<ellipse cx="'+l1x+'" cy="'+l1y+'" rx="8" ry="3.5" fill="'+stemC+'" opacity="0.72" transform="rotate(-38,'+l1x+','+l1y+')"/>';
-        var l2x=(cx-8).toFixed(1),l2y=(gy-hs*0.6).toFixed(1);
-        s+='<ellipse cx="'+l2x+'" cy="'+l2y+'" rx="7" ry="3" fill="'+stemC+'" opacity="0.62" transform="rotate(34,'+l2x+','+l2y+')"/>';
+        var l1x=(cx+12).toFixed(1),l1y=(gy-hs*0.36).toFixed(1);
+        s+='<ellipse cx="'+l1x+'" cy="'+l1y+'" rx="11" ry="4.5" fill="'+stemC+'" opacity="0.72" transform="rotate(-40,'+l1x+','+l1y+')"/>';
+        var l2x=(cx-11).toFixed(1),l2y=(gy-hs*0.6).toFixed(1);
+        s+='<ellipse cx="'+l2x+'" cy="'+l2y+'" rx="9" ry="4" fill="'+stemC+'" opacity="0.62" transform="rotate(36,'+l2x+','+l2y+')"/>';
       }
       if(stage===3){
-        s+='<ellipse cx="'+cx+'" cy="'+(tipY+3)+'" rx="5" ry="8" fill="'+fc+'" opacity="0.88"/>';
-        s+='<ellipse cx="'+cx+'" cy="'+(tipY-1)+'" rx="3.5" ry="4.5" fill="'+fc+'" opacity="0.62"/>';
+        s+='<ellipse cx="'+cx+'" cy="'+(tipY+4)+'" rx="7" ry="11" fill="'+fc+'" opacity="0.88"/>';
+        s+='<ellipse cx="'+cx+'" cy="'+(tipY-2)+'" rx="5" ry="6" fill="'+fc+'" opacity="0.6"/>';
       }
       if(stage===4){
-        var fr=9;
+        var fr=13;
         [0,60,120,180,240,300].forEach(function(ang){
           var rad=ang*Math.PI/180;
           var px=(cx+Math.cos(rad)*fr*1.38).toFixed(1);
           var py=(tipY+Math.sin(rad)*fr*1.05).toFixed(1);
-          s+='<ellipse cx="'+px+'" cy="'+py+'" rx="'+(fr*0.86).toFixed(1)+'" ry="'+(fr*0.54).toFixed(1)+'" fill="'+fc+'" opacity="0.9" transform="rotate('+ang+','+px+','+py+')"/>';
+          s+='<ellipse cx="'+px+'" cy="'+py+'" rx="'+(fr*0.86).toFixed(1)+'" ry="'+(fr*0.55).toFixed(1)+'" fill="'+fc+'" opacity="0.9" transform="rotate('+ang+','+px+','+py+')"/>';
         });
-        s+='<circle cx="'+cx+'" cy="'+tipY+'" r="'+(fr*0.42).toFixed(1)+'" fill="#FFF8A0" opacity="0.96"/>';
+        s+='<circle cx="'+cx+'" cy="'+tipY+'" r="'+(fr*0.42).toFixed(1)+'" fill="#FFF8A0" opacity="0.97"/>';
         s+='<circle cx="'+cx+'" cy="'+tipY+'" r="'+(fr*0.2).toFixed(1)+'" fill="#F0C830" opacity="0.9"/>';
       }
     }
     return s;
   }
 
-  // Build SVG string
+  // Build SVG string — no emojis anywhere
   var svg='<svg viewBox="0 0 '+svgW+' '+svgH+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">'
     +'<defs>'
     +'<linearGradient id="gsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7DD8F0"/><stop offset="100%" stop-color="#C4EED4"/></linearGradient>'
     +'<linearGradient id="ggn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+pal.decoGrass1+'"/><stop offset="100%" stop-color="'+pal.decoGround+'"/></linearGradient>'
     +'</defs>'
     +'<rect x="0" y="0" width="'+svgW+'" height="'+svgH+'" fill="url(#gsk)"/>'
-    // Sun
-    +'<circle cx="'+(svgW-16)+'" cy="18" r="13" fill="#FFD93D"/><circle cx="'+(svgW-16)+'" cy="18" r="8" fill="#FFF070" opacity="0.6"/>'
-    // Clouds
-    +'<ellipse cx="22" cy="15" rx="15" ry="6" fill="white" opacity="0.82"/><ellipse cx="32" cy="11" rx="10" ry="5" fill="white" opacity="0.75"/>'
-    +'<ellipse cx="'+(svgW*0.46).toFixed(0)+'" cy="21" rx="12" ry="5" fill="white" opacity="0.6"/><ellipse cx="'+(svgW*0.52).toFixed(0)+'" cy="17" rx="8" ry="4" fill="white" opacity="0.55"/>';
+    // Sun (SVG circles only)
+    +'<circle cx="'+(svgW-22)+'" cy="22" r="17" fill="#FFD93D"/>'
+    +'<circle cx="'+(svgW-22)+'" cy="22" r="10" fill="#FFF070" opacity="0.55"/>'
+    // Clouds (SVG ellipses only)
+    +'<ellipse cx="26" cy="18" rx="20" ry="8" fill="white" opacity="0.8"/>'
+    +'<ellipse cx="40" cy="13" rx="13" ry="6" fill="white" opacity="0.7"/>'
+    +'<ellipse cx="'+(svgW*0.5).toFixed(0)+'" cy="26" rx="16" ry="6" fill="white" opacity="0.55"/>'
+    +'<ellipse cx="'+(svgW*0.57).toFixed(0)+'" cy="20" rx="10" ry="5" fill="white" opacity="0.5"/>';
 
   // Draw rows back-to-front so front row renders on top
   for(var ri=numRows-1;ri>=0;ri--){
     var rowActs=visibleActs.slice(ri*COLS,(ri+1)*COLS);
-    var gy=svgH-GH-ri*RH; // ground Y for this row
+    var gy=svgH-GH-ri*RH;
 
     // Ground strip
     svg+='<rect x="0" y="'+(gy-4)+'" width="'+svgW+'" height="'+(GH+4)+'" fill="url(#ggn)"/>';
     // Grass blades
-    for(var gx=2;gx<svgW;gx+=7){
-      var gh=6+(gx%5),gj=(gx*7)%4-2;
-      svg+='<line x1="'+(gx+gj)+'" y1="'+gy+'" x2="'+(gx+gj-2)+'" y2="'+(gy-gh)+'" stroke="'+pal.decoGrass1+'" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>';
+    for(var gx=2;gx<svgW;gx+=8){
+      var gh=8+(gx%6),gj=(gx*7)%5-2;
+      svg+='<line x1="'+(gx+gj)+'" y1="'+gy+'" x2="'+(gx+gj-2)+'" y2="'+(gy-gh)+'" stroke="'+pal.decoGrass1+'" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/>';
     }
 
     rowActs.forEach(function(a,ci){
@@ -4979,36 +4985,21 @@ function rGarden(){
       var cx=ci*TW+TW/2;
       var fc=FC[(ri*COLS+ci)%FC.length];
       var dormant=gardenTab==='all'&&hasFocusSet()&&!isFocused(a.id);
-      var lastSess=sessions.filter(function(s){return s.actId===a.id;}).sort(function(x,y){return y.date-x.date;})[0];
-      var og=lastSess&&(Date.now()-lastSess.date>14*24*3600*1000);
-      var shortName=a.name.length>9?a.name.slice(0,8)+'…':a.name;
-      var hs=[0,22,38,56,72][stage];
+      var shortName=a.name.length>10?a.name.slice(0,9)+'.':a.name;
 
-      svg+='<g data-pid="'+a.id+'" style="cursor:pointer;"'+(dormant?' opacity="0.38"':'')+'>';
+      svg+='<g data-pid="'+a.id+'" style="cursor:pointer;"'+(dormant?' opacity="0.32"':'')+'>';
       svg+=dp(cx,gy,stage,fc);
 
-      // Activity emoji floating above plant tip
-      if(stage>=1){
-        svg+='<text x="'+cx+'" y="'+(gy-hs-9)+'" font-size="11" text-anchor="middle" font-family="system-ui,sans-serif">'+a.emoji+'</text>';
-      }
-      // OG indicator
-      if(og&&!dormant){
-        svg+='<text x="'+(cx+14)+'" y="'+(gy-hs-2)+'" font-size="9" text-anchor="middle" font-family="system-ui">🍂</text>';
-      }
-      // Name label in ground strip
-      svg+='<text x="'+cx+'" y="'+(gy+14)+'" text-anchor="middle" font-size="7.5" font-weight="700" fill="rgba(255,255,255,.92)" font-family="system-ui,sans-serif" paint-order="stroke" stroke="rgba(0,0,0,.28)" stroke-width="2">'+shortName+'</text>';
+      // Name label — bigger and clearly readable
+      svg+='<text x="'+cx+'" y="'+(gy+18)+'" text-anchor="middle" font-size="10" font-weight="700" fill="rgba(255,255,255,.95)" font-family="system-ui,sans-serif" paint-order="stroke" stroke="rgba(0,0,0,.35)" stroke-width="2.5">'+shortName+'</text>';
+
       // Stage progress dots
-      var ds=5,totalD=4,startDX=cx-(totalD-1)*ds/2;
+      var ds=7,totalD=4,startDX=cx-(totalD-1)*ds/2;
       for(var di=0;di<totalD;di++){
-        svg+='<circle cx="'+(startDX+di*ds)+'" cy="'+(gy+25)+'" r="1.8" fill="'+(di<stage?'rgba(255,255,255,.9)':'rgba(255,255,255,.28)')+'"/>';
+        svg+='<circle cx="'+(startDX+di*ds)+'" cy="'+(gy+32)+'" r="2.8" fill="'+(di<stage?'rgba(255,255,255,.95)':'rgba(255,255,255,.25)')+'"/>';
       }
       svg+='</g>';
     });
-  }
-
-  // Butterfly if any blooms
-  if(bloomCount>0){
-    svg+='<text x="'+(svgW*0.18).toFixed(0)+'" y="'+(SH+PA*0.45).toFixed(0)+'" font-size="13" font-family="system-ui" opacity="0.8">🦋</text>';
   }
 
   svg+='</svg>';
