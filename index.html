@@ -225,6 +225,10 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
 .btn:active{transform:scale(.96);box-shadow:inset 0 2px 6px rgba(0,0,0,.12)!important;}
 .btn-p{box-shadow:var(--btn-p-sh);}
 .btn-co{box-shadow:0 3px 10px rgba(242,78,30,.28);}
+.iconbtn{background:none;border:none;font-size:22px;line-height:1;cursor:pointer;color:var(--tx3);padding:6px 10px;margin:-6px -10px;border-radius:8px;touch-action:manipulation;transition:background .12s,color .12s,transform .12s;-webkit-tap-highlight-color:transparent;}
+.iconbtn:hover{background:var(--bg2);color:var(--tx2);}
+.iconbtn:active{background:var(--bg3);transform:scale(.94);}
+.iconbtn.back{color:var(--tx2);}
 .nb{transition:transform .16s cubic-bezier(.34,1.4,.64,1);}
 .nb:active{transform:scale(.93);}
 .fab{transition:transform .18s cubic-bezier(.34,1.4,.64,1),box-shadow .18s;}
@@ -637,7 +641,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     <div class="sh">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <div style="font-family:var(--serif);font-size:20px;font-weight:700;">Collections</div>
-        <button id="btn-collect-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;touch-action:manipulation;">×</button>
+        <button id="btn-collect-close" class="iconbtn" aria-label="Close">×</button>
       </div>
       <div style="font-size:13px;color:var(--tx2);margin-bottom:18px;">Rewards for growing</div>
       <div id="collect-pending-wrap"></div>
@@ -754,7 +758,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
         <div id="conv-name" style="font-size:15px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
         <div id="conv-un" style="font-size:12px;color:var(--tx3);"></div>
       </div>
-      <button id="btn-conv-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;touch-action:manipulation;">×</button>
+      <button id="btn-conv-close" class="iconbtn" aria-label="Close">×</button>
     </div>
     <div id="conv-msgs"></div>
     <div style="padding:10px 14px;border-top:.5px solid var(--bg3);display:flex;gap:8px;align-items:center;flex-shrink:0;background:var(--bg);padding-bottom:max(10px,env(safe-area-inset-bottom));">
@@ -784,7 +788,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
       <button id="btn-notes-back" style="display:none;background:none;border:none;font-size:20px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;touch-action:manipulation;">‹</button>
       <div style="flex:1;font-family:var(--serif);font-size:20px;font-weight:700;" id="notes-title">Notes</div>
-      <button id="btn-notes-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;touch-action:manipulation;">×</button>
+      <button id="btn-notes-close" class="iconbtn" aria-label="Close">×</button>
     </div>
     <div id="notes-body"></div>
   </div>
@@ -795,7 +799,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
   <div class="sh" id="cal-sh" style="max-width:480px;padding:22px 18px 28px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
       <div style="font-family:var(--serif);font-size:20px;font-weight:700;" id="cal-title">Calendar</div>
-      <button id="btn-cal-close" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);line-height:1;padding:0;touch-action:manipulation;">×</button>
+      <button id="btn-cal-close" class="iconbtn" aria-label="Close">×</button>
     </div>
     <div id="cal-body"></div>
   </div>
@@ -2016,7 +2020,7 @@ function renderCalWeek(){
   var titleRow=document.createElement('div');
   titleRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;';
   var titleLbl=document.createElement('div');titleLbl.style.cssText='font-family:var(--serif);font-size:20px;font-weight:700;';titleLbl.textContent='Calendar';
-  var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;touch-action:manipulation;';closeBtn.textContent='×';
+  var closeBtn=document.createElement('button');closeBtn.className='iconbtn';closeBtn.setAttribute('aria-label','Close');closeBtn.textContent='×';
   closeBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
   titleRow.appendChild(titleLbl);titleRow.appendChild(closeBtn);
   topBar.appendChild(titleRow);
@@ -2097,7 +2101,7 @@ function renderCalWeek(){
     calRoutines.forEach(function(r){
       var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--bg2);border-radius:10px;margin-bottom:6px;cursor:pointer;';
       var dayStr=r.days.length===7?'Every day':r.days.length===5&&r.days.every(function(d){return d<5;})?'Weekdays':r.days.map(function(d){return DNAMES_SHORT[d];}).join(', ');
-      row.innerHTML='<span style="font-size:18px;">'+r.actEmoji+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+r.actName+'</div><div style="font-size:11px;color:var(--tx3);">'+dayStr+' · '+_fmtHour(r.hour)+'</div></div><button style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--tx3);padding:2px 4px;flex-shrink:0;">✕</button>';
+      row.innerHTML='<span style="font-size:18px;">'+r.actEmoji+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+r.actName+'</div><div style="font-size:11px;color:var(--tx3);">'+dayStr+' · '+_fmtHour(r.hour)+'</div></div><button aria-label="Remove routine" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--tx3);padding:2px 4px;flex-shrink:0;">✕</button>';
       row.querySelector('button').addEventListener('click',function(e){e.stopPropagation();if(!confirm('Remove this routine?'))return;calRoutines=calRoutines.filter(function(x){return x.id!==r.id;});sv();renderCalWeek();updateHomeNudge();});
       rtSec.appendChild(row);
     });
@@ -2136,12 +2140,12 @@ function renderCalWeekDetails(mon,wkSess){
   navHdr.style.cssText='padding:22px 16px 18px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
   var topRow=document.createElement('div');topRow.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;';
   var lbl=document.createElement('div');lbl.style.cssText='font-family:var(--serif);font-size:17px;font-weight:700;margin-left:2px;margin-top:2px;';lbl.textContent='Week breakdown';
-  var closeBtn=document.createElement('button');closeBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;touch-action:manipulation;';closeBtn.textContent='×';
+  var closeBtn=document.createElement('button');closeBtn.className='iconbtn';closeBtn.setAttribute('aria-label','Close');closeBtn.textContent='×';
   closeBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
   topRow.appendChild(lbl);topRow.appendChild(closeBtn);
   var dateRow=document.createElement('div');dateRow.style.cssText='display:flex;align-items:center;gap:8px;';
   var backBtn=document.createElement('button');
-  backBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';backBtn.textContent='‹';
+  backBtn.className='iconbtn back';backBtn.setAttribute('aria-label','Back');backBtn.textContent='‹';
   backBtn.addEventListener('click',function(){sh.style.cssText='max-width:480px;padding:28px 20px 28px;';_transitionSheet(sh,renderCalWeek);});
   var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;font-size:14px;font-weight:500;color:var(--tx2);';
   titleWrap.textContent=MNAMES[mon.getMonth()]+' '+mon.getDate()+'–'+sun.getDate();
@@ -2227,7 +2231,7 @@ function renderCalDay(dateObj){
   var navHdr=document.createElement('div');
   navHdr.style.cssText='display:flex;align-items:center;gap:8px;padding:16px 16px 18px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
   var backBtn=document.createElement('button');
-  backBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx2);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';
+  backBtn.className='iconbtn back';backBtn.setAttribute('aria-label','Back');
   backBtn.textContent='‹';
   backBtn.addEventListener('click',function(){sh.style.cssText='max-width:480px;padding:20px 18px 28px;';_transitionSheet(sh,renderCalWeek);});
   var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;';
@@ -2235,11 +2239,12 @@ function renderCalDay(dateObj){
   var dateLbl=document.createElement('div');dateLbl.style.cssText='font-family:var(--serif);font-size:16px;font-weight:700;color:var(--tx);';
   dateLbl.textContent=DNAMES[_calDayDate.getDay()]+', '+_calDayDate.getDate()+' '+MNAMES[_calDayDate.getMonth()];
   titleWrap.appendChild(dateLbl);
-  var calDayCloseBtn=document.createElement('button');calDayCloseBtn.style.cssText='background:none;border:none;font-size:22px;cursor:pointer;color:var(--tx3);padding:0;line-height:1;flex-shrink:0;touch-action:manipulation;';calDayCloseBtn.textContent='×';
+  var calDayCloseBtn=document.createElement('button');calDayCloseBtn.className='iconbtn';calDayCloseBtn.setAttribute('aria-label','Close');calDayCloseBtn.textContent='×';
   calDayCloseBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
   var navBtns=document.createElement('div');navBtns.style.cssText='display:flex;gap:4px;flex-shrink:0;';
   ['‹','›'].forEach(function(ar,i){
-    var b=document.createElement('button');b.style.cssText='background:var(--bg2);border:var(--br);border-radius:8px;width:30px;height:30px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);touch-action:manipulation;';
+    var b=document.createElement('button');b.style.cssText='background:var(--bg2);border:var(--br);border-radius:8px;width:34px;height:34px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);touch-action:manipulation;';
+    b.setAttribute('aria-label',i===0?'Previous day':'Next day');
     b.textContent=ar;
     b.addEventListener('click',function(){
       var nd=new Date(_calDayDate);nd.setDate(nd.getDate()+(i===0?-1:1));
@@ -2294,7 +2299,7 @@ function renderCalDay(dateObj){
     dayPlanned.forEach(function(ev){
       var isPast=new Date(ev.date).setHours(ev.hour+Math.ceil(ev.duration||1),0,0,0)<=Date.now();
       var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:12px;margin-bottom:6px;cursor:pointer;';
-      row.innerHTML='<span style="font-size:18px;flex-shrink:0;">'+ev.actEmoji+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+ev.actName+'</div><div style="font-size:11px;color:var(--tx3);">Planned · '+_fmtHour(ev.hour)+(ev.duration?(' · '+_fmtMins(ev.duration*60)):'')+'</div></div>'+(isPast?'<button style="background:var(--gr);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;">Log</button>':'<button style="background:none;border:none;font-size:15px;cursor:pointer;color:var(--tx3);flex-shrink:0;">✕</button>');
+      row.innerHTML='<span style="font-size:18px;flex-shrink:0;">'+ev.actEmoji+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+ev.actName+'</div><div style="font-size:11px;color:var(--tx3);">Planned · '+_fmtHour(ev.hour)+(ev.duration?(' · '+_fmtMins(ev.duration*60)):'')+'</div></div>'+(isPast?'<button style="background:var(--gr);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;">Log</button>':'<button aria-label="Remove planned event" style="background:none;border:none;font-size:15px;cursor:pointer;color:var(--tx3);flex-shrink:0;">✕</button>');
       var btn=row.querySelector('button');
       if(isPast){
         btn.addEventListener('click',function(e){e.stopPropagation();document.getElementById('cal-ov').classList.remove('on');calPlanned=calPlanned.filter(function(p){return p.id!==ev.id;});sv();var act=myActs.find(function(a){return a.id===ev.actId;});if(act){setupLogScreen(act.id,'home',null);}});
@@ -2938,7 +2943,7 @@ async function renderRequests(){
           +'<div class="fr-info"><div class="fr-name">'+name+'</div><div class="fr-un">@'+un+'</div></div>'
           +'<div class="fr-acts">'
             +'<button style="background:var(--gr);color:#fff;" data-reqid="'+req.id+'" class="fr-action-btn fr-accept-btn">Accept</button>'
-            +'<button style="background:var(--bg2);color:var(--tx2);border:var(--br);" data-reqid="'+req.id+'" class="fr-action-btn fr-decline-btn">✕</button>'
+            +'<button aria-label="Decline request" style="background:var(--bg2);color:var(--tx2);border:var(--br);" data-reqid="'+req.id+'" class="fr-action-btn fr-decline-btn">✕</button>'
           +'</div>';
         row.querySelector('.fr-accept-btn').addEventListener('click',async function(){
           var id=this.dataset.reqid;
@@ -3597,18 +3602,25 @@ function setupLogScreen(id,from,startedAt){
 function _fmtMins(m){if(m===0)return '0m';return(m>=60?Math.floor(m/60)+'h ':'')+(m%60?m%60+'m':'');}
 function _periodMins(sArr){return sArr.reduce(function(t,s){return t+(s.hours||0)*60+(s.mins||0);},0);}
 
+var STREAK_GRACE=3;
 function calcStreak(){
   if(!sessions.length)return 0;
   var today=new Date();today.setHours(0,0,0,0);
   var todayMs=today.getTime();
   var hasTodaySess=sessions.some(function(s){return s.date>=todayMs&&s.date<todayMs+86400000;});
-  var streak=0;
+  var earliestSess=sessions.reduce(function(m,s){return s.date<m?s.date:m;},Infinity);
+  var earliestDay=new Date(earliestSess);earliestDay.setHours(0,0,0,0);
+  var streak=0,graceUsed=0;
   var d=new Date(today);
   if(!hasTodaySess)d.setDate(d.getDate()-1);
-  while(true){
+  while(d.getTime()>=earliestDay.getTime()){
     var start=d.getTime(),end=start+86400000;
-    if(!sessions.some(function(s){return s.date>=start&&s.date<end;}))break;
-    streak++;
+    if(sessions.some(function(s){return s.date>=start&&s.date<end;})){
+      streak++;
+    } else {
+      graceUsed++;
+      if(graceUsed>STREAK_GRACE)break;
+    }
     d.setDate(d.getDate()-1);
   }
   return streak;
@@ -4341,8 +4353,15 @@ function getStreakAt(actId, date){
     var sd=new Date(s.date);sd.setHours(0,0,0,0);return sd.getTime();
   });
   actDays=actDays.filter(function(v,i){return actDays.indexOf(v)===i;});
-  var streak=0,check=d.getTime();
-  while(actDays.indexOf(check)>-1){streak++;check-=dayMs;}
+  if(!actDays.length)return 0;
+  var earliest=Math.min.apply(null,actDays);
+  var streak=0,graceUsed=0,check=d.getTime();
+  if(actDays.indexOf(check)===-1){check-=dayMs;}
+  while(check>=earliest){
+    if(actDays.indexOf(check)>-1){streak++;}
+    else{graceUsed++;if(graceUsed>STREAK_GRACE)break;}
+    check-=dayMs;
+  }
   return streak;
 }
 var histSearch='', histPeriod='all', histCustomFrom=null, histCustomTo=null, histExpanded={};
