@@ -4952,35 +4952,147 @@ function rGarden(){
       }
     }
 
-    if(stage===3){
-      var bx=cx, by=tipY;
-      s+='<path d="M '+bx+','+(by+18)+' Q '+(bx-11)+','+(by+13)+' '+(bx-5)+','+(by-3)+' Q '+bx+','+(by-1)+' '+(bx+5)+','+(by-3)+' Q '+(bx+11)+','+(by+13)+' '+bx+','+(by+18)+' Z" fill="'+LEAF_B+'" opacity="0.7"/>';
-      s+='<path d="M '+bx+','+(by-2)+' Q '+(bx-11)+','+(by-9)+' '+(bx-8)+','+(by-18)+' Q '+bx+','+(by-25)+' '+(bx+8)+','+(by-18)+' Q '+(bx+11)+','+(by-9)+' '+bx+','+(by-2)+' Z" fill="'+fc+'" opacity="0.55"/>';
-      s+='<path d="M '+bx+','+(by-2)+' Q '+(bx-9)+','+(by-9)+' '+(bx-6)+','+(by-18)+' Q '+bx+','+(by-23)+' '+(bx+6)+','+(by-18)+' Q '+(bx+9)+','+(by-9)+' '+bx+','+(by-2)+' Z" fill="'+fc+'" opacity="0.9"/>';
-      s+='<path d="M '+(bx-2)+','+(by-8)+' Q '+(bx-5)+','+(by-14)+' '+(bx-1)+','+(by-19)+' Q '+(bx+1)+','+(by-15)+' '+(bx-2)+','+(by-8)+' Z" fill="#fff" opacity="0.32"/>';
-    }
+    var species=SPECIES[ph%SPECIES.length];
 
-    if(stage===4){
-      var fx=cx, fy=tipY, fr=15;
-      var off=(ph>>4)%20;
-      for(var pi=0;pi<6;pi++){
-        var ang=(pi/6)*360+off;
-        var rad=(ang-90)*Math.PI/180;
-        var px=fx+Math.cos(rad)*fr*1.32, py=fy+Math.sin(rad)*fr*1.32;
-        s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(fr*1.0).toFixed(1)+'" ry="'+(fr*0.65).toFixed(1)+'" fill="'+fc+'" opacity="0.38" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-      }
-      for(var pi=0;pi<6;pi++){
-        var ang=(pi/6)*360+off;
-        var rad=(ang-90)*Math.PI/180;
-        var px=fx+Math.cos(rad)*fr*1.12, py=fy+Math.sin(rad)*fr*1.12;
-        s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(fr*0.78).toFixed(1)+'" ry="'+(fr*0.5).toFixed(1)+'" fill="'+fc+'" opacity="0.92" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-      }
-      s+='<circle cx="'+fx+'" cy="'+fy+'" r="'+(fr*0.58).toFixed(1)+'" fill="#F6DDA0" opacity="0.95"/>';
-      s+='<circle cx="'+fx+'" cy="'+fy+'" r="'+(fr*0.32).toFixed(1)+'" fill="#E4B25E" opacity="0.9"/>';
-      s+='<circle cx="'+(fx-2)+'" cy="'+(fy-2)+'" r="1.3" fill="#7A5626" opacity="0.55"/>';
-      s+='<circle cx="'+(fx+2.5)+'" cy="'+(fy+1.5)+'" r="1.2" fill="#7A5626" opacity="0.55"/>';
-      s+='<circle cx="'+(fx-1)+'" cy="'+(fy+3)+'" r="1" fill="#7A5626" opacity="0.5"/>';
+    if(stage===3){
+      s+=drawBud(cx,tipY,fc,species,ph);
     }
+    if(stage===4){
+      if(species==='daisy')s+=drawDaisy(cx,tipY,fc,ph);
+      else if(species==='tulip')s+=drawTulip(cx,tipY,fc,ph);
+      else if(species==='poppy')s+=drawPoppy(cx,tipY,fc,ph);
+      else if(species==='cosmos')s+=drawCosmos(cx,tipY,fc,ph);
+      else if(species==='lavender')s+=drawLavender(cx,tipY,fc,ph);
+      else s+=drawDaisy(cx,tipY,fc,ph);
+    }
+    return s;
+  }
+
+  var SPECIES=['daisy','tulip','poppy','cosmos','lavender'];
+
+  function drawDaisy(cx,cy,fc,ph){
+    var s='';
+    var petals=6+(ph%2);
+    var pl=10, pw=5.4;
+    var pr=13;
+    var baseJit=((ph>>2)%14)-7;
+    for(var i=0;i<petals;i++){
+      var wobble=(((ph>>(i+3))&7)-3);
+      var ang=(i/petals)*360+baseJit+wobble;
+      var rad=(ang-90)*Math.PI/180;
+      var px=cx+Math.cos(rad)*pr, py=cy+Math.sin(rad)*pr;
+      s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl+1.5)+'" ry="'+(pw+1)+'" fill="'+fc+'" opacity="0.32" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl+'" ry="'+pw+'" fill="'+fc+'" opacity="0.92" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      var hlAng=ang;
+      var hpx=cx+Math.cos(rad)*(pr+2), hpy=cy+Math.sin(rad)*(pr+2);
+      s+='<ellipse cx="'+hpx.toFixed(1)+'" cy="'+hpy.toFixed(1)+'" rx="'+(pl*0.35)+'" ry="'+(pw*0.35)+'" fill="#FFF6EA" opacity="0.35" transform="rotate('+hlAng.toFixed(1)+' '+hpx.toFixed(1)+' '+hpy.toFixed(1)+')"/>';
+    }
+    s+='<circle cx="'+cx+'" cy="'+cy+'" r="6.2" fill="#F6DDA0" opacity="0.95"/>';
+    s+='<circle cx="'+cx+'" cy="'+cy+'" r="4" fill="#E4B25E" opacity="0.92"/>';
+    s+='<circle cx="'+(cx-1.6)+'" cy="'+(cy-1.6)+'" r="1" fill="#7A5626" opacity="0.55"/>';
+    s+='<circle cx="'+(cx+2)+'" cy="'+(cy+1.1)+'" r="0.9" fill="#7A5626" opacity="0.55"/>';
+    s+='<circle cx="'+(cx-0.5)+'" cy="'+(cy+2.2)+'" r="0.8" fill="#7A5626" opacity="0.5"/>';
+    return s;
+  }
+
+  function drawTulip(cx,cy,fc,ph){
+    var s='';
+    var tilt=((ph>>3)%9)-4;
+    var g='<g transform="rotate('+tilt+' '+cx+' '+(cy+8)+')">';
+    g+='<path d="M '+cx+','+(cy+11)+' C '+(cx-11)+','+(cy+8)+' '+(cx-12)+','+(cy-9)+' '+cx+','+(cy-16)+' C '+(cx+12)+','+(cy-9)+' '+(cx+11)+','+(cy+8)+' '+cx+','+(cy+11)+' Z" fill="'+fc+'" opacity="0.4"/>';
+    g+='<path d="M '+cx+','+(cy+11)+' C '+(cx-9)+','+(cy+8)+' '+(cx-10)+','+(cy-8)+' '+cx+','+(cy-15)+' C '+(cx+10)+','+(cy-8)+' '+(cx+9)+','+(cy+8)+' '+cx+','+(cy+11)+' Z" fill="'+fc+'" opacity="0.82"/>';
+    g+='<path d="M '+(cx-4)+','+(cy+9)+' C '+(cx-12)+','+(cy+5)+' '+(cx-13)+','+(cy-7)+' '+(cx-6)+','+(cy-12)+' C '+(cx-3)+','+(cy-6)+' '+(cx-3)+','+(cy+9)+' '+(cx-4)+','+(cy+9)+' Z" fill="'+fc+'" opacity="0.9"/>';
+    g+='<path d="M '+(cx+4)+','+(cy+9)+' C '+(cx+12)+','+(cy+5)+' '+(cx+13)+','+(cy-7)+' '+(cx+6)+','+(cy-12)+' C '+(cx+3)+','+(cy-6)+' '+(cx+3)+','+(cy+9)+' '+(cx+4)+','+(cy+9)+' Z" fill="'+fc+'" opacity="0.9"/>';
+    g+='<path d="M '+(cx-3)+','+(cy-4)+' Q '+(cx-5)+','+(cy-10)+' '+(cx-1)+','+(cy-13)+' Q '+(cx+1)+','+(cy-9)+' '+(cx-3)+','+(cy-4)+' Z" fill="#FFF6EA" opacity="0.32"/>';
+    g+='</g>';
+    s+=g;
+    return s;
+  }
+
+  function drawPoppy(cx,cy,fc,ph){
+    var s='';
+    var baseJit=(ph%12)-6;
+    for(var i=0;i<4;i++){
+      var wobble=(((ph>>(i*3))&11)-5);
+      var ang=i*90+baseJit+wobble;
+      var rad=(ang-90)*Math.PI/180;
+      var px=cx+Math.cos(rad)*8.5, py=cy+Math.sin(rad)*8.5;
+      s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="14" ry="11" fill="'+fc+'" opacity="0.32" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="12" ry="9" fill="'+fc+'" opacity="0.86" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      var hpx=cx+Math.cos(rad)*11, hpy=cy+Math.sin(rad)*11;
+      s+='<ellipse cx="'+hpx.toFixed(1)+'" cy="'+hpy.toFixed(1)+'" rx="4" ry="2.4" fill="#FFF6EA" opacity="0.28" transform="rotate('+ang.toFixed(1)+' '+hpx.toFixed(1)+' '+hpy.toFixed(1)+')"/>';
+    }
+    s+='<circle cx="'+cx+'" cy="'+cy+'" r="5.4" fill="#3D2820" opacity="0.85"/>';
+    s+='<circle cx="'+cx+'" cy="'+cy+'" r="3.8" fill="#1E1410" opacity="0.9"/>';
+    for(var i=0;i<10;i++){
+      var ang=i*36;
+      var rad=(ang-90)*Math.PI/180;
+      var px=cx+Math.cos(rad)*5.2, py=cy+Math.sin(rad)*5.2;
+      s+='<circle cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" r="0.8" fill="#F6D080" opacity="0.75"/>';
+    }
+    return s;
+  }
+
+  function drawCosmos(cx,cy,fc,ph){
+    var s='';
+    var petals=8;
+    var baseJit=((ph>>1)%10)-5;
+    for(var i=0;i<petals;i++){
+      var wobble=(((ph>>(i+2))&5)-2);
+      var ang=(i/petals)*360+baseJit+wobble;
+      var rad=(ang-90)*Math.PI/180;
+      var px=cx+Math.cos(rad)*13, py=cy+Math.sin(rad)*13;
+      s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="10" ry="3.8" fill="'+fc+'" opacity="0.32" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="8" ry="2.8" fill="'+fc+'" opacity="0.9" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      var hpx=cx+Math.cos(rad)*15, hpy=cy+Math.sin(rad)*15;
+      s+='<ellipse cx="'+hpx.toFixed(1)+'" cy="'+hpy.toFixed(1)+'" rx="2.6" ry="1" fill="#FFF6EA" opacity="0.34" transform="rotate('+ang.toFixed(1)+' '+hpx.toFixed(1)+' '+hpy.toFixed(1)+')"/>';
+    }
+    s+='<circle cx="'+cx+'" cy="'+cy+'" r="4.5" fill="#F6DDA0" opacity="0.95"/>';
+    s+='<circle cx="'+cx+'" cy="'+cy+'" r="2.8" fill="#E4B25E" opacity="0.92"/>';
+    s+='<circle cx="'+(cx-1)+'" cy="'+(cy-1)+'" r="0.7" fill="#7A5626" opacity="0.55"/>';
+    return s;
+  }
+
+  function drawLavender(cx,cy,fc,ph){
+    var s='';
+    var count=6+(ph%3);
+    for(var i=0;i<count;i++){
+      var fy=cy-(i*4.5)+3;
+      var sway=((ph>>i)&3)-1;
+      var fxc=cx+sway;
+      var lx=fxc-3, rx=fxc+3;
+      s+='<ellipse cx="'+lx+'" cy="'+fy+'" rx="3" ry="1.9" fill="'+fc+'" opacity="0.5" transform="rotate(-32 '+lx+' '+fy+')"/>';
+      s+='<ellipse cx="'+lx+'" cy="'+fy+'" rx="2.4" ry="1.5" fill="'+fc+'" opacity="0.9" transform="rotate(-32 '+lx+' '+fy+')"/>';
+      s+='<ellipse cx="'+rx+'" cy="'+fy+'" rx="3" ry="1.9" fill="'+fc+'" opacity="0.5" transform="rotate(32 '+rx+' '+fy+')"/>';
+      s+='<ellipse cx="'+rx+'" cy="'+fy+'" rx="2.4" ry="1.5" fill="'+fc+'" opacity="0.9" transform="rotate(32 '+rx+' '+fy+')"/>';
+      s+='<circle cx="'+fxc+'" cy="'+fy+'" r="1.7" fill="'+fc+'" opacity="0.88"/>';
+    }
+    s+='<circle cx="'+cx+'" cy="'+(cy-count*4.5+3-4)+'" r="1.8" fill="'+fc+'" opacity="0.9"/>';
+    return s;
+  }
+
+  function drawBud(cx,cy,fc,species,ph){
+    var s='';
+    var bx=cx, by=cy;
+    if(species==='lavender'){
+      s+='<path d="M '+bx+','+(by+11)+' Q '+(bx-6)+','+(by+7)+' '+(bx-3)+','+by+' Q '+bx+','+(by+2)+' '+(bx+3)+','+by+' Q '+(bx+6)+','+(by+7)+' '+bx+','+(by+11)+' Z" fill="'+LEAF_B+'" opacity="0.72"/>';
+      s+='<circle cx="'+bx+'" cy="'+(by-9)+'" r="1.6" fill="'+fc+'" opacity="0.85"/>';
+      s+='<circle cx="'+bx+'" cy="'+(by-5)+'" r="1.9" fill="'+fc+'" opacity="0.9"/>';
+      s+='<circle cx="'+bx+'" cy="'+(by-1)+'" r="2.1" fill="'+fc+'" opacity="0.92"/>';
+      return s;
+    }
+    if(species==='tulip'){
+      s+='<path d="M '+bx+','+(by+11)+' Q '+(bx-6)+','+(by+6)+' '+(bx-3)+','+(by+1)+' Q '+bx+','+(by+3)+' '+(bx+3)+','+(by+1)+' Q '+(bx+6)+','+(by+6)+' '+bx+','+(by+11)+' Z" fill="'+LEAF_B+'" opacity="0.72"/>';
+      s+='<path d="M '+bx+','+(by+7)+' C '+(bx-8)+','+(by+4)+' '+(bx-9)+','+(by-9)+' '+bx+','+(by-16)+' C '+(bx+9)+','+(by-9)+' '+(bx+8)+','+(by+4)+' '+bx+','+(by+7)+' Z" fill="'+fc+'" opacity="0.5"/>';
+      s+='<path d="M '+bx+','+(by+7)+' C '+(bx-6.5)+','+(by+4)+' '+(bx-7.5)+','+(by-8)+' '+bx+','+(by-14)+' C '+(bx+7.5)+','+(by-8)+' '+(bx+6.5)+','+(by+4)+' '+bx+','+(by+7)+' Z" fill="'+fc+'" opacity="0.9"/>';
+      s+='<path d="M '+(bx-2)+','+(by-3)+' Q '+(bx-4)+','+(by-9)+' '+(bx-0.5)+','+(by-12)+' Q '+(bx+1)+','+(by-8)+' '+(bx-2)+','+(by-3)+' Z" fill="#FFF6EA" opacity="0.32"/>';
+      return s;
+    }
+    s+='<path d="M '+bx+','+(by+16)+' Q '+(bx-11)+','+(by+12)+' '+(bx-5)+','+(by-1)+' Q '+bx+','+(by+1)+' '+(bx+5)+','+(by-1)+' Q '+(bx+11)+','+(by+12)+' '+bx+','+(by+16)+' Z" fill="'+LEAF_B+'" opacity="0.72"/>';
+    s+='<ellipse cx="'+bx+'" cy="'+(by-6)+'" rx="9.5" ry="10" fill="'+fc+'" opacity="0.5"/>';
+    s+='<ellipse cx="'+bx+'" cy="'+(by-6)+'" rx="7.5" ry="8" fill="'+fc+'" opacity="0.9"/>';
+    s+='<path d="M '+(bx-3)+','+(by-10)+' Q '+(bx-5)+','+(by-13)+' '+(bx-1)+','+(by-14)+' Q '+(bx+1)+','+(by-11)+' '+(bx-3)+','+(by-10)+' Z" fill="#FFF6EA" opacity="0.35"/>';
+    s+='<path d="M '+(bx-4)+','+(by-2)+' Q '+(bx-7)+','+(by-6)+' '+(bx-2)+','+(by-2)+' Z" fill="'+LEAF_B+'" opacity="0.5"/>';
     return s;
   }
 
