@@ -4893,127 +4893,198 @@ function rGarden(){
   document.getElementById('garden-empty').style.display='none';
 
   var wrap=document.getElementById('garden-svg-wrap');
-  var pal=PALETTES[colorPalette]||PALETTES.green;
-  var stemC=pal.decoStem||'#3A7A38';
-  var FC=['#F4A0B8','#D4A0DC','#F8B890','#F8D860','#90D8B8','#B0A8E8','#F8A8A0','#A0C8E0'];
 
   var n=visibleActs.length;
-  var COLS=Math.min(n,4);      // max 4 per row — bigger plants
+  var COLS=Math.min(Math.max(n,1),3);
   var numRows=Math.ceil(n/COLS);
 
-  // SVG layout constants
-  var TW=90;           // tile width per plant
-  var PA=130;          // plant area height above ground line
-  var GH=46;           // ground strip height (name + dots)
-  var RH=PA+GH;
-  var SH=52;           // sky header at top
-  var svgW=TW*COLS;
-  var svgH=SH+RH*numRows;
+  var TW=118, PA=170, GH=58, RH=PA+GH, SH=96;
+  var svgW=TW*COLS, svgH=SH+RH*numRows;
 
-  // Stem heights per stage
-  var HS=[0,30,54,78,104];
+  // Painterly palette — warm cream sky, sage hills, loam earth, dusty florals
+  var SKY_TOP='#F4EBDA', SKY_MID='#EADAD6', SKY_BOT='#CFBBC8';
+  var HILL_FAR='#B7C6BD', HILL_NEAR='#8FA898';
+  var GROUND_TOP='#B29679', GROUND_BOT='#8A7256';
+  var GRASS_A='#6C8562', GRASS_B='#4F6A48';
+  var STEM_BASE='#4C6641', STEM_HI='#7B9569';
+  var LEAF_A='#6D8A5F', LEAF_B='#4B6D44';
+  var FC=['#E5A5B4','#EBC98F','#C7A5D3','#EDB097','#B3CFBB','#D6B0CB','#A6C1D2','#EBCCB0'];
 
-  // Stable per-plant hash for stem sway direction
-  function phash(s){var h=0;for(var i=0;i<s.length;i++)h=(31*h+s.charCodeAt(i))|0;return Math.abs(h);}
+  var HS=[0,38,68,96,124];
 
-  // Draw a single SVG plant centered at (cx, groundY) with organic curves
-  function dp(cx,gy,stage,fc,sw){
+  function phash(s,seed){var h=(seed|0);for(var i=0;i<s.length;i++)h=(31*h+s.charCodeAt(i))|0;return Math.abs(h);}
+
+  function leafPath(ax,ay,size,dir){
+    var tipX=ax+28*size*dir, tipY=ay-4*size;
+    var c1x=ax+9*size*dir, c1y=ay-15*size;
+    var c2x=ax+18*size*dir, c2y=ay+10*size;
+    return 'M '+ax+','+ay+' C '+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+tipX.toFixed(1)+','+tipY.toFixed(1)+' '+tipX.toFixed(1)+','+(ay+1)+' C '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+ax+','+(ay+3)+' '+ax+','+ay+' Z';
+  }
+
+  // Painterly plant — layered fills for a watercolor feel
+  function dp(cx,gy,stage,fc,ph){
+    var sw=((ph%11)-5)*2;
     var hs=HS[stage];
     var s='';
+
     if(stage===0){
-      // Sprouting seed — small dome + first tiny leaf
-      s+='<path d="M '+(cx-7)+','+gy+' C '+(cx-10)+','+(gy-20)+' '+(cx+10)+','+(gy-20)+' '+(cx+7)+','+gy+' Z" fill="'+stemC+'" opacity="0.75"/>';
-      s+='<path d="M '+(cx-2)+','+(gy-17)+' C '+(cx-10)+','+(gy-24)+' '+(cx-12)+','+(gy-30)+' '+(cx-7)+','+(gy-29)+' C '+(cx-2)+','+(gy-28)+' '+(cx)+','+(gy-22)+' '+(cx-2)+','+(gy-17)+' Z" fill="'+stemC+'" opacity="0.82"/>';
-    } else {
-      var tipY=gy-hs;
-      var mx=cx+sw; // curve midpoint for stem sway
-      // Curved stem (quadratic bezier)
-      s+='<path d="M '+cx+','+gy+' Q '+mx+','+(gy-hs*0.5)+' '+cx+','+tipY+'" fill="none" stroke="'+stemC+'" stroke-width="3.5" stroke-linecap="round"/>';
-      if(stage===1){
-        // Two small leaves fanning from tip
-        s+='<path d="M '+cx+','+tipY+' C '+(cx-16)+','+(tipY-5)+' '+(cx-15)+','+(tipY+7)+' '+cx+','+(tipY+5)+' Z" fill="'+stemC+'" opacity="0.82"/>';
-        s+='<path d="M '+cx+','+tipY+' C '+(cx+16)+','+(tipY-5)+' '+(cx+15)+','+(tipY+7)+' '+cx+','+(tipY+5)+' Z" fill="'+stemC+'" opacity="0.78"/>';
+      s+='<ellipse cx="'+cx+'" cy="'+(gy-1)+'" rx="16" ry="5" fill="'+GROUND_BOT+'" opacity="0.55"/>';
+      s+='<path d="M '+(cx-3)+','+gy+' Q '+(cx-5)+','+(gy-11)+' '+(cx-1)+','+(gy-14)+' Q '+(cx+2)+','+(gy-11)+' '+(cx+3)+','+gy+' Z" fill="'+LEAF_A+'" opacity="0.92"/>';
+      s+='<path d="M '+(cx+1)+','+(gy-3)+' Q '+(cx+6)+','+(gy-9)+' '+(cx+8)+','+(gy-6)+' Q '+(cx+5)+','+(gy-2)+' '+(cx+1)+','+(gy-3)+' Z" fill="'+LEAF_B+'" opacity="0.7"/>';
+      return s;
+    }
+
+    var tipY=gy-hs, mx=cx+sw;
+    var stemD='M '+cx+','+gy+' Q '+mx+','+(gy-hs*0.55)+' '+cx+','+tipY;
+    s+='<path d="'+stemD+'" fill="none" stroke="'+STEM_BASE+'" stroke-width="8" stroke-linecap="round" opacity="0.2"/>';
+    s+='<path d="'+stemD+'" fill="none" stroke="'+STEM_BASE+'" stroke-width="3.2" stroke-linecap="round" opacity="0.95"/>';
+    s+='<path d="'+stemD+'" fill="none" stroke="'+STEM_HI+'" stroke-width="1.1" stroke-linecap="round" opacity="0.55"/>';
+
+    if(stage===1){
+      var lp1=leafPath(cx-1,tipY+7,0.6,-1), lp2=leafPath(cx+1,tipY+8,0.6,1);
+      s+='<path d="'+lp1+'" fill="'+LEAF_A+'" opacity="0.9"/>';
+      s+='<path d="'+lp1+'" fill="'+LEAF_B+'" opacity="0.45"/>';
+      s+='<path d="'+lp2+'" fill="'+LEAF_A+'" opacity="0.88"/>';
+      s+='<path d="'+lp2+'" fill="'+LEAF_B+'" opacity="0.42"/>';
+    }
+
+    if(stage>=2){
+      var l1y=gy-hs*0.32, l2y=gy-hs*0.6;
+      var l1=leafPath(cx,l1y,1.2,1), l2=leafPath(cx,l2y,1.0,-1);
+      s+='<path d="'+l1+'" fill="'+LEAF_A+'" opacity="0.88"/>';
+      s+='<path d="'+l1+'" fill="'+LEAF_B+'" opacity="0.42"/>';
+      s+='<path d="'+l2+'" fill="'+LEAF_A+'" opacity="0.86"/>';
+      s+='<path d="'+l2+'" fill="'+LEAF_B+'" opacity="0.4"/>';
+      if(stage>=3){
+        var l3=leafPath(cx,gy-hs*0.8,0.78,1);
+        s+='<path d="'+l3+'" fill="'+LEAF_A+'" opacity="0.85"/>';
+        s+='<path d="'+l3+'" fill="'+LEAF_B+'" opacity="0.38"/>';
       }
-      if(stage>=2){
-        // Organic bezier leaves
-        var lh=hs*0.28;
-        var ly1=gy-hs*0.38;
-        s+='<path d="M '+cx+','+ly1+' C '+(cx+22)+','+(ly1-lh*0.4)+' '+(cx+20)+','+(ly1+lh*0.65)+' '+cx+','+(ly1+lh*0.1)+' Z" fill="'+stemC+'" opacity="0.7"/>';
-        var ly2=gy-hs*0.62;
-        s+='<path d="M '+cx+','+ly2+' C '+(cx-20)+','+(ly2-lh*0.4)+' '+(cx-18)+','+(ly2+lh*0.65)+' '+cx+','+(ly2+lh*0.1)+' Z" fill="'+stemC+'" opacity="0.6"/>';
+    }
+
+    if(stage===3){
+      var bx=cx, by=tipY;
+      s+='<path d="M '+bx+','+(by+18)+' Q '+(bx-11)+','+(by+13)+' '+(bx-5)+','+(by-3)+' Q '+bx+','+(by-1)+' '+(bx+5)+','+(by-3)+' Q '+(bx+11)+','+(by+13)+' '+bx+','+(by+18)+' Z" fill="'+LEAF_B+'" opacity="0.7"/>';
+      s+='<path d="M '+bx+','+(by-2)+' Q '+(bx-11)+','+(by-9)+' '+(bx-8)+','+(by-18)+' Q '+bx+','+(by-25)+' '+(bx+8)+','+(by-18)+' Q '+(bx+11)+','+(by-9)+' '+bx+','+(by-2)+' Z" fill="'+fc+'" opacity="0.55"/>';
+      s+='<path d="M '+bx+','+(by-2)+' Q '+(bx-9)+','+(by-9)+' '+(bx-6)+','+(by-18)+' Q '+bx+','+(by-23)+' '+(bx+6)+','+(by-18)+' Q '+(bx+9)+','+(by-9)+' '+bx+','+(by-2)+' Z" fill="'+fc+'" opacity="0.9"/>';
+      s+='<path d="M '+(bx-2)+','+(by-8)+' Q '+(bx-5)+','+(by-14)+' '+(bx-1)+','+(by-19)+' Q '+(bx+1)+','+(by-15)+' '+(bx-2)+','+(by-8)+' Z" fill="#fff" opacity="0.32"/>';
+    }
+
+    if(stage===4){
+      var fx=cx, fy=tipY, fr=15;
+      var off=(ph>>4)%20;
+      for(var pi=0;pi<6;pi++){
+        var ang=(pi/6)*360+off;
+        var rad=(ang-90)*Math.PI/180;
+        var px=fx+Math.cos(rad)*fr*1.32, py=fy+Math.sin(rad)*fr*1.32;
+        s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(fr*1.0).toFixed(1)+'" ry="'+(fr*0.65).toFixed(1)+'" fill="'+fc+'" opacity="0.38" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
       }
-      if(stage===3){
-        // Elegant teardrop bud
-        s+='<path d="M '+cx+','+(tipY+13)+' C '+(cx-10)+','+(tipY+7)+' '+(cx-10)+','+(tipY-7)+' '+cx+','+(tipY-11)+' C '+(cx+10)+','+(tipY-7)+' '+(cx+10)+','+(tipY+7)+' '+cx+','+(tipY+13)+' Z" fill="'+fc+'" opacity="0.9"/>';
-        // Sepal hints
-        s+='<path d="M '+cx+','+(tipY+13)+' C '+(cx-7)+','+(tipY+18)+' '+(cx-9)+','+(tipY+15)+' '+(cx-5)+','+(tipY+13)+'" fill="none" stroke="'+stemC+'" stroke-width="1.5" stroke-linecap="round"/>';
-        s+='<path d="M '+cx+','+(tipY+13)+' C '+(cx+7)+','+(tipY+18)+' '+(cx+9)+','+(tipY+15)+' '+(cx+5)+','+(tipY+13)+'" fill="none" stroke="'+stemC+'" stroke-width="1.5" stroke-linecap="round"/>';
+      for(var pi=0;pi<6;pi++){
+        var ang=(pi/6)*360+off;
+        var rad=(ang-90)*Math.PI/180;
+        var px=fx+Math.cos(rad)*fr*1.12, py=fy+Math.sin(rad)*fr*1.12;
+        s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(fr*0.78).toFixed(1)+'" ry="'+(fr*0.5).toFixed(1)+'" fill="'+fc+'" opacity="0.92" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
       }
-      if(stage===4){
-        var fr=13;
-        [0,60,120,180,240,300].forEach(function(ang){
-          var rad=ang*Math.PI/180;
-          var px=(cx+Math.cos(rad)*fr*1.38).toFixed(1);
-          var py=(tipY+Math.sin(rad)*fr*1.05).toFixed(1);
-          s+='<ellipse cx="'+px+'" cy="'+py+'" rx="'+(fr*0.86).toFixed(1)+'" ry="'+(fr*0.55).toFixed(1)+'" fill="'+fc+'" opacity="0.92" transform="rotate('+ang+','+px+','+py+')"/>';
-        });
-        s+='<circle cx="'+cx+'" cy="'+tipY+'" r="'+(fr*0.42).toFixed(1)+'" fill="#FFF8A0" opacity="0.97"/>';
-        s+='<circle cx="'+cx+'" cy="'+tipY+'" r="'+(fr*0.2).toFixed(1)+'" fill="#F0C830" opacity="0.92"/>';
-      }
+      s+='<circle cx="'+fx+'" cy="'+fy+'" r="'+(fr*0.58).toFixed(1)+'" fill="#F6DDA0" opacity="0.95"/>';
+      s+='<circle cx="'+fx+'" cy="'+fy+'" r="'+(fr*0.32).toFixed(1)+'" fill="#E4B25E" opacity="0.9"/>';
+      s+='<circle cx="'+(fx-2)+'" cy="'+(fy-2)+'" r="1.3" fill="#7A5626" opacity="0.55"/>';
+      s+='<circle cx="'+(fx+2.5)+'" cy="'+(fy+1.5)+'" r="1.2" fill="#7A5626" opacity="0.55"/>';
+      s+='<circle cx="'+(fx-1)+'" cy="'+(fy+3)+'" r="1" fill="#7A5626" opacity="0.5"/>';
     }
     return s;
   }
 
-  // Build SVG string — no emojis anywhere
+  function hillPath(baseY,amp,phase){
+    var pts=[], steps=12;
+    for(var i=0;i<=steps;i++){
+      var px=(i/steps)*svgW;
+      var py=baseY+Math.sin(i*0.85+phase)*amp+Math.cos(i*1.6+phase)*amp*0.35;
+      pts.push(px.toFixed(1)+','+py.toFixed(1));
+    }
+    return 'M -2,'+svgH+' L -2,'+pts[0].split(',')[1]+' L '+pts.join(' L ')+' L '+(svgW+2)+','+svgH+' Z';
+  }
+
+  function grassTuft(x,y,ph){
+    var s='', blades=3+(ph%3);
+    for(var b=0;b<blades;b++){
+      var bx=x+(b-blades/2)*2.4;
+      var bh=7+((b*7+ph)%9);
+      var lean=(((ph>>b)&3)-1)*1.6;
+      var col=b%2?GRASS_B:GRASS_A;
+      s+='<path d="M '+bx.toFixed(1)+','+y+' Q '+(bx+lean).toFixed(1)+','+(y-bh*0.55)+' '+(bx+lean*1.6).toFixed(1)+','+(y-bh)+'" fill="none" stroke="'+col+'" stroke-width="1.4" stroke-linecap="round" opacity="0.85"/>';
+    }
+    return s;
+  }
+
   var svg='<svg viewBox="0 0 '+svgW+' '+svgH+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">'
     +'<defs>'
-    +'<linearGradient id="gsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7DD8F0"/><stop offset="100%" stop-color="#C4EED4"/></linearGradient>'
-    +'<linearGradient id="ggn" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+pal.decoGrass1+'"/><stop offset="100%" stop-color="'+pal.decoGround+'"/></linearGradient>'
+    +'<linearGradient id="gsky" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0%" stop-color="'+SKY_TOP+'"/>'
+    +'<stop offset="55%" stop-color="'+SKY_MID+'"/>'
+    +'<stop offset="100%" stop-color="'+SKY_BOT+'"/>'
+    +'</linearGradient>'
+    +'<linearGradient id="ggnd" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0%" stop-color="'+GROUND_TOP+'"/>'
+    +'<stop offset="100%" stop-color="'+GROUND_BOT+'"/>'
+    +'</linearGradient>'
+    +'<radialGradient id="gsun" cx="50%" cy="50%" r="50%">'
+    +'<stop offset="0%" stop-color="#FFF1D2" stop-opacity="0.85"/>'
+    +'<stop offset="55%" stop-color="#F5D5A6" stop-opacity="0.32"/>'
+    +'<stop offset="100%" stop-color="#F5D5A6" stop-opacity="0"/>'
+    +'</radialGradient>'
     +'</defs>'
-    +'<rect x="0" y="0" width="'+svgW+'" height="'+svgH+'" fill="url(#gsk)"/>'
-    // Sun (SVG circles only)
-    +'<circle cx="'+(svgW-22)+'" cy="22" r="17" fill="#FFD93D"/>'
-    +'<circle cx="'+(svgW-22)+'" cy="22" r="10" fill="#FFF070" opacity="0.55"/>'
-    // Clouds (SVG ellipses only)
-    +'<ellipse cx="26" cy="18" rx="20" ry="8" fill="white" opacity="0.8"/>'
-    +'<ellipse cx="40" cy="13" rx="13" ry="6" fill="white" opacity="0.7"/>'
-    +'<ellipse cx="'+(svgW*0.5).toFixed(0)+'" cy="26" rx="16" ry="6" fill="white" opacity="0.55"/>'
-    +'<ellipse cx="'+(svgW*0.57).toFixed(0)+'" cy="20" rx="10" ry="5" fill="white" opacity="0.5"/>';
+    +'<rect x="0" y="0" width="'+svgW+'" height="'+svgH+'" fill="url(#gsky)"/>'
+    +'<circle cx="'+(svgW*0.72).toFixed(0)+'" cy="'+(SH*0.5).toFixed(0)+'" r="62" fill="url(#gsun)"/>'
+    +'<path d="'+hillPath(SH*0.78,9,0.3)+'" fill="'+HILL_FAR+'" opacity="0.5"/>'
+    +'<path d="'+hillPath(SH*0.95,7,1.7)+'" fill="'+HILL_NEAR+'" opacity="0.62"/>';
+
+  // Ambient floating petals in the sky
+  for(var af=0;af<3;af++){
+    var afh=phash('petal'+af,af*13+7);
+    var afx=((afh%(svgW-40))+20)|0;
+    var afy=(18+(afh>>5)%(SH-40))|0;
+    var afc=FC[(afh>>3)%FC.length];
+    svg+='<ellipse cx="'+afx+'" cy="'+afy+'" rx="3.4" ry="1.8" fill="'+afc+'" opacity="0.5" transform="rotate('+((afh%180)-90)+' '+afx+' '+afy+')"/>';
+  }
 
   // Draw rows back-to-front so front row renders on top
   for(var ri=numRows-1;ri>=0;ri--){
     var rowActs=visibleActs.slice(ri*COLS,(ri+1)*COLS);
     var gy=svgH-GH-ri*RH;
 
-    // Ground strip
-    svg+='<rect x="0" y="'+(gy-4)+'" width="'+svgW+'" height="'+(GH+4)+'" fill="url(#ggn)"/>';
-    // Grass blades (two-layer)
-    for(var gx=2;gx<svgW;gx+=8){
-      var gh1=10+(gx%7),gh2=7+(gx%5),gj=(gx*7)%4-2;
-      svg+='<line x1="'+(gx+gj)+'" y1="'+gy+'" x2="'+(gx+gj-2)+'" y2="'+(gy-gh1)+'" stroke="'+pal.decoGrass1+'" stroke-width="1.6" stroke-linecap="round" opacity="0.65"/>';
-      svg+='<line x1="'+(gx+gj+4)+'" y1="'+gy+'" x2="'+(gx+gj+6)+'" y2="'+(gy-gh2)+'" stroke="'+pal.decoGrass2+'" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>';
+    // Ground band with undulating top edge
+    var ipts=[];
+    for(var gi=0;gi<=10;gi++){
+      var gpx=(gi/10)*svgW;
+      var gpy=gy+Math.sin(gi*1.1+ri*0.7)*2.4+Math.cos(gi*2.3+ri)*1.3;
+      ipts.push(gpx.toFixed(1)+','+gpy.toFixed(1));
+    }
+    svg+='<path d="M -2,'+(gy+GH+8)+' L -2,'+ipts[0].split(',')[1]+' L '+ipts.join(' L ')+' L '+(svgW+2)+','+(gy+GH+8)+' Z" fill="url(#ggnd)"/>';
+
+    // Grass tufts scattered along the row
+    for(var gxi=0;gxi<Math.max(10,COLS*4);gxi++){
+      var tph=phash('tuft'+ri+'x'+gxi,ri*17+gxi*5);
+      var tx=(gxi/Math.max(10,COLS*4))*svgW+6+((tph%14)-7);
+      svg+=grassTuft(tx,gy+2,tph);
     }
 
     rowActs.forEach(function(a,ci){
+      var ph=phash(a.id,42+ri*7);
+      var jx=(ph%17)-8;
+      var jy=((ph>>3)%7)-3;
+      var cx=ci*TW+TW/2+jx;
+      var pgy=gy+jy;
       var hrs=getHours(a.id),stage=getStage(hrs);
-      var next=NEXT_THRESH[stage],prev=stage>0?NEXT_THRESH[stage-1]:0;
-      var pct=next?Math.min((hrs-prev)/(next-prev),1):1;
-      var cx=ci*TW+TW/2;
-      var fc=FC[(ri*COLS+ci)%FC.length];
+      var fc=FC[ph%FC.length];
       var dormant=gardenTab==='all'&&hasFocusSet()&&!isFocused(a.id);
-      var shortName=a.name.length>10?a.name.slice(0,9)+'.':a.name;
+      var shortName=a.name.length>12?a.name.slice(0,11)+'.':a.name;
 
       svg+='<g data-pid="'+a.id+'" style="cursor:pointer;"'+(dormant?' opacity="0.32"':'')+'>';
-      var sw=((phash(a.id)%3)-1)*10;
-      svg+=dp(cx,gy,stage,fc,sw);
-
-      // Name label — bigger and clearly readable
-      svg+='<text x="'+cx+'" y="'+(gy+18)+'" text-anchor="middle" font-size="10" font-weight="700" fill="rgba(255,255,255,.95)" font-family="system-ui,sans-serif" paint-order="stroke" stroke="rgba(0,0,0,.35)" stroke-width="2.5">'+shortName+'</text>';
-
-      // Stage progress dots
-      var ds=7,totalD=4,startDX=cx-(totalD-1)*ds/2;
-      for(var di=0;di<totalD;di++){
-        svg+='<circle cx="'+(startDX+di*ds)+'" cy="'+(gy+32)+'" r="2.8" fill="'+(di<stage?'rgba(255,255,255,.95)':'rgba(255,255,255,.25)')+'"/>';
+      svg+=dp(cx,pgy,stage,fc,ph);
+      svg+='<text x="'+cx+'" y="'+(gy+24)+'" text-anchor="middle" font-size="11" font-weight="600" fill="#FBF6EE" font-family="ui-serif,Georgia,serif" paint-order="stroke" stroke="rgba(60,44,30,.55)" stroke-width="2.6" stroke-linejoin="round">'+shortName+'</text>';
+      var ds=6,startDX=cx-(4-1)*ds/2;
+      for(var di=0;di<4;di++){
+        svg+='<circle cx="'+(startDX+di*ds).toFixed(1)+'" cy="'+(gy+38)+'" r="2.3" fill="'+(di<stage?'rgba(251,246,238,.92)':'rgba(251,246,238,.28)')+'"/>';
       }
       svg+='</g>';
     });
@@ -5022,7 +5093,7 @@ function rGarden(){
   svg+='</svg>';
 
   var container=document.createElement('div');
-  container.style.cssText='margin:0 16px 20px;border-radius:22px;overflow:hidden;box-shadow:0 6px 28px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.06);';
+  container.style.cssText='margin:0 16px 20px;border-radius:22px;overflow:hidden;box-shadow:0 6px 28px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.05);';
   container.innerHTML=svg;
   container.querySelectorAll('[data-pid]').forEach(function(el){
     el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});
