@@ -450,7 +450,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 /* ══════════════════════════════════════════════════════ */
 /*   V2 REDESIGN LAYER                                    */
 /* ══════════════════════════════════════════════════════ */
-#s-home,#s-my,#s-hist,#s-garden{padding-top:calc(38px + env(safe-area-inset-top));}
+#s-home,#s-my,#s-hist,#s-garden{padding-top:calc(38px + env(safe-area-inset-top));padding-left:0;padding-right:0;}
 #s-garden{padding-top:0;}
 .v2-hero{padding:12px 22px 24px;}
 .v2-hero-meta{font-size:11px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--tx3);margin-bottom:14px;}
@@ -679,20 +679,23 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <div id="s-lock" class="sess-lock" style="display:none;"></div>
   </div>
 
-  <!-- PLOT -->
+  <!-- PLOT (v2) -->
   <div id="s-my" class="scr">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-      <div style="font-family:var(--serif);font-size:23px;font-weight:700;">Seed packet</div>
+    <header class="v2-hero">
+      <div class="v2-hero-meta" id="plot-hero-meta">Your seeds</div>
+      <h1 class="v2-hero-greet">Seed packet</h1>
+      <div class="v2-hero-sub">Skills you're growing and projects you're building.</div>
+    </header>
+    <div style="padding:0 22px;">
+      <div id="my-kind-tabs" style="display:none;gap:6px;margin-bottom:14px;"></div>
+      <div id="focus-banner-wrap"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div id="my-tabs" style="display:flex;gap:6px;"></div>
+        <div id="plot-count" style="font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;"></div>
+      </div>
+      <div class="sw" style="margin-bottom:14px;"><span class="sic">🔍</span><input class="si" id="my-search" placeholder="Search seeds…" autocomplete="off"></div>
+      <div id="my-list"></div>
     </div>
-    <div style="font-size:13px;color:var(--tx2);margin-bottom:14px;">Skills you're growing and projects you're building</div>
-    <div id="my-kind-tabs" style="display:none;gap:6px;margin-bottom:12px;"></div>
-    <div id="focus-banner-wrap"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <div id="my-tabs" style="display:flex;gap:6px;"></div>
-      <div id="plot-count" style="font-size:12px;color:var(--tx3);font-weight:500;"></div>
-    </div>
-    <div class="sw" style="margin-bottom:12px;"><span class="sic">🔍</span><input class="si" id="my-search" placeholder="Search activities…" autocomplete="off"></div>
-    <div id="my-list"></div>
   </div>
 
   <!-- GARDEN -->
