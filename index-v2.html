@@ -5180,11 +5180,23 @@ function renderTodaySection(){
   focusProjects.forEach(function(p){getProjectTasks(p).forEach(function(t){if(!t.done)openTasks.push({proj:p,task:t});});});
   if(!myActs.length){wrap.innerHTML='';return;}
   var html='<div class="today-sec">';
+  // Scheduled items (planned events + routines) sit under On today's list
+  if(scheduled.length){
+    scheduled.forEach(function(it){
+      var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
+      html+='<div class="sched-item" data-startid="'+(it.actId||'')+'">'
+          +'<div class="sched-time">'+_fmtHour12(it.hour||0)+'</div>'
+          +'<div class="sched-em">'+(it.emoji||'🌱')+'</div>'
+          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+(it.name||'Untitled')+'</div><div class="sched-meta">'+(it.kind==='routine'?'Routine':'Planned')+dur+'</div></div>'
+          +'<button class="sched-start" data-startid="'+(it.actId||'')+'">Start</button>'
+          +'</div>';
+    });
+  }
   // No focus set: point them to the Seed packet
   if(!hasFocusSet()){
-    html+='<div class="v2-today-empty">Head to your <strong>Seed packet</strong> and pick a few activities to focus on. They\'ll show up here.</div>';
+    html+='<div class="v2-today-empty"'+(scheduled.length?' style="margin-top:14px;"':'')+'>Head to your <strong>Seed packet</strong> and pick a few activities to focus on. They\'ll show up here.</div>';
   } else if(focusActs.length){
-    html+='<div class="today-hdr"><span>Your targeted activities</span></div>';
+    html+='<div class="today-hdr"'+(scheduled.length?' style="margin-top:14px;"':'')+'><span>Your targeted activities</span></div>';
     html+='<div class="focus-row">';
     focusActs.forEach(function(a){
       var proj=isProject(a);
@@ -5196,7 +5208,7 @@ function renderTodaySection(){
     html+='</div>';
   } else {
     // Focus set but everything got removed
-    html+='<div class="v2-today-empty">No focused activities right now. Pick some from your <strong>Seed packet</strong>.</div>';
+    html+='<div class="v2-today-empty"'+(scheduled.length?' style="margin-top:14px;"':'')+'>No focused activities right now. Pick some from your <strong>Seed packet</strong>.</div>';
   }
   // Points list (from focused projects)
   if(openTasks.length){
