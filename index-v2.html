@@ -5182,7 +5182,7 @@ function renderTodaySection(){
   var html='<div class="today-sec">';
   // No focus set: point them to the Seed packet
   if(!hasFocusSet()){
-    html+='<div class="v2-today-empty">Head to your <strong>Seed packet</strong> and pin a few activities to focus on. They\'ll show up here.</div>';
+    html+='<div class="v2-today-empty">Head to your <strong>Seed packet</strong> and pick a few activities to focus on. They\'ll show up here.</div>';
   } else if(focusActs.length){
     html+='<div class="today-hdr"><span>Your targeted activities</span></div>';
     html+='<div class="focus-row">';
@@ -5196,7 +5196,7 @@ function renderTodaySection(){
     html+='</div>';
   } else {
     // Focus set but everything got removed
-    html+='<div class="v2-today-empty">No focused activities right now. Pin some from your <strong>Seed packet</strong>.</div>';
+    html+='<div class="v2-today-empty">No focused activities right now. Pick some from your <strong>Seed packet</strong>.</div>';
   }
   // Points list (from focused projects)
   if(openTasks.length){
