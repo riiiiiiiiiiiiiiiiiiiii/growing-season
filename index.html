@@ -857,8 +857,13 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 <!-- ADD SHEET -->
 <div class="ov" id="add-ov">
   <div class="sh">
-    <div style="font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:14px;">Plant a new seed</div>
-    <!-- Tabs -->
+    <div id="add-sheet-title" style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:14px;letter-spacing:-.01em;">Plant a new seed</div>
+    <!-- Kind selector -->
+    <div id="kind-tabs" style="display:flex;gap:0;margin-bottom:16px;border-radius:10px;overflow:hidden;border:1px solid var(--br2);">
+      <button id="kind-tab-skill" style="flex:1;padding:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--gr);color:#FFFBF3;transition:all .15s;">🌱 Skill</button>
+      <button id="kind-tab-project" style="flex:1;padding:10px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--tx2);transition:all .15s;">🌳 Project</button>
+    </div>
+    <!-- SKILL mode: existing library/custom tabs -->
     <div id="add-tabs" style="display:flex;gap:0;margin-bottom:16px;border-radius:10px;overflow:hidden;border:1px solid var(--br2);">
       <button id="tab-library" style="flex:1;padding:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--gr);color:#fff;transition:all .15s;">From library</button>
       <button id="tab-custom" style="flex:1;padding:9px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--tx2);transition:all .15s;">Create my own</button>
@@ -878,6 +883,16 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="sf" id="ac-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:stretch;"><input class="sinp" id="ac-custom-name" placeholder="e.g. Gaming, Cooking..." style="flex:1;min-width:0;"><button id="btn-add-cat" type="button" style="padding:0 16px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save</button></div></div>
       <button class="btn btn-p" id="btn-add-save" style="margin-top:4px;">Plant it</button>
       <button class="btn btn-s" id="btn-add-cancel-custom" style="margin-top:6px;width:100%;">Cancel</button>
+    </div>
+    <!-- PROJECT mode: new project form -->
+    <div id="add-panel-project" style="display:none;">
+      <div class="sf"><div class="sl">Name</div><input class="sinp" id="proj-name" placeholder="e.g. Side app, Home reno, EP..."></div>
+      <div class="sf"><div class="sl">Category</div><div class="so" id="proj-cat-opts"></div></div>
+      <div class="sf" id="proj-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:stretch;"><input class="sinp" id="proj-custom-cat" placeholder="e.g. Home, Career..." style="flex:1;min-width:0;"><button id="btn-proj-cat-save" type="button" style="padding:0 16px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save</button></div></div>
+      <div class="sf"><div class="sl">Notes (optional)</div><textarea class="nta" id="proj-notes" placeholder="What is this project about?" style="min-height:60px;"></textarea></div>
+      <div class="sf"><div class="sl">First point (optional)</div><input class="sinp" id="proj-first-task" placeholder="e.g. Draft the onboarding copy" maxlength="80"></div>
+      <button class="btn btn-p" id="btn-proj-save" style="margin-top:4px;">🌳 Plant tree</button>
+      <button class="btn btn-s" id="btn-proj-cancel" style="margin-top:6px;width:100%;">Cancel</button>
     </div>
   </div>
 </div>
@@ -1476,6 +1491,16 @@ document.getElementById('btn-discard').addEventListener('click',discard);
 document.getElementById('btn-ed-cancel').addEventListener('click',closeEd);
 document.getElementById('btn-add-cancel-lib').addEventListener('click',closeAdd);
 document.getElementById('btn-add-cancel-custom').addEventListener('click',closeAdd);
+document.getElementById('btn-proj-cancel').addEventListener('click',closeAdd);
+document.getElementById('btn-proj-cat-save').addEventListener('click',function(){
+  var name=document.getElementById('proj-custom-cat').value.trim();
+  if(!name)return;
+  if(!customCats.includes(name))customCats.push(name);
+  sv();renderProjectCats(name);showToast('Category saved',null);
+});
+document.getElementById('btn-proj-save').addEventListener('click',saveProject);
+document.getElementById('kind-tab-skill').addEventListener('click',function(){switchAddKind('skill');});
+document.getElementById('kind-tab-project').addEventListener('click',function(){switchAddKind('project');});
 document.getElementById('btn-add-cat').addEventListener('click',function(){
   var name=document.getElementById('ac-custom-name').value.trim();
   if(!name)return;
@@ -3832,6 +3857,7 @@ function openTimeStats(){
 function openActInfo(actId,from){
   var act=myActs.find(function(a){return a.id===actId;});
   if(!act)return;
+  if(isProject(act))return showProjectInfo(actId,from);
   var actSess=sessions.filter(function(s){return s.actId===actId;});
   var totalMins=actSess.reduce(function(t,s){return t+(s.hours||0)*60+(s.mins||0);},0);
   var sorted=actSess.slice().sort(function(a,b){return (a.date||0)-(b.date||0);});
@@ -4769,8 +4795,13 @@ function openAdd(){
   libCat='all';libSearch='';libSelected=[];
   document.getElementById('an').value='';
   var libBtn=document.getElementById('btn-lib-save');libBtn.disabled=true;libBtn.textContent='Select seeds to plant';
+  switchAddKind('skill');
   switchAddTab('library');
   rLibCats();rLibGrid();
+  // Clear project form
+  var pn=document.getElementById('proj-name');if(pn)pn.value='';
+  var pnt=document.getElementById('proj-notes');if(pnt)pnt.value='';
+  var pft=document.getElementById('proj-first-task');if(pft)pft.value='';
 
   // Search wiring
   var si=document.getElementById('lib-search');si.value='';
@@ -4835,10 +4866,174 @@ function saveAdd(){
     cat=catEl.dataset.cat;
     emoji=CEM[cat]||'🌱';
   }
-  var _newAct={id:genUUID(),name:name,emoji:emoji,cat:cat,tags:[]};
+  var _newAct={id:genUUID(),name:name,emoji:emoji,cat:cat,tags:[],kind:'skill'};
+  _normalizeSeed(_newAct);
   myActs.push(_newAct);
   pushFeedEvent('plant',name,emoji,null);
   checkTrophies();sv();closeAdd();rMy();
+}
+
+// ── PROJECT ADD FLOW (Phase 2) ────────────────────────
+function switchAddKind(kind){
+  var s=kind==='skill';
+  var sTab=document.getElementById('kind-tab-skill'), pTab=document.getElementById('kind-tab-project');
+  sTab.style.background=s?'var(--gr)':'var(--bg2)';sTab.style.color=s?'#FFFBF3':'var(--tx2)';
+  pTab.style.background=s?'var(--bg2)':'var(--gr)';pTab.style.color=s?'var(--tx2)':'#FFFBF3';
+  ['add-tabs','add-panel-library','add-panel-custom'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=s?'':'none';});
+  document.getElementById('add-panel-project').style.display=s?'none':'block';
+  document.getElementById('add-sheet-title').textContent=s?'Plant a new seed':'Plant a new tree';
+  if(s){
+    // restore library panel visibility (was hidden above)
+    document.getElementById('add-panel-library').style.display='';
+    document.getElementById('add-panel-custom').style.display='none';
+    switchAddTab('library');
+  } else {
+    renderProjectCats(null);
+  }
+}
+function renderProjectCats(selected){
+  var wrap=document.getElementById('proj-cat-opts');
+  var customWrap=document.getElementById('proj-custom-wrap');
+  wrap.innerHTML='';customWrap.style.display='none';
+  function addCatPill(cat,label,bg,fg){
+    var b=document.createElement('div');b.className='sop';b.dataset.cat=cat;
+    b.style.background=bg;b.style.color=fg;b.textContent=label;
+    if(cat===selected)b.classList.add('on');
+    b.addEventListener('click',function(){wrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');customWrap.style.display='none';});
+    wrap.appendChild(b);return b;
+  }
+  CATS.forEach(function(cat){var cc=CAT_COLORS[cat].split(',');addCatPill(cat,CEM[cat]+' '+cat,cc[0],cc[1]);});
+  customCats.forEach(function(cat){addCatPill(cat,'🌱 '+cat,'var(--bg3)','var(--tx)');});
+  var newPill=document.createElement('div');newPill.className='sop';newPill.dataset.cat='__new__';
+  newPill.style.background='var(--bg2)';newPill.style.color='var(--tx2)';newPill.textContent='＋ New';
+  newPill.addEventListener('click',function(){
+    wrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});
+    newPill.classList.add('on');customWrap.style.display='';
+    document.getElementById('proj-custom-cat').value='';
+    document.getElementById('proj-custom-cat').focus();
+  });
+  wrap.appendChild(newPill);
+}
+function saveProject(){
+  var name=document.getElementById('proj-name').value.trim();
+  var catEl=document.querySelector('#proj-cat-opts .sop.on');
+  if(!name){document.getElementById('proj-name').focus();return;}
+  if(!catEl){showToast('Pick a category',null);return;}
+  var cat;
+  if(catEl.dataset.cat==='__new__'){
+    cat=document.getElementById('proj-custom-cat').value.trim()||'Project';
+    if(cat&&!customCats.includes(cat))customCats.push(cat);
+  } else {
+    cat=catEl.dataset.cat;
+  }
+  var notes=document.getElementById('proj-notes').value.trim();
+  var firstTaskText=document.getElementById('proj-first-task').value.trim();
+  var tasks=[];
+  if(firstTaskText)tasks.push({id:genUUID(),text:firstTaskText.slice(0,80),done:false,doneAt:null,createdAt:Date.now()});
+  var newProj={id:genUUID(),name:name,emoji:'🌳',cat:cat,kind:'project',notes:notes,tasks:tasks,tags:[]};
+  _normalizeSeed(newProj);
+  myActs.push(newProj);
+  pushFeedEvent('plant',name,'🌳',null);
+  checkTrophies();sv();closeAdd();rMy();
+  // Clear form for next time
+  document.getElementById('proj-name').value='';
+  document.getElementById('proj-notes').value='';
+  document.getElementById('proj-first-task').value='';
+}
+
+// ── PROJECT DETAIL SCREEN (Phase 3) ───────────────────
+var TREE_STAGE_LABELS=['Seed','Sapling','Young tree','Mature tree','Fruiting'];
+function getTreeStage(hrs){
+  for(var i=TREE_HRS.length-1;i>=0;i--){if(hrs>=TREE_HRS[i])return i;}
+  return 0;
+}
+function showProjectInfo(id){
+  var a=myActs.find(function(x){return x.id===id;});
+  if(!a)return;
+  var hrs=getHours(id);
+  var stage=getTreeStage(hrs);
+  var nextH=stage<4?TREE_HRS[stage+1]:null;
+  var tasks=getProjectTasks(a);
+  var doneCount=tasks.filter(function(t){return t.done;}).length;
+  var sh=document.getElementById('ed-sh');
+  var html='';
+  html+='<div style="text-align:center;margin-bottom:16px;">';
+  html+='<div style="font-size:44px;line-height:1;margin-bottom:8px;">'+a.emoji+'</div>';
+  html+='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+a.name+'</div>';
+  html+='<div style="font-size:11px;color:var(--tx3);margin-top:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Stage '+stage+'/4 · '+TREE_STAGE_LABELS[stage]+(nextH?' · '+Math.max(0,Math.round((nextH-hrs)*10)/10)+'h to next':' · fully grown')+'</div>';
+  html+='</div>';
+  // Notes
+  html+='<div style="margin-bottom:16px;">';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Notes</div>';
+  html+='<textarea id="proj-notes-edit" class="nta" style="min-height:60px;" placeholder="What is this project about?">'+(a.notes||'').replace(/</g,'&lt;')+'</textarea>';
+  html+='</div>';
+  // Points
+  html+='<div style="margin-bottom:14px;">';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Points ('+doneCount+'/'+tasks.length+(tasks.length>=MAX_TASKS_PER_PROJECT?' · max':'')+')</div>';
+  html+='<div id="proj-tasks-list">';
+  tasks.forEach(function(t){
+    var safeText=(t.text||'').replace(/</g,'&lt;');
+    html+='<div class="task-row" data-tid="'+t.id+'" style="display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--bg2);border-radius:10px;margin-bottom:6px;">';
+    html+='<button class="task-check" data-tid="'+t.id+'" aria-label="'+(t.done?'Uncheck':'Check')+' point" style="width:22px;height:22px;border-radius:6px;border:1.5px solid '+(t.done?'var(--gr)':'var(--bg3)')+';background:'+(t.done?'var(--gr)':'transparent')+';color:#FFFBF3;font-size:14px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">'+(t.done?'✓':'')+'</button>';
+    html+='<div style="flex:1;font-size:13px;color:'+(t.done?'var(--tx3)':'var(--tx)')+';'+(t.done?'text-decoration:line-through;':'')+'">'+safeText+'</div>';
+    html+='<button class="task-del" data-tid="'+t.id+'" aria-label="Delete point" style="background:none;border:none;font-size:16px;color:var(--tx3);cursor:pointer;padding:2px 6px;line-height:1;">×</button>';
+    html+='</div>';
+  });
+  html+='</div>';
+  if(tasks.length<MAX_TASKS_PER_PROJECT){
+    html+='<div style="display:flex;gap:6px;margin-top:6px;">';
+    html+='<input type="text" id="proj-new-task" class="sinp" placeholder="Add a point..." maxlength="80" style="flex:1;">';
+    html+='<button id="proj-add-task-btn" style="padding:0 14px;border:none;border-radius:var(--rsm);background:var(--gr);color:#FFFBF3;font-size:14px;font-weight:600;cursor:pointer;">Add</button>';
+    html+='</div>';
+  }
+  html+='</div>';
+  // Session stats compact
+  var actSess=sessions.filter(function(s){return s.actId===id;});
+  var totalMins=actSess.reduce(function(t,s){return t+(s.hours||0)*60+(s.mins||0);},0);
+  html+='<div style="background:var(--bg2);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;font-size:13px;">';
+  html+='<span style="color:var(--tx3);">Total time</span><span style="font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
+  sh.innerHTML=html;
+  // Start / log buttons
+  var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start working';
+  startBtn.addEventListener('click',function(){closeEd();startFrom(id);});sh.appendChild(startBtn);
+  var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='+ Log a session';
+  logBtn.addEventListener('click',function(){closeEd();openLogDirect(id,'my');});sh.appendChild(logBtn);
+  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
+  closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
+  // Wire tasks
+  sh.querySelectorAll('.task-check').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var tid=this.dataset.tid;var task=a.tasks.find(function(t){return t.id===tid;});if(!task)return;
+      task.done=!task.done;task.doneAt=task.done?Date.now():null;sv();showProjectInfo(id);
+    });
+  });
+  sh.querySelectorAll('.task-del').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var tid=this.dataset.tid;
+      if(!confirm('Delete this point?'))return;
+      a.tasks=a.tasks.filter(function(t){return t.id!==tid;});sv();showProjectInfo(id);
+    });
+  });
+  var addBtn=sh.querySelector('#proj-add-task-btn');
+  if(addBtn){
+    var addNew=function(){
+      var inp=sh.querySelector('#proj-new-task');var text=inp.value.trim();
+      if(!text)return;if(a.tasks.length>=MAX_TASKS_PER_PROJECT)return;
+      a.tasks.push({id:genUUID(),text:text.slice(0,80),done:false,doneAt:null,createdAt:Date.now()});
+      sv();showProjectInfo(id);
+    };
+    addBtn.addEventListener('click',addNew);
+    sh.querySelector('#proj-new-task').addEventListener('keypress',function(e){if(e.key==='Enter'){e.preventDefault();addNew();}});
+  }
+  // Notes autosave on blur
+  var notesEl=sh.querySelector('#proj-notes-edit');
+  if(notesEl){
+    notesEl.addEventListener('blur',function(){
+      var newNotes=this.value.slice(0,2000);
+      if(newNotes!==a.notes){a.notes=newNotes;sv();}
+    });
+  }
+  document.getElementById('ed-ov').classList.add('on');
 }
 
 // ── GARDEN ────────────────────────────────────────────
