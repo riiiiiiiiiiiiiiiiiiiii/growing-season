@@ -446,6 +446,37 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .msg-in{align-self:flex-start;background:var(--bg2);color:var(--tx);padding:9px 13px;border-radius:18px 18px 18px 4px;font-size:14px;max-width:76%;line-height:1.45;word-break:break-word;}
 .msg-wave{align-self:center;font-size:13px;color:var(--tx3);padding:3px 0;}
 .msg-time{align-self:center;font-size:10px;color:var(--tx3);margin:4px 0;}
+
+/* ══════════════════════════════════════════════════════ */
+/*   V2 REDESIGN LAYER                                    */
+/* ══════════════════════════════════════════════════════ */
+#s-home,#s-my,#s-hist,#s-garden{padding-top:calc(38px + env(safe-area-inset-top));}
+#s-garden{padding-top:0;}
+.v2-hero{padding:12px 22px 24px;}
+.v2-hero-meta{font-size:11px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--tx3);margin-bottom:14px;}
+.v2-hero-greet{font-family:var(--serif);font-size:34px;font-weight:700;line-height:1.1;letter-spacing:-.015em;color:var(--tx);margin:0;}
+.v2-hero-greet .streak-inline{background:rgba(201,112,80,.14);color:var(--co2);font-family:var(--sans);font-size:12px;padding:3px 10px;margin-left:10px;position:relative;top:-6px;}
+.v2-hero-sub{font-size:14px;color:var(--tx2);margin-top:8px;line-height:1.5;}
+.v2-sec{padding:0 22px;margin-top:32px;}
+.v2-sec-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;padding-bottom:8px;border-bottom:0.5px solid var(--bg3);}
+.v2-sec-hdr>span{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--tx);letter-spacing:-.005em;}
+.v2-sec-link{font-size:12px;color:var(--gr2);cursor:pointer;font-weight:600;letter-spacing:.02em;user-select:none;}
+.v2-sec-link:active{opacity:.6;}
+.v2-stats{display:flex;gap:20px;margin-top:16px;font-size:13px;color:var(--tx2);}
+.v2-stats>div{display:flex;flex-direction:column;gap:2px;}
+.v2-stats .v2-stat-n{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--tx);letter-spacing:-.01em;line-height:1;}
+.v2-stats .v2-stat-l{font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;margin-top:4px;}
+#daily-quote{padding:36px 22px 8px;}
+#daily-quote .dq{background:none;padding:0;border:none;box-shadow:none;margin:0;font-family:var(--serif);font-style:italic;color:var(--tx3);}
+#daily-quote .dq-em{opacity:.55;}
+#daily-quote .dq-txt{color:var(--tx3);}
+/* Bottom nav — v2 more restrained */
+.nav{padding:8px 0 max(12px,env(safe-area-inset-bottom));}
+.nb{font-size:10px;font-weight:600;letter-spacing:.02em;gap:3px;}
+.nb-ic{font-size:20px;}
+.nb-wrap{padding:5px 14px;border-radius:14px;}
+/* Weekly bar v2 — bigger */
+#weekly-bar{margin:0;}
 </style>
 </head>
 <body class="auth-mode">
@@ -609,9 +640,10 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     </div>
   </div>
 
-  <!-- HOME -->
+  <!-- HOME (v2) -->
   <div id="s-home" class="scr">
-    <div class="sb" id="sb">
+    <!-- Legacy hero placeholders kept for JS refs; hidden in v2 -->
+    <div class="sb" id="sb" style="display:none;">
       <div class="sb-bg" id="sb-bg"></div>
       <div class="sb-fade" id="sb-fade"></div>
       <div class="sb-c">
@@ -620,14 +652,29 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
         <div class="sb-title" id="sb-title"></div>
       </div>
     </div>
+    <!-- v2 hero -->
+    <header class="v2-hero">
+      <div class="v2-hero-meta" id="v2-hero-meta"></div>
+      <h1 class="v2-hero-greet" id="v2-hero-greet"></h1>
+      <div class="v2-hero-sub" id="v2-hero-sub"></div>
+    </header>
     <div id="ip-wrap"></div>
-    <div id="today-section"></div>
-    <div id="pc-wrap"></div>
-    <div id="streak-wrap"></div>
-    <div class="stats" id="stats" style="margin-top:23px;"></div>
-    <div id="weekly-bar" style="margin:23px 16px 0;"></div>
+    <!-- TODAY -->
+    <section class="v2-sec">
+      <div class="v2-sec-hdr"><span>Today</span><a class="v2-sec-link" data-action="open-cal">Calendar</a></div>
+      <div id="today-section"></div>
+      <div id="pc-wrap"></div>
+    </section>
+    <div id="streak-wrap" style="display:none;"></div>
+    <!-- THIS WEEK -->
+    <section class="v2-sec">
+      <div class="v2-sec-hdr"><span>This week</span><a class="v2-sec-link" data-action="open-week">Recap</a></div>
+      <div id="weekly-bar"></div>
+      <div class="v2-stats" id="stats"></div>
+    </section>
     <div id="home-due"></div>
-    <div id="home-extras" style="display:flex;flex-direction:column;gap:8px;"></div>
+    <div id="home-extras" style="display:none;"></div>
+    <!-- Quote footer -->
     <div id="daily-quote"></div>
     <div id="s-lock" class="sess-lock" style="display:none;"></div>
   </div>
@@ -1732,14 +1779,17 @@ function rHome(){
   var pal=PALETTES[colorPalette]||PALETTES.green;
   var h=new Date().getHours();
   var greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
-  document.getElementById('sb-bg').style.background=pal.homeBg||sea.bg;
-  document.getElementById('sb').style.color=pal.homeTc||sea.tc;
-  document.getElementById('sb-fade').style.background='linear-gradient(to bottom,transparent,var(--bg))';
-  var nameStr=profile&&profile.name?', '+(profile.emoji||'')+(profile.emoji?' ':'')+profile.name:'';
+  var nameStr=profile&&profile.name?(profile.name):'';
   var _streak=calcStreak();
   var streakHtml=_streak>=2?'<span class="streak-inline" title="'+_streak+'-day streak">🔥 '+_streak+'</span>':'';
-  document.getElementById('sb-label').innerHTML=greet+nameStr+streakHtml+' · '+sea.label;
-  document.getElementById('sb-title').textContent=sea.title;
+  // v2 hero
+  var dateStr=new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+  var v2Meta=document.getElementById('v2-hero-meta');
+  if(v2Meta)v2Meta.textContent=sea.label+' · '+dateStr;
+  var v2Greet=document.getElementById('v2-hero-greet');
+  if(v2Greet)v2Greet.innerHTML=greet+(nameStr?', '+nameStr:'')+streakHtml;
+  var v2Sub=document.getElementById('v2-hero-sub');
+  if(v2Sub)v2Sub.textContent=sea.title;
   var pbEm=document.getElementById('menu-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
@@ -1757,10 +1807,9 @@ function rHome(){
     ipW.innerHTML='';
     // Only show the promo/CTA card when Today section is empty (no focus + no active session)
     if(!hasFocusSet()){
-      pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-title">What should I tend to today?</div><div class="pc-sub">A little today becomes a lot over time.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-suggest" style="flex:1;min-width:0;background:var(--col);border:none;border-radius:12px;padding:9px 8px;font-size:11.5px;font-weight:600;color:var(--co2);cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.04),0 1px 4px rgba(0,0,0,.07);touch-action:manipulation;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🎲 Surprise me</button><button id="btn-quick-log" style="flex:1;min-width:0;background:var(--col);border:none;border-radius:12px;padding:9px 8px;font-size:11.5px;font-weight:600;color:var(--co2);cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.04),0 1px 4px rgba(0,0,0,.07);touch-action:manipulation;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">✍️ Log a session</button></div>';
+      pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-title">What are we working on today?</div><div class="pc-sub">Pick a seed to start, or add a new one.</div><div class="pc-btn">Start growing</div></div><button id="btn-quick-log" style="display:block;width:100%;margin-top:10px;background:var(--col);border:none;border-radius:12px;padding:11px;font-size:12.5px;font-weight:600;color:var(--co2);cursor:pointer;">✍️ Log a past session</button>';
       document.getElementById('pc-card').addEventListener('click',openPicker);
       document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
-      document.getElementById('btn-suggest').addEventListener('click',suggestAct);
     } else {
       pcW.innerHTML='';
     }
@@ -1770,7 +1819,7 @@ function rHome(){
   var todaySess=sessions.filter(function(s){return new Date(s.date).toDateString()===todayStr;});
   var todayCnt=todaySess.length;
   var todayTm=todaySess.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
-  document.getElementById('stats').innerHTML='<div class="sc" id="stat-sess" style="cursor:pointer;"><div class="sc-n">'+todayCnt+'</div><div class="sc-l">Sessions today</div></div><div class="sc" id="stat-time" style="cursor:pointer;"><div class="sc-n">'+Math.floor(todayTm/60)+'h '+(todayTm%60)+'m</div><div class="sc-l">Time today</div></div>';
+  document.getElementById('stats').innerHTML='<div id="stat-sess" style="cursor:pointer;"><span class="v2-stat-n">'+todayCnt+'</span><span class="v2-stat-l">Sessions today</span></div><div id="stat-time" style="cursor:pointer;"><span class="v2-stat-n">'+Math.floor(todayTm/60)+'h '+(todayTm%60)+'m</span><span class="v2-stat-l">Time today</span></div>';
   document.getElementById('stat-sess').addEventListener('click',openSessionsStats);
   document.getElementById('stat-time').addEventListener('click',openTimeStats);
 
@@ -2762,6 +2811,14 @@ document.getElementById('mp-profile').addEventListener('click',function(){closeM
 document.getElementById('mp-signin').addEventListener('click',function(){closeMenuPanel();goToSignIn();});
 document.getElementById('mp-collect').addEventListener('click',function(){closeMenuPanel();openCollect();});
 document.getElementById('mp-cal').addEventListener('click',function(){closeMenuPanel();openCalendar();});
+// v2 section links (home)
+document.querySelectorAll('#s-home .v2-sec-link').forEach(function(el){
+  el.addEventListener('click',function(){
+    var a=this.dataset.action;
+    if(a==='open-cal')openCalendar();
+    else if(a==='open-week')openWeeklySummary();
+  });
+});
 document.getElementById('mp-notes').addEventListener('click',function(){closeMenuPanel();openNotes();});
 document.getElementById('mp-palette').addEventListener('click',function(e){
   var dot=e.target.closest('.pal-dot');
