@@ -5172,7 +5172,7 @@ function renderTodaySection(){
   if(!hasFocusSet()){
     html+='<div class="v2-today-empty"'+(scheduled.length?' style="margin-top:14px;"':'')+'>Head to your <strong>Seed packet</strong> and pick a few activities to focus on. They\'ll show up here.</div>';
   } else if(focusActs.length){
-    html+='<div class="today-hdr"'+(scheduled.length?' style="margin-top:14px;"':'')+'><span>Your targeted activities</span></div>';
+    html+='<div class="today-hdr"'+(scheduled.length?' style="margin-top:14px;"':'')+'><span>This week's focus</span></div>';
     html+='<div class="focus-row">';
     focusActs.forEach(function(a){
       var proj=isProject(a);
@@ -5188,7 +5188,7 @@ function renderTodaySection(){
   }
   // Points list (from focused projects)
   if(openTasks.length){
-    html+='<div class="today-hdr" style="margin-top:18px;"><span>Points to work on</span><span class="today-hdr-link" style="opacity:.6;cursor:default;">'+openTasks.length+'</span></div>';
+    html+='<div class="today-hdr" style="margin-top:18px;"><span>Ongoing projects</span><span class="today-hdr-link" style="opacity:.6;cursor:default;">'+openTasks.length+'</span></div>';
     openTasks.slice(0,8).forEach(function(pt){
       var safe=(pt.task.text||'').replace(/</g,'&lt;');
       html+='<div class="task-item" data-projid="'+pt.proj.id+'" data-taskid="'+pt.task.id+'">'
