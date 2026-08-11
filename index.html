@@ -726,6 +726,10 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
         <input type="number" class="di" id="lm" min="0" max="59" value="30"><span class="du">min</span>
       </div>
     </div>
+    <div class="fl" id="log-tasks-wrap" style="display:none;">
+      <div class="fl-lbl">Points completed <span style="font-weight:400;text-transform:none;">optional</span></div>
+      <div id="log-tasks-list"></div>
+    </div>
     <div class="fl">
       <div class="fl-lbl">Feeling after <span style="font-weight:400;text-transform:none;">optional</span></div>
       <div id="feels"></div>
@@ -3688,6 +3692,24 @@ function setupLogScreen(id,from,startedAt){
     document.getElementById('au-btn').textContent='';
   }
 
+  // Task check-off for projects
+  var tw=document.getElementById('log-tasks-wrap');
+  var tl=document.getElementById('log-tasks-list');
+  if(isProject(a)){
+    var _openTasks=getProjectTasks(a).filter(function(t){return !t.done;});
+    if(_openTasks.length){
+      tw.style.display='';
+      tl.innerHTML='';
+      _openTasks.forEach(function(t){
+        var row=document.createElement('label');
+        row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:10px;margin-bottom:6px;cursor:pointer;';
+        var safe=(t.text||'').replace(/</g,'&lt;');
+        row.innerHTML='<input type="checkbox" class="log-task-check" data-tid="'+t.id+'" style="width:18px;height:18px;accent-color:var(--gr);flex-shrink:0;"><span style="font-size:13px;color:var(--tx);flex:1;line-height:1.4;">'+safe+'</span>';
+        tl.appendChild(row);
+      });
+    } else { tw.style.display='none'; }
+  } else { tw.style.display='none'; }
+
   logFeels=[];
   var feels=document.getElementById('feels');
   makeFeelsCategories(feels,logFeels);
@@ -3967,8 +3989,9 @@ function openFinish(id,from){setupLogScreen(id,from,active?active.startedAt:null
 
 function saveLog(){
   try{
-    var stageBefore=getStage(getHours(logId));
     var _logAct=myActs.find(function(x){return x.id===logId;})||{};
+    var _isProj=isProject(_logAct);
+    var stageBefore=_isProj?getTreeStage(getHours(logId)):getStage(getHours(logId));
     var logDateVal=document.getElementById('log-date').value;
     var _todayActive=document.getElementById('log-today-btn').textContent.indexOf('✓')>-1;
     var _ph={morning:'09',afternoon:'14',evening:'19'}[logTimeOfDay]||'12';
@@ -3977,8 +4000,16 @@ function saveLog(){
     else{logTs=logDateVal?new Date(logDateVal+'T'+_ph+':00:00').getTime():Date.now();}
     var _sid=genUUID();
     sessions.push({id:_sid,actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:logTs,hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
-    var stageAfter=getStage(getHours(logId));
-    for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(logId,s);
+    // Mark checked project tasks done
+    var _checkedTasks=[];
+    document.querySelectorAll('.log-task-check:checked').forEach(function(cb){_checkedTasks.push(cb.dataset.tid);});
+    if(_isProj&&_checkedTasks.length&&Array.isArray(_logAct.tasks)){
+      _logAct.tasks.forEach(function(t){
+        if(_checkedTasks.indexOf(t.id)>-1){t.done=true;t.doneAt=Date.now();}
+      });
+    }
+    var stageAfter=_isProj?getTreeStage(getHours(logId)):getStage(getHours(logId));
+    if(!_isProj){for(var s=stageBefore+1;s<=stageAfter;s++)awardItem(logId,s);}
     checkTrophies();
     active=null;sv();rHome();goBack();
     showHarvestBurst(_logAct.emoji);
@@ -3986,8 +4017,9 @@ function saveLog(){
     if(stageAfter>stageBefore){
       var a=myActs.find(function(x){return x.id===logId;});
       if(a){
-        pushFeedEvent('levelup',a.name,a.emoji,STAGE_LABELS[stageAfter]||null);
-        setTimeout(function(){showStageUp(a,stageAfter);},320);
+        var lbl=_isProj?TREE_STAGE_LABELS[stageAfter]:STAGE_LABELS[stageAfter];
+        pushFeedEvent('levelup',a.name,a.emoji,lbl||null);
+        setTimeout(function(){showStageUp(a,stageAfter,_isProj);},320);
       }
     }
   }catch(e){showToast('Save error: '+e.message,null);console.error('saveLog error',e);}
@@ -4010,12 +4042,12 @@ function showHarvestBurst(actEmoji){
   document.body.appendChild(wrap);
   setTimeout(function(){if(wrap.parentNode)wrap.parentNode.removeChild(wrap);},1800);
 }
-function showStageUp(a,stage){
-  var stagePlants=['🌰','🌱','🪴','🌸','🌺'];
-  var stageLines=['Seed planted','Sprouting','Taking root','Flowering','In full bloom'];
+function showStageUp(a,stage,isTree){
+  var stagePlants=isTree?['🌰','🌱','🌿','🌳','🍎']:['🌰','🌱','🪴','🌸','🌺'];
+  var stageLabel=(isTree?TREE_STAGE_LABELS:STAGE_LABELS)[stage];
   document.getElementById('stageup-plant').textContent=stagePlants[stage]||a.emoji;
   document.getElementById('stageup-aname').textContent=a.name;
-  document.getElementById('stageup-stage').textContent='Now: Stage '+stage+' — '+STAGE_LABELS[stage];
+  document.getElementById('stageup-stage').textContent=(isTree&&stage===4?'🎉 Harvest time! ':'Now: Stage '+stage+' — ')+stageLabel;
   var conf=document.getElementById('stageup-confetti');conf.innerHTML='';
   var emojis=['🌿','✨','🌸','🍃','⭐','🌱'];
   for(var i=0;i<14;i++){
@@ -4058,7 +4090,10 @@ function renderFocusList(query){
       item.addEventListener('click',function(){
         var idx=focusTmp.indexOf(a.id);
         if(idx>-1){focusTmp.splice(idx,1);item.classList.remove('on');item.querySelector('.foc-item-check').textContent='';}
-        else{focusTmp.push(a.id);item.classList.add('on');item.querySelector('.foc-item-check').textContent='✓';}
+        else{
+          if(focusTmp.length>=FOCUS_LIMIT){showToast('Focus limit is '+FOCUS_LIMIT,null);return;}
+          focusTmp.push(a.id);item.classList.add('on');item.querySelector('.foc-item-check').textContent='✓';
+        }
       });
       list.appendChild(item);
     });
@@ -5352,6 +5387,60 @@ function rGarden(){
     return 'M '+ax+','+ay+' C '+c1x.toFixed(1)+','+c1y.toFixed(1)+' '+tipX.toFixed(1)+','+tipY.toFixed(1)+' '+tipX.toFixed(1)+','+(ay+1)+' C '+c2x.toFixed(1)+','+c2y.toFixed(1)+' '+ax+','+(ay+3)+' '+ax+','+ay+' Z';
   }
 
+  // Painterly tree — trunk + canopy blobs + fruits
+  function drawTree(cx,gy,stage,fruitCount,ph){
+    var s='';
+    if(stage===0){
+      s+='<ellipse cx="'+cx+'" cy="'+(gy-1)+'" rx="16" ry="5" fill="'+GROUND_BOT+'" opacity="0.55"/>';
+      s+='<path d="M '+(cx-3)+','+gy+' Q '+(cx-5)+','+(gy-11)+' '+(cx-1)+','+(gy-14)+' Q '+(cx+2)+','+(gy-11)+' '+(cx+3)+','+gy+' Z" fill="'+LEAF_A+'" opacity="0.92"/>';
+      return s;
+    }
+    var trunkH=[0,36,66,96,120][stage];
+    var trunkW=[0,3.2,5,7,9][stage];
+    var canopyR=[0,11,22,32,40][stage];
+    var sway=((ph%7)-3);
+    var trunkX=cx+sway;
+    var trunkTopY=gy-trunkH;
+    var brown='#6B4A2A', brownDark='#4A3220', brownHi='#8B6540';
+    // Trunk soft outer
+    s+='<path d="M '+(cx-trunkW*0.85)+','+gy+' Q '+(trunkX-trunkW*0.5)+','+(gy-trunkH*0.5)+' '+(trunkX-trunkW*0.5)+','+trunkTopY+' L '+(trunkX+trunkW*0.5)+','+trunkTopY+' Q '+(trunkX+trunkW*0.5)+','+(gy-trunkH*0.5)+' '+(cx+trunkW*0.85)+','+gy+' Z" fill="'+brown+'" opacity="0.28"/>';
+    // Trunk main
+    s+='<path d="M '+(cx-trunkW*0.6)+','+gy+' Q '+(trunkX-trunkW*0.3)+','+(gy-trunkH*0.5)+' '+(trunkX-trunkW*0.35)+','+trunkTopY+' L '+(trunkX+trunkW*0.35)+','+trunkTopY+' Q '+(trunkX+trunkW*0.3)+','+(gy-trunkH*0.5)+' '+(cx+trunkW*0.6)+','+gy+' Z" fill="'+brown+'"/>';
+    // Trunk shadow side
+    s+='<path d="M '+(cx-trunkW*0.6)+','+gy+' Q '+(trunkX-trunkW*0.3)+','+(gy-trunkH*0.5)+' '+(trunkX-trunkW*0.35)+','+trunkTopY+' L '+(trunkX-trunkW*0.05)+','+trunkTopY+' Q '+(trunkX-trunkW*0.05)+','+(gy-trunkH*0.5)+' '+(cx-trunkW*0.2)+','+gy+' Z" fill="'+brownDark+'" opacity="0.6"/>';
+    // Canopy at top of trunk
+    var cx0=trunkX, cy0=trunkTopY-canopyR*0.35;
+    var canopyCol='#5F8560', canopyLite='#83AF80', canopyDark='#4C6F4E';
+    // Wash halo
+    s+='<circle cx="'+cx0+'" cy="'+cy0+'" r="'+(canopyR*1.15).toFixed(1)+'" fill="'+canopyCol+'" opacity="0.28"/>';
+    // Main blobs
+    var offsets=[[0,0,1.0],[-canopyR*0.55,canopyR*0.15,0.78],[canopyR*0.55,canopyR*0.1,0.75],[-canopyR*0.3,-canopyR*0.4,0.7],[canopyR*0.32,-canopyR*0.32,0.68],[0,canopyR*0.35,0.62]];
+    offsets.forEach(function(o,i){
+      var opa=[0.92,0.88,0.86,0.84,0.82,0.78][i]||0.85;
+      s+='<circle cx="'+(cx0+o[0]).toFixed(1)+'" cy="'+(cy0+o[1]).toFixed(1)+'" r="'+(canopyR*o[2]).toFixed(1)+'" fill="'+canopyCol+'" opacity="'+opa+'"/>';
+    });
+    // Highlight
+    s+='<circle cx="'+(cx0-canopyR*0.28).toFixed(1)+'" cy="'+(cy0-canopyR*0.42).toFixed(1)+'" r="'+(canopyR*0.32).toFixed(1)+'" fill="'+canopyLite+'" opacity="0.5"/>';
+    // Shadow underside
+    s+='<circle cx="'+(cx0+canopyR*0.15).toFixed(1)+'" cy="'+(cy0+canopyR*0.42).toFixed(1)+'" r="'+(canopyR*0.28).toFixed(1)+'" fill="'+canopyDark+'" opacity="0.35"/>';
+    // Fruits — only after fruiting stage
+    if(stage>=4&&fruitCount>0){
+      var fruitCols=['#D5544A','#C97050','#F5C842','#8E4066','#D4855A','#B44A28'];
+      var maxFruits=Math.min(fruitCount,26);
+      for(var f=0;f<maxFruits;f++){
+        var seed=Math.abs((ph*7+f*29+13)|0);
+        var ang=(seed%360)*Math.PI/180;
+        var rad=canopyR*0.35+((seed>>4)%Math.max(1,Math.floor(canopyR*0.5)));
+        var fx=cx0+Math.cos(ang)*rad;
+        var fy=cy0+Math.sin(ang)*rad;
+        var col=fruitCols[f%fruitCols.length];
+        s+='<circle cx="'+fx.toFixed(1)+'" cy="'+fy.toFixed(1)+'" r="3.2" fill="'+col+'" opacity="0.95"/>';
+        s+='<circle cx="'+(fx-0.9).toFixed(1)+'" cy="'+(fy-0.9).toFixed(1)+'" r="1" fill="#FFF6EA" opacity="0.6"/>';
+      }
+    }
+    return s;
+  }
+
   // Painterly plant — layered fills for a watercolor feel
   function dp(cx,gy,stage,fc,ph){
     var sw=((ph%11)-5)*2;
@@ -5617,13 +5706,16 @@ function rGarden(){
       var jy=((ph>>3)%7)-3;
       var cx=ci*TW+TW/2+jx;
       var pgy=gy+jy;
-      var hrs=getHours(a.id),stage=getStage(hrs);
+      var _isProj=isProject(a);
+      var hrs=getHours(a.id);
+      var stage=_isProj?getTreeStage(hrs):getStage(hrs);
       var fc=FC[ph%FC.length];
       var dormant=gardenTab==='all'&&hasFocusSet()&&!isFocused(a.id);
       var shortName=a.name.length>12?a.name.slice(0,11)+'.':a.name;
 
-      svg+='<g data-pid="'+a.id+'" style="cursor:pointer;"'+(dormant?' opacity="0.32"':'')+'>';
-      svg+=dp(cx,pgy,stage,fc,ph);
+      svg+='<g data-pid="'+a.id+'" data-kind="'+(_isProj?'project':'skill')+'" style="cursor:pointer;"'+(dormant?' opacity="0.32"':'')+'>';
+      if(_isProj)svg+=drawTree(cx,pgy,stage,getProjectDoneCount(a),ph);
+      else svg+=dp(cx,pgy,stage,fc,ph);
       svg+='<text x="'+cx+'" y="'+(gy+24)+'" text-anchor="middle" font-size="11" font-weight="600" fill="#FBF6EE" font-family="ui-serif,Georgia,serif" paint-order="stroke" stroke="rgba(60,44,30,.55)" stroke-width="2.6" stroke-linejoin="round">'+shortName+'</text>';
       var ds=6,startDX=cx-(4-1)*ds/2;
       for(var di=0;di<4;di++){
@@ -5639,7 +5731,10 @@ function rGarden(){
   container.style.cssText='margin:0 16px 20px;border-radius:22px;overflow:hidden;box-shadow:0 6px 28px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.05);';
   container.innerHTML=svg;
   container.querySelectorAll('[data-pid]').forEach(function(el){
-    el.addEventListener('click',function(){showPlantInfo(this.dataset.pid);});
+    el.addEventListener('click',function(){
+      if(this.dataset.kind==='project')showProjectInfo(this.dataset.pid,'garden');
+      else showPlantInfo(this.dataset.pid);
+    });
   });
 
   wrap.innerHTML='';wrap.appendChild(container);
