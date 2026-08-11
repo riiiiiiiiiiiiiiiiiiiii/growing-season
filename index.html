@@ -58,6 +58,17 @@ html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--t
 .ob0-anim{opacity:0;animation:obFadeUp .7s cubic-bezier(.22,1,.36,1) both;}
 body.auth-mode .nav,body.auth-mode #fab,body.auth-mode #menu-btn{display:none!important;}
 body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!important;}
+body.session-lock .nav,body.session-lock #fab,body.session-lock #menu-btn{display:none!important;}
+body.session-lock #s-home > *:not(#s-lock){display:none!important;}
+.sess-lock{padding:80px 24px 40px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;animation:scrIn .28s ease;}
+.sess-lock-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.4px;color:var(--tx3);margin-bottom:14px;}
+.sess-lock-emoji{font-size:56px;line-height:1;margin-bottom:12px;}
+.sess-lock-name{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--tx);margin-bottom:34px;letter-spacing:-.01em;line-height:1.15;max-width:320px;}
+.sess-lock-timer{font-size:56px;font-weight:700;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.02em;color:var(--gr2);margin-bottom:44px;line-height:1;font-variant-numeric:tabular-nums;}
+.sess-lock-btn{width:100%;max-width:300px;padding:16px 22px;border-radius:16px;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;touch-action:manipulation;transition:transform .12s;}
+.sess-lock-btn:active{transform:scale(.97);}
+.sess-lock-btn-p{background:var(--co);color:#FFFBF3;box-shadow:0 4px 14px rgba(201,112,80,.32);}
+.sess-lock-btn-d{background:transparent;color:var(--tx3);border:none;font-size:13px;font-weight:500;padding:10px;margin-top:4px;}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,245,235,.92);backdrop-filter:saturate(140%) blur(14px);-webkit-backdrop-filter:saturate(140%) blur(14px);border-top:0.5px solid rgba(155,135,105,.18);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
 .nb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--tx3);padding:6px 4px;user-select:none;position:relative;white-space:nowrap;letter-spacing:.02em;}
@@ -589,6 +600,7 @@ body.ob-mode #menu-btn,body.ob-mode #fab,body.ob-mode .nav{display:none!importan
     <div id="home-due"></div>
     <div id="home-extras" style="display:flex;flex-direction:column;gap:8px;"></div>
     <div id="daily-quote"></div>
+    <div id="s-lock" class="sess-lock" style="display:none;"></div>
   </div>
 
   <!-- PLOT -->
@@ -985,6 +997,26 @@ if(!collection.counts)collection.counts={drop:0,leaf:0,petal:0,bee:0};
 if(!collection.awarded)collection.awarded=[];
 var colorPalette=st.colorPalette||'green';
 var seedsExpanded=true;
+
+// ── PROJECTS / TREES (Phase 1) ────────────────────────
+var MAX_TASKS_PER_PROJECT=26;
+var FOCUS_LIMIT=12;
+var TREE_HRS=[0,1,5,12,25]; // seed, sapling, young, mature, fruiting
+function _normalizeSeed(a){
+  if(!a)return a;
+  if(!a.kind)a.kind='skill';
+  if(a.kind==='project'){
+    if(!Array.isArray(a.tasks))a.tasks=[];
+    if(typeof a.notes!=='string')a.notes='';
+  }
+  return a;
+}
+function isProject(a){return !!(a&&a.kind==='project');}
+function isSkill(a){return !isProject(a);}
+function getProjectTasks(a){return isProject(a)&&Array.isArray(a.tasks)?a.tasks:[];}
+function getProjectDoneCount(a){return getProjectTasks(a).filter(function(t){return t&&t.done;}).length;}
+myActs.forEach(_normalizeSeed);
+archivedActs.forEach(_normalizeSeed);
 var PALETTES={
   green:{gr:'#6B8E6A',gr2:'#4A6A4A',grl:'#E4EAD9',grm:'#8AA783',bg:'#FAF5EB',bg2:'#F1E9D9',bg3:'#E1D5BE',tx:'#2A2418',tx2:'#5D4E3A',tx3:'#96866D',brC:'#DDD0B4',br2C:'#C2B296',sh:'0 1px 2px rgba(90,70,40,.04),0 2px 6px rgba(90,70,40,.06)',pcGrad:'linear-gradient(150deg,#6B8E6A,#4A6A4A,#2E4530)',mfGrad:'linear-gradient(90deg,#6B8E6A,#8AA783)',fabSh:'0 4px 16px rgba(201,112,80,.32)',btnSh:'0 3px 10px rgba(107,142,106,.28)',fabActSh:'0 1px 6px rgba(201,112,80,.22)',pcSh:'0 6px 20px rgba(74,106,74,.22)',homeBg:'linear-gradient(135deg,#F5CCDA,#8FBC6C)',homeTc:'#22301C',co:'#C97050',co2:'#A15535',col:'#F5E3D4',decoGround:'#8A7256',decoGrass1:'#6C8562',decoGrass2:'#4F6A48',decoStem:'#4C6641'},
   blue:{gr:'#1898C0',gr2:'#0E7098',grl:'#C8E8F8',grm:'#40B0D0',bg:'#F2F8FC',bg2:'#E0EEF8',bg3:'#C0D8EC',tx:'#081820',tx2:'#1A4860',tx3:'#487898',brC:'#A8C8E0',br2C:'#88A8D0',sh:'0 1px 4px rgba(8,24,32,.08)',pcGrad:'linear-gradient(150deg,#1898C0,#0E7098,#073858)',mfGrad:'linear-gradient(90deg,#1898C0,#40B0D0)',fabSh:'0 4px 16px rgba(24,152,192,.4)',btnSh:'0 3px 10px rgba(24,152,192,.28)',fabActSh:'0 1px 6px rgba(24,152,192,.25)',pcSh:'0 4px 18px rgba(24,152,192,.3)',homeBg:'linear-gradient(135deg,#70C8E0,#1898C0)',homeTc:'#041820',co:'#E8C030',co2:'#B09020',col:'#FBF4B0',decoGround:'#107898',decoGrass1:'#085878',decoGrass2:'#107890',decoStem:'#087080'},
@@ -1405,9 +1437,9 @@ document.getElementById('btn-import-no').addEventListener('click',function(){
 document.getElementById('btn-import-yes').addEventListener('click',function(){
   if(!pendingImport)return;
   var d=pendingImport;
-  myActs.splice(0,myActs.length);d.myActs.forEach(function(a){myActs.push(a);});
+  myActs.splice(0,myActs.length);d.myActs.forEach(function(a){myActs.push(_normalizeSeed(a));});
   sessions.splice(0,sessions.length);d.sessions.forEach(function(s){sessions.push(s);});
-  archivedActs.splice(0,archivedActs.length);(d.archivedActs||[]).forEach(function(a){archivedActs.push(a);});
+  archivedActs.splice(0,archivedActs.length);(d.archivedActs||[]).forEach(function(a){archivedActs.push(_normalizeSeed(a));});
   if(d.profile)Object.assign(profile,d.profile);
   if(d.weeklyFocus)weeklyFocus=d.weeklyFocus;
   onboarded=d.onboarded!==undefined?d.onboarded:true;
@@ -1610,6 +1642,33 @@ function showTodayDetail(todaySess){
 }
 
 function rHome(){
+  // ── Session lock: when a session is in progress, take over the home
+  if(active){
+    document.body.classList.add('session-lock');
+    var lockAct=myActs.find(function(a){return a.id===active.actId;})||{emoji:'🌱',name:'Unknown'};
+    var lockEl=document.getElementById('s-lock');
+    if(lockEl){
+      lockEl.style.display='flex';
+      lockEl.innerHTML=
+        '<div class="sess-lock-lbl">🌱 Currently growing</div>'
+       +'<div class="sess-lock-emoji">'+lockAct.emoji+'</div>'
+       +'<div class="sess-lock-name">'+lockAct.name+'</div>'
+       +'<div class="sess-lock-timer" id="sess-lock-timer">00:00</div>'
+       +'<button class="sess-lock-btn sess-lock-btn-p" id="sess-lock-log">Log this session</button>'
+       +'<button class="sess-lock-btn sess-lock-btn-d" id="sess-lock-discard">Discard session</button>';
+      document.getElementById('sess-lock-log').addEventListener('click',resumeSess);
+      document.getElementById('sess-lock-discard').addEventListener('click',function(){
+        if(!confirm('Discard this session? Your time won\'t be saved.'))return;
+        active=null;sv();rHome();
+      });
+    }
+    if(_activeTimerInt)clearInterval(_activeTimerInt);
+    (function(t0){function tick(){var el=document.getElementById('sess-lock-timer');if(el)el.textContent=_fmtElapsed(Date.now()-t0);else{clearInterval(_activeTimerInt);_activeTimerInt=null;}}tick();_activeTimerInt=setInterval(tick,1000);})(active.startedAt);
+    return;
+  }
+  document.body.classList.remove('session-lock');
+  var lockElOff=document.getElementById('s-lock');if(lockElOff){lockElOff.style.display='none';lockElOff.innerHTML='';}
+
   var sea=getSeason(), sk=getSeasonKey();
   var pal=PALETTES[colorPalette]||PALETTES.green;
   var h=new Date().getHours();
@@ -3381,7 +3440,7 @@ function showBrowse(){
   rBrowse();
 }
 
-function startFrom(id){closePicker();active={actId:id,startedAt:Date.now()};sv();rHome();}
+function startFrom(id){closePicker();active={actId:id,startedAt:Date.now()};sv();nav('home');}
 function resumeSess(){if(!active)return;openFinish(active.actId,'home');}
 
 var _lastSuggestedId=null;
@@ -5341,7 +5400,7 @@ async function loadFromSupabase(){
     if(actsRes&&actsRes.data&&actsRes.data.length){
       gotData=true;
       myActs.splice(0,myActs.length);
-      actsRes.data.forEach(function(a){myActs.push(Object.assign({},a.data||{},{id:a.id,name:a.name,emoji:a.emoji,cat:a.cat,type:a.type,level:a.level}));});
+      actsRes.data.forEach(function(a){myActs.push(_normalizeSeed(Object.assign({},a.data||{},{id:a.id,name:a.name,emoji:a.emoji,cat:a.cat,type:a.type,level:a.level})));});
       onboarded=true; // if activities exist, they've definitely been onboarded
     }
 
@@ -5363,11 +5422,11 @@ async function loadFromSupabase(){
       var locOwned=!loc.userId||loc.userId===uid; // treat old entries without userId as owned
       if(locOwned&&(loc.onboarded||(loc.myActs&&loc.myActs.length))){
         if(loc.onboarded!==undefined)onboarded=loc.onboarded;
-        if(loc.myActs&&loc.myActs.length){onboarded=true;myActs.splice(0);loc.myActs.forEach(function(a){myActs.push(a);});}
+        if(loc.myActs&&loc.myActs.length){onboarded=true;myActs.splice(0);loc.myActs.forEach(function(a){myActs.push(_normalizeSeed(a));});}
         if(loc.sessions&&loc.sessions.length){sessions.splice(0);loc.sessions.forEach(function(s){sessions.push(s);});}
         if(loc.profile)profile=loc.profile;
         if(loc.weeklyFocus)weeklyFocus=loc.weeklyFocus;
-        if(loc.archivedActs&&loc.archivedActs.length){archivedActs.splice(0);loc.archivedActs.forEach(function(a){archivedActs.push(a);});}
+        if(loc.archivedActs&&loc.archivedActs.length){archivedActs.splice(0);loc.archivedActs.forEach(function(a){archivedActs.push(_normalizeSeed(a));});}
         if(loc.activityNotes)activityNotes=loc.activityNotes;
         if(loc.collection)collection=loc.collection;
         if(loc.customCats)customCats=loc.customCats;
@@ -5438,7 +5497,7 @@ async function checkProfile(){
     // Supabase unavailable (timeout, paused project, network) — boot from localStorage
     var _loc=ld();
     if(_loc.onboarded||(_loc.myActs&&_loc.myActs.length)){
-      if(_loc.myActs&&_loc.myActs.length){onboarded=true;myActs.splice(0);_loc.myActs.forEach(function(a){myActs.push(a);});}
+      if(_loc.myActs&&_loc.myActs.length){onboarded=true;myActs.splice(0);_loc.myActs.forEach(function(a){myActs.push(_normalizeSeed(a));});}
       if(_loc.sessions&&_loc.sessions.length){sessions.splice(0);_loc.sessions.forEach(function(s){sessions.push(s);});}
       if(_loc.profile)profile=_loc.profile;
       if(_loc.weeklyFocus)weeklyFocus=_loc.weeklyFocus;
