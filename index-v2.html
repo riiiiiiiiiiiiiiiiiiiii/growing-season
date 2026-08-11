@@ -5172,7 +5172,7 @@ function renderTodaySection(){
   if(!hasFocusSet()){
     html+='<div class="v2-today-empty"'+(scheduled.length?' style="margin-top:14px;"':'')+'>Head to your <strong>Seed packet</strong> and pick a few activities to focus on. They\'ll show up here.</div>';
   } else if(focusActs.length){
-    html+='<div class="today-hdr"'+(scheduled.length?' style="margin-top:14px;"':'')+'><span>This week's focus</span></div>';
+    html+='<div class="today-hdr"'+(scheduled.length?' style="margin-top:14px;"':'')+'><span>This week’s focus</span></div>';
     html+='<div class="focus-row">';
     focusActs.forEach(function(a){
       var proj=isProject(a);
