@@ -823,18 +823,17 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <button class="btn btn-s" style="margin-top:8px;" id="btn-discard">Cancel</button>
   </div>
 
-  <!-- FRIENDS PAGE -->
+  <!-- FRIENDS PAGE (v2) -->
   <div id="s-friends" class="scr">
   <div id="friends-panel">
-    <div style="padding:32px 16px 0;flex-shrink:0;">
-      <div style="display:flex;align-items:center;margin-bottom:14px;">
-        <div style="flex:1;">
-          <div style="font-family:var(--serif);font-size:23px;font-weight:700;margin-bottom:4px;">Neighbours</div>
-          <div style="font-size:13px;color:var(--tx2);">Grow alongside your friends</div>
-        </div>
-      </div>
-      <div class="sw" style="margin-bottom:10px;"><span class="sic" style="font-size:14px;font-weight:600;">@</span><input class="si" id="fr-search" placeholder="Find by username…"></div>
-      <div id="fr-search-result" style="margin-bottom:6px;"></div>
+    <header class="v2-hero">
+      <div class="v2-hero-meta">Neighbours</div>
+      <h1 class="v2-hero-greet">Grow alongside</h1>
+      <div class="v2-hero-sub">See what the people you follow are tending to.</div>
+    </header>
+    <div style="padding:0 22px;flex-shrink:0;">
+      <div class="sw" style="margin-bottom:12px;"><span class="sic" style="font-size:14px;font-weight:600;">@</span><input class="si" id="fr-search" placeholder="Find by username…"></div>
+      <div id="fr-search-result" style="margin-bottom:8px;"></div>
       <div style="display:flex;border-bottom:.5px solid var(--bg3);">
         <button class="fr-tab on" id="fr-tab-friends">Neighbours</button>
         <button class="fr-tab" id="fr-tab-feed">Feed</button>
