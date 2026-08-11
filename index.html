@@ -69,6 +69,26 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .sess-lock-btn:active{transform:scale(.97);}
 .sess-lock-btn-p{background:var(--co);color:#FFFBF3;box-shadow:0 4px 14px rgba(201,112,80,.32);}
 .sess-lock-btn-d{background:transparent;color:var(--tx3);border:none;font-size:13px;font-weight:500;padding:10px;margin-top:4px;}
+.today-sec{margin:0 16px 23px;}
+.today-hdr{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:10px;}
+.today-hdr-link{font-size:11px;font-weight:600;color:var(--gr2);cursor:pointer;letter-spacing:.02em;text-transform:none;}
+.focus-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch;margin-bottom:14px;}
+.focus-row::-webkit-scrollbar{display:none;}
+.focus-chip{flex:0 0 auto;display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--bg3);border-radius:24px;padding:9px 14px;font-size:13px;font-weight:600;color:var(--tx);cursor:pointer;box-shadow:var(--sh);touch-action:manipulation;white-space:nowrap;transition:transform .12s,background .15s;}
+.focus-chip:active{transform:scale(.96);}
+.focus-chip.project{background:var(--col);color:var(--co2);border-color:transparent;}
+.focus-chip-em{font-size:16px;line-height:1;}
+.task-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--card);border:1px solid var(--bg3);border-radius:12px;margin-bottom:6px;cursor:pointer;transition:background .12s;box-shadow:var(--sh);}
+.task-item:active{background:var(--bg2);}
+.task-item-check{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--bg3);background:transparent;color:#FFFBF3;font-size:14px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:all .12s;}
+.task-item-check.done{background:var(--gr);border-color:var(--gr);}
+.task-item-text{flex:1;font-size:13px;color:var(--tx);line-height:1.4;}
+.task-item-proj{font-size:11px;color:var(--tx3);margin-top:2px;font-weight:500;}
+.today-empty{background:var(--col);border:none;border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:var(--sh);margin-bottom:14px;}
+.today-empty-em{font-size:20px;flex-shrink:0;}
+.today-empty-text{flex:1;font-size:13px;font-weight:600;color:var(--co2);line-height:1.4;}
+.today-empty-cta{background:var(--co);color:#FFFBF3;border:none;border-radius:14px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;}
+.streak-inline{display:inline-flex;align-items:center;gap:4px;background:rgba(201,112,80,.16);color:inherit;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;letter-spacing:.02em;margin-left:8px;vertical-align:middle;}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,245,235,.92);backdrop-filter:saturate(140%) blur(14px);-webkit-backdrop-filter:saturate(140%) blur(14px);border-top:0.5px solid rgba(155,135,105,.18);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
 .nb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--tx3);padding:6px 4px;user-select:none;position:relative;white-space:nowrap;letter-spacing:.02em;}
@@ -593,7 +613,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       </div>
     </div>
     <div id="ip-wrap"></div>
-<div id="pc-wrap"></div>
+    <div id="today-section"></div>
+    <div id="pc-wrap"></div>
     <div id="streak-wrap"></div>
     <div class="stats" id="stats" style="margin-top:23px;"></div>
     <div id="weekly-bar" style="margin:23px 16px 0;"></div>
@@ -1702,11 +1723,15 @@ function rHome(){
   document.getElementById('sb').style.color=pal.homeTc||sea.tc;
   document.getElementById('sb-fade').style.background='linear-gradient(to bottom,transparent,var(--bg))';
   var nameStr=profile&&profile.name?', '+(profile.emoji||'')+(profile.emoji?' ':'')+profile.name:'';
-  document.getElementById('sb-label').textContent=greet+nameStr+' · '+sea.label;
+  var _streak=calcStreak();
+  var streakHtml=_streak>=2?'<span class="streak-inline" title="'+_streak+'-day streak">🔥 '+_streak+'</span>':'';
+  document.getElementById('sb-label').innerHTML=greet+nameStr+streakHtml+' · '+sea.label;
   document.getElementById('sb-title').textContent=sea.title;
   var pbEm=document.getElementById('menu-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
+  // Render Today section (focus chips + tasks from focused projects)
+  renderTodaySection();
   if(active){
     var act=myActs.find(function(a){return a.id===active.actId;})||{emoji:'?',name:'Unknown'};
     ipW.innerHTML='<div class="ip" id="ip-card"><div class="ip-dot"></div><div class="ip-lbl">🌱 Currently growing</div><div class="ip-name">'+act.emoji+' '+act.name+'</div><div class="ip-time" id="ip-elapsed" style="font-size:22px;font-weight:700;font-family:var(--mono,monospace);letter-spacing:.04em;color:#fff;margin-bottom:8px;"></div><div class="ip-btn">Finish &amp; log</div></div>';
@@ -1717,10 +1742,15 @@ function rHome(){
   } else {
     if(_activeTimerInt){clearInterval(_activeTimerInt);_activeTimerInt=null;}
     ipW.innerHTML='';
-    pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-title">What should I tend to today?</div><div class="pc-sub">A little today becomes a lot over time.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-suggest" style="flex:1;min-width:0;background:var(--col);border:none;border-radius:12px;padding:9px 8px;font-size:11.5px;font-weight:600;color:var(--co2);cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.04),0 1px 4px rgba(0,0,0,.07);touch-action:manipulation;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🎲 Surprise me</button><button id="btn-quick-log" style="flex:1;min-width:0;background:var(--col);border:none;border-radius:12px;padding:9px 8px;font-size:11.5px;font-weight:600;color:var(--co2);cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.04),0 1px 4px rgba(0,0,0,.07);touch-action:manipulation;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">✍️ Log a session</button></div>';
-    document.getElementById('pc-card').addEventListener('click',openPicker);
-    document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
-    document.getElementById('btn-suggest').addEventListener('click',suggestAct);
+    // Only show the promo/CTA card when Today section is empty (no focus + no active session)
+    if(!hasFocusSet()){
+      pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-title">What should I tend to today?</div><div class="pc-sub">A little today becomes a lot over time.</div><div class="pc-btn">Start growing</div></div><div style="display:flex;gap:8px;padding:0 16px;margin-top:8px;"><button id="btn-suggest" style="flex:1;min-width:0;background:var(--col);border:none;border-radius:12px;padding:9px 8px;font-size:11.5px;font-weight:600;color:var(--co2);cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.04),0 1px 4px rgba(0,0,0,.07);touch-action:manipulation;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🎲 Surprise me</button><button id="btn-quick-log" style="flex:1;min-width:0;background:var(--col);border:none;border-radius:12px;padding:9px 8px;font-size:11.5px;font-weight:600;color:var(--co2);cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.04),0 1px 4px rgba(0,0,0,.07);touch-action:manipulation;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">✍️ Log a session</button></div>';
+      document.getElementById('pc-card').addEventListener('click',openPicker);
+      document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
+      document.getElementById('btn-suggest').addEventListener('click',suggestAct);
+    } else {
+      pcW.innerHTML='';
+    }
   }
 
   var todayStr=new Date().toDateString();
@@ -1775,17 +1805,8 @@ function rHome(){
     }
     wb.innerHTML='';wb.appendChild(row);
   })();
-  var _streak=calcStreak();
-  var _swEl=document.getElementById('streak-wrap');
-  if(_streak>=2){
-    _swEl.innerHTML='<div id="streak-pill" style="margin:0 16px 23px;display:flex;align-items:center;gap:10px;background:var(--col);border-radius:16px;padding:10px 14px;cursor:pointer;box-shadow:0 0 0 1px rgba(0,0,0,.05),var(--sh);touch-action:manipulation;">'
-      +'<span style="font-size:20px;line-height:1;">🔥</span>'
-      +'<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:var(--co2);">'+_streak+'-day streak</div>'
-      +'<div style="font-size:11px;color:var(--co2);opacity:.7;">Keep the momentum going</div></div>'
-      +'<span style="font-size:11px;font-weight:600;color:var(--co2);opacity:.55;">See week ›</span>'
-      +'</div>';
-    document.getElementById('streak-pill').addEventListener('click',openWeeklySummary);
-  }else{_swEl.innerHTML='';}
+  // Streak is now inline with greeting; empty the standalone pill container
+  var _swEl=document.getElementById('streak-wrap');if(_swEl)_swEl.innerHTML='';
 
   updateHomeNudge();
 
@@ -4888,7 +4909,8 @@ function switchAddKind(kind){
     document.getElementById('add-panel-custom').style.display='none';
     switchAddTab('library');
   } else {
-    renderProjectCats(null);
+    renderProjectCats(CATS[0]||'Personal');
+    var pn=document.getElementById('proj-name');if(pn)setTimeout(function(){pn.focus();},50);
   }
 }
 function renderProjectCats(selected){
@@ -4917,7 +4939,7 @@ function renderProjectCats(selected){
 function saveProject(){
   var name=document.getElementById('proj-name').value.trim();
   var catEl=document.querySelector('#proj-cat-opts .sop.on');
-  if(!name){document.getElementById('proj-name').focus();return;}
+  if(!name){showToast('Give your tree a name',null);document.getElementById('proj-name').focus();return;}
   if(!catEl){showToast('Pick a category',null);return;}
   var cat;
   if(catEl.dataset.cat==='__new__'){
@@ -4934,11 +4956,78 @@ function saveProject(){
   _normalizeSeed(newProj);
   myActs.push(newProj);
   pushFeedEvent('plant',name,'🌳',null);
-  checkTrophies();sv();closeAdd();rMy();
+  checkTrophies();sv();closeAdd();
   // Clear form for next time
   document.getElementById('proj-name').value='';
   document.getElementById('proj-notes').value='';
   document.getElementById('proj-first-task').value='';
+  // Navigate to plot so user sees the new tree
+  nav('my');
+  showToast('🌳 Tree planted!',null);
+}
+
+// ── TODAY SECTION (Phase 5) ───────────────────────────
+function renderTodaySection(){
+  var wrap=document.getElementById('today-section');
+  if(!wrap)return;
+  if(active){wrap.innerHTML='';return;} // lockdown owns the screen when active
+  if(!hasFocusSet()){wrap.innerHTML='';return;} // fallback promo card handles empty state
+  var focusActs=myActs.filter(function(a){return isFocused(a.id);});
+  if(!focusActs.length){wrap.innerHTML='';return;}
+  var html='<div class="today-sec">';
+  html+='<div class="today-hdr"><span>In focus</span><span class="today-hdr-link" data-action="edit-focus">Edit</span></div>';
+  html+='<div class="focus-row">';
+  focusActs.forEach(function(a){
+    var proj=isProject(a);
+    html+='<div class="focus-chip'+(proj?' project':'')+'" data-startid="'+a.id+'">'
+        +'<span class="focus-chip-em">'+a.emoji+'</span>'
+        +'<span>'+a.name+'</span>'
+        +'</div>';
+  });
+  html+='</div>';
+  // Points from focused projects (unchecked only)
+  var focusProjects=focusActs.filter(isProject);
+  var openTasks=[];
+  focusProjects.forEach(function(p){
+    getProjectTasks(p).forEach(function(t){
+      if(!t.done)openTasks.push({proj:p,task:t});
+    });
+  });
+  if(openTasks.length){
+    html+='<div class="today-hdr" style="margin-top:6px;"><span>Points to work on</span><span class="today-hdr-link" style="opacity:.6;cursor:default;">'+openTasks.length+'</span></div>';
+    openTasks.slice(0,8).forEach(function(pt){
+      var safe=(pt.task.text||'').replace(/</g,'&lt;');
+      html+='<div class="task-item" data-projid="'+pt.proj.id+'" data-taskid="'+pt.task.id+'">'
+          +'<button class="task-item-check" data-taskid="'+pt.task.id+'" data-projid="'+pt.proj.id+'" aria-label="Complete point"></button>'
+          +'<div style="flex:1;min-width:0;"><div class="task-item-text">'+safe+'</div><div class="task-item-proj">'+pt.proj.emoji+' '+pt.proj.name+'</div></div>'
+          +'</div>';
+    });
+    if(openTasks.length>8){
+      html+='<div style="text-align:center;font-size:12px;color:var(--tx3);padding:8px;">+'+(openTasks.length-8)+' more</div>';
+    }
+  }
+  html+='</div>';
+  wrap.innerHTML=html;
+  // Wire chips → start session
+  wrap.querySelectorAll('.focus-chip').forEach(function(el){
+    el.addEventListener('click',function(){startFrom(this.dataset.startid);});
+  });
+  // Wire tasks: check button toggles done, row opens project
+  wrap.querySelectorAll('.task-item-check').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var pid=this.dataset.projid,tid=this.dataset.taskid;
+      var p=myActs.find(function(a){return a.id===pid;});if(!p)return;
+      var t=(p.tasks||[]).find(function(x){return x.id===tid;});if(!t)return;
+      t.done=true;t.doneAt=Date.now();
+      sv();renderTodaySection();showToast('Point complete ✓',null);
+    });
+  });
+  wrap.querySelectorAll('.task-item').forEach(function(row){
+    row.addEventListener('click',function(){showProjectInfo(this.dataset.projid,'home');});
+  });
+  var editLink=wrap.querySelector('[data-action="edit-focus"]');
+  if(editLink)editLink.addEventListener('click',openFocus);
 }
 
 // ── PROJECT DETAIL SCREEN (Phase 3) ───────────────────
