@@ -89,6 +89,13 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .today-empty-text{flex:1;font-size:13px;font-weight:600;color:var(--co2);line-height:1.4;}
 .today-empty-cta{background:var(--co);color:#FFFBF3;border:none;border-radius:14px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;}
 .streak-inline{display:inline-flex;align-items:center;gap:4px;background:rgba(201,112,80,.16);color:inherit;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;letter-spacing:.02em;margin-left:8px;vertical-align:middle;}
+.sched-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--card);border:1px solid var(--bg3);border-radius:12px;margin-bottom:6px;cursor:pointer;box-shadow:var(--sh);}
+.sched-time{font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:.02em;min-width:36px;text-transform:uppercase;}
+.sched-em{font-size:22px;line-height:1;}
+.sched-name{font-size:14px;font-weight:600;color:var(--tx);line-height:1.2;}
+.sched-meta{font-size:11px;color:var(--tx3);margin-top:2px;}
+.sched-start{background:var(--gr);color:#FFFBF3;border:none;border-radius:12px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;letter-spacing:.02em;}
+.sched-start:active{transform:scale(.95);}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,245,235,.92);backdrop-filter:saturate(140%) blur(14px);-webkit-backdrop-filter:saturate(140%) blur(14px);border-top:0.5px solid rgba(155,135,105,.18);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
 .nb{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:var(--tx3);padding:6px 4px;user-select:none;position:relative;white-space:nowrap;letter-spacing:.02em;}
@@ -629,7 +636,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
       <div style="font-family:var(--serif);font-size:23px;font-weight:700;">Seed packet</div>
     </div>
-    <div style="font-size:13px;color:var(--tx2);margin-bottom:14px;">Each seed is a skill you want to build</div>
+    <div style="font-size:13px;color:var(--tx2);margin-bottom:14px;">Skills you're growing and projects you're building</div>
+    <div id="my-kind-tabs" style="display:none;gap:6px;margin-bottom:12px;"></div>
     <div id="focus-banner-wrap"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <div id="my-tabs" style="display:flex;gap:6px;"></div>
@@ -4239,9 +4247,43 @@ var mySearch='';
 var focusCatFilter='all';
 var focusCatOpen={};
 var gardenTab='all';
+var myKind='all';
 function rMy(){
   var el=document.getElementById('my-list');
-  var pc=document.getElementById('plot-count');if(pc)pc.textContent=myActs.length+' seed'+(myActs.length!==1?'s':'')+(myActs.length?' planted':'');
+  // Kind tabs (Skills / Projects) — only shown when user has both types
+  var kindTabsEl=document.getElementById('my-kind-tabs');
+  if(kindTabsEl){
+    var hasProjects=myActs.some(isProject);
+    var hasSkills=myActs.some(isSkill);
+    if(hasProjects&&hasSkills){
+      kindTabsEl.style.display='flex';
+      kindTabsEl.innerHTML='';
+      [{id:'all',label:'🌿 All'},{id:'skill',label:'🌱 Skills'},{id:'project',label:'🌳 Projects'}].forEach(function(t){
+        var btn=document.createElement('div');
+        btn.className='pill'+(myKind===t.id?'':' off');
+        btn.style.cssText='cursor:pointer;'+(myKind===t.id?'background:var(--gr);color:#FFFBF3;':'background:var(--bg2);color:var(--tx2);');
+        btn.textContent=t.label;
+        btn.addEventListener('click',(function(k){return function(){myKind=k;rMy();};})(t.id));
+        kindTabsEl.appendChild(btn);
+      });
+    } else {
+      kindTabsEl.style.display='none';
+      myKind='all';
+    }
+  }
+  // Filter myActs by selected kind for the rest of the render
+  var _origMyActs=myActs;
+  var _filtered=myKind==='skill'?myActs.filter(isSkill):myKind==='project'?myActs.filter(isProject):myActs;
+  var pc=document.getElementById('plot-count');
+  if(pc){
+    var label=myKind==='skill'?'skill':myKind==='project'?'tree':'seed';
+    pc.textContent=_filtered.length+' '+label+(_filtered.length!==1?'s':'')+(_filtered.length?' planted':'');
+  }
+  // Swap in the filtered array for the render body
+  myActs=_filtered;
+  try{_rMyBody(el,_origMyActs);}finally{myActs=_origMyActs;}
+}
+function _rMyBody(el,allActs){
 
   // Tabs
   var tabsEl=document.getElementById('my-tabs');
@@ -4967,34 +5009,87 @@ function saveProject(){
 }
 
 // ── TODAY SECTION (Phase 5) ───────────────────────────
+function _fmtHour12(h){
+  var suf=h>=12?'pm':'am';
+  var hr=h%12||12;
+  return hr+suf;
+}
+function _getTodayScheduled(){
+  var now=new Date();
+  var midnight=new Date(now);midnight.setHours(0,0,0,0);
+  var tomorrow=midnight.getTime()+86400000;
+  var dow=(now.getDay()===0)?6:now.getDay()-1; // Mon=0..Sun=6
+  var items=[];
+  (calPlanned||[]).forEach(function(ev){
+    if(ev.date>=midnight.getTime()&&ev.date<tomorrow){
+      items.push({kind:'planned',id:ev.id,actId:ev.actId,emoji:ev.actEmoji,name:ev.actName,hour:ev.hour,duration:ev.duration});
+    }
+  });
+  (calRoutines||[]).forEach(function(r){
+    if(r.days&&r.days.indexOf(dow)>-1){
+      items.push({kind:'routine',id:r.id,actId:r.actId,emoji:r.actEmoji,name:r.actName,hour:r.hour,duration:r.duration});
+    }
+  });
+  items.sort(function(a,b){return (a.hour||0)-(b.hour||0);});
+  return items;
+}
 function renderTodaySection(){
   var wrap=document.getElementById('today-section');
   if(!wrap)return;
-  if(active){wrap.innerHTML='';return;} // lockdown owns the screen when active
-  if(!hasFocusSet()){wrap.innerHTML='';return;} // fallback promo card handles empty state
-  var focusActs=myActs.filter(function(a){return isFocused(a.id);});
-  if(!focusActs.length){wrap.innerHTML='';return;}
-  var html='<div class="today-sec">';
-  html+='<div class="today-hdr"><span>In focus</span><span class="today-hdr-link" data-action="edit-focus">Edit</span></div>';
-  html+='<div class="focus-row">';
-  focusActs.forEach(function(a){
-    var proj=isProject(a);
-    html+='<div class="focus-chip'+(proj?' project':'')+'" data-startid="'+a.id+'">'
-        +'<span class="focus-chip-em">'+a.emoji+'</span>'
-        +'<span>'+a.name+'</span>'
-        +'</div>';
-  });
-  html+='</div>';
-  // Points from focused projects (unchecked only)
+  if(active){wrap.innerHTML='';return;}
+  var focusActs=myActs.filter(function(a){return isFocused(a.id)&&hasFocusSet();});
+  var scheduled=_getTodayScheduled();
   var focusProjects=focusActs.filter(isProject);
   var openTasks=[];
-  focusProjects.forEach(function(p){
-    getProjectTasks(p).forEach(function(t){
-      if(!t.done)openTasks.push({proj:p,task:t});
+  focusProjects.forEach(function(p){getProjectTasks(p).forEach(function(t){if(!t.done)openTasks.push({proj:p,task:t});});});
+  if(!myActs.length){wrap.innerHTML='';return;}
+  var html='<div class="today-sec">';
+  html+='<div class="today-hdr" style="margin-bottom:12px;"><span>Today</span><span class="today-hdr-link" data-action="open-cal">📅 Schedule</span></div>';
+  // Schedule row
+  if(scheduled.length){
+    html+='<div class="today-hdr" style="text-transform:none;letter-spacing:.5px;font-size:12px;color:var(--tx2);margin-bottom:8px;"><span>Scheduled</span></div>';
+    scheduled.forEach(function(it){
+      var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
+      html+='<div class="sched-item" data-startid="'+(it.actId||'')+'">'
+          +'<div class="sched-time">'+_fmtHour12(it.hour||0)+'</div>'
+          +'<div class="sched-em">'+(it.emoji||'🌱')+'</div>'
+          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+(it.name||'Untitled')+'</div><div class="sched-meta">'+(it.kind==='routine'?'Routine':'Planned')+dur+'</div></div>'
+          +'<button class="sched-start" data-startid="'+(it.actId||'')+'">Start</button>'
+          +'</div>';
     });
-  });
+  }
+  // Focus row (only when set)
+  if(hasFocusSet()&&focusActs.length){
+    html+='<div class="today-hdr" style="margin-top:'+(scheduled.length?'16px':'0')+';"><span>🎯 In focus</span><span class="today-hdr-link" data-action="edit-focus">Edit</span></div>';
+    html+='<div class="focus-row">';
+    focusActs.forEach(function(a){
+      var proj=isProject(a);
+      html+='<div class="focus-chip'+(proj?' project':'')+'" data-startid="'+a.id+'">'
+          +'<span class="focus-chip-em">'+a.emoji+'</span>'
+          +'<span>'+a.name+'</span>'
+          +'</div>';
+    });
+    html+='</div>';
+  }
+  // All other seeds (not focused, or all if no focus)
+  var otherActs=hasFocusSet()?myActs.filter(function(a){return !isFocused(a.id);}):myActs;
+  if(otherActs.length){
+    var lbl=hasFocusSet()?'Everything else':'Pick a seed to work on';
+    html+='<div class="today-hdr" style="margin-top:16px;"><span>'+lbl+'</span>'+(!hasFocusSet()?'<span class="today-hdr-link" data-action="edit-focus">🎯 Set focus</span>':'')+'</div>';
+    html+='<div class="focus-row">';
+    otherActs.slice(0,12).forEach(function(a){
+      var proj=isProject(a);
+      html+='<div class="focus-chip'+(proj?' project':'')+'" data-startid="'+a.id+'" style="opacity:'+(hasFocusSet()?'.7':'1')+';">'
+          +'<span class="focus-chip-em">'+a.emoji+'</span>'
+          +'<span>'+a.name+'</span>'
+          +'</div>';
+    });
+    if(otherActs.length>12)html+='<div class="focus-chip" style="opacity:.65;" data-action="open-plot"><span>+'+(otherActs.length-12)+' more</span></div>';
+    html+='</div>';
+  }
+  // Points list
   if(openTasks.length){
-    html+='<div class="today-hdr" style="margin-top:6px;"><span>Points to work on</span><span class="today-hdr-link" style="opacity:.6;cursor:default;">'+openTasks.length+'</span></div>';
+    html+='<div class="today-hdr" style="margin-top:14px;"><span>Points to work on</span><span class="today-hdr-link" style="opacity:.6;cursor:default;">'+openTasks.length+'</span></div>';
     openTasks.slice(0,8).forEach(function(pt){
       var safe=(pt.task.text||'').replace(/</g,'&lt;');
       html+='<div class="task-item" data-projid="'+pt.proj.id+'" data-taskid="'+pt.task.id+'">'
@@ -5002,32 +5097,35 @@ function renderTodaySection(){
           +'<div style="flex:1;min-width:0;"><div class="task-item-text">'+safe+'</div><div class="task-item-proj">'+pt.proj.emoji+' '+pt.proj.name+'</div></div>'
           +'</div>';
     });
-    if(openTasks.length>8){
-      html+='<div style="text-align:center;font-size:12px;color:var(--tx3);padding:8px;">+'+(openTasks.length-8)+' more</div>';
-    }
+    if(openTasks.length>8)html+='<div style="text-align:center;font-size:12px;color:var(--tx3);padding:8px;">+'+(openTasks.length-8)+' more</div>';
   }
   html+='</div>';
   wrap.innerHTML=html;
   // Wire chips → start session
-  wrap.querySelectorAll('.focus-chip').forEach(function(el){
-    el.addEventListener('click',function(){startFrom(this.dataset.startid);});
+  wrap.querySelectorAll('.focus-chip').forEach(function(el){el.addEventListener('click',function(){startFrom(this.dataset.startid);});});
+  // Wire schedule Start buttons
+  wrap.querySelectorAll('.sched-start').forEach(function(el){
+    el.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id)startFrom(id);});
   });
-  // Wire tasks: check button toggles done, row opens project
+  wrap.querySelectorAll('.sched-item').forEach(function(el){
+    el.addEventListener('click',function(){var id=this.dataset.startid;if(id)openActInfo(id,'home');});
+  });
+  // Wire tasks
   wrap.querySelectorAll('.task-item-check').forEach(function(btn){
     btn.addEventListener('click',function(e){
       e.stopPropagation();
       var pid=this.dataset.projid,tid=this.dataset.taskid;
       var p=myActs.find(function(a){return a.id===pid;});if(!p)return;
       var t=(p.tasks||[]).find(function(x){return x.id===tid;});if(!t)return;
-      t.done=true;t.doneAt=Date.now();
-      sv();renderTodaySection();showToast('Point complete ✓',null);
+      t.done=true;t.doneAt=Date.now();sv();renderTodaySection();showToast('Point complete ✓',null);
     });
   });
   wrap.querySelectorAll('.task-item').forEach(function(row){
     row.addEventListener('click',function(){showProjectInfo(this.dataset.projid,'home');});
   });
-  var editLink=wrap.querySelector('[data-action="edit-focus"]');
-  if(editLink)editLink.addEventListener('click',openFocus);
+  wrap.querySelectorAll('[data-action="edit-focus"]').forEach(function(el){el.addEventListener('click',openFocus);});
+  wrap.querySelectorAll('[data-action="open-cal"]').forEach(function(el){el.addEventListener('click',openCalendar);});
+  wrap.querySelectorAll('[data-action="open-plot"]').forEach(function(el){el.addEventListener('click',function(){nav('my');});});
 }
 
 // ── PROJECT DETAIL SCREEN (Phase 3) ───────────────────
