@@ -476,6 +476,10 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .v2-sec-hdr>span{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--tx);letter-spacing:-.005em;}
 .v2-sec-link{font-size:12px;color:var(--gr2);cursor:pointer;font-weight:600;letter-spacing:.02em;user-select:none;}
 .v2-sec-link:active{opacity:.6;}
+.v2-sec-hdr-clickable{cursor:pointer;user-select:none;transition:opacity .15s;}
+.v2-sec-hdr-clickable:active{opacity:.6;}
+.v2-today-empty{margin-top:12px;font-size:13px;color:var(--tx3);line-height:1.55;padding:14px 16px;background:var(--bg2);border-radius:12px;}
+.v2-today-empty strong{color:var(--tx2);font-weight:600;}
 .v2-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;align-items:start;}
 .v2-stats>div{padding:0;margin:0;min-width:0;}
 .v2-stats .v2-stat-n{display:block;font-family:var(--serif);font-size:26px;font-weight:700;color:var(--tx);letter-spacing:-.01em;line-height:1.1;margin:0 0 8px;padding:0;white-space:nowrap;}
@@ -680,14 +684,14 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <div id="ip-wrap"></div>
     <!-- ON TODAY'S LIST -->
     <section class="v2-sec">
-      <div class="v2-sec-hdr"><span>On today's list</span><a class="v2-sec-link" data-action="open-cal">Calendar</a></div>
+      <div class="v2-sec-hdr"><span>On today's list</span></div>
       <div id="today-section"></div>
       <div id="pc-wrap"></div>
     </section>
     <div id="streak-wrap" style="display:none;"></div>
-    <!-- THIS WEEK -->
+    <!-- THIS WEEK (clickable header opens recap) -->
     <section class="v2-sec">
-      <div class="v2-sec-hdr"><span>This week</span><a class="v2-sec-link" data-action="open-week">Recap</a></div>
+      <div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-week"><span>This week ›</span></div>
       <div id="weekly-bar"></div>
       <div class="v2-stats" id="stats"></div>
     </section>
@@ -1819,7 +1823,7 @@ function rHome(){
   var v2Greet=document.getElementById('v2-hero-greet');
   if(v2Greet)v2Greet.innerHTML=greet+(nameStr?', '+nameStr:'')+streakHtml;
   var v2Sub=document.getElementById('v2-hero-sub');
-  if(v2Sub)v2Sub.textContent=sea.title;
+  if(v2Sub)v2Sub.textContent='';
   var pbEm=document.getElementById('menu-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
@@ -1837,7 +1841,7 @@ function rHome(){
     ipW.innerHTML='';
     // Only show the promo/CTA card when Today section is empty (no focus + no active session)
     if(!hasFocusSet()){
-      pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-title">What are we working on today?</div><div class="pc-sub">Pick a seed to start, or add a new one.</div><div class="pc-btn">Start growing</div></div><button id="btn-quick-log" style="display:block;width:100%;margin-top:10px;background:var(--col);border:none;border-radius:12px;padding:11px;font-size:12.5px;font-weight:600;color:var(--co2);cursor:pointer;">✍️ Log a past session</button>';
+      pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-title">Ready to start?</div><div class="pc-sub">Pick a seed to begin, or add a new one.</div><div class="pc-btn">Choose a seed</div></div><button id="btn-quick-log" style="display:block;width:100%;margin-top:10px;background:var(--col);border:none;border-radius:12px;padding:11px;font-size:12.5px;font-weight:600;color:var(--co2);cursor:pointer;">✍️ Log a past session</button>';
       document.getElementById('pc-card').addEventListener('click',openPicker);
       document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
     } else {
@@ -2850,7 +2854,7 @@ document.getElementById('mp-signin').addEventListener('click',function(){closeMe
 document.getElementById('mp-collect').addEventListener('click',function(){closeMenuPanel();openCollect();});
 document.getElementById('mp-cal').addEventListener('click',function(){closeMenuPanel();openCalendar();});
 // v2 section links (home)
-document.querySelectorAll('#s-home .v2-sec-link').forEach(function(el){
+document.querySelectorAll('#s-home .v2-sec-link,#s-home .v2-sec-hdr-clickable').forEach(function(el){
   el.addEventListener('click',function(){
     var a=this.dataset.action;
     if(a==='open-cal')openCalendar();
@@ -5175,10 +5179,11 @@ function renderTodaySection(){
   focusProjects.forEach(function(p){getProjectTasks(p).forEach(function(t){if(!t.done)openTasks.push({proj:p,task:t});});});
   if(!myActs.length){wrap.innerHTML='';return;}
   var html='<div class="today-sec">';
-  // (schedule intentionally removed — Calendar owns that surface)
-  // Focus row (only when set)
-  if(hasFocusSet()&&focusActs.length){
-    html+='<div class="today-hdr"><span>🎯 In focus</span><span class="today-hdr-link" data-action="edit-focus">Edit</span></div>';
+  // No focus set: point them to the Seed packet
+  if(!hasFocusSet()){
+    html+='<div class="v2-today-empty">Head to your <strong>Seed packet</strong> and pin a few activities to focus on. They\'ll show up here.</div>';
+  } else if(focusActs.length){
+    html+='<div class="today-hdr"><span>Your targeted activities</span></div>';
     html+='<div class="focus-row">';
     focusActs.forEach(function(a){
       var proj=isProject(a);
@@ -5188,26 +5193,13 @@ function renderTodaySection(){
           +'</div>';
     });
     html+='</div>';
+  } else {
+    // Focus set but everything got removed
+    html+='<div class="v2-today-empty">No focused activities right now. Pin some from your <strong>Seed packet</strong>.</div>';
   }
-  // All other seeds (not focused, or all if no focus)
-  var otherActs=hasFocusSet()?myActs.filter(function(a){return !isFocused(a.id);}):myActs;
-  if(otherActs.length){
-    var lbl=hasFocusSet()?'Everything else':'Pick a seed to work on';
-    html+='<div class="today-hdr" style="margin-top:16px;"><span>'+lbl+'</span>'+(!hasFocusSet()?'<span class="today-hdr-link" data-action="edit-focus">🎯 Set focus</span>':'')+'</div>';
-    html+='<div class="focus-row">';
-    otherActs.slice(0,12).forEach(function(a){
-      var proj=isProject(a);
-      html+='<div class="focus-chip'+(proj?' project':'')+'" data-startid="'+a.id+'" style="opacity:'+(hasFocusSet()?'.7':'1')+';">'
-          +'<span class="focus-chip-em">'+a.emoji+'</span>'
-          +'<span>'+a.name+'</span>'
-          +'</div>';
-    });
-    if(otherActs.length>12)html+='<div class="focus-chip" style="opacity:.65;" data-action="open-plot"><span>+'+(otherActs.length-12)+' more</span></div>';
-    html+='</div>';
-  }
-  // Points list
+  // Points list (from focused projects)
   if(openTasks.length){
-    html+='<div class="today-hdr" style="margin-top:14px;"><span>Points to work on</span><span class="today-hdr-link" style="opacity:.6;cursor:default;">'+openTasks.length+'</span></div>';
+    html+='<div class="today-hdr" style="margin-top:18px;"><span>Points to work on</span><span class="today-hdr-link" style="opacity:.6;cursor:default;">'+openTasks.length+'</span></div>';
     openTasks.slice(0,8).forEach(function(pt){
       var safe=(pt.task.text||'').replace(/</g,'&lt;');
       html+='<div class="task-item" data-projid="'+pt.proj.id+'" data-taskid="'+pt.task.id+'">'
@@ -5216,6 +5208,9 @@ function renderTodaySection(){
           +'</div>';
     });
     if(openTasks.length>8)html+='<div style="text-align:center;font-size:12px;color:var(--tx3);padding:8px;">+'+(openTasks.length-8)+' more</div>';
+  } else if(hasFocusSet()&&focusActs.length){
+    // Focus is set with chips shown but no scheduled/task items → subtle CTA
+    html+='<div class="v2-today-empty" style="margin-top:18px;">Pick an activity to get started.</div>';
   }
   html+='</div>';
   wrap.innerHTML=html;
