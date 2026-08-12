@@ -358,6 +358,9 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .cat-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.4,0,.2,1),opacity .22s ease;opacity:0;}
 .cat-body.open{grid-template-rows:1fr;opacity:1;}
 .cat-body-inner{overflow:hidden;min-height:0;}
+.hist-day-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.4,0,.2,1),opacity .22s ease;opacity:0;}
+.hist-day-body.open{grid-template-rows:1fr;opacity:1;}
+.hist-day-inner{overflow:hidden;min-height:0;}
 .cat-body{padding-top:6px;}
 .oq-opt{transition:transform .16s cubic-bezier(.34,1.4,.64,1),background .14s,border-color .14s;}
 .oq-opt:active{transform:scale(.97);}
@@ -4743,7 +4746,7 @@ function getStreakAt(actId, date){
   }
   return streak;
 }
-var histSearch='', histPeriod='all', histCustomFrom=null, histCustomTo=null, histExpanded={};
+var histSearch='', histPeriod='all', histCustomFrom=null, histCustomTo=null, histExpanded={}, histDayOpen={};
 
 function rHist(){
   // Sync period pills
@@ -4787,16 +4790,21 @@ function rHist(){
     if(dayKey(ds)===dayKey(yesterday))return'Yesterday';
     return ds.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
   }
-  var lastKey=null,_hi=0;
-  sorted.forEach(function(s){
-    var key=dayKey(s.date);
-    if(key!==lastKey){
-      lastKey=key;
-      var hdr=document.createElement('div');
-      hdr.style.cssText='font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.7px;padding:14px 0 6px;';
-      hdr.textContent=dayLabel(s.date);
-      el.appendChild(hdr);
-    }
+  // Group sessions by day so each day can be collapsed
+  var _dayGroups={};var _dayOrder=[];
+  sorted.forEach(function(s){var k=dayKey(s.date);if(!_dayGroups[k]){_dayGroups[k]=[];_dayOrder.push(k);}_dayGroups[k].push(s);});
+  var _hi=0;
+  _dayOrder.forEach(function(_dk){
+    var _daySess=_dayGroups[_dk];
+    var _isDayOpen=histDayOpen[_dk]!==false;
+    var _dayWrap=document.createElement('div');
+    var _dayHdr=document.createElement('div');
+    _dayHdr.style.cssText='display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.7px;padding:14px 0 6px;cursor:pointer;user-select:none;';
+    _dayHdr.innerHTML='<span>'+dayLabel(_daySess[0].date)+'</span><span class="hist-day-arrow" style="font-size:14px;font-weight:400;display:inline-block;transition:transform .28s cubic-bezier(.4,0,.2,1);transform:rotate('+(_isDayOpen?'90':'0')+'deg);line-height:1;">›</span>';
+    var _dayBody=document.createElement('div');_dayBody.className='hist-day-body'+(_isDayOpen?' open':'');
+    var _dayInner=document.createElement('div');_dayInner.className='hist-day-inner';
+    (function(k,bd,hd){hd.addEventListener('click',function(){var wasOpen=bd.classList.contains('open');bd.classList.toggle('open',!wasOpen);var arr=hd.querySelector('.hist-day-arrow');if(arr)arr.style.transform='rotate('+(!wasOpen?'90':'0')+'deg)';histDayOpen[k]=!wasOpen;});})(_dk,_dayBody,_dayHdr);
+    _daySess.forEach(function(s){
     var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||(s.actName?{emoji:s.actEmoji||'📋',name:s.actName}:{emoji:'📋',name:'Deleted activity'});
     var dur=s.hours>0?s.hours+'h '+s.mins+'min':s.mins+'min';
     var stage=getStage(getHours(s.actId));
@@ -4830,7 +4838,11 @@ function rHist(){
       (function(nd,arr,sid){arr.addEventListener('click',function(e){e.stopPropagation();histExpanded[sid]=!histExpanded[sid];nd.style.display=histExpanded[sid]?'':'none';var sp=arr.querySelector('span');if(sp)sp.style.transform='rotate('+(histExpanded[sid]?'-90':'90')+'deg)';});})(  _nd,_arr,s.id);
     }
     (function(sess,act){hc.addEventListener('click',function(){openSessionDetail(sess,act);});})(s,a);
-    el.appendChild(hc);
+    _dayInner.appendChild(hc);
+    });
+    _dayBody.appendChild(_dayInner);
+    _dayWrap.appendChild(_dayHdr);_dayWrap.appendChild(_dayBody);
+    el.appendChild(_dayWrap);
   });
 }
 
@@ -6025,7 +6037,7 @@ async function syncToSupabase(){
       var _localActSet=new Set(myActs.map(function(a){return a.id;}));
       var _toDeleteActs=_remoteActIds.data.filter(function(r){return!_localActSet.has(r.id);}).map(function(r){return r.id;});
       if(_toDeleteActs.length){
-        var _dr=await _supa.from('activities').delete().in('id',_toDeleteActs);
+        var _dr=await _supa.from('activities').delete().eq('user_id',uid).in('id',_toDeleteActs);
         if(_dr&&_dr.error){console.warn('Supabase sync: activities delete',_dr.error.message,_dr.error.code);_syncHadError=true;}
       }
     }
@@ -6043,7 +6055,7 @@ async function syncToSupabase(){
     if(_remoteIds.data&&_remoteIds.data.length){
       var _localSet=new Set(sessions.map(function(s){return s.id;}));
       var _toDelete=_remoteIds.data.filter(function(r){return!_localSet.has(r.id);}).map(function(r){return r.id;});
-      if(_toDelete.length)await _supa.from('sessions').delete().in('id',_toDelete);
+      if(_toDelete.length)await _supa.from('sessions').delete().eq('user_id',uid).in('id',_toDelete);
     }
     if(_syncHadError)showToast("Sync failed — your data is saved locally.",null);
   }catch(e){console.warn('Supabase sync error:',e);showToast("Couldn't sync — your data is saved locally.",null);}finally{_syncInProgress=false;if(_syncPending)syncToSupabase();}
