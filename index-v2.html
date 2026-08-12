@@ -769,11 +769,12 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     </header>
     <div style="padding:0 22px;">
       <div class="sw" style="margin-bottom:12px;"><span class="sic">🔍</span><input class="si" id="hist-search" placeholder="Search by seed or notes…" autocomplete="off"></div>
-      <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:12px;" id="hist-period-row">
+      <div style="display:flex;gap:6px;align-items:center;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:12px;" id="hist-period-row">
         <button class="hist-fp on" data-p="all">All</button>
         <button class="hist-fp" data-p="week">This week</button>
         <button class="hist-fp" data-p="month">This month</button>
         <button class="hist-fp" data-p="custom">Custom</button>
+        <button id="hist-add-btn" aria-label="Log a past session" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:26px;height:26px;font-size:16px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;margin-left:2px;">+</button>
       </div>
       <div id="hist-custom-range" style="display:none;background:var(--bg2);border:var(--br);border-radius:12px;padding:10px 12px;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -1437,7 +1438,7 @@ function show(id){document.querySelectorAll('.scr').forEach(function(s){s.classL
 function nav(v){
   show('s-'+v);
   ['home','my','garden','hist','friends'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
-  document.getElementById('fab').style.display=(v==='hist')?'flex':'none';
+  document.getElementById('fab').style.display='none';
   var mb=document.getElementById('menu-btn');if(mb)mb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist'||v==='friends')?'flex':'none';
   if(v==='home')rHome();
   if(v==='my'){mySearch='';mySearchOpen=false;var ms=document.getElementById('my-search');if(ms)ms.value='';var msw=document.getElementById('my-search-wrap');if(msw)msw.style.display='none';rMy();}
@@ -1546,6 +1547,7 @@ document.getElementById('fab').addEventListener('click',function(){
   else openAdd();
 });
 // Harvest filters
+document.getElementById('hist-add-btn').addEventListener('click',openHarvestQuickLog);
 document.getElementById('hist-search').addEventListener('input',function(){histSearch=this.value;rHist();});
 document.getElementById('my-search').addEventListener('input',function(){mySearch=this.value;rMy();});
 document.getElementById('hist-period-row').addEventListener('click',function(e){
@@ -4127,7 +4129,7 @@ function openActInfo(actId,from){
   notesBtn.addEventListener('click',function(){closeEd();openNotes();rNoteEditor(act);});
   row.appendChild(notesBtn);
   var sessBtn=document.createElement('button');sessBtn.className='btn btn-s';sessBtn.style.cssText='flex:1;margin-top:0;font-size:13px;';sessBtn.textContent='📋 Sessions';
-  sessBtn.addEventListener('click',function(){closeEd();show('s-hist');['home','my','garden','hist'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t==='hist');});document.getElementById('fab').style.display='flex';histSearch=act.name;histPeriod='all';var hs=document.getElementById('hist-search');if(hs)hs.value=act.name;rHist();});
+  sessBtn.addEventListener('click',function(){closeEd();show('s-hist');['home','my','garden','hist'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t==='hist');});document.getElementById('fab').style.display='none';histSearch=act.name;histPeriod='all';var hs=document.getElementById('hist-search');if(hs)hs.value=act.name;rHist();});
   row.appendChild(sessBtn);sh.appendChild(row);
   var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start activity';
   startBtn.addEventListener('click',function(){closeEd();startFrom(actId);});
