@@ -690,7 +690,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <div id="ip-wrap"></div>
     <!-- ON TODAY'S LIST -->
     <section class="v2-sec">
-      <div class="v2-sec-hdr"><span>On today's list</span></div>
+      <div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-today"><span>On today's list ›</span></div>
       <div id="today-section"></div>
       <div id="pc-wrap"></div>
     </section>
@@ -2838,6 +2838,7 @@ document.querySelectorAll('#s-home .v2-sec-link,#s-home .v2-sec-hdr-clickable').
     var a=this.dataset.action;
     if(a==='open-cal')openCalendar();
     else if(a==='open-week')openWeeklySummary();
+    else if(a==='open-today')openTodayOverview();
   });
 });
 document.getElementById('mp-notes').addEventListener('click',function(){closeMenuPanel();openNotes();});
@@ -3849,6 +3850,110 @@ function calcStreak(){
     d.setDate(d.getDate()-1);
   }
   return streak;
+}
+
+function openTodayOverview(){
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
+  var now=new Date();
+  var mid=new Date(now);mid.setHours(0,0,0,0);
+  var dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+  var todaySess=sessions.filter(function(s){return new Date(s.date).toDateString()===now.toDateString();});
+  var todayMins=todaySess.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
+  var scheduled=_getTodayScheduled();
+  var focusActs=myActs.filter(function(a){return isFocused(a.id)&&hasFocusSet();});
+  var focusProjects=focusActs.filter(isProject);
+  var openTasks=[];
+  focusProjects.forEach(function(p){getProjectTasks(p).forEach(function(t){if(!t.done)openTasks.push({proj:p,task:t});});});
+
+  var hdr=document.createElement('div');
+  hdr.style.cssText='margin-bottom:18px;';
+  hdr.innerHTML='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.005em;line-height:1.2;">Today</div>'
+    +'<div style="font-size:12px;color:var(--tx3);margin-top:4px;font-weight:500;letter-spacing:.02em;">'+dateStr+' · '+todaySess.length+' session'+(todaySess.length!==1?'s':'')+' · '+(todayMins>=60?Math.floor(todayMins/60)+'h '+(todayMins%60)+'m':todayMins+'m')+'</div>';
+  sh.appendChild(hdr);
+
+  function subHdr(text){
+    var el=document.createElement('div');
+    el.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1.2px;margin:14px 0 8px;';
+    el.textContent=text;
+    return el;
+  }
+
+  // ── Scheduled ──
+  sh.appendChild(subHdr('Scheduled'));
+  if(scheduled.length){
+    scheduled.forEach(function(it){
+      var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FDF3C8;border:1px solid #F0DE94;border-radius:12px;margin-bottom:6px;';
+      row.innerHTML='<div style="font-size:11px;font-weight:700;color:#846214;min-width:36px;letter-spacing:.02em;text-transform:uppercase;">'+_fmtHour12(it.hour||0)+'</div>'
+        +'<div style="font-size:20px;">'+(it.emoji||'🌱')+'</div>'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:#5C4610;line-height:1.2;">'+(it.name||'Untitled')+'</div><div style="font-size:11px;color:#846214;opacity:.7;margin-top:2px;">'+(it.kind==='routine'?'Routine':'Planned')+dur+'</div></div>'
+        +'<button data-startid="'+(it.actId||'')+'" style="background:#846214;color:#FDF3C8;border:none;border-radius:12px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">Start</button>';
+      sh.appendChild(row);
+    });
+  } else {
+    var empty=document.createElement('div');
+    empty.style.cssText='display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--skl);border:1px solid rgba(122,155,184,.3);border-radius:12px;';
+    empty.innerHTML='<div style="font-size:18px;opacity:.85;">🗓️</div><div style="flex:1;font-size:13px;color:var(--sk2);">Nothing scheduled today.</div>';
+    sh.appendChild(empty);
+  }
+
+  // ── Ongoing points ──
+  if(openTasks.length){
+    sh.appendChild(subHdr('Ongoing points'));
+    var tWrap=document.createElement('div');
+    tWrap.style.cssText='background:var(--bg2);border-radius:12px;padding:2px 12px;';
+    openTasks.slice(0,6).forEach(function(pt,i){
+      var safe=(pt.task.text||'').replace(/</g,'&lt;');
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 0;'+(i<Math.min(openTasks.length,6)-1?'border-bottom:.5px solid var(--bg3);':'');
+      row.innerHTML='<div style="width:14px;height:14px;border-radius:4px;border:1.5px solid var(--bg3);flex-shrink:0;"></div>'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:13px;color:var(--tx);line-height:1.35;">'+safe+'</div><div style="font-size:11px;color:var(--tx3);margin-top:2px;">'+pt.proj.emoji+' '+pt.proj.name+'</div></div>';
+      tWrap.appendChild(row);
+    });
+    sh.appendChild(tWrap);
+    if(openTasks.length>6){
+      var more=document.createElement('div');more.style.cssText='font-size:11px;color:var(--tx3);text-align:center;margin-top:6px;';more.textContent='+'+(openTasks.length-6)+' more';sh.appendChild(more);
+    }
+  }
+
+  // ── Logged today ──
+  if(todaySess.length){
+    sh.appendChild(subHdr('Logged today'));
+    var lWrap=document.createElement('div');
+    lWrap.style.cssText='background:var(--bg2);border-radius:12px;padding:2px 12px;';
+    todaySess.slice().reverse().forEach(function(s,i,arr){
+      var act=myActs.find(function(a){return a.id===s.actId;})||{emoji:'?',name:'Unknown'};
+      var mins=(s.hours||0)*60+(s.mins||0);
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 0;'+(i<arr.length-1?'border-bottom:.5px solid var(--bg3);':'');
+      row.innerHTML='<span style="font-size:18px;">'+act.emoji+'</span><div style="flex:1;font-size:13px;font-weight:600;">'+act.name+'</div><div style="font-size:12px;color:var(--gr);font-weight:600;">'+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m')+'</div>';
+      lWrap.appendChild(row);
+    });
+    sh.appendChild(lWrap);
+  }
+
+  // ── Quick actions ──
+  var spacer=document.createElement('div');spacer.style.height='18px';sh.appendChild(spacer);
+  var addBtn=document.createElement('button');
+  addBtn.className='btn btn-p';addBtn.textContent='+ Add activity to today';
+  addBtn.addEventListener('click',function(){closeEd();openPicker();});
+  sh.appendChild(addBtn);
+  var schedBtn=document.createElement('button');
+  schedBtn.className='btn btn-s';schedBtn.style.marginTop='8px';schedBtn.textContent='+ Schedule for later today';
+  schedBtn.addEventListener('click',function(){closeEd();setTimeout(function(){_calScheduleForm(mid);},60);});
+  sh.appendChild(schedBtn);
+  var closeBtn=document.createElement('button');
+  closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
+  closeBtn.addEventListener('click',closeEd);
+  sh.appendChild(closeBtn);
+
+  // Wire schedule Start buttons
+  sh.querySelectorAll('button[data-startid]').forEach(function(b){
+    b.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id){closeEd();openStartConfirm(id);}});
+  });
+
+  document.getElementById('ed-ov').classList.add('on');
 }
 
 function openWeeklySummary(){
