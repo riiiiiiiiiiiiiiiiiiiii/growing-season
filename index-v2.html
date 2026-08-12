@@ -695,11 +695,14 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div id="pc-wrap"></div>
     </section>
     <div id="streak-wrap" style="display:none;"></div>
+    <!-- THIS WEEK'S FOCUS -->
+    <section class="v2-sec">
+      <div id="week-focus-wrap"></div>
+    </section>
     <!-- THIS WEEK (clickable header opens recap) -->
     <section class="v2-sec">
       <div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-week"><span>This week ›</span></div>
       <div id="weekly-bar"></div>
-      <div id="week-focus-wrap"></div>
       <div class="v2-stats" id="stats"></div>
     </section>
     <div id="home-due"></div>
@@ -1854,7 +1857,7 @@ function rHome(){
   var todayCnt=todaySess.length;
   var todayTm=todaySess.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
   document.getElementById('stats').innerHTML=
-    '<div id="stat-sess" class="v2-stat" style="cursor:pointer;">'
+    '<div id="stat-sess" class="v2-stat" style="cursor:pointer;padding-left:12px;">'
       +'<div class="v2-stat-n">'+todayCnt+'</div>'
       +'<div class="v2-stat-l">Sessions today</div>'
     +'</div>'
@@ -5215,7 +5218,7 @@ function renderWeekFocus(){
   if(active){wrap.innerHTML='';return;}
   var focusActs=myActs.filter(function(a){return isFocused(a.id)&&hasFocusSet();});
   var html='';
-  html+='<div class="v2-sub-hdr"><span>This week’s focus</span></div>';
+  html+='<div class="v2-sec-hdr"><span>This week’s focus</span></div>';
   if(!hasFocusSet()){
     html+='<div class="v2-today-empty" style="margin-top:0;">Head to your <strong>Seed packet</strong> and pick a few activities to focus on. They\'ll show up here.</div>';
   } else if(focusActs.length){
