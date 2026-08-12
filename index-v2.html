@@ -89,12 +89,12 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .today-empty-text{flex:1;font-size:13px;font-weight:600;color:var(--co2);line-height:1.4;}
 .today-empty-cta{background:var(--co);color:#FFFBF3;border:none;border-radius:14px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;}
 .streak-inline{display:inline-flex;align-items:center;gap:4px;background:rgba(201,112,80,.16);color:inherit;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;letter-spacing:.02em;margin-left:8px;vertical-align:middle;}
-.sched-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:#FDF3C8;border:1px solid #F0DE94;border-radius:12px;margin-bottom:6px;cursor:pointer;box-shadow:var(--sh);}
-.sched-time{font-size:11px;font-weight:700;color:#846214;letter-spacing:.02em;min-width:36px;text-transform:uppercase;}
+.sched-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--sul);border:1px solid var(--sum);border-radius:12px;margin-bottom:6px;cursor:pointer;box-shadow:var(--sh);}
+.sched-time{font-size:11px;font-weight:700;color:var(--su2);letter-spacing:.02em;min-width:36px;text-transform:uppercase;}
 .sched-em{font-size:22px;line-height:1;}
-.sched-name{font-size:14px;font-weight:600;color:#5C4610;line-height:1.2;}
-.sched-meta{font-size:11px;color:#846214;opacity:.7;margin-top:2px;}
-.sched-start{background:#846214;color:#FDF3C8;border:none;border-radius:12px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;letter-spacing:.02em;}
+.sched-name{font-size:14px;font-weight:600;color:var(--su2);line-height:1.2;}
+.sched-meta{font-size:11px;color:var(--su2);opacity:.75;margin-top:2px;}
+.sched-start{background:var(--su2);color:var(--sul);border:none;border-radius:12px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;letter-spacing:.02em;}
 .sched-start:active{transform:scale(.95);}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,245,235,.92);backdrop-filter:saturate(140%) blur(14px);-webkit-backdrop-filter:saturate(140%) blur(14px);border-top:0.5px solid rgba(155,135,105,.18);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
@@ -161,7 +161,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .pc-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,251,243,.66);margin-bottom:6px;}
 .pc-title{font-family:var(--serif);font-size:22px;font-weight:700;color:#FFFBF3;margin-top:2px;margin-bottom:6px;line-height:1.2;letter-spacing:-.005em;}
 .pc-sub{font-size:13px;color:rgba(255,251,243,.78);margin-bottom:18px;line-height:1.5;}
-.pc-btn{background:rgba(255,251,243,.16);border:1px solid rgba(255,251,243,.28);border-radius:24px;padding:8px 18px;color:#FFFBF3;font-size:12px;font-weight:600;letter-spacing:.02em;display:inline-block;}
+.pc-btn{background:#FFFBF3;border:none;border-radius:24px;padding:9px 20px;color:var(--tx);font-size:12.5px;font-weight:700;letter-spacing:.02em;display:inline-block;box-shadow:0 2px 8px rgba(0,0,0,.10);}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;margin-bottom:0;}
 .hs-hdr{display:flex;align-items:center;margin-bottom:8px;cursor:pointer;user-select:none;touch-action:manipulation;}
 .hs-t{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1.6px;flex:1;}
@@ -1821,13 +1821,13 @@ function rHome(){
   var greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
   var nameStr=profile&&profile.name?(profile.name):'';
   var _streak=calcStreak();
-  var streakHtml=_streak>=2?'<span class="streak-inline" title="'+_streak+'-day streak">🔥 '+_streak+'</span>':'';
+  var streakMeta=_streak>=2?' · 🔥 '+_streak:'';
   // v2 hero
   var dateStr=new Date().toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
   var v2Meta=document.getElementById('v2-hero-meta');
-  if(v2Meta)v2Meta.textContent=sea.label+' · '+dateStr;
+  if(v2Meta)v2Meta.textContent=sea.label+' · '+dateStr+streakMeta;
   var v2Greet=document.getElementById('v2-hero-greet');
-  if(v2Greet)v2Greet.innerHTML=greet+(nameStr?', '+nameStr:'')+streakHtml;
+  if(v2Greet)v2Greet.textContent=greet+(nameStr?', '+nameStr:'');
   var v2Sub=document.getElementById('v2-hero-sub');
   if(v2Sub)v2Sub.textContent=sea.sub||'';
   var pbEm=document.getElementById('menu-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
@@ -1848,7 +1848,7 @@ function rHome(){
     if(_activeTimerInt){clearInterval(_activeTimerInt);_activeTimerInt=null;}
     ipW.innerHTML='';
     // Always show the "Ready to start?" CTA under Today when no active session
-    pcW.innerHTML='<div class="pc" id="pc-card" style="margin-left:0;margin-right:0;margin-top:14px;"><div class="pc-title">Ready to start?</div><div class="pc-sub">Pick a seed to begin, or add a new one.</div><div class="pc-btn">Choose a seed</div></div>';
+    pcW.innerHTML='<div class="pc" id="pc-card" style="margin-left:0;margin-right:0;margin-top:14px;"><div class="pc-title">Not sure what to work on?</div><div class="pc-sub">Answer a few quick questions and we\'ll suggest a seed.</div><div class="pc-btn">Take the quiz</div></div>';
     document.getElementById('pc-card').addEventListener('click',openPicker);
   }
 
@@ -1857,7 +1857,7 @@ function rHome(){
   var todayCnt=todaySess.length;
   var todayTm=todaySess.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
   document.getElementById('stats').innerHTML=
-    '<div id="stat-sess" class="v2-stat" style="cursor:pointer;padding-left:12px;">'
+    '<div id="stat-sess" class="v2-stat" style="cursor:pointer;padding-left:8px;">'
       +'<div class="v2-stat-n">'+todayCnt+'</div>'
       +'<div class="v2-stat-l">Sessions today</div>'
     +'</div>'
@@ -2213,7 +2213,7 @@ function _transitionSheet(sh,fn){
 
 function _calMidnight(d){var m=new Date(d);m.setHours(0,0,0,0);return m;}
 function _calWeekMon(offset){var n=new Date();n.setHours(0,0,0,0);var dow=n.getDay();var diff=dow===0?-6:1-dow;n.setDate(n.getDate()+diff+(offset||0)*7);return n;}
-function _fmtHour(h){return (h<10?'0':'')+h+':00';}
+function _fmtHour(h){if(h==null)return 'Any time';return (h<10?'0':'')+h+':00';}
 
 function openCalendar(){
   _calWeekOffset=0;
@@ -2506,7 +2506,7 @@ function renderCalDay(dateObj){
 
   // Scheduled section
   var dayOfWeek=_calDayDate.getDay()===0?6:_calDayDate.getDay()-1;
-  var dayPlanned=calPlanned.filter(function(ev){return _calMidnight(new Date(ev.date)).getTime()===dayMid;}).sort(function(a,b){return a.hour-b.hour;});
+  var dayPlanned=calPlanned.filter(function(ev){return _calMidnight(new Date(ev.date)).getTime()===dayMid;}).sort(function(a,b){var ah=a.hour==null?9999:a.hour;var bh=b.hour==null?9999:b.hour;return ah-bh;});
   var dayRoutines=calRoutines.filter(function(r){return r.days.indexOf(dayOfWeek)>-1;});
 
   if(dayPlanned.length||dayRoutines.length||true){
@@ -2520,7 +2520,7 @@ function renderCalDay(dateObj){
     });
 
     dayPlanned.forEach(function(ev){
-      var isPast=new Date(ev.date).setHours(ev.hour+Math.ceil(ev.duration||1),0,0,0)<=Date.now();
+      var isPast=ev.hour==null?(ev.date+86400000<=Date.now()):(new Date(ev.date).setHours(ev.hour+Math.ceil(ev.duration||1),0,0,0)<=Date.now());
       var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:12px;margin-bottom:6px;cursor:pointer;';
       row.innerHTML='<span style="font-size:18px;flex-shrink:0;">'+ev.actEmoji+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+ev.actName+'</div><div style="font-size:11px;color:var(--tx3);">Planned · '+_fmtHour(ev.hour)+(ev.duration?(' · '+_fmtMins(ev.duration*60)):'')+'</div></div>'+(isPast?'<button style="background:var(--gr);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;">Log</button>':'<button aria-label="Remove planned event" style="background:none;border:none;font-size:15px;cursor:pointer;color:var(--tx3);flex-shrink:0;">✕</button>');
       var btn=row.querySelector('button');
@@ -2570,11 +2570,12 @@ function _calScheduleForm(dayDate){
   });
   sh.appendChild(aGrid);
 
-  // Time picker
-  var tLbl=document.createElement('div');tLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';tLbl.textContent='Time';sh.appendChild(tLbl);
+  // Time picker (optional)
+  var tLbl=document.createElement('div');tLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';tLbl.textContent='Time (optional)';sh.appendChild(tLbl);
   var timeRow=document.createElement('div');timeRow.style.cssText='display:flex;gap:8px;margin-bottom:16px;align-items:center;';
   var hourSel=document.createElement('select');hourSel.className='sinp';hourSel.style.cssText='flex:1;padding:8px;font-size:14px;';
-  for(var h=0;h<24;h++){var o=document.createElement('option');o.value=h;o.textContent=(h<10?'0':'')+h+':00';if(h===8)o.selected=true;hourSel.appendChild(o);}
+  var anyOpt=document.createElement('option');anyOpt.value='-1';anyOpt.textContent='Any time';anyOpt.selected=true;hourSel.appendChild(anyOpt);
+  for(var h=0;h<24;h++){var o=document.createElement('option');o.value=h;o.textContent=(h<10?'0':'')+h+':00';hourSel.appendChild(o);}
   timeRow.appendChild(hourSel);sh.appendChild(timeRow);
 
   // Duration
@@ -2612,7 +2613,8 @@ function _calScheduleForm(dayDate){
   var saveB=document.createElement('button');saveB.className='btn btn-p';saveB.style.flex='1';saveB.textContent='Save';
   saveB.addEventListener('click',function(){
     if(!_selAct){showToast('Pick an activity first',null);return;}
-    var hour=parseInt(hourSel.value);
+    var hourVal=parseInt(hourSel.value);
+    var hour=hourVal>=0?hourVal:null;
     if(_isRoutine){
       if(!_selDays.length){showToast('Pick at least one day',null);return;}
       calRoutines.push({id:genUUID(),actId:_selAct.id,actName:_selAct.name,actEmoji:_selAct.emoji,cat:_selAct.cat||'',days:_selDays.slice(),hour:hour,duration:_dur});
@@ -2641,7 +2643,7 @@ function updateHomeNudge(){
 
 function checkCalPlanned(){
   var now=Date.now();
-  var due=calPlanned.filter(function(ev){if(ev.notified)return false;var evEnd=ev.date+ev.hour*3600000+(ev.duration||1)*3600000;return evEnd<=now;});
+  var due=calPlanned.filter(function(ev){if(ev.notified)return false;if(ev.hour==null)return false;var evEnd=ev.date+ev.hour*3600000+(ev.duration||1)*3600000;return evEnd<=now;});
   if(!due.length)return;
   var ev=due[0];ev.notified=true;sv();
   var ov=document.getElementById('ed-ov'),sh=document.getElementById('ed-sh');sh.innerHTML='';
@@ -3890,11 +3892,11 @@ function openTodayOverview(){
     scheduled.forEach(function(it){
       var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
       var row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FDF3C8;border:1px solid #F0DE94;border-radius:12px;margin-bottom:6px;';
-      row.innerHTML='<div style="font-size:11px;font-weight:700;color:#846214;min-width:36px;letter-spacing:.02em;text-transform:uppercase;">'+_fmtHour12(it.hour||0)+'</div>'
+      row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--sul);border:1px solid var(--sum);border-radius:12px;margin-bottom:6px;';
+      row.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--su2);min-width:36px;letter-spacing:.02em;text-transform:uppercase;">'+(it.hour==null?'Any':_fmtHour12(it.hour))+'</div>'
         +'<div style="font-size:20px;">'+(it.emoji||'🌱')+'</div>'
-        +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:#5C4610;line-height:1.2;">'+(it.name||'Untitled')+'</div><div style="font-size:11px;color:#846214;opacity:.7;margin-top:2px;">'+(it.kind==='routine'?'Routine':'Planned')+dur+'</div></div>'
-        +'<button data-startid="'+(it.actId||'')+'" style="background:#846214;color:#FDF3C8;border:none;border-radius:12px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">Start</button>';
+        +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--su2);line-height:1.2;">'+(it.name||'Untitled')+'</div><div style="font-size:11px;color:var(--su2);opacity:.75;margin-top:2px;">'+(it.kind==='routine'?'Routine':'Planned')+dur+'</div></div>'
+        +'<button data-startid="'+(it.actId||'')+'" style="background:var(--su2);color:var(--sul);border:none;border-radius:12px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">Start</button>';
       sh.appendChild(row);
     });
   } else {
@@ -3941,12 +3943,8 @@ function openTodayOverview(){
 
   // ── Quick actions ──
   var spacer=document.createElement('div');spacer.style.height='18px';sh.appendChild(spacer);
-  var addBtn=document.createElement('button');
-  addBtn.className='btn btn-p';addBtn.textContent='+ Add activity to today';
-  addBtn.addEventListener('click',function(){closeEd();openPicker();});
-  sh.appendChild(addBtn);
   var schedBtn=document.createElement('button');
-  schedBtn.className='btn btn-s';schedBtn.style.marginTop='8px';schedBtn.textContent='+ Schedule for later today';
+  schedBtn.className='btn btn-p';schedBtn.textContent='+ Add to today’s schedule';
   schedBtn.addEventListener('click',function(){closeEd();setTimeout(function(){_calScheduleForm(mid);},60);});
   sh.appendChild(schedBtn);
   var closeBtn=document.createElement('button');
@@ -3956,7 +3954,7 @@ function openTodayOverview(){
 
   // Wire schedule Start buttons
   sh.querySelectorAll('button[data-startid]').forEach(function(b){
-    b.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id){closeEd();openStartConfirm(id);}});
+    b.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id){closeEd();openActInfo(id,'home');}});
   });
 
   document.getElementById('ed-ov').classList.add('on');
@@ -5253,7 +5251,11 @@ function _getTodayScheduled(){
       items.push({kind:'routine',id:r.id,actId:r.actId,emoji:r.actEmoji,name:r.actName,hour:r.hour,duration:r.duration});
     }
   });
-  items.sort(function(a,b){return (a.hour||0)-(b.hour||0);});
+  items.sort(function(a,b){
+    var ah=a.hour==null?9999:a.hour;
+    var bh=b.hour==null?9999:b.hour;
+    return ah-bh;
+  });
   return items;
 }
 function renderTodaySection(){
@@ -5272,7 +5274,7 @@ function renderTodaySection(){
     scheduled.forEach(function(it){
       var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
       html+='<div class="sched-item" data-startid="'+(it.actId||'')+'">'
-          +'<div class="sched-time">'+_fmtHour12(it.hour||0)+'</div>'
+          +'<div class="sched-time">'+(it.hour==null?'Any':_fmtHour12(it.hour))+'</div>'
           +'<div class="sched-em">'+(it.emoji||'🌱')+'</div>'
           +'<div style="flex:1;min-width:0;"><div class="sched-name">'+(it.name||'Untitled')+'</div><div class="sched-meta">'+(it.kind==='routine'?'Routine':'Planned')+dur+'</div></div>'
           +'<button class="sched-start" data-startid="'+(it.actId||'')+'">Start</button>'
@@ -5287,7 +5289,7 @@ function renderTodaySection(){
   }
   // Points list (from focused projects)
   if(openTasks.length){
-    html+='<div class="today-hdr" style="margin-top:18px;"><span>Ongoing projects</span><span class="today-hdr-link" style="opacity:.6;cursor:default;">'+openTasks.length+'</span></div>';
+    html+='<div style="margin-top:14px;"></div>';
     openTasks.slice(0,8).forEach(function(pt){
       var safe=(pt.task.text||'').replace(/</g,'&lt;');
       html+='<div class="task-item" data-projid="'+pt.proj.id+'" data-taskid="'+pt.task.id+'">'
@@ -5301,7 +5303,7 @@ function renderTodaySection(){
   wrap.innerHTML=html;
   // Wire schedule Start buttons → confirm modal
   wrap.querySelectorAll('.sched-start').forEach(function(el){
-    el.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id)openStartConfirm(id);});
+    el.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id)openActInfo(id,'home');});
   });
   wrap.querySelectorAll('.sched-item').forEach(function(el){
     el.addEventListener('click',function(){var id=this.dataset.startid;if(id)openActInfo(id,'home');});
@@ -5335,7 +5337,6 @@ function renderWeekFocus(){
     focusActs.forEach(function(a){
       var proj=isProject(a);
       html+='<div class="focus-chip'+(proj?' project':'')+'" data-startid="'+a.id+'">'
-          +'<span class="focus-chip-em">'+a.emoji+'</span>'
           +'<span>'+a.name+'</span>'
           +'</div>';
     });
@@ -5345,37 +5346,10 @@ function renderWeekFocus(){
   }
   wrap.innerHTML=html;
   wrap.querySelectorAll('.focus-chip').forEach(function(el){
-    el.addEventListener('click',function(){openStartConfirm(this.dataset.startid);});
+    el.addEventListener('click',function(){openActInfo(this.dataset.startid,'home');});
   });
   var hdr=wrap.querySelector('.v2-sec-hdr-clickable');
   if(hdr)hdr.addEventListener('click',openFocus);
-}
-
-function openStartConfirm(id){
-  var act=myActs.find(function(a){return a.id===id;});
-  if(!act)return;
-  var sh=document.getElementById('ed-sh');
-  if(!sh)return;
-  sh.innerHTML='';
-  var head=document.createElement('div');
-  head.style.cssText='text-align:center;margin-bottom:14px;';
-  head.innerHTML='<div style="font-size:44px;line-height:1;margin-bottom:8px;">'+(act.emoji||'🌱')+'</div>'
-    +'<div style="font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.005em;line-height:1.2;">Ready to start '+act.name+'?</div>'
-    +'<div style="font-size:12.5px;color:var(--tx3);margin-top:6px;">A timer will begin as soon as you start.</div>';
-  sh.appendChild(head);
-  var startBtn=document.createElement('button');
-  startBtn.className='btn btn-p';startBtn.textContent='▶ Start now';
-  startBtn.addEventListener('click',function(){closeEd();startFrom(id);});
-  sh.appendChild(startBtn);
-  var detailsBtn=document.createElement('button');
-  detailsBtn.className='btn btn-s';detailsBtn.style.marginTop='8px';detailsBtn.textContent='View details';
-  detailsBtn.addEventListener('click',function(){closeEd();openActInfo(id,'home');});
-  sh.appendChild(detailsBtn);
-  var cancelBtn=document.createElement('button');
-  cancelBtn.className='btn btn-s';cancelBtn.style.marginTop='8px';cancelBtn.textContent='Cancel';
-  cancelBtn.addEventListener('click',closeEd);
-  sh.appendChild(cancelBtn);
-  document.getElementById('ed-ov').classList.add('on');
 }
 
 // ── PROJECT DETAIL SCREEN (Phase 3) ───────────────────
