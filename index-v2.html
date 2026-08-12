@@ -451,7 +451,6 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 /*   V2 REDESIGN LAYER                                    */
 /* ══════════════════════════════════════════════════════ */
 #s-home,#s-my,#s-hist,#s-garden{padding-top:calc(38px + env(safe-area-inset-top));padding-left:0;padding-right:0;}
-#s-garden{padding-top:0;}
 #s-log{padding:calc(36px + env(safe-area-inset-top)) 22px 40px;}
 #s-log .lh{margin-bottom:20px;}
 #s-log .lt{font-size:26px;letter-spacing:-.01em;line-height:1.15;}
@@ -732,8 +731,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 
   <!-- GARDEN (v2) -->
   <div id="s-garden" class="scr">
-    <header class="v2-hero" style="padding-top:calc(38px + env(safe-area-inset-top));">
-      <h1 class="v2-hero-greet">In bloom</h1>
+    <header class="v2-hero">
+      <h1 class="v2-hero-greet">Greenhouse</h1>
       <div class="v2-hero-sub">Plants and trees grow every time you log a session.</div>
     </header>
     <div id="garden-focus-banner-wrap" style="padding:0 22px 8px;"></div>
@@ -741,7 +740,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div id="garden-tabs" style="display:flex;gap:6px;"></div>
       <div style="display:flex;align-items:center;gap:10px;">
         <div id="garden-count" style="font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;"></div>
-        <button id="garden-help-btn" aria-label="Growth stages" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:32px;height:32px;font-size:13px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">?</button>
+        <button id="garden-help-btn" aria-label="Growth stages" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:26px;height:26px;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">?</button>
       </div>
     </div>
     <div id="garden-svg-wrap"></div>
@@ -857,7 +856,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
   <div id="s-friends" class="scr">
   <div id="friends-panel">
     <header class="v2-hero">
-      <h1 class="v2-hero-greet">Fellow growers</h1>
+      <h1 class="v2-hero-greet">Neighbourhood</h1>
       <div class="v2-hero-sub">See what the people you follow are tending to.</div>
     </header>
     <div style="padding:0 22px;flex-shrink:0;">
