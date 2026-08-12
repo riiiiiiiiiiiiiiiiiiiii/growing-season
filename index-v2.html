@@ -5460,13 +5460,11 @@ function rGarden(){
   var gbw=document.getElementById('garden-focus-banner-wrap');
   var gtabs=document.getElementById('garden-tabs');
   if(gbw){
+    gbw.innerHTML='';
     if(!hasFocusSet()){
       gardenTab='all';
-      gbw.innerHTML='<div class="focus-banner" style="cursor:pointer;" id="garden-focus-set-cta"><span style="font-size:18px;">🎯</span><div class="focus-banner-text"><strong>Set your focus</strong><br><span style="font-weight:400;">Pick a few activities to prioritise</span></div><button class="focus-banner-edit">Choose</button></div>';
-      document.getElementById('garden-focus-set-cta').addEventListener('click',openFocus);
       if(gtabs){gtabs.innerHTML='';gtabs.style.display='none';}
     } else {
-      gbw.innerHTML='';
       if(gtabs){
         gtabs.style.display='flex';
         if(!gtabs.children.length){
