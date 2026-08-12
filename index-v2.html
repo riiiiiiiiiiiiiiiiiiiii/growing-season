@@ -466,12 +466,12 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 #s-log .stars{gap:6px;}
 #s-log .star{font-size:28px;}
 #s-log .lbadge{background:var(--grl);color:var(--gr2);font-weight:600;letter-spacing:.02em;padding:4px 12px;}
-.v2-hero{padding:12px 22px 24px;}
+.v2-hero{padding:12px 22px 14px;}
 .v2-hero-meta{font-size:11px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;color:var(--tx3);margin-bottom:14px;}
 .v2-hero-greet{font-family:var(--serif);font-size:34px;font-weight:700;line-height:1.1;letter-spacing:-.015em;color:var(--tx);margin:0;}
 .v2-hero-greet .streak-inline{background:rgba(201,112,80,.14);color:var(--co2);font-family:var(--sans);font-size:12px;padding:3px 10px;margin-left:10px;position:relative;top:-6px;}
 .v2-hero-sub{font-size:14px;color:var(--tx2);margin-top:8px;line-height:1.5;}
-.v2-sec{padding:0 22px;margin-top:32px;}
+.v2-sec{padding:0 22px;margin-top:18px;}
 .v2-sec-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;padding-bottom:8px;border-bottom:0.5px solid var(--bg3);}
 .v2-sec-hdr>span{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--tx);letter-spacing:-.005em;}
 .v2-sec-link{font-size:12px;color:var(--gr2);cursor:pointer;font-weight:600;letter-spacing:.02em;user-select:none;}
@@ -480,11 +480,16 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .v2-sec-hdr-clickable:active{opacity:.6;}
 .v2-today-empty{margin-top:12px;font-size:13px;color:var(--tx3);line-height:1.55;padding:14px 16px;background:var(--bg2);border-radius:12px;}
 .v2-today-empty strong{color:var(--tx2);font-weight:600;}
-.v2-stats{display:flex;flex-direction:row;margin-top:20px;padding:0;width:100%;box-sizing:border-box;align-items:flex-start;}
+.v2-stats{display:flex;flex-direction:row;margin-top:16px;padding:0;width:100%;box-sizing:border-box;align-items:flex-start;}
 .v2-stats .v2-stat{flex:1 1 0;min-width:0;padding:0;background:none;border:none;text-align:left;}
-.v2-stats .v2-stat + .v2-stat{border-left:0.5px solid var(--bg3);padding-left:22px;margin-left:22px;}
-.v2-stats .v2-stat-n{display:block;font-family:var(--serif);font-size:28px;font-weight:700;color:var(--tx);letter-spacing:-.01em;line-height:1;margin:0 0 8px 0;padding:0;white-space:nowrap;}
-.v2-stats .v2-stat-l{display:block;font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;font-weight:600;line-height:1.2;margin:0;padding:0;}
+.v2-stats .v2-stat + .v2-stat{border-left:0.5px solid var(--bg3);padding-left:20px;margin-left:20px;}
+.v2-stats .v2-stat-n{display:block;font-family:var(--serif);font-size:20px;font-weight:700;color:var(--tx);letter-spacing:-.01em;line-height:1;margin:0 0 5px 0;padding:0;white-space:nowrap;}
+.v2-stats .v2-stat-l{display:block;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;line-height:1.2;margin:0;padding:0;}
+.sched-empty{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--skl);border:1px solid rgba(122,155,184,.3);border-radius:12px;margin-bottom:6px;box-shadow:var(--sh);}
+.sched-empty-em{font-size:20px;flex-shrink:0;opacity:.85;}
+.sched-empty-text{flex:1;font-size:13px;font-weight:500;color:var(--sk2);line-height:1.4;}
+.v2-sub-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-top:20px;margin-bottom:14px;padding-bottom:8px;border-bottom:0.5px solid var(--bg3);}
+.v2-sub-hdr>span{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--tx);letter-spacing:-.005em;}
 #daily-quote{padding:36px 22px 8px;}
 #daily-quote .dq{background:none;padding:0;border:none;box-shadow:none;margin:0;font-family:var(--serif);font-style:italic;color:var(--tx3);}
 #daily-quote .dq-em{opacity:.55;}
@@ -694,6 +699,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <section class="v2-sec">
       <div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-week"><span>This week ›</span></div>
       <div id="weekly-bar"></div>
+      <div id="week-focus-wrap"></div>
       <div class="v2-stats" id="stats"></div>
     </section>
     <div id="home-due"></div>
@@ -734,7 +740,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div id="garden-tabs" style="display:flex;gap:6px;"></div>
       <div style="display:flex;align-items:center;gap:10px;">
         <div id="garden-count" style="font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;"></div>
-        <button id="garden-help-btn" aria-label="Growth stages" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</button>
+        <button id="garden-help-btn" aria-label="Growth stages" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:32px;height:32px;font-size:13px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">?</button>
       </div>
     </div>
     <div id="garden-svg-wrap"></div>
@@ -1824,12 +1830,14 @@ function rHome(){
   var v2Greet=document.getElementById('v2-hero-greet');
   if(v2Greet)v2Greet.innerHTML=greet+(nameStr?', '+nameStr:'')+streakHtml;
   var v2Sub=document.getElementById('v2-hero-sub');
-  if(v2Sub)v2Sub.textContent='';
+  if(v2Sub)v2Sub.textContent=sea.sub||'';
   var pbEm=document.getElementById('menu-btn-em');if(pbEm)pbEm.textContent=profile&&profile.emoji?profile.emoji:'👤';
 
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
-  // Render Today section (focus chips + tasks from focused projects)
+  // Render Today section (schedule or empty) + tasks from focused projects
   renderTodaySection();
+  // Render This week's focus (chips) into its own slot under the weekly overview
+  renderWeekFocus();
   if(active){
     var act=myActs.find(function(a){return a.id===active.actId;})||{emoji:'?',name:'Unknown'};
     ipW.innerHTML='<div class="ip" id="ip-card"><div class="ip-dot"></div><div class="ip-lbl">🌱 Currently growing</div><div class="ip-name">'+act.emoji+' '+act.name+'</div><div class="ip-time" id="ip-elapsed" style="font-size:22px;font-weight:700;font-family:var(--mono,monospace);letter-spacing:.04em;color:#fff;margin-bottom:8px;"></div><div class="ip-btn">Finish &amp; log</div></div>';
@@ -1840,14 +1848,9 @@ function rHome(){
   } else {
     if(_activeTimerInt){clearInterval(_activeTimerInt);_activeTimerInt=null;}
     ipW.innerHTML='';
-    // Only show the promo/CTA card when Today section is empty (no focus + no active session)
-    if(!hasFocusSet()){
-      pcW.innerHTML='<div class="pc" id="pc-card"><div class="pc-title">Ready to start?</div><div class="pc-sub">Pick a seed to begin, or add a new one.</div><div class="pc-btn">Choose a seed</div></div><button id="btn-quick-log" style="display:block;width:100%;margin-top:10px;background:var(--col);border:none;border-radius:12px;padding:11px;font-size:12.5px;font-weight:600;color:var(--co2);cursor:pointer;">✍️ Log a past session</button>';
-      document.getElementById('pc-card').addEventListener('click',openPicker);
-      document.getElementById('btn-quick-log').addEventListener('click',showQuickLog);
-    } else {
-      pcW.innerHTML='';
-    }
+    // Always show the "Ready to start?" CTA under Today when no active session
+    pcW.innerHTML='<div class="pc" id="pc-card" style="margin-left:0;margin-right:0;margin-top:14px;"><div class="pc-title">Ready to start?</div><div class="pc-sub">Pick a seed to begin, or add a new one.</div><div class="pc-btn">Choose a seed</div></div>';
+    document.getElementById('pc-card').addEventListener('click',openPicker);
   }
 
   var todayStr=new Date().toDateString();
@@ -5167,24 +5170,12 @@ function renderTodaySection(){
           +'<button class="sched-start" data-startid="'+(it.actId||'')+'">Start</button>'
           +'</div>';
     });
-  }
-  // No focus set: point them to the Seed packet
-  if(!hasFocusSet()){
-    html+='<div class="v2-today-empty"'+(scheduled.length?' style="margin-top:14px;"':'')+'>Head to your <strong>Seed packet</strong> and pick a few activities to focus on. They\'ll show up here.</div>';
-  } else if(focusActs.length){
-    html+='<div class="today-hdr"'+(scheduled.length?' style="margin-top:14px;"':'')+'><span>This week’s focus</span></div>';
-    html+='<div class="focus-row">';
-    focusActs.forEach(function(a){
-      var proj=isProject(a);
-      html+='<div class="focus-chip'+(proj?' project':'')+'" data-startid="'+a.id+'">'
-          +'<span class="focus-chip-em">'+a.emoji+'</span>'
-          +'<span>'+a.name+'</span>'
-          +'</div>';
-    });
-    html+='</div>';
   } else {
-    // Focus set but everything got removed
-    html+='<div class="v2-today-empty"'+(scheduled.length?' style="margin-top:14px;"':'')+'>No focused activities right now. Pick some from your <strong>Seed packet</strong>.</div>';
+    // No scheduled items — light-blue empty card
+    html+='<div class="sched-empty">'
+        +'<div class="sched-empty-em">🗓️</div>'
+        +'<div class="sched-empty-text">No activity scheduled. Pick one to get started.</div>'
+        +'</div>';
   }
   // Points list (from focused projects)
   if(openTasks.length){
@@ -5197,17 +5188,12 @@ function renderTodaySection(){
           +'</div>';
     });
     if(openTasks.length>8)html+='<div style="text-align:center;font-size:12px;color:var(--tx3);padding:8px;">+'+(openTasks.length-8)+' more</div>';
-  } else if(hasFocusSet()&&focusActs.length){
-    // Focus is set with chips shown but no scheduled/task items → subtle CTA
-    html+='<div class="v2-today-empty" style="margin-top:18px;">Pick an activity to get started.</div>';
   }
   html+='</div>';
   wrap.innerHTML=html;
-  // Wire chips → start session
-  wrap.querySelectorAll('.focus-chip').forEach(function(el){el.addEventListener('click',function(){startFrom(this.dataset.startid);});});
-  // Wire schedule Start buttons
+  // Wire schedule Start buttons → confirm modal
   wrap.querySelectorAll('.sched-start').forEach(function(el){
-    el.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id)startFrom(id);});
+    el.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id)openStartConfirm(id);});
   });
   wrap.querySelectorAll('.sched-item').forEach(function(el){
     el.addEventListener('click',function(){var id=this.dataset.startid;if(id)openActInfo(id,'home');});
@@ -5225,9 +5211,61 @@ function renderTodaySection(){
   wrap.querySelectorAll('.task-item').forEach(function(row){
     row.addEventListener('click',function(){showProjectInfo(this.dataset.projid,'home');});
   });
-  wrap.querySelectorAll('[data-action="edit-focus"]').forEach(function(el){el.addEventListener('click',openFocus);});
-  wrap.querySelectorAll('[data-action="open-cal"]').forEach(function(el){el.addEventListener('click',openCalendar);});
-  wrap.querySelectorAll('[data-action="open-plot"]').forEach(function(el){el.addEventListener('click',function(){nav('my');});});
+}
+
+function renderWeekFocus(){
+  var wrap=document.getElementById('week-focus-wrap');
+  if(!wrap)return;
+  if(active){wrap.innerHTML='';return;}
+  var focusActs=myActs.filter(function(a){return isFocused(a.id)&&hasFocusSet();});
+  var html='';
+  html+='<div class="v2-sub-hdr"><span>This week’s focus</span></div>';
+  if(!hasFocusSet()){
+    html+='<div class="v2-today-empty" style="margin-top:0;">Head to your <strong>Seed packet</strong> and pick a few activities to focus on. They\'ll show up here.</div>';
+  } else if(focusActs.length){
+    html+='<div class="focus-row">';
+    focusActs.forEach(function(a){
+      var proj=isProject(a);
+      html+='<div class="focus-chip'+(proj?' project':'')+'" data-startid="'+a.id+'">'
+          +'<span class="focus-chip-em">'+a.emoji+'</span>'
+          +'<span>'+a.name+'</span>'
+          +'</div>';
+    });
+    html+='</div>';
+  } else {
+    html+='<div class="v2-today-empty" style="margin-top:0;">No focused activities right now. Pick some from your <strong>Seed packet</strong>.</div>';
+  }
+  wrap.innerHTML=html;
+  wrap.querySelectorAll('.focus-chip').forEach(function(el){
+    el.addEventListener('click',function(){openStartConfirm(this.dataset.startid);});
+  });
+}
+
+function openStartConfirm(id){
+  var act=myActs.find(function(a){return a.id===id;});
+  if(!act)return;
+  var sh=document.getElementById('ed-sh');
+  if(!sh)return;
+  sh.innerHTML='';
+  var head=document.createElement('div');
+  head.style.cssText='text-align:center;margin-bottom:14px;';
+  head.innerHTML='<div style="font-size:44px;line-height:1;margin-bottom:8px;">'+(act.emoji||'🌱')+'</div>'
+    +'<div style="font-family:var(--serif);font-size:20px;font-weight:700;letter-spacing:-.005em;line-height:1.2;">Ready to start '+act.name+'?</div>'
+    +'<div style="font-size:12.5px;color:var(--tx3);margin-top:6px;">A timer will begin as soon as you start.</div>';
+  sh.appendChild(head);
+  var startBtn=document.createElement('button');
+  startBtn.className='btn btn-p';startBtn.textContent='▶ Start now';
+  startBtn.addEventListener('click',function(){closeEd();startFrom(id);});
+  sh.appendChild(startBtn);
+  var detailsBtn=document.createElement('button');
+  detailsBtn.className='btn btn-s';detailsBtn.style.marginTop='8px';detailsBtn.textContent='View details';
+  detailsBtn.addEventListener('click',function(){closeEd();openActInfo(id,'home');});
+  sh.appendChild(detailsBtn);
+  var cancelBtn=document.createElement('button');
+  cancelBtn.className='btn btn-s';cancelBtn.style.marginTop='8px';cancelBtn.textContent='Cancel';
+  cancelBtn.addEventListener('click',closeEd);
+  sh.appendChild(cancelBtn);
+  document.getElementById('ed-ov').classList.add('on');
 }
 
 // ── PROJECT DETAIL SCREEN (Phase 3) ───────────────────
