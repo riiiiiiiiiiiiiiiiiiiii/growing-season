@@ -5283,7 +5283,7 @@ function renderWeekFocus(){
   var html='';
   html+='<div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-focus"><span>This week’s focus<span class="v2-chev">›</span></span></div>';
   if(!hasFocusSet()){
-    html+='<div class="v2-today-empty" style="margin-top:0;">Tap the header to pick a few activities to focus on.</div>';
+    html+='<div class="v2-today-empty" style="margin:0 16px;">Tap the header to pick a few activities to focus on.</div>';
   } else if(focusActs.length){
     html+='<div class="focus-row">';
     focusActs.forEach(function(a){
@@ -5294,7 +5294,7 @@ function renderWeekFocus(){
     });
     html+='</div>';
   } else {
-    html+='<div class="v2-today-empty" style="margin-top:0;">No focused activities right now. Tap the header to pick some.</div>';
+    html+='<div class="v2-today-empty" style="margin:0 16px;">No focused activities right now. Tap the header to pick some.</div>';
   }
   wrap.innerHTML=html;
   wrap.querySelectorAll('.focus-chip').forEach(function(el){
