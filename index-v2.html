@@ -1856,7 +1856,7 @@ function rHome(){
     if(_activeTimerInt){clearInterval(_activeTimerInt);_activeTimerInt=null;}
     ipW.innerHTML='';
     // Always show the "Ready to start?" CTA under Today when no active session
-    pcW.innerHTML='<div class="pc" id="pc-card" style="margin-left:0;margin-right:0;margin-top:14px;"><div class="pc-title">Not sure what to work on?</div><div class="pc-sub">Answer a few quick questions and we\'ll suggest a seed.</div><div class="pc-btn">Take the quiz</div></div>';
+    pcW.innerHTML='<div class="pc" id="pc-card" style="margin-left:0;margin-right:0;margin-top:14px;"><div class="pc-title">Ready to start?</div><div class="pc-sub">Pick a seed to grow or answer a few questions and we\'ll suggest one.</div><div class="pc-btn">Take the quiz</div></div>';
     document.getElementById('pc-card').addEventListener('click',openPicker);
   }
 
