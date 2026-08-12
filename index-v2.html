@@ -3968,7 +3968,7 @@ function openTodayOverview(){
   document.getElementById('ed-ov').classList.add('on');
 }
 
-function openWeeklySummary(){
+function openWeeklySummary(preferLast){
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
   var ov=document.getElementById('ed-ov');
   var today=new Date();today.setHours(0,0,0,0);
@@ -3976,7 +3976,7 @@ function openWeeklySummary(){
   var lastMonStart=thisMonStart-7*86400000;
   var lastWkSess=sessions.filter(function(s){return s.date>=lastMonStart&&s.date<thisMonStart;});
   var thisWkSess=sessions.filter(function(s){return s.date>=thisMonStart;});
-  var showLast=lastWkSess.length>0;
+  var showLast=preferLast===true&&lastWkSess.length>0;
   var wkSess=showLast?lastWkSess:thisWkSess;
   var wkStartMs=showLast?lastMonStart:thisMonStart;
   var wkEndMs=showLast?thisMonStart:today.getTime()+86400000;
@@ -4028,7 +4028,7 @@ function checkWeeklySummary(){
   if(lastWeeklyTs>=mondayTs)return;
   var lastWkSess=sessions.filter(function(s){return s.date>=mondayTs-7*86400000&&s.date<mondayTs;});
   lastWeeklyTs=mondayTs;sv();
-  if(lastWkSess.length>0)setTimeout(openWeeklySummary,1000);
+  if(lastWkSess.length>0)setTimeout(function(){openWeeklySummary(true);},1000);
 }
 function _startOf(unit){
   var d=new Date();
