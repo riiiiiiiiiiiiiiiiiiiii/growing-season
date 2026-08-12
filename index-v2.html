@@ -5979,6 +5979,16 @@ async function syncToSupabase(){
       );
       if(_r&&_r.error){console.warn('Supabase sync: activities',_r.error.message,_r.error.code);_syncHadError=true;}
     }
+    // Remove activities deleted or archived locally (mirrors the sessions delete pass)
+    var _remoteActIds=await _supa.from('activities').select('id').eq('user_id',uid);
+    if(_remoteActIds.data&&_remoteActIds.data.length){
+      var _localActSet=new Set(myActs.map(function(a){return a.id;}));
+      var _toDeleteActs=_remoteActIds.data.filter(function(r){return!_localActSet.has(r.id);}).map(function(r){return r.id;});
+      if(_toDeleteActs.length){
+        var _dr=await _supa.from('activities').delete().in('id',_toDeleteActs);
+        if(_dr&&_dr.error){console.warn('Supabase sync: activities delete',_dr.error.message,_dr.error.code);_syncHadError=true;}
+      }
+    }
 
     // Sessions: upsert by id, then delete any Supabase rows not present locally
     if(sessions.length){
