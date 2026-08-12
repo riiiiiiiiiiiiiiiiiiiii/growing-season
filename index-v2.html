@@ -4132,7 +4132,7 @@ function openActInfo(actId,from){
   if(firstSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Growing since</span><span style="font-size:13px;font-weight:600;">'+fmtD(firstSess.date)+'</span></div>';
   if(lastSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span><span style="font-size:13px;font-weight:600;">'+fmtD(lastSess.date)+'</span></div>';
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
-  sh.innerHTML='<div style="text-align:center;margin-bottom:16px;"><div style="font-size:44px;margin-bottom:6px;">'+act.emoji+'</div><div style="display:inline-flex;align-items:center;gap:6px;"><span style="font-family:var(--serif);font-size:20px;font-weight:700;">'+act.name+'</span><button id="act-info-edit-btn" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 5px;border-radius:6px;line-height:1;" title="Edit activity">✏️</button></div></div>'
+  sh.innerHTML='<div style="text-align:center;margin-bottom:16px;"><div style="display:inline-flex;align-items:center;gap:6px;"><span style="font-family:var(--serif);font-size:20px;font-weight:700;">'+act.name+'</span><button id="act-info-edit-btn" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 5px;border-radius:6px;line-height:1;" title="Edit activity">✏️</button></div></div>'
     +'<div style="background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;">'+rows+'</div>';
   document.getElementById('act-info-edit-btn').addEventListener('click',function(){openActInfoEdit(actId,from);});
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-bottom:10px;';
@@ -5369,7 +5369,6 @@ function showProjectInfo(id){
   var sh=document.getElementById('ed-sh');
   var html='';
   html+='<div style="text-align:center;margin-bottom:16px;">';
-  html+='<div style="font-size:44px;line-height:1;margin-bottom:8px;">'+a.emoji+'</div>';
   html+='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+a.name+'</div>';
   html+='<div style="font-size:11px;color:var(--tx3);margin-top:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Stage '+stage+'/4 · '+TREE_STAGE_LABELS[stage]+(nextH?' · '+Math.max(0,Math.round((nextH-hrs)*10)/10)+'h to next':' · fully grown')+'</div>';
   html+='</div>';
