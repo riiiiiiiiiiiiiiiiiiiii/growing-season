@@ -750,7 +750,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     </header>
     <div id="garden-focus-banner-wrap" style="padding:0 22px 8px;"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:0 22px 14px;">
-      <div id="garden-tabs" style="display:flex;gap:6px;"></div>
+      <div id="garden-tabs" class="my-seg" style="flex:0 0 auto;display:none;"></div>
       <div style="display:flex;align-items:center;gap:10px;">
         <div id="garden-count" style="font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;"></div>
         <button id="garden-help-btn" aria-label="Growth stages" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:26px;height:26px;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">?</button>
@@ -5462,9 +5462,10 @@ function rGarden(){
       if(gtabs){
         gtabs.style.display='flex';
         if(!gtabs.children.length){
-          [{id:'focus',label:'🎯 In focus'},{id:'all',label:'🌸 Full garden'}].forEach(function(t){
+          [{id:'focus',label:'In focus'},{id:'all',label:'Full garden'}].forEach(function(t){
             var btn=document.createElement('div');
             btn.dataset.tabId=t.id;
+            btn.className='my-seg-btn';
             btn.textContent=t.label;
             btn.addEventListener('click',(function(tid){return function(){
               if(gardenTab===tid)return;
@@ -5481,8 +5482,7 @@ function rGarden(){
         }
         gtabs.querySelectorAll('[data-tab-id]').forEach(function(btn){
           var isActive=btn.dataset.tabId===gardenTab;
-          btn.className='pill'+(isActive?'':' off');
-          btn.style.cssText='cursor:pointer;'+(isActive?'background:var(--gr);color:#fff;':'background:var(--bg2);color:var(--tx2);');
+          btn.className='my-seg-btn'+(isActive?' on':'');
         });
       }
     }
