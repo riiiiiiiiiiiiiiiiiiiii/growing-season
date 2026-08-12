@@ -3994,11 +3994,11 @@ function openWeeklySummary(){
   sh.appendChild(hdr);
   if(wkSess.length){
     var grid=document.createElement('div');
-    grid.style.cssText='background:var(--bg2);border-radius:16px;padding:16px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:14px;';
-    function mkStat(val,lbl){var d=document.createElement('div');d.innerHTML='<div style="font-family:var(--serif);font-size:20px;font-weight:700;color:var(--gr2);margin-bottom:2px;">'+val+'</div><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--tx3);">'+lbl+'</div>';grid.appendChild(d);}
+    grid.style.cssText='background:var(--bg2);border-radius:14px;padding:12px 10px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px;';
+    function mkStat(val,lbl){var d=document.createElement('div');d.style.cssText='flex:1;min-width:0;text-align:center;';d.innerHTML='<div style="font-family:var(--serif);font-size:16px;font-weight:700;color:var(--gr2);margin-bottom:2px;line-height:1.1;white-space:nowrap;">'+val+'</div><div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);line-height:1.2;">'+lbl+'</div>';grid.appendChild(d);}
     mkStat(wkSess.length,'Sessions');
     mkStat(Math.floor(wkMins/60)+'h '+(wkMins%60)+'m','Time growing');
-    mkStat(daysActive+' / 7','Days active');
+    mkStat(daysActive+'/7','Days active');
     if(streak>=2)mkStat('🔥 '+streak,'Day streak');
     sh.appendChild(grid);
     if(topActs.length){
