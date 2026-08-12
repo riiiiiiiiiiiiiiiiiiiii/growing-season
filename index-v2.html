@@ -752,13 +752,15 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <div id="garden-focus-banner-wrap" style="padding:0 22px 8px;"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;padding:0 22px 14px;">
       <div id="garden-tabs" class="my-seg" style="flex:0 0 auto;display:none;"></div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div id="garden-count" style="font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;"></div>
-        <button id="garden-help-btn" aria-label="Growth stages" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:26px;height:26px;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">?</button>
-        <button id="garden-add-btn" aria-label="Plant / log" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:26px;height:26px;font-size:16px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">+</button>
-      </div>
+      <div id="garden-count" style="font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;"></div>
     </div>
-    <div id="garden-svg-wrap"></div>
+    <div style="position:relative;">
+      <div style="position:absolute;top:0;right:12px;display:flex;flex-direction:column;gap:8px;z-index:5;">
+        <button id="garden-help-btn" aria-label="Growth stages" style="background:var(--bg);border:1px solid var(--bg3);border-radius:50%;width:32px;height:32px;font-size:13px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;box-shadow:var(--sh);">?</button>
+        <button id="garden-add-btn" aria-label="Plant / log" style="background:var(--bg);border:1px solid var(--bg3);border-radius:50%;width:32px;height:32px;font-size:18px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;box-shadow:var(--sh);">+</button>
+      </div>
+      <div id="garden-svg-wrap"></div>
+    </div>
     <div id="garden-empty" style="display:none;padding:40px 22px;text-align:center;color:var(--tx3);font-size:13px;line-height:1.5;">Plant a seed and log a session to see your garden take shape.</div>
   </div>
 
