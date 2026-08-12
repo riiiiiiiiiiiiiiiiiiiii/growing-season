@@ -4151,10 +4151,10 @@ function openActInfo(actId,from){
     +'<div style="background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;">'+rows+'</div>';
   document.getElementById('act-info-edit-btn').addEventListener('click',function(){openActInfoEdit(actId,from);});
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-bottom:10px;';
-  var notesBtn=document.createElement('button');notesBtn.className='btn btn-s';notesBtn.style.cssText='flex:1;margin-top:0;font-size:13px;';notesBtn.textContent='✏️ Notes';
+  var notesBtn=document.createElement('button');notesBtn.className='btn btn-s';notesBtn.style.cssText='flex:1;margin-top:0;font-size:13px;';notesBtn.textContent='Notes';
   notesBtn.addEventListener('click',function(){closeEd();openNotes();rNoteEditor(act);});
   row.appendChild(notesBtn);
-  var sessBtn=document.createElement('button');sessBtn.className='btn btn-s';sessBtn.style.cssText='flex:1;margin-top:0;font-size:13px;';sessBtn.textContent='📋 Sessions';
+  var sessBtn=document.createElement('button');sessBtn.className='btn btn-s';sessBtn.style.cssText='flex:1;margin-top:0;font-size:13px;';sessBtn.textContent='Sessions';
   sessBtn.addEventListener('click',function(){closeEd();show('s-hist');['home','my','garden','hist'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t==='hist');});document.getElementById('fab').style.display='none';histSearch=act.name;histPeriod='all';var hs=document.getElementById('hist-search');if(hs)hs.value=act.name;rHist();});
   row.appendChild(sessBtn);sh.appendChild(row);
   var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start activity';
