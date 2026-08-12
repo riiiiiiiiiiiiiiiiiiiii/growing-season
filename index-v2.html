@@ -727,6 +727,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
         <div id="my-kind-seg" class="my-seg" style="display:none;"></div>
         <button id="my-focus-toggle" class="my-icon-tog" style="margin-left:auto;" aria-label="Focus only">🎯</button>
         <button id="my-search-toggle" class="my-icon-tog" aria-label="Search">🔍</button>
+        <button id="my-add-btn" class="my-icon-tog" aria-label="Plant a new seed" style="font-size:20px;font-weight:600;">+</button>
       </div>
       <div class="sw" id="my-search-wrap" style="display:none;margin-bottom:12px;"><span class="sic">🔍</span><input class="si" id="my-search" placeholder="Search seeds…" autocomplete="off"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -1432,7 +1433,7 @@ function show(id){document.querySelectorAll('.scr').forEach(function(s){s.classL
 function nav(v){
   show('s-'+v);
   ['home','my','garden','hist','friends'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t===v);});
-  document.getElementById('fab').style.display=(v==='my'||v==='garden'||v==='hist')?'flex':'none';
+  document.getElementById('fab').style.display=(v==='garden'||v==='hist')?'flex':'none';
   var mb=document.getElementById('menu-btn');if(mb)mb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist'||v==='friends')?'flex':'none';
   if(v==='home')rHome();
   if(v==='my'){mySearch='';mySearchOpen=false;var ms=document.getElementById('my-search');if(ms)ms.value='';var msw=document.getElementById('my-search-wrap');if(msw)msw.style.display='none';rMy();}
@@ -4531,6 +4532,10 @@ function rMy(){
       else{mySearch='';if(inp)inp.value='';rMy();}
     };
   }
+
+  // Add-seed button
+  var addBtn=document.getElementById('my-add-btn');
+  if(addBtn)addBtn.onclick=function(){openAdd();};
 
   // Filter by kind + focus for the render
   var _origMyActs=myActs;
