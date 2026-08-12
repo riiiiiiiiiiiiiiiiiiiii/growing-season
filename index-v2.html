@@ -2146,12 +2146,16 @@ document.getElementById('btn-prof-back').addEventListener('click',function(){
 function openProfileEdit(){
   var tmpEmoji=profile.emoji||'🌱';
   var sh=document.getElementById('ed-sh');
-  sh.innerHTML='<div style="font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:16px;">Edit profile</div>'
+  sh.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">'
+    +'<button id="pe-back" aria-label="Back" style="background:none;border:none;font-size:24px;line-height:1;padding:0 4px 0 0;cursor:pointer;color:var(--tx2);">‹</button>'
+    +'<div style="font-family:var(--serif);font-size:17px;font-weight:700;">Edit profile</div>'
+    +'</div>'
     +'<div id="pe-account-section"></div>'
     +'<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Your name</div>'
     +'<input id="pe-name" class="sinp" placeholder="e.g. Sillyblackcat" style="width:100%;font-size:16px;margin-bottom:18px;" maxlength="30">'
     +'<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Your emblem</div>'
     +'<div id="pe-em-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;"></div>';
+  document.getElementById('pe-back').addEventListener('click',function(){closeEd();setTimeout(openMenuPanel,180);});
   var peNameEl=document.getElementById('pe-name');peNameEl.value=profile.name||'';setTimeout(function(){peNameEl.select();},80);
   var grid=document.getElementById('pe-em-grid');
   PROF_EMOJIS.forEach(function(em){
