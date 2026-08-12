@@ -2616,11 +2616,17 @@ function _calScheduleForm(dayDate){
     if(_isRoutine){
       if(!_selDays.length){showToast('Pick at least one day',null);return;}
       calRoutines.push({id:genUUID(),actId:_selAct.id,actName:_selAct.name,actEmoji:_selAct.emoji,cat:_selAct.cat||'',days:_selDays.slice(),hour:hour,duration:_dur});
-      sv();ov.classList.remove('on');renderCalDay(dayDate);updateHomeNudge();
+      sv();ov.classList.remove('on');
+      if(document.getElementById('cal-ov').classList.contains('on'))renderCalDay(dayDate);
+      if(document.getElementById('s-home').classList.contains('on'))rHome();
+      updateHomeNudge();
       showToast('Routine added: '+_selAct.emoji+' '+_selAct.name,null);
     } else {
       calPlanned.push({id:genUUID(),actId:_selAct.id,actName:_selAct.name,actEmoji:_selAct.emoji,cat:_selAct.cat||'',date:_calMidnight(dayDate).getTime(),hour:hour,duration:_dur,notified:false});
-      sv();ov.classList.remove('on');renderCalDay(dayDate);updateHomeNudge();
+      sv();ov.classList.remove('on');
+      if(document.getElementById('cal-ov').classList.contains('on'))renderCalDay(dayDate);
+      if(document.getElementById('s-home').classList.contains('on'))rHome();
+      updateHomeNudge();
       showToast('Scheduled '+_selAct.emoji+' '+_selAct.name,null);
     }
   });
@@ -5321,9 +5327,9 @@ function renderWeekFocus(){
   if(active){wrap.innerHTML='';return;}
   var focusActs=myActs.filter(function(a){return isFocused(a.id)&&hasFocusSet();});
   var html='';
-  html+='<div class="v2-sec-hdr"><span>This week’s focus</span></div>';
+  html+='<div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-focus"><span>This week’s focus ›</span></div>';
   if(!hasFocusSet()){
-    html+='<div class="v2-today-empty" style="margin-top:0;">Head to your <strong>Seed packet</strong> and pick a few activities to focus on. They\'ll show up here.</div>';
+    html+='<div class="v2-today-empty" style="margin-top:0;">Tap the header to pick a few activities to focus on this week.</div>';
   } else if(focusActs.length){
     html+='<div class="focus-row">';
     focusActs.forEach(function(a){
@@ -5335,12 +5341,14 @@ function renderWeekFocus(){
     });
     html+='</div>';
   } else {
-    html+='<div class="v2-today-empty" style="margin-top:0;">No focused activities right now. Pick some from your <strong>Seed packet</strong>.</div>';
+    html+='<div class="v2-today-empty" style="margin-top:0;">No focused activities right now. Tap the header to pick some.</div>';
   }
   wrap.innerHTML=html;
   wrap.querySelectorAll('.focus-chip').forEach(function(el){
     el.addEventListener('click',function(){openStartConfirm(this.dataset.startid);});
   });
+  var hdr=wrap.querySelector('.v2-sec-hdr-clickable');
+  if(hdr)hdr.addEventListener('click',openFocus);
 }
 
 function openStartConfirm(id){
