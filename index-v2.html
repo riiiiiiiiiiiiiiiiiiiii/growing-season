@@ -6402,14 +6402,13 @@ if('serviceWorker' in navigator){
 <div class="ov" id="foc-ov">
   <div class="sh" style="max-height:82vh;display:flex;flex-direction:column;overflow:hidden;">
     <div style="margin-bottom:16px;">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;">
-        <div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1.4px;">This week</div>
-        <button id="btn-foc-clear" style="background:none;border:none;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;padding:0;line-height:1;touch-action:manipulation;letter-spacing:.02em;">Clear all</button>
-      </div>
       <div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.15;">What deserves your focus?</div>
       <div style="font-size:13px;color:var(--tx2);margin-top:8px;line-height:1.5;">Pick the seeds you want to prioritise. Others stay in your packet but fade back.</div>
     </div>
-    <input type="search" id="foc-search" placeholder="Search seeds…" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--bg3);background:var(--card);font-size:14px;margin-bottom:14px;outline:none;-webkit-appearance:none;touch-action:manipulation;">
+    <input type="search" id="foc-search" placeholder="Search seeds…" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid var(--bg3);background:var(--card);font-size:14px;margin-bottom:8px;outline:none;-webkit-appearance:none;touch-action:manipulation;">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+      <button id="btn-foc-clear" style="background:none;border:none;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;padding:2px 0;line-height:1;touch-action:manipulation;letter-spacing:.02em;">Clear all</button>
+    </div>
     <div id="foc-list" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;"></div>
     <div style="display:flex;gap:8px;padding-top:14px;border-top:0.5px solid var(--bg3);margin-top:8px;flex-shrink:0;">
       <button class="btn btn-s" style="flex:1;margin-top:0;" id="btn-foc-cancel">Cancel</button>
