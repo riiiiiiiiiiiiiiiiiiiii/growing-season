@@ -479,6 +479,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .v2-sec-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;padding-bottom:8px;border-bottom:0.5px solid var(--bg3);}
 .v2-sec-hdr>span{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--tx);letter-spacing:-.005em;}
 .v2-sec-link{font-size:12px;color:var(--gr2);cursor:pointer;font-weight:600;letter-spacing:.02em;user-select:none;}
+.v2-chev{color:var(--co);font-weight:400;margin-left:2px;}
 .v2-sec-link:active{opacity:.6;}
 .v2-sec-hdr-clickable{cursor:pointer;user-select:none;transition:opacity .15s;}
 .v2-sec-hdr-clickable:active{opacity:.6;}
@@ -694,7 +695,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <div id="ip-wrap"></div>
     <!-- ON TODAY'S LIST -->
     <section class="v2-sec">
-      <div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-today"><span>On today's list ›</span></div>
+      <div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-today"><span>On today's list<span class="v2-chev">›</span></span></div>
       <div id="today-section"></div>
       <div id="pc-wrap"></div>
     </section>
@@ -705,7 +706,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     </section>
     <!-- THIS WEEK (clickable header opens recap) -->
     <section class="v2-sec">
-      <div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-week"><span>This week ›</span></div>
+      <div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-week"><span>This week<span class="v2-chev">›</span></span></div>
       <div id="weekly-bar"></div>
       <div class="v2-stats" id="stats"></div>
     </section>
@@ -1906,7 +1907,7 @@ function rHome(){
         col.style.cssText='flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:'+(isFuture?'default':'pointer')+';';
         var circle=document.createElement('div');
         circle.style.cssText='width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;'
-          +(isToday?'background:var(--gr);box-shadow:0 0 0 2px var(--grl);':hasLog?'background:var(--grl);border:1.5px solid var(--gr);':'background:var(--bg2);border:1px solid var(--bg3);')
+          +(isToday?'background:var(--co);box-shadow:0 0 0 2px var(--col);':hasLog?'background:var(--grl);border:1.5px solid var(--gr);':'background:var(--bg2);border:1px solid var(--bg3);')
           +(isFuture?'opacity:.35;':'');
         if(hasLog&&!isToday){var dot=document.createElement('div');dot.style.cssText='width:8px;height:8px;border-radius:50%;background:var(--gr);';circle.appendChild(dot);}
         if(isToday){var dot2=document.createElement('div');dot2.style.cssText='width:8px;height:8px;border-radius:50%;background:#fff;';circle.appendChild(dot2);}
@@ -5282,7 +5283,7 @@ function renderWeekFocus(){
   if(active){wrap.innerHTML='';return;}
   var focusActs=myActs.filter(function(a){return isFocused(a.id)&&hasFocusSet();});
   var html='';
-  html+='<div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-focus"><span>This week’s focus ›</span></div>';
+  html+='<div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-focus"><span>This week’s focus<span class="v2-chev">›</span></span></div>';
   if(!hasFocusSet()){
     html+='<div class="v2-today-empty" style="margin-top:0;">Tap the header to pick a few activities to focus on this week.</div>';
   } else if(focusActs.length){
