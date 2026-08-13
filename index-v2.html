@@ -1000,7 +1000,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <!-- Kind selector -->
     <div id="kind-tabs" style="display:flex;gap:6px;margin-bottom:18px;">
       <button id="kind-tab-skill" style="flex:1;padding:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--gr);color:#FFFBF3;transition:all .15s;border-radius:12px;letter-spacing:.01em;">🌱 Skill</button>
-      <button id="kind-tab-project" style="flex:1;padding:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--tx2);transition:all .15s;border-radius:12px;letter-spacing:.01em;">🌳 Project</button>
+      <button id="kind-tab-project" style="flex:1;padding:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--tx2);transition:all .15s;border-radius:12px;letter-spacing:.01em;">🌲 Project</button>
     </div>
     <!-- SKILL mode: existing library/custom tabs -->
     <div id="add-tabs" style="display:flex;gap:6px;margin-bottom:18px;">
@@ -1030,7 +1030,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="sf" id="proj-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:stretch;"><input class="sinp" id="proj-custom-cat" placeholder="e.g. Home, Career..." style="flex:1;min-width:0;"><button id="btn-proj-cat-save" type="button" style="padding:0 16px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save</button></div></div>
       <div class="sf"><div class="sl">Notes (optional)</div><textarea class="nta" id="proj-notes" placeholder="What is this project about?" style="min-height:60px;"></textarea></div>
       <div class="sf"><div class="sl">First point (optional)</div><input class="sinp" id="proj-first-task" placeholder="e.g. Draft the onboarding copy" maxlength="80"></div>
-      <button class="btn btn-p" id="btn-proj-save" style="margin-top:4px;">🌳 Plant tree</button>
+      <button class="btn btn-p" id="btn-proj-save" style="margin-top:4px;">🌲 Plant tree</button>
       <button class="btn btn-s" id="btn-proj-cancel" style="margin-top:6px;width:100%;">Cancel</button>
     </div>
   </div>
@@ -2098,7 +2098,7 @@ function pickOQ(key,val){
   },260);
 }
 
-var PROF_EMOJIS=['🌱','🌿','🍀','🌾','🌵','🌲','🌳','🌴','🎋','🌻','🌸','🌺','🌹','🌷','🌼','💐','🪴','🍃','🍁','🌊','☀️','🌙'];
+var PROF_EMOJIS=['🌱','🌿','🍀','🌾','🌵','🌲','🌲','🌴','🎋','🌻','🌸','🌺','🌹','🌷','🌼','💐','🪴','🍃','🍁','🌊','☀️','🌙'];
 var profEmoji='🌱';
 var _needsProfile=false;
 function openProfileStep(){
@@ -4291,7 +4291,7 @@ function showHarvestBurst(actEmoji){
   setTimeout(function(){if(wrap.parentNode)wrap.parentNode.removeChild(wrap);},1800);
 }
 function showStageUp(a,stage,isTree){
-  var stagePlants=isTree?['🌰','🌱','🌿','🌳','🍎']:['🌰','🌱','🪴','🌸','🌺'];
+  var stagePlants=isTree?['🌰','🌱','🌿','🌲','🍎']:['🌰','🌱','🪴','🌸','🌺'];
   var stageLabel=(isTree?TREE_STAGE_LABELS:STAGE_LABELS)[stage];
   document.getElementById('stageup-plant').textContent=stagePlants[stage]||a.emoji;
   document.getElementById('stageup-aname').textContent=a.name;
@@ -4675,7 +4675,8 @@ function _rMyBody(el,allActs){
       var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
       var streak=getStreakAt(a.id,Date.now());
-      inner.innerHTML='<div style="flex:1;"><div class="mc-n">'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
+      var _kindIcon=isProject(a)?'🌲':'🌱';
+      inner.innerHTML='<div style="flex:1;"><div class="mc-n"><span style="margin-right:6px;font-size:14px;opacity:.85;">'+_kindIcon+'</span>'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'')
         +'<span style="font-size:11px;color:var(--tx3);">'+STAGE_LABELS[getStage(getHours(a.id))]+'</span>'
@@ -5256,10 +5257,10 @@ function saveProject(){
   var firstTaskText=document.getElementById('proj-first-task').value.trim();
   var tasks=[];
   if(firstTaskText)tasks.push({id:genUUID(),text:firstTaskText.slice(0,80),done:false,doneAt:null,createdAt:Date.now()});
-  var newProj={id:genUUID(),name:name,emoji:'🌳',cat:cat,kind:'project',notes:notes,tasks:tasks,tags:[]};
+  var newProj={id:genUUID(),name:name,emoji:'🌲',cat:cat,kind:'project',notes:notes,tasks:tasks,tags:[]};
   _normalizeSeed(newProj);
   myActs.push(newProj);
-  pushFeedEvent('plant',name,'🌳',null);
+  pushFeedEvent('plant',name,'🌲',null);
   checkTrophies();sv();closeAdd();
   // Clear form for next time
   document.getElementById('proj-name').value='';
@@ -5267,7 +5268,7 @@ function saveProject(){
   document.getElementById('proj-first-task').value='';
   // Navigate to plot so user sees the new tree
   nav('my');
-  showToast('🌳 Tree planted!',null);
+  showToast('🌲 Tree planted!',null);
 }
 
 // ── TODAY SECTION (Phase 5) ───────────────────────────
