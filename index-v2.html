@@ -373,7 +373,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .pq-opt.on{transform:scale(1.04);}
 .rc{transition:transform .16s cubic-bezier(.34,1.4,.64,1);}
 .rc:active{transform:scale(.97);}
-.bp-card{transition:transform .16s cubic-bezier(.34,1.4,.64,1);}
+.bp-card{transition:transform .16s cubic-bezier(.34,1.4,.64,1),background .18s ease,border-color .18s ease;}
 .bp-card:active{transform:scale(.97);}
 .sop.on{transform:scale(1.05);}
 .fb{transition:transform .16s cubic-bezier(.34,1.4,.64,1),background .14s;}
@@ -382,7 +382,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .star.on{transform:scale(1.22);}
 .oc{transition:border-color .18s,transform .16s cubic-bezier(.34,1.4,.64,1);}
 .oc.on{transform:scale(1.005);}
-.pill{transition:opacity .22s ease,transform .22s cubic-bezier(.34,1.4,.64,1),background .2s ease,color .2s ease,box-shadow .22s ease;}
+.pill{transition:opacity .14s ease,transform .16s cubic-bezier(.34,1.4,.64,1),background .14s ease,color .14s ease,box-shadow .14s ease;}
 .pill:active{transform:scale(.94);}
 .pill.on{transform:scale(1.06);box-shadow:0 3px 10px rgba(0,0,0,.14),0 0 0 1.5px rgba(0,0,0,.08) inset;}
 @keyframes ripple{to{transform:scale(1);opacity:0;}}
@@ -5114,13 +5114,10 @@ function _resizeSheet(sh,work){
 }
 function switchAddTab(tab){
   var isLib = tab==='library';
-  var sh=document.querySelector('#add-ov .sh');
-  _resizeSheet(sh,function(){
-    var lib=document.getElementById('add-panel-library'),cus=document.getElementById('add-panel-custom');
-    var show=isLib?lib:cus, hide=isLib?cus:lib;
-    hide.style.display='none';hide.style.opacity='';hide.style.transition='';
-    _fadeInPanel(show);
-  });
+  var lib=document.getElementById('add-panel-library'),cus=document.getElementById('add-panel-custom');
+  var show=isLib?lib:cus, hide=isLib?cus:lib;
+  hide.style.display='none';hide.style.opacity='';hide.style.transition='';
+  _fadeInPanel(show);
   document.getElementById('tab-library').style.background = isLib?'var(--gr)':'var(--bg2)';
   document.getElementById('tab-library').style.color = isLib?'#fff':'var(--tx2)';
   document.getElementById('tab-custom').style.background = isLib?'var(--bg2)':'var(--gr)';
@@ -5157,8 +5154,13 @@ function rLibGrid(){
       +'<span class="lib-chk" style="font-size:18px;color:var(--gr);font-weight:700;width:24px;text-align:center;">'+(sel?'✓':'+')+'</span>';
     card.addEventListener('click',function(){
       var idx=libSelected.indexOf(a.id);
-      if(idx>-1){libSelected.splice(idx,1);}else{libSelected.push(a.id);}
-      rLibGrid();
+      var nowSel;
+      if(idx>-1){libSelected.splice(idx,1);nowSel=false;}else{libSelected.push(a.id);nowSel=true;}
+      // Update this card in-place so the CSS transition can animate
+      card.style.borderColor=nowSel?'var(--gr)':'';
+      card.style.background=nowSel?'var(--grl)':'';
+      var chk=card.querySelector('.lib-chk');
+      if(chk)chk.textContent=nowSel?'✓':'+';
       var btn=document.getElementById('btn-lib-save');
       btn.disabled=libSelected.length===0;
       btn.textContent=libSelected.length===0?'Select seeds to plant':'Plant '+libSelected.length+' seed'+(libSelected.length!==1?'s':'');
