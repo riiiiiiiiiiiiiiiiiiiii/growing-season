@@ -3934,10 +3934,11 @@ function openTodayOverview(){
     scheduled.forEach(function(it){
       var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
       var row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:#FDE1D3;border:1px solid #F5CBB0;border-radius:12px;margin-bottom:6px;';
+      row.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;background:#FDE1D3;border:1px solid #F5CBB0;border-radius:12px;margin-bottom:6px;';
       row.innerHTML='<div style="font-size:11px;font-weight:700;color:#B85C36;min-width:36px;letter-spacing:.02em;text-transform:uppercase;">'+(it.hour==null?'Any':_fmtHour12(it.hour))+'</div>'
         +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:#B85C36;line-height:1.2;">'+(it.name||'Untitled')+'</div><div style="font-size:11px;color:#B85C36;opacity:.75;margin-top:2px;">'+(it.kind==='routine'?'Routine':'Planned')+dur+'</div></div>'
-        +'<button data-startid="'+(it.actId||'')+'" style="background:#B85C36;color:#FDE1D3;border:none;border-radius:12px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">Start</button>';
+        +'<button data-startid="'+(it.actId||'')+'" style="background:#B85C36;color:#FFFBF3;border:none;border-radius:12px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">Start</button>'
+        +'<button data-schedid="'+it.id+'" data-schedkind="'+it.kind+'" aria-label="Remove" style="background:transparent;border:1px solid rgba(184,92,54,.45);color:#B85C36;border-radius:50%;width:26px;height:26px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>';
       sh.appendChild(row);
     });
   } else {
@@ -3996,6 +3997,22 @@ function openTodayOverview(){
   // Wire schedule Start buttons
   sh.querySelectorAll('button[data-startid]').forEach(function(b){
     b.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id){closeEd();openActInfo(id,'home');}});
+  });
+  // Wire schedule × remove buttons
+  sh.querySelectorAll('button[data-schedid]').forEach(function(b){
+    b.addEventListener('click',function(e){
+      e.stopPropagation();
+      var id=this.dataset.schedid,kind=this.dataset.schedkind;
+      if(kind==='routine'){
+        if(!confirm('Remove this routine?'))return;
+        calRoutines=calRoutines.filter(function(r){return r.id!==id;});
+      } else {
+        calPlanned=calPlanned.filter(function(p){return p.id!==id;});
+      }
+      sv();
+      if(document.getElementById('s-home').classList.contains('on'))rHome();
+      openTodayOverview();
+    });
   });
 
   document.getElementById('ed-ov').classList.add('on');
