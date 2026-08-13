@@ -4158,7 +4158,7 @@ function openActInfo(actId,from){
   var sorted=actSess.slice().sort(function(a,b){return (a.date||0)-(b.date||0);});
   var firstSess=sorted.length?sorted[0]:null;
   var lastSess=sorted.length?sorted[sorted.length-1]:null;
-  function fmtD(ts){if(!ts)return null;return new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+  function fmtD(ts){if(!ts)return null;var d=new Date(ts);var nowY=new Date().getFullYear();var y=d.getFullYear();var base=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});return y===nowY?base:base+", '"+String(y).slice(-2);}
   var rows='';
   rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--bg3);"><span style="font-size:13px;color:var(--tx3);">Sessions</span><span style="font-size:13px;font-weight:600;">'+actSess.length+'</span></div>';
   rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(firstSess||lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
