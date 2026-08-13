@@ -289,8 +289,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .ip:active{transform:scale(.97);}
 .ac{transition:transform .16s cubic-bezier(.34,1.4,.64,1);}
 .ac:active{transform:scale(.92);}
-.mc-wrap{position:relative;overflow:hidden;border-radius:var(--rad);margin-bottom:8px;transition:transform .26s cubic-bezier(.4,0,.2,1),opacity .22s ease,max-height .3s cubic-bezier(.4,0,.2,1),margin-bottom .3s cubic-bezier(.4,0,.2,1);}
-.mc-wrap.mc-leaving{transform:translateY(-16px);opacity:0;max-height:0!important;margin-bottom:0!important;pointer-events:none;}
+.mc-wrap{position:relative;overflow:hidden;border-radius:var(--rad);margin-bottom:8px;}
 .mc-del{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
 .mc-foc{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
 .mc{transition:transform .18s cubic-bezier(.25,.46,.45,.94);margin-bottom:0;border-radius:var(--rad);touch-action:pan-y;animation:fadeIn .22s ease;}
@@ -4581,13 +4580,27 @@ function rMy(){
         var leavers=[];
         wraps.forEach(function(w){var id=w.dataset.dragId;if(id&&!focusedIds[id])leavers.push(w);});
         if(leavers.length){
-          // Lock explicit max-height first so the collapse animates
-          leavers.forEach(function(w){w.style.maxHeight=w.offsetHeight+'px';});
-          leavers[0].getBoundingClientRect(); // reflow
-          requestAnimationFrame(function(){
-            leavers.forEach(function(w){w.classList.add('mc-leaving');w.style.maxHeight='0px';});
+          leavers.forEach(function(w){
+            var h=w.offsetHeight;
+            w.style.transition='none';
+            w.style.maxHeight=h+'px';
+            w.style.marginBottom='8px';
+            w.style.opacity='1';
+            w.style.transform='translateY(0)';
           });
-          setTimeout(function(){myFocusOnly=true;rMy();},320);
+          // Force per-element reflow so the transition has a starting value
+          leavers.forEach(function(w){w.getBoundingClientRect();});
+          requestAnimationFrame(function(){
+            leavers.forEach(function(w){
+              w.style.transition='max-height .3s cubic-bezier(.4,0,.2,1),opacity .22s ease,transform .28s cubic-bezier(.4,0,.2,1),margin-bottom .3s cubic-bezier(.4,0,.2,1)';
+              w.style.maxHeight='0px';
+              w.style.marginBottom='0px';
+              w.style.opacity='0';
+              w.style.transform='translateY(-16px)';
+              w.style.pointerEvents='none';
+            });
+          });
+          setTimeout(function(){myFocusOnly=true;rMy();},340);
         } else {myFocusOnly=true;rMy();}
       } else {
         myFocusOnly=false;rMy();
