@@ -89,12 +89,12 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .today-empty-text{flex:1;font-size:13px;font-weight:600;color:var(--co2);line-height:1.4;}
 .today-empty-cta{background:var(--co);color:#FFFBF3;border:none;border-radius:14px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;}
 .streak-inline{display:inline-flex;align-items:center;gap:4px;background:rgba(201,112,80,.16);color:inherit;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;letter-spacing:.02em;margin-left:8px;vertical-align:middle;}
-.sched-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:#FDD5D0;border:1px solid #F0BCB7;border-radius:12px;margin-bottom:6px;cursor:pointer;box-shadow:var(--sh);}
-.sched-time{font-size:11px;font-weight:700;color:#B45B5B;letter-spacing:.02em;min-width:36px;text-transform:uppercase;}
-.sched-em{font-size:22px;line-height:1;}
-.sched-name{font-size:14px;font-weight:600;color:#B45B5B;line-height:1.2;}
-.sched-meta{font-size:11px;color:#B45B5B;opacity:.75;margin-top:2px;}
-.sched-start{background:#B45B5B;color:#FFFBF3;border:none;border-radius:12px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;letter-spacing:.02em;}
+.sched-item{display:flex;align-items:center;gap:10px;padding:7px 12px;background:#FDD5D0;border:1px solid #F0BCB7;border-radius:10px;margin-bottom:5px;cursor:pointer;box-shadow:var(--sh);}
+.sched-time{font-size:10.5px;font-weight:700;color:#B45B5B;letter-spacing:.02em;min-width:32px;text-transform:uppercase;}
+.sched-em{font-size:20px;line-height:1;}
+.sched-name{font-size:13px;font-weight:600;color:#B45B5B;line-height:1.2;}
+.sched-meta{font-size:10.5px;color:#B45B5B;opacity:.75;margin-top:1px;}
+.sched-start{background:#B45B5B;color:#FFFBF3;border:none;border-radius:10px;padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;letter-spacing:.02em;}
 .sched-start:active{transform:scale(.95);}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(250,245,235,.92);backdrop-filter:saturate(140%) blur(14px);-webkit-backdrop-filter:saturate(140%) blur(14px);border-top:0.5px solid rgba(155,135,105,.18);display:none;z-index:100;padding:6px 0 max(10px,env(safe-area-inset-bottom));}
 .nav.on{display:flex;}
@@ -5448,12 +5448,11 @@ function renderTodaySection(){
   var html='<div class="today-sec">';
   // Scheduled items (planned events + routines) sit under On today's list
   if(scheduled.length){
-    html+='<div class="sched-scroll" style="max-height:180px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;">';
+    html+='<div class="sched-scroll" style="max-height:160px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;">';
     scheduled.forEach(function(it){
-      var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
       html+='<div class="sched-item" data-startid="'+(it.actId||'')+'">'
           +'<div class="sched-time">'+(it.hour==null?'Any':_fmtHour12(it.hour))+'</div>'
-          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+(it.name||'Untitled')+'</div><div class="sched-meta">'+(it.kind==='routine'?'Routine':'Planned')+dur+'</div></div>'
+          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+(it.name||'Untitled')+'</div></div>'
           +'<button class="sched-start" data-startid="'+(it.actId||'')+'">Start</button>'
           +'</div>';
     });
