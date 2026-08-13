@@ -359,9 +359,9 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .cat-hdr .cat-arrow.open ~ .cat-hdr-count{opacity:1;transform:translateX(0);}
 .cat-arrow{font-size:16px;color:var(--tx2);transition:transform .28s cubic-bezier(.4,0,.2,1);display:inline-block;line-height:1;}
 .cat-arrow.open{transform:rotate(90deg);}
-.cat-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.4,0,.2,1),opacity .22s ease;opacity:0;}
-.cat-body.open{grid-template-rows:1fr;opacity:1;}
-.cat-body-inner{overflow:hidden;min-height:0;}
+.cat-body{overflow:hidden;max-height:0;opacity:0;transition:max-height .32s cubic-bezier(.4,0,.2,1),opacity .22s ease;}
+.cat-body.open{opacity:1;}
+.cat-body-inner{}
 .hist-day-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.4,0,.2,1),opacity .22s ease;opacity:0;}
 .hist-day-body.open{grid-template-rows:1fr;opacity:1;}
 .hist-day-inner{overflow:hidden;min-height:0;}
@@ -4719,12 +4719,29 @@ function _rMyBody(el,allActs){
       wrap.appendChild(card);bodyInner.appendChild(wrap);
     });
     body.appendChild(bodyInner);
+    // Initialize open state's max-height so opening categories render immediately
+    if(isOpen){body.style.maxHeight='none';body.style.opacity='1';}
     hdr.addEventListener('click',function(){
       var nowOpen=!body.classList.contains('open');
-      body.classList.toggle('open',nowOpen);
       catOpen[cat]=nowOpen;
       var arrow=hdr.querySelector('.cat-arrow');
       arrow.classList.toggle('open',nowOpen);
+      if(nowOpen){
+        body.classList.add('open');
+        body.style.maxHeight='0px';
+        body.style.opacity='0';
+        body.getBoundingClientRect();
+        var target=body.scrollHeight;
+        body.style.maxHeight=target+'px';
+        body.style.opacity='1';
+        setTimeout(function(){if(body.classList.contains('open')){body.style.maxHeight='none';}},340);
+      } else {
+        // Lock current height first so collapse animates from real value
+        body.style.maxHeight=body.scrollHeight+'px';
+        body.getBoundingClientRect();
+        body.classList.remove('open');
+        requestAnimationFrame(function(){body.style.maxHeight='0px';body.style.opacity='0';});
+      }
     });
     section.appendChild(hdr);section.appendChild(body);el.appendChild(section);
   });
