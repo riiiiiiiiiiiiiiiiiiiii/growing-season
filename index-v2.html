@@ -4800,7 +4800,7 @@ function rHist(){
   // Sync period pills
   document.querySelectorAll('.hist-fp').forEach(function(b){b.classList.toggle('on',b.dataset.p===histPeriod);});
   var el=document.getElementById('hist-list');
-  if(!sessions.length){el.innerHTML='<p style="color:var(--tx2);font-size:14px;">No harvests yet</p>';return;}
+  if(!sessions.length){el.innerHTML='<p style="color:var(--tx2);font-size:14px;line-height:1.55;padding:8px 4px;">No harvests yet.<br><span style="color:var(--tx3);">Tap + to log your first session and start your garden.</span></p>';return;}
   el.innerHTML='';
 
   var now=new Date();
