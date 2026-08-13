@@ -5857,6 +5857,9 @@ function rGarden(){
     var rowActs=visibleActs.slice(ri*COLS,(ri+1)*COLS);
     var gy=svgH-GH-ri*RH;
 
+    // Soft ground line per row
+    svg+='<line x1="8" y1="'+(gy+2)+'" x2="'+(svgW-8)+'" y2="'+(gy+2)+'" stroke="rgba(24,60,90,.18)" stroke-width="1"/>';
+
     rowActs.forEach(function(a,ci){
       var ph=phash(a.id,42+ri*7);
       var cx=ci*TW+TW/2;
@@ -5883,7 +5886,7 @@ function rGarden(){
   svg+='</svg>';
 
   var container=document.createElement('div');
-  container.style.cssText='margin:0 16px 20px;';
+  container.style.cssText='margin:0 16px 20px;background:linear-gradient(180deg,#EAF2FA 0%,#D9E8F2 100%);border-radius:22px;overflow:hidden;padding:8px 0;box-shadow:0 4px 18px rgba(24,60,90,.08);';
   container.innerHTML=svg;
   container.querySelectorAll('[data-pid]').forEach(function(el){
     el.addEventListener('click',function(){
