@@ -502,6 +502,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .v2-stats .v2-stat-l{display:block;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;line-height:1.2;margin:0;padding:0;}
 .sched-empty{padding:14px 16px;background:var(--bg2);border:none;border-radius:12px;margin-bottom:6px;box-shadow:none;}
 .sched-empty-text{font-size:13px;color:var(--tx3);line-height:1.55;}
+.opt{opacity:.3;font-size:.82em;font-weight:400;text-transform:none;letter-spacing:normal;}
 .v2-sub-hdr{display:flex;align-items:baseline;justify-content:space-between;margin-top:20px;margin-bottom:14px;padding-bottom:8px;border-bottom:0.5px solid var(--bg3);}
 .v2-sub-hdr>span{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--tx);letter-spacing:-.005em;}
 #daily-quote{padding:28px 22px 8px;}
@@ -723,7 +724,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <div id="home-extras" style="display:none;"></div>
     <!-- Quote footer -->
     <div id="daily-quote"></div>
-    <div id="home-deco" style="pointer-events:none;opacity:.42;margin-top:24px;"></div>
+    <div id="home-deco" style="pointer-events:none;opacity:.75;margin-top:24px;"></div>
     <div id="s-lock" class="sess-lock" style="display:none;"></div>
   </div>
 
@@ -836,20 +837,20 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       </div>
     </div>
     <div class="fl" id="log-tasks-wrap" style="display:none;">
-      <div class="fl-lbl">Points completed <span style="font-weight:400;text-transform:none;">optional</span></div>
+      <div class="fl-lbl">Points completed <span class="opt">optional</span></div>
       <div id="log-tasks-list"></div>
     </div>
     <div class="fl">
-      <div class="fl-lbl">Feeling after <span style="font-weight:400;text-transform:none;">optional</span></div>
+      <div class="fl-lbl">Feeling after <span class="opt">optional</span></div>
       <div id="feels"></div>
     </div>
     <div class="fl">
-      <div class="fl-lbl">Field notes <span style="font-weight:400;text-transform:none;">optional</span></div>
+      <div class="fl-lbl">Field notes <span class="opt">optional</span></div>
       <textarea class="nta" id="ln" placeholder="What did you work on? What grew today?"></textarea>
     </div>
     <div class="fl" id="reflection-toggle-wrap" style="margin-bottom:0;">
       <button id="reflection-toggle" type="button" style="background:none;border:none;padding:0;font-size:13px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;gap:5px;user-select:none;">
-        <span id="reflection-arrow" style="display:inline-block;transition:transform .2s;font-size:11px;">›</span> Reflection <span style="font-weight:400;">optional</span>
+        <span id="reflection-arrow" style="display:inline-block;transition:transform .2s;font-size:11px;">›</span> Reflection <span class="opt">optional</span>
       </button>
     </div>
     <div id="reflection-body" style="display:none;overflow:hidden;padding-top:16px;">
@@ -1030,8 +1031,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="sf"><div class="sl">Name</div><input class="sinp" id="proj-name" placeholder="e.g. Side app, Home reno, EP..."></div>
       <div class="sf"><div class="sl">Category</div><div class="so" id="proj-cat-opts"></div></div>
       <div class="sf" id="proj-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:stretch;"><input class="sinp" id="proj-custom-cat" placeholder="e.g. Home, Career..." style="flex:1;min-width:0;"><button id="btn-proj-cat-save" type="button" style="padding:0 16px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save</button></div></div>
-      <div class="sf"><div class="sl">Notes (optional)</div><textarea class="nta" id="proj-notes" placeholder="What is this project about?" style="min-height:60px;"></textarea></div>
-      <div class="sf"><div class="sl">First point (optional)</div><input class="sinp" id="proj-first-task" placeholder="e.g. Draft the onboarding copy" maxlength="80"></div>
+      <div class="sf"><div class="sl">Notes <span class="opt">optional</span></div><textarea class="nta" id="proj-notes" placeholder="What is this project about?" style="min-height:60px;"></textarea></div>
+      <div class="sf"><div class="sl">First point <span class="opt">optional</span></div><input class="sinp" id="proj-first-task" placeholder="e.g. Draft the onboarding copy" maxlength="80"></div>
       <button class="btn btn-p" id="btn-proj-save" style="margin-top:4px;">🌲 Plant tree</button>
       <button class="btn btn-s" id="btn-proj-cancel" style="margin-top:6px;width:100%;">Cancel</button>
     </div>
@@ -2615,7 +2616,7 @@ function _calScheduleForm(dayDate){
   _renderActPicker();
 
   // Time picker (optional)
-  var tLbl=document.createElement('div');tLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';tLbl.textContent='Time (optional)';sh.appendChild(tLbl);
+  var tLbl=document.createElement('div');tLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';tLbl.innerHTML='Time <span class="opt">optional</span>';sh.appendChild(tLbl);
   var timeRow=document.createElement('div');timeRow.style.cssText='display:flex;gap:8px;margin-bottom:22px;align-items:center;';
   var hourSel=document.createElement('select');hourSel.className='sinp';hourSel.style.cssText='flex:1;padding:8px;font-size:14px;';
   var anyOpt=document.createElement('option');anyOpt.value='-1';anyOpt.textContent='Any time';anyOpt.selected=true;hourSel.appendChild(anyOpt);
@@ -4928,12 +4929,12 @@ function openSessionEdit(s,a){
     +'<div class="fl"><div class="fl-lbl">Date</div><input type="date" class="sinp" id="ses-edit-date" value="'+_dv+'" style="width:100%;"></div>'
     +'<div class="fl"><div class="fl-lbl">Time spent</div>'
       +'<div class="dr"><input type="number" class="di" id="ses-edit-h" min="0" max="24" value="'+(s.hours||0)+'"><span class="du">h</span><input type="number" class="di" id="ses-edit-m" min="0" max="59" value="'+(s.mins||0)+'"><span class="du">min</span></div></div>'
-    +'<div class="fl"><div class="fl-lbl">Feeling after <span style="font-size:11px;font-weight:400;color:var(--tx3);">optional</span></div><div id="ses-edit-feels"></div></div>'
+    +'<div class="fl"><div class="fl-lbl">Feeling after <span class="opt">optional</span></div><div id="ses-edit-feels"></div></div>'
     +'<div class="fl"><div class="fl-lbl">Rate this session</div><div class="stars" id="ses-edit-stars"></div><div class="slbl" id="ses-edit-slbl"></div></div>'
     +'<div class="fl"><div class="fl-lbl">Momentum</div><div class="fr" id="ses-edit-momentum"></div></div>'
-    +'<div class="fl"><div class="fl-lbl">Field notes <span style="font-size:11px;font-weight:400;color:var(--tx3);">optional</span></div><textarea class="nta" id="ses-edit-notes" placeholder="What did you work on?">'+(s.notes||'')+'</textarea></div>'
-    +'<div class="fl"><div class="fl-lbl">What went well? <span style="font-weight:400;color:var(--tx3);">optional</span></div><textarea class="nta" id="ses-edit-well" style="min-height:56px;" placeholder="A small win…">'+(s.well||'')+'</textarea></div>'
-    +'<div class="fl"><div class="fl-lbl">Do differently next time? <span style="font-weight:400;color:var(--tx3);">optional</span></div><textarea class="nta" id="ses-edit-diff" style="min-height:56px;" placeholder="One thing to adjust…">'+(s.diff||'')+'</textarea></div>';
+    +'<div class="fl"><div class="fl-lbl">Field notes <span class="opt">optional</span></div><textarea class="nta" id="ses-edit-notes" placeholder="What did you work on?">'+(s.notes||'')+'</textarea></div>'
+    +'<div class="fl"><div class="fl-lbl">What went well? <span class="opt">optional</span></div><textarea class="nta" id="ses-edit-well" style="min-height:56px;" placeholder="A small win…">'+(s.well||'')+'</textarea></div>'
+    +'<div class="fl"><div class="fl-lbl">Do differently next time? <span class="opt">optional</span></div><textarea class="nta" id="ses-edit-diff" style="min-height:56px;" placeholder="One thing to adjust…">'+(s.diff||'')+'</textarea></div>';
 
   // feels
   var feelsWrap=sh.querySelector('#ses-edit-feels');
