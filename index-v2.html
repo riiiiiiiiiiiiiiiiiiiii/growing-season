@@ -287,7 +287,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .ip:active{transform:scale(.97);}
 .ac{transition:transform .16s cubic-bezier(.34,1.4,.64,1);}
 .ac:active{transform:scale(.92);}
-.mc-wrap{position:relative;overflow:hidden;border-radius:var(--rad);margin-bottom:8px;}
+.mc-wrap{position:relative;overflow:hidden;border-radius:var(--rad);margin-bottom:8px;transition:transform .26s cubic-bezier(.4,0,.2,1),opacity .22s ease,max-height .3s cubic-bezier(.4,0,.2,1),margin-bottom .3s cubic-bezier(.4,0,.2,1);}
+.mc-wrap.mc-leaving{transform:translateY(-16px);opacity:0;max-height:0!important;margin-bottom:0!important;pointer-events:none;}
 .mc-del{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
 .mc-foc{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
 .mc{transition:transform .18s cubic-bezier(.25,.46,.45,.94);margin-bottom:0;border-radius:var(--rad);touch-action:pan-y;animation:fadeIn .22s ease;}
@@ -4590,8 +4591,18 @@ function rMy(){
     focBtn.classList.toggle('on',myFocusOnly&&hasFocusSet());
     focBtn.onclick=function(){
       if(!hasFocusSet()){openFocus();return;}
-      myFocusOnly=!myFocusOnly;
-      rMy();
+      var willBeOn=!myFocusOnly;
+      if(willBeOn){
+        // Fade out cards that are about to be filtered out, then re-render
+        var focusedIds={};weeklyFocus.actIds.forEach(function(id){focusedIds[id]=true;});
+        var wraps=document.querySelectorAll('#my-list .mc-wrap');
+        var leaving=0;
+        wraps.forEach(function(w){var id=w.dataset.dragId;if(id&&!focusedIds[id]){w.classList.add('mc-leaving');leaving++;}});
+        if(leaving){setTimeout(function(){myFocusOnly=true;rMy();},280);}
+        else{myFocusOnly=true;rMy();}
+      } else {
+        myFocusOnly=false;rMy();
+      }
     };
   }
 
