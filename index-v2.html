@@ -2878,6 +2878,11 @@ function closeMenuPanel(){
 }
 document.getElementById('menu-btn').addEventListener('click',openMenuPanel);
 document.getElementById('menu-ov').addEventListener('click',function(e){if(e.target===this)closeMenuPanel();});
+// Tap outside the sheet dismisses these overlays too
+['ed-ov','foc-ov','cal-ov','notes-ov','add-ov','collect-ov','pq-ov'].forEach(function(oid){
+  var ov=document.getElementById(oid);
+  if(ov)ov.addEventListener('click',function(e){if(e.target===this)ov.classList.remove('on');});
+});
 document.getElementById('mp-profile').addEventListener('click',function(){closeMenuPanel();setTimeout(openProfileEdit,220);});
 document.getElementById('mp-signin').addEventListener('click',function(){closeMenuPanel();goToSignIn();});
 document.getElementById('mp-collect').addEventListener('click',function(){closeMenuPanel();openCollect();});
