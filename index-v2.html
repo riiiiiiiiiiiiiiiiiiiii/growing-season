@@ -4685,8 +4685,8 @@ function _rMyBody(el,allActs){
       if(!isAct){(function(act){
         addSwipe(wrap,card,function(){
           var idx=myActs.findIndex(function(x){return x.id===act.id;});
-          if(idx>-1){myActs.splice(idx,1);archivedActs.push(act);sv();rMy();
-            showToast(act.emoji+' '+act.name+' archived',function(){archivedActs.splice(archivedActs.indexOf(act),1);myActs.splice(idx,0,act);sv();rMy();});}
+          if(idx>-1){myActs.splice(idx,1);archivedActs.push(act);_tombstone(act.id);sv();rMy();
+            showToast(act.emoji+' '+act.name+' archived',function(){archivedActs.splice(archivedActs.indexOf(act),1);myActs.splice(idx,0,act);delete _tombstones[act.id];_saveTombstones();sv();rMy();});}
         },function(){
           var fi=weeklyFocus.actIds.indexOf(act.id);
           if(fi>-1){weeklyFocus.actIds.splice(fi,1);showToast(act.emoji+' '+act.name+' removed from focus',null);}
@@ -4742,7 +4742,7 @@ function showArchivedList(){
         deleteBtn.addEventListener('click',function(){
           if(!confirm('Delete "'+act.name+'" for good? This cannot be undone.'))return;
           var ai=archivedActs.indexOf(act);
-          if(ai>-1){archivedActs.splice(ai,1);sv();showToast(act.emoji+' '+act.name+' deleted',null);showArchivedList();rMy();}
+          if(ai>-1){archivedActs.splice(ai,1);_tombstone(act.id);sv();showToast(act.emoji+' '+act.name+' deleted',null);showArchivedList();rMy();}
         });
       })(a);
       btns.appendChild(restoreBtn);btns.appendChild(deleteBtn);
@@ -6001,6 +6001,13 @@ document.addEventListener('pointerdown',function(e){
 // ── SUPABASE SYNC ─────────────────────────────────────
 var _syncInProgress=false;
 var _syncPending=false;
+// Tombstones: items the user removed locally. Filter them out of any remote
+// load so silent RLS failures / racy background refreshes can't resurrect
+// deleted projects/skills. Purged after 30 days.
+var _tombstones=(function(){try{var t=JSON.parse(localStorage.getItem('gs-tombstones')||'{}');var cutoff=Date.now()-30*86400000;Object.keys(t).forEach(function(k){if(t[k]<cutoff)delete t[k];});return t;}catch(e){return {};}})();
+function _saveTombstones(){try{localStorage.setItem('gs-tombstones',JSON.stringify(_tombstones));}catch(e){}}
+function _tombstone(id){if(!id)return;_tombstones[id]=Date.now();_saveTombstones();}
+function _isTombstoned(id){return !!_tombstones[id];}
 async function syncToSupabase(){
   if(!supaUser)return;
   if(_syncInProgress){_syncPending=true;return;}
@@ -6082,7 +6089,7 @@ async function loadFromSupabase(){
     if(actsRes&&actsRes.data&&actsRes.data.length){
       gotData=true;
       myActs.splice(0,myActs.length);
-      actsRes.data.forEach(function(a){myActs.push(_normalizeSeed(Object.assign({},a.data||{},{id:a.id,name:a.name,emoji:a.emoji,cat:a.cat,type:a.type,level:a.level})));});
+      actsRes.data.forEach(function(a){if(_isTombstoned(a.id))return;myActs.push(_normalizeSeed(Object.assign({},a.data||{},{id:a.id,name:a.name,emoji:a.emoji,cat:a.cat,type:a.type,level:a.level})));});
       onboarded=true; // if activities exist, they've definitely been onboarded
     }
 
