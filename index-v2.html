@@ -5329,18 +5329,6 @@ function renderTodaySection(){
         +'<div class="sched-empty-text">No activity scheduled.<br>Pick one to get started.</div>'
         +'</div>';
   }
-  // Points list (from focused projects)
-  if(openTasks.length){
-    html+='<div style="margin-top:14px;"></div>';
-    openTasks.slice(0,8).forEach(function(pt){
-      var safe=(pt.task.text||'').replace(/</g,'&lt;');
-      html+='<div class="task-item" data-projid="'+pt.proj.id+'" data-taskid="'+pt.task.id+'">'
-          +'<button class="task-item-check" data-taskid="'+pt.task.id+'" data-projid="'+pt.proj.id+'" aria-label="Complete point"></button>'
-          +'<div style="flex:1;min-width:0;"><div class="task-item-text">'+safe+'</div><div class="task-item-proj">'+pt.proj.emoji+' '+pt.proj.name+'</div></div>'
-          +'</div>';
-    });
-    if(openTasks.length>8)html+='<div style="text-align:center;font-size:12px;color:var(--tx3);padding:8px;">+'+(openTasks.length-8)+' more</div>';
-  }
   html+='</div>';
   wrap.innerHTML=html;
   // Wire schedule Start buttons → confirm modal
@@ -5349,19 +5337,6 @@ function renderTodaySection(){
   });
   wrap.querySelectorAll('.sched-item').forEach(function(el){
     el.addEventListener('click',function(){var id=this.dataset.startid;if(id)openActInfo(id,'home');});
-  });
-  // Wire tasks
-  wrap.querySelectorAll('.task-item-check').forEach(function(btn){
-    btn.addEventListener('click',function(e){
-      e.stopPropagation();
-      var pid=this.dataset.projid,tid=this.dataset.taskid;
-      var p=myActs.find(function(a){return a.id===pid;});if(!p)return;
-      var t=(p.tasks||[]).find(function(x){return x.id===tid;});if(!t)return;
-      t.done=true;t.doneAt=Date.now();sv();renderTodaySection();showToast('Point complete ✓',null);
-    });
-  });
-  wrap.querySelectorAll('.task-item').forEach(function(row){
-    row.addEventListener('click',function(){showProjectInfo(this.dataset.projid,'home');});
   });
 }
 
