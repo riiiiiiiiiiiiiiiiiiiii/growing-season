@@ -4227,6 +4227,10 @@ function saveLog(){
     else{logTs=logDateVal?new Date(logDateVal+'T'+_ph+':00:00').getTime():Date.now();}
     var _sid=genUUID();
     sessions.push({id:_sid,actId:logId,actName:_logAct.name||'',actEmoji:_logAct.emoji||'',date:logTs,hours:parseInt(document.getElementById('lh').value)||0,mins:parseInt(document.getElementById('lm').value)||0,feel:logFeels.slice(),rating:logRating,notes:document.getElementById('ln').value.trim(),well:document.getElementById('ln-well').value.trim(),diff:document.getElementById('ln-diff').value.trim(),momentum:logMomentum,startedAt:active?active.startedAt:null});
+    // Auto-clear any one-off scheduled events for this activity on the logged day
+    var _logDayStart=new Date(logTs);_logDayStart.setHours(0,0,0,0);
+    var _logDayStartMs=_logDayStart.getTime(),_logDayEndMs=_logDayStartMs+86400000;
+    calPlanned=calPlanned.filter(function(ev){return !(ev.actId===logId&&ev.date>=_logDayStartMs&&ev.date<_logDayEndMs);});
     // Mark checked project tasks done
     var _checkedTasks=[];
     document.querySelectorAll('.log-task-check:checked').forEach(function(cb){_checkedTasks.push(cb.dataset.tid);});
