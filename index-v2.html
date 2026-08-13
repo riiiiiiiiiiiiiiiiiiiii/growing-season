@@ -4218,7 +4218,7 @@ function openActInfoEdit(actId,from){
     });
     catWrap.appendChild(b);
   }
-  CATS.forEach(function(cat){var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg2)','var(--tx)'];addCat(cat,CEM[cat]+' '+cat,cc);});
+  CATS.forEach(function(cat){var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg2)','var(--tx)'];addCat(cat,cat,cc);});
   customCats.forEach(function(cat){addCat(cat,'🌱 '+cat,['var(--bg3)','var(--tx)']);});
   sf2.appendChild(sl2);sf2.appendChild(catWrap);sh.appendChild(sf2);
   var srow=document.createElement('div');srow.className='srow';
@@ -4997,7 +4997,7 @@ function openEd(id){
     });
     catWrap.appendChild(b);
   }
-  CATS.forEach(function(cat){var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg2)','var(--tx)'];addEdCat(cat,CEM[cat]+' '+cat,cc);});
+  CATS.forEach(function(cat){var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg2)','var(--tx)'];addEdCat(cat,cat,cc);});
   customCats.forEach(function(cat){addEdCat(cat,'🌱 '+cat,['var(--bg3)','var(--tx)']);});
 
   document.getElementById('ed-ov').classList.add('on');
@@ -5158,7 +5158,7 @@ function openAdd(){
       b.addEventListener('click',function(){catWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');acCustomWrap.style.display='none';});
       catWrap.appendChild(b);return b;
     }
-    CATS.forEach(function(cat){var cc=CAT_COLORS[cat].split(',');addCatPill(cat,CEM[cat]+' '+cat,cc[0],cc[1]);});
+    CATS.forEach(function(cat){var cc=CAT_COLORS[cat].split(',');addCatPill(cat,cat,cc[0],cc[1]);});
     customCats.forEach(function(cat){
       var pill=addCatPill(cat,'🌱 '+cat,'var(--bg3)','var(--tx)');
       var del=document.createElement('span');
@@ -5236,7 +5236,7 @@ function renderProjectCats(selected){
     b.addEventListener('click',function(){wrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');});b.classList.add('on');customWrap.style.display='none';});
     wrap.appendChild(b);return b;
   }
-  CATS.forEach(function(cat){var cc=CAT_COLORS[cat].split(',');addCatPill(cat,CEM[cat]+' '+cat,cc[0],cc[1]);});
+  CATS.forEach(function(cat){var cc=CAT_COLORS[cat].split(',');addCatPill(cat,cat,cc[0],cc[1]);});
   customCats.forEach(function(cat){addCatPill(cat,'🌱 '+cat,'var(--bg3)','var(--tx)');});
   var newPill=document.createElement('div');newPill.className='sop';newPill.dataset.cat='__new__';
   newPill.style.background='var(--bg2)';newPill.style.color='var(--tx2)';newPill.textContent='＋ New';
