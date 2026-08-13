@@ -5293,6 +5293,7 @@ function renderTodaySection(){
   var html='<div class="today-sec">';
   // Scheduled items (planned events + routines) sit under On today's list
   if(scheduled.length){
+    html+='<div class="sched-scroll" style="max-height:180px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;">';
     scheduled.forEach(function(it){
       var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
       html+='<div class="sched-item" data-startid="'+(it.actId||'')+'">'
@@ -5301,6 +5302,7 @@ function renderTodaySection(){
           +'<button class="sched-start" data-startid="'+(it.actId||'')+'">Start</button>'
           +'</div>';
     });
+    html+='</div>';
   } else {
     // No scheduled items — light-blue empty card
     html+='<div class="sched-empty">'
