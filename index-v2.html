@@ -497,9 +497,9 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .v2-sec-hdr-clickable:active{opacity:.6;}
 .v2-today-empty{margin-top:12px;font-size:13px;color:var(--tx3);line-height:1.55;padding:14px 16px;background:var(--bg2);border-radius:12px;}
 .v2-today-empty strong{color:var(--tx2);font-weight:600;}
-.v2-stats{display:flex;flex-direction:row;margin-top:22px;padding:0;width:100%;box-sizing:border-box;align-items:flex-start;}
-.v2-stats .v2-stat{flex:1 1 0;min-width:0;padding:0;background:none;border:none;text-align:left;}
-.v2-stats .v2-stat + .v2-stat{border-left:0.5px solid var(--bg3);padding-left:20px;margin-left:20px;}
+.v2-stats{display:grid;grid-template-columns:1fr 1fr;margin-top:22px;padding:0;width:100%;box-sizing:border-box;align-items:flex-start;}
+.v2-stats .v2-stat{min-width:0;padding:0 16px 0 0;background:none;border:none;text-align:left;}
+.v2-stats .v2-stat + .v2-stat{border-left:0.5px solid var(--bg3);padding:0 0 0 16px;margin:0;}
 .v2-stats .v2-stat-n{display:block;font-family:var(--serif);font-size:20px;font-weight:700;color:var(--tx);letter-spacing:-.01em;line-height:1;margin:0 0 5px 0;padding:0;white-space:nowrap;}
 .v2-stats .v2-stat-l{display:block;font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;font-weight:600;line-height:1.2;margin:0;padding:0;}
 .sched-empty{padding:14px 16px;background:var(--bg2);border:none;border-radius:12px;margin-bottom:6px;box-shadow:none;}
@@ -726,7 +726,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <div id="home-extras" style="display:none;"></div>
     <!-- Quote footer -->
     <div id="daily-quote"></div>
-    <div id="home-deco" style="pointer-events:none;opacity:.75;margin-top:24px;"></div>
+    <div id="home-deco" style="pointer-events:none;opacity:.95;margin-top:24px;"></div>
     <div id="s-lock" class="sess-lock" style="display:none;"></div>
   </div>
 
@@ -785,7 +785,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
         <button class="hist-fp" data-p="week">This week</button>
         <button class="hist-fp" data-p="month">This month</button>
         <button class="hist-fp" data-p="custom">Custom</button>
-        <button id="hist-add-btn" aria-label="Log a past session" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:26px;height:26px;font-size:16px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;margin-left:2px;">+</button>
+        <button id="hist-add-btn" aria-label="Log a past session" style="background:var(--co);border:none;border-radius:50%;width:30px;height:30px;font-size:20px;font-weight:700;color:#FFFBF3;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;margin-left:6px;box-shadow:0 2px 8px rgba(184,92,54,.28);transition:transform .15s cubic-bezier(.34,1.4,.64,1),box-shadow .18s ease;">+</button>
       </div>
       <div id="hist-custom-range" style="display:none;background:var(--bg2);border:var(--br);border-radius:12px;padding:10px 12px;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -3178,7 +3178,7 @@ async function openFriendProfile(fid,p,fshipId){
 
 async function renderRequests(){
   var body=document.getElementById('fr-body');
-  if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);">Sign in to see requests</div>';return;}
+  if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);font-size:14px;">Sign in to see requests</div>';return;}
   body.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
   try{
     var res=await _tq(_supa.from('friendships').select('id,requester_id,addressee_id,status,created_at').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','pending'));
@@ -3253,7 +3253,7 @@ async function renderRequests(){
 
 async function renderConvList(){
   var body=document.getElementById('fr-body');
-  if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);">Sign in to see messages</div>';return;}
+  if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);font-size:14px;">Sign in to see messages</div>';return;}
   body.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
   try{
     var res=await _supa.from('messages').select('*').or('from_id.eq.'+supaUser.id+',to_id.eq.'+supaUser.id).order('created_at',{ascending:false});
@@ -4594,13 +4594,19 @@ function rMy(){
       if(!hasFocusSet()){openFocus();return;}
       var willBeOn=!myFocusOnly;
       if(willBeOn){
-        // Fade out cards that are about to be filtered out, then re-render
         var focusedIds={};weeklyFocus.actIds.forEach(function(id){focusedIds[id]=true;});
         var wraps=document.querySelectorAll('#my-list .mc-wrap');
-        var leaving=0;
-        wraps.forEach(function(w){var id=w.dataset.dragId;if(id&&!focusedIds[id]){w.classList.add('mc-leaving');leaving++;}});
-        if(leaving){setTimeout(function(){myFocusOnly=true;rMy();},280);}
-        else{myFocusOnly=true;rMy();}
+        var leavers=[];
+        wraps.forEach(function(w){var id=w.dataset.dragId;if(id&&!focusedIds[id])leavers.push(w);});
+        if(leavers.length){
+          // Lock explicit max-height first so the collapse animates
+          leavers.forEach(function(w){w.style.maxHeight=w.offsetHeight+'px';});
+          leavers[0].getBoundingClientRect(); // reflow
+          requestAnimationFrame(function(){
+            leavers.forEach(function(w){w.classList.add('mc-leaving');w.style.maxHeight='0px';});
+          });
+          setTimeout(function(){myFocusOnly=true;rMy();},320);
+        } else {myFocusOnly=true;rMy();}
       } else {
         myFocusOnly=false;rMy();
       }
