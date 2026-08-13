@@ -308,8 +308,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .my-icon-tog.on{background:var(--co);color:#FFFBF3;border-color:transparent;}
 .my-icon-add{background:var(--co);border:none;border-radius:50%;width:30px;height:30px;font-size:20px;font-weight:700;color:#FFFBF3;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;padding:0;box-shadow:0 2px 8px rgba(180,91,91,.28);transition:transform .15s cubic-bezier(.34,1.4,.64,1),box-shadow .18s ease;}
 .my-icon-add:active{transform:scale(.92);}
-#my-search-wrap{max-height:0;opacity:0;overflow:hidden;margin-bottom:0!important;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .22s ease,margin-bottom .28s cubic-bezier(.4,0,.2,1);}
-#my-search-wrap.open{max-height:56px;opacity:1;margin-bottom:12px!important;}
+#my-search-wrap,#hist-search-wrap{max-height:0;opacity:0;overflow:hidden;margin-bottom:0!important;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .22s ease,margin-bottom .28s cubic-bezier(.4,0,.2,1);}
+#my-search-wrap.open,#hist-search-wrap.open{max-height:56px;opacity:1;margin-bottom:12px!important;}
 .focus-banner{background:var(--col);border:none;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh);}
 .focus-banner-text{flex:1;font-size:13px;color:var(--co2);line-height:1.4;}
 .focus-banner-edit{background:var(--co);color:#FFFBF3;border:none;border-radius:14px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;}
@@ -781,14 +781,17 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="v2-hero-sub">A record of your logged sessions.</div>
     </header>
     <div style="padding:0 22px;">
-      <div class="sw" style="margin-bottom:12px;"><span class="sic">🔍</span><input class="si" id="hist-search" placeholder="Search by seed or notes…" autocomplete="off"></div>
-      <div style="display:flex;gap:6px;align-items:center;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;margin-bottom:12px;" id="hist-period-row">
-        <button class="hist-fp on" data-p="all">All</button>
-        <button class="hist-fp" data-p="week">This week</button>
-        <button class="hist-fp" data-p="month">This month</button>
-        <button class="hist-fp" data-p="custom">Custom</button>
-        <button id="hist-add-btn" class="my-icon-add" aria-label="Log a past session" style="margin-left:6px;">+</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;" id="hist-toolbar">
+        <div id="hist-seg" class="my-seg" style="flex:1;">
+          <div class="my-seg-btn on" data-p="all">All</div>
+          <div class="my-seg-btn" data-p="week">Week</div>
+          <div class="my-seg-btn" data-p="month">Month</div>
+          <div class="my-seg-btn" data-p="custom">Custom</div>
+        </div>
+        <button id="hist-search-toggle" class="my-icon-tog" aria-label="Search">🔍</button>
+        <button id="hist-add-btn" class="my-icon-add" aria-label="Log a past session">+</button>
       </div>
+      <div class="sw" id="hist-search-wrap"><span class="sic">🔍</span><input class="si" id="hist-search" placeholder="Search by seed or notes…" autocomplete="off"></div>
       <div id="hist-custom-range" style="display:none;background:var(--bg2);border:var(--br);border-radius:12px;padding:10px 12px;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
           <span style="font-size:12px;color:var(--tx2);white-space:nowrap;">From</span>
@@ -1455,7 +1458,7 @@ function nav(v){
   if(v==='home')rHome();
   if(v==='my'){mySearch='';mySearchOpen=false;var ms=document.getElementById('my-search');if(ms)ms.value='';var msw=document.getElementById('my-search-wrap');if(msw)msw.classList.remove('open');rMy();}
   if(v==='garden')rGarden();
-  if(v==='hist'){histSearch='';histPeriod='all';histCustomFrom=null;histCustomTo=null;var hs=document.getElementById('hist-search');if(hs)hs.value='';var cr=document.getElementById('hist-custom-range');if(cr)cr.style.display='none';rHist();}
+  if(v==='hist'){histSearch='';histPeriod='all';histCustomFrom=null;histCustomTo=null;var hs=document.getElementById('hist-search');if(hs)hs.value='';var hsw=document.getElementById('hist-search-wrap');if(hsw)hsw.classList.remove('open');var hst=document.getElementById('hist-search-toggle');if(hst)hst.classList.remove('on');if(typeof histSearchOpen!=='undefined')histSearchOpen=false;var cr=document.getElementById('hist-custom-range');if(cr)cr.style.display='none';rHist();}
   if(v==='friends'){_frTab='friends';['friends','feed','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='friends');});renderFriends();}
 }
 function goBack(){nav(backFrom);}
@@ -1562,12 +1565,27 @@ document.getElementById('fab').addEventListener('click',function(){
 document.getElementById('hist-add-btn').addEventListener('click',openHarvestQuickLog);
 document.getElementById('hist-search').addEventListener('input',function(){histSearch=this.value;rHist();});
 document.getElementById('my-search').addEventListener('input',function(){mySearch=this.value;rMy();});
-document.getElementById('hist-period-row').addEventListener('click',function(e){
-  var btn=e.target.closest('.hist-fp');if(!btn)return;
+// Field notes segmented control
+document.getElementById('hist-seg').addEventListener('click',function(e){
+  var btn=e.target.closest('.my-seg-btn');if(!btn)return;
   histPeriod=btn.dataset.p;
+  this.querySelectorAll('.my-seg-btn').forEach(function(b){b.classList.toggle('on',b===btn);});
+  positionSegThumb(this);
   var rangeEl=document.getElementById('hist-custom-range');
   rangeEl.style.display=(histPeriod==='custom')?'block':'none';
   rHist();
+});
+// Field notes search toggle
+var histSearchOpen=false;
+document.getElementById('hist-search-toggle').addEventListener('click',function(){
+  histSearchOpen=!histSearchOpen;
+  var w=document.getElementById('hist-search-wrap');
+  var btn=this;
+  w.classList.toggle('open',histSearchOpen);
+  btn.classList.toggle('on',histSearchOpen);
+  var inp=document.getElementById('hist-search');
+  if(histSearchOpen){if(inp)setTimeout(function(){inp.focus();},280);}
+  else{histSearch='';if(inp)inp.value='';rHist();}
 });
 (function(){
   function onCustomDate(){
@@ -4819,7 +4837,8 @@ var histSearch='', histPeriod='all', histCustomFrom=null, histCustomTo=null, his
 
 function rHist(){
   // Sync period pills
-  document.querySelectorAll('.hist-fp').forEach(function(b){b.classList.toggle('on',b.dataset.p===histPeriod);});
+  document.querySelectorAll('#hist-seg .my-seg-btn').forEach(function(b){b.classList.toggle('on',b.dataset.p===histPeriod);});
+  var _histSeg=document.getElementById('hist-seg');if(_histSeg)requestAnimationFrame(function(){positionSegThumb(_histSeg);});
   var el=document.getElementById('hist-list');
   if(!sessions.length){el.innerHTML='<p style="color:var(--tx2);font-size:14px;line-height:1.55;padding:8px 4px;">No harvests yet.<br><span style="color:var(--tx3);">Tap + to log your first session and start your garden.</span></p>';return;}
   el.innerHTML='';
