@@ -2584,9 +2584,9 @@ function _calScheduleForm(dayDate){
   var DNAMES_SHORT=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var t=document.createElement('div');t.style.cssText='font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:16px;';t.textContent='Schedule';sh.appendChild(t);
 
-  // Activity picker with search
-  var aLbl=document.createElement('div');aLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';aLbl.textContent='Activity';sh.appendChild(aLbl);
-  var _selAct=null;
+  // Activity picker with search (multi-select)
+  var aLbl=document.createElement('div');aLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';aLbl.textContent='Activities';sh.appendChild(aLbl);
+  var _selActs=[];
   var aSearch=document.createElement('input');
   aSearch.type='search';aSearch.placeholder='Search seeds…';aSearch.className='sinp';
   aSearch.style.cssText='width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bg3);background:var(--card);font-size:14px;margin-bottom:8px;outline:none;-webkit-appearance:none;';
@@ -2594,17 +2594,18 @@ function _calScheduleForm(dayDate){
   var aList=document.createElement('div');
   aList.style.cssText='display:flex;flex-direction:column;gap:4px;margin-bottom:22px;max-height:140px;overflow-y:auto;';
   sh.appendChild(aList);
+  function _isSelActs(id){return _selActs.some(function(x){return x.id===id;});}
   function _renderActPicker(){
     var q=(aSearch.value||'').trim().toLowerCase();
     aList.innerHTML='';
     var matches=myActs.filter(function(a){return !q||a.name.toLowerCase().indexOf(q)>-1||a.emoji.indexOf(q)>-1;});
     if(!matches.length){var none=document.createElement('div');none.style.cssText='padding:12px;text-align:center;color:var(--tx3);font-size:13px;';none.textContent='No matches';aList.appendChild(none);return;}
     matches.forEach(function(a){
-      var on=_selAct&&_selAct.id===a.id;
+      var on=_isSelActs(a.id);
       var p=document.createElement('div');
       p.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;cursor:pointer;background:'+(on?'var(--grl)':'var(--bg2)')+';border:1.5px solid '+(on?'var(--gr)':'transparent')+';transition:background .12s,border-color .12s;';
       p.innerHTML='<span style="font-size:16px;">'+a.emoji+'</span><span style="font-size:14px;font-weight:500;color:var(--tx);flex:1;">'+a.name+'</span>'+(on?'<span style="color:var(--gr);font-weight:700;">✓</span>':'');
-      p.addEventListener('click',(function(act){return function(){_selAct=act;_renderActPicker();};})(a));
+      p.addEventListener('click',(function(act){return function(){var i=_selActs.findIndex(function(x){return x.id===act.id;});if(i>-1)_selActs.splice(i,1);else _selActs.push(act);_renderActPicker();};})(a));
       aList.appendChild(p);
     });
   }
@@ -2653,24 +2654,24 @@ function _calScheduleForm(dayDate){
   var cancelB=document.createElement('button');cancelB.className='btn btn-s';cancelB.style.flex='1';cancelB.textContent='Cancel';cancelB.addEventListener('click',function(){ov.classList.remove('on');});
   var saveB=document.createElement('button');saveB.className='btn btn-p';saveB.style.flex='1';saveB.textContent='Save';
   saveB.addEventListener('click',function(){
-    if(!_selAct){showToast('Pick an activity first',null);return;}
+    if(!_selActs.length){showToast('Pick at least one activity',null);return;}
     var hourVal=parseInt(hourSel.value);
     var hour=hourVal>=0?hourVal:null;
     if(_isRoutine){
       if(!_selDays.length){showToast('Pick at least one day',null);return;}
-      calRoutines.push({id:genUUID(),actId:_selAct.id,actName:_selAct.name,actEmoji:_selAct.emoji,cat:_selAct.cat||'',days:_selDays.slice(),hour:hour,duration:_dur});
+      _selActs.forEach(function(a){calRoutines.push({id:genUUID(),actId:a.id,actName:a.name,actEmoji:a.emoji,cat:a.cat||'',days:_selDays.slice(),hour:hour,duration:_dur});});
       sv();ov.classList.remove('on');
       if(document.getElementById('cal-ov').classList.contains('on'))renderCalDay(dayDate);
       if(document.getElementById('s-home').classList.contains('on'))rHome();
       updateHomeNudge();
-      showToast('Routine added: '+_selAct.emoji+' '+_selAct.name,null);
+      showToast(_selActs.length>1?_selActs.length+' routines added':'Routine added: '+_selActs[0].emoji+' '+_selActs[0].name,null);
     } else {
-      calPlanned.push({id:genUUID(),actId:_selAct.id,actName:_selAct.name,actEmoji:_selAct.emoji,cat:_selAct.cat||'',date:_calMidnight(dayDate).getTime(),hour:hour,duration:_dur,notified:false});
+      _selActs.forEach(function(a){calPlanned.push({id:genUUID(),actId:a.id,actName:a.name,actEmoji:a.emoji,cat:a.cat||'',date:_calMidnight(dayDate).getTime(),hour:hour,duration:_dur,notified:false});});
       sv();ov.classList.remove('on');
       if(document.getElementById('cal-ov').classList.contains('on'))renderCalDay(dayDate);
       if(document.getElementById('s-home').classList.contains('on'))rHome();
       updateHomeNudge();
-      showToast('Scheduled '+_selAct.emoji+' '+_selAct.name,null);
+      showToast(_selActs.length>1?_selActs.length+' activities scheduled':'Scheduled '+_selActs[0].emoji+' '+_selActs[0].name,null);
     }
   });
   btnRow.appendChild(cancelB);btnRow.appendChild(saveB);sh.appendChild(btnRow);ov.classList.add('on');
