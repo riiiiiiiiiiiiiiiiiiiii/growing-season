@@ -3958,25 +3958,6 @@ function openTodayOverview(){
     sh.appendChild(empty);
   }
 
-  // ── Ongoing points ──
-  if(openTasks.length){
-    sh.appendChild(subHdr('Ongoing points'));
-    var tWrap=document.createElement('div');
-    tWrap.style.cssText='background:var(--bg2);border-radius:12px;padding:2px 12px;';
-    openTasks.slice(0,6).forEach(function(pt,i){
-      var safe=(pt.task.text||'').replace(/</g,'&lt;');
-      var row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 0;'+(i<Math.min(openTasks.length,6)-1?'border-bottom:.5px solid var(--bg3);':'');
-      row.innerHTML='<div style="width:14px;height:14px;border-radius:4px;border:1.5px solid var(--bg3);flex-shrink:0;"></div>'
-        +'<div style="flex:1;min-width:0;"><div style="font-size:13px;color:var(--tx);line-height:1.35;">'+safe+'</div><div style="font-size:11px;color:var(--tx3);margin-top:2px;">'+pt.proj.emoji+' '+pt.proj.name+'</div></div>';
-      tWrap.appendChild(row);
-    });
-    sh.appendChild(tWrap);
-    if(openTasks.length>6){
-      var more=document.createElement('div');more.style.cssText='font-size:11px;color:var(--tx3);text-align:center;margin-top:6px;';more.textContent='+'+(openTasks.length-6)+' more';sh.appendChild(more);
-    }
-  }
-
   // ── Logged today ──
   if(todaySess.length){
     sh.appendChild(subHdr('Logged today'));
