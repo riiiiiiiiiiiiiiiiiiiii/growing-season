@@ -6111,6 +6111,7 @@ document.addEventListener('pointerdown',function(e){
 // ── SUPABASE SYNC ─────────────────────────────────────
 var _syncInProgress=false;
 var _syncPending=false;
+var _syncFailStreak=0;
 // Tombstones: items the user removed locally. Filter them out of any remote
 // load so silent RLS failures / racy background refreshes can't resurrect
 // deleted projects/skills. Purged after 30 days.
@@ -6170,8 +6171,17 @@ async function syncToSupabase(){
       var _toDelete=_remoteIds.data.filter(function(r){return!_localSet.has(r.id);}).map(function(r){return r.id;});
       if(_toDelete.length)await _supa.from('sessions').delete().eq('user_id',uid).in('id',_toDelete);
     }
-    if(_syncHadError)showToast("Sync failed — your data is saved locally.",null);
-  }catch(e){console.warn('Supabase sync error:',e);showToast("Couldn't sync — your data is saved locally.",null);}finally{_syncInProgress=false;if(_syncPending)syncToSupabase();}
+    if(_syncHadError){
+      _syncFailStreak++;
+      if(_syncFailStreak>=5)showToast("Sync isn't working — check your connection.",null);
+    } else {
+      _syncFailStreak=0;
+    }
+  }catch(e){
+    console.warn('Supabase sync error:',e);
+    _syncFailStreak++;
+    if(_syncFailStreak>=5)showToast("Sync isn't working — check your connection.",null);
+  }finally{_syncInProgress=false;if(_syncPending)syncToSupabase();}
 }
 
 async function loadFromSupabase(){
