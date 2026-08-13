@@ -5690,13 +5690,22 @@ function rGarden(){
       s+=drawBud(cx,tipY,fc,species,ph);
     }
     if(stage===4){
-      if(species==='daisy')s+=drawDaisy(cx,tipY,fc,ph);
-      else if(species==='tulip')s+=drawTulip(cx,tipY,fc,ph);
-      else if(species==='poppy')s+=drawPoppy(cx,tipY,fc,ph);
-      else if(species==='cosmos')s+=drawCosmos(cx,tipY,fc,ph);
-      else if(species==='lavender')s+=drawLavender(cx,tipY,fc,ph);
-      else s+=drawDaisy(cx,tipY,fc,ph);
+      s+=drawBloom(cx,tipY,fc);
     }
+    return s;
+  }
+
+  function drawBloom(cx,cy,fc){
+    var s='';
+    var pl=11, pw=6.5, pr=11;
+    for(var i=0;i<6;i++){
+      var ang=(i/6)*360;
+      var rad=(ang-90)*Math.PI/180;
+      var px=cx+Math.cos(rad)*pr, py=cy+Math.sin(rad)*pr;
+      s+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl+'" ry="'+pw+'" fill="'+fc+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+    }
+    s+='<circle cx="'+cx+'" cy="'+cy+'" r="5.2" fill="#F4C97A"/>';
+    s+='<circle cx="'+cx+'" cy="'+cy+'" r="2.6" fill="#8B5A22"/>';
     return s;
   }
 
@@ -5858,7 +5867,7 @@ function rGarden(){
     var gy=svgH-GH-ri*RH;
 
     // Soft ground line per row
-    svg+='<line x1="8" y1="'+(gy+2)+'" x2="'+(svgW-8)+'" y2="'+(gy+2)+'" stroke="rgba(24,60,90,.18)" stroke-width="1"/>';
+    svg+='<line x1="8" y1="'+(gy+2)+'" x2="'+(svgW-8)+'" y2="'+(gy+2)+'" stroke="rgba(120,80,50,.18)" stroke-width="1"/>';
 
     rowActs.forEach(function(a,ci){
       var ph=phash(a.id,42+ri*7);
@@ -5886,7 +5895,7 @@ function rGarden(){
   svg+='</svg>';
 
   var container=document.createElement('div');
-  container.style.cssText='margin:0 16px 20px;background:linear-gradient(180deg,#EAF2FA 0%,#D9E8F2 100%);border-radius:22px;overflow:hidden;padding:8px 0;box-shadow:0 4px 18px rgba(24,60,90,.08);';
+  container.style.cssText='margin:0 16px 20px;background:linear-gradient(180deg,#FDF3E8 0%,#F5E4D0 100%);border-radius:22px;overflow:hidden;padding:8px 0;box-shadow:0 4px 18px rgba(120,80,50,.08);';
   container.innerHTML=svg;
   container.querySelectorAll('[data-pid]').forEach(function(el){
     el.addEventListener('click',function(){
