@@ -115,7 +115,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .pill:active{transform:scale(.96);}
 .pill.off{opacity:.42;}
 .sw{position:relative;margin-bottom:10px;}
-.si{width:100%;padding:10px 14px 10px 34px;border-radius:var(--rad);border:var(--br2);background:var(--card);color:var(--tx);font-size:14px;-webkit-appearance:none;box-shadow:var(--sh);}
+.si{width:100%;padding:10px 14px 10px 34px;border-radius:var(--rad);border:var(--br2);background:var(--card);color:var(--tx);font-size:14px;-webkit-appearance:none;box-shadow:var(--sh);outline:none;}
+.si:focus{outline:none;border-color:var(--gr);}
 .sic{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.4;}
 .oc{background:var(--card);border:var(--br);border-radius:var(--rad);padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:border-color .15s,background .15s;box-shadow:var(--sh);}
 .oc.on{border:1.5px solid var(--gr);background:var(--grl);}
