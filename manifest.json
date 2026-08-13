@@ -2,7 +2,7 @@
   "name": "Growing Season",
   "short_name": "Growing",
   "description": "Track your personal growth, one seed at a time.",
-  "start_url": "./",
+  "start_url": "./index-v2.html",
   "display": "standalone",
   "background_color": "#F4FAF6",
   "theme_color": "#18835A",
