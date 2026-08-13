@@ -5078,19 +5078,21 @@ function saveEd(){
 // ── ADD SHEET ─────────────────────────────────────────
 var libCat='all', libSearch='', libSelected=[], _renderCats=null;
 
-function _addPanelSwap(showEl,hideEls){
-  hideEls.forEach(function(el){if(!el)return;if(el.style.display==='none'||el===showEl)return;el.style.transition='opacity .16s ease';el.style.opacity='0';setTimeout(function(){el.style.display='none';},160);});
-  if(showEl&&(showEl.style.display==='none'||showEl.style.display==='')){
-    setTimeout(function(){
-      showEl.style.opacity='0';showEl.style.display='block';showEl.style.transition='opacity .22s ease,transform .28s cubic-bezier(.4,0,.2,1)';showEl.style.transform='translateY(6px)';
-      requestAnimationFrame(function(){requestAnimationFrame(function(){showEl.style.opacity='1';showEl.style.transform='translateY(0)';});});
-    },170);
-  }
+function _fadeInPanel(el){
+  if(!el)return;
+  el.style.transition='none';
+  el.style.opacity='0';
+  el.style.display='block';
+  el.getBoundingClientRect();
+  el.style.transition='opacity .22s ease';
+  el.style.opacity='1';
 }
 function switchAddTab(tab){
   var isLib = tab==='library';
   var lib=document.getElementById('add-panel-library'),cus=document.getElementById('add-panel-custom');
-  _addPanelSwap(isLib?lib:cus,[lib,cus]);
+  var show=isLib?lib:cus, hide=isLib?cus:lib;
+  hide.style.display='none';hide.style.opacity='';hide.style.transition='';
+  _fadeInPanel(show);
   document.getElementById('tab-library').style.background = isLib?'var(--gr)':'var(--bg2)';
   document.getElementById('tab-library').style.color = isLib?'#fff':'var(--tx2)';
   document.getElementById('tab-custom').style.background = isLib?'var(--bg2)':'var(--gr)';
@@ -5240,24 +5242,24 @@ function switchAddKind(kind){
   var sTab=document.getElementById('kind-tab-skill'), pTab=document.getElementById('kind-tab-project');
   sTab.style.background=s?'var(--gr)':'var(--bg2)';sTab.style.color=s?'#FFFBF3':'var(--tx2)';
   pTab.style.background=s?'var(--bg2)':'var(--gr)';pTab.style.color=s?'var(--tx2)':'#FFFBF3';
-  var skillGroup=[document.getElementById('add-tabs'),document.getElementById('add-panel-library'),document.getElementById('add-panel-custom')];
-  var projPanel=document.getElementById('add-panel-project');
-  var toShow=s?[document.getElementById('add-tabs'),document.getElementById('add-panel-library')]:[projPanel];
-  var toHide=s?[projPanel]:skillGroup;
-  toHide.forEach(function(el){if(!el||el.style.display==='none')return;el.style.transition='opacity .16s ease';el.style.opacity='0';setTimeout(function(){el.style.display='none';},160);});
-  setTimeout(function(){
-    toShow.forEach(function(el){if(!el)return;el.style.opacity='0';el.style.display='';el.style.transition='opacity .22s ease,transform .28s cubic-bezier(.4,0,.2,1)';el.style.transform='translateY(6px)';requestAnimationFrame(function(){requestAnimationFrame(function(){el.style.opacity='1';el.style.transform='translateY(0)';});});});
-    // Ensure custom is hidden when going back to skill (library is default)
-    if(s)document.getElementById('add-panel-custom').style.display='none';
-  },170);
   document.getElementById('add-sheet-title').textContent=s?'Plant a new seed':'Plant a new tree';
+  var addTabs=document.getElementById('add-tabs');
+  var libP=document.getElementById('add-panel-library');
+  var cusP=document.getElementById('add-panel-custom');
+  var projP=document.getElementById('add-panel-project');
   if(s){
-    // Reset tab-button styling to library-active when returning to Skill
+    projP.style.display='none';projP.style.opacity='';projP.style.transition='';
+    addTabs.style.display='';addTabs.style.opacity='';addTabs.style.transition='';
+    cusP.style.display='none';cusP.style.opacity='';cusP.style.transition='';
+    _fadeInPanel(libP);
+    // Reset tab pill styling to Library-active
     document.getElementById('tab-library').style.background='var(--gr)';
     document.getElementById('tab-library').style.color='#fff';
     document.getElementById('tab-custom').style.background='var(--bg2)';
     document.getElementById('tab-custom').style.color='var(--tx2)';
   } else {
+    addTabs.style.display='none';libP.style.display='none';cusP.style.display='none';
+    _fadeInPanel(projP);
     renderProjectCats(CATS[0]||'Personal');
     var pn=document.getElementById('proj-name');if(pn)setTimeout(function(){pn.focus();},50);
   }
