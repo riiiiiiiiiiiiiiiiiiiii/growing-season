@@ -304,8 +304,10 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .my-seg-thumb{position:absolute;top:2px;bottom:2px;left:0;width:0;background:var(--gr);border-radius:18px;transform:translateX(0);transition:transform .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),opacity .18s ease;pointer-events:none;z-index:0;opacity:0;}
 .my-seg-btn{position:relative;z-index:1;flex:1;padding:7px 8px;border-radius:18px;cursor:pointer;text-align:center;color:var(--tx2);white-space:nowrap;transition:color .22s ease;line-height:1.1;user-select:none;background:transparent;}
 .my-seg-btn.on{color:#FFFBF3;}
-.my-icon-tog{background:var(--bg2);border:var(--br);border-radius:50%;width:36px;height:36px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tx2);flex-shrink:0;transition:background .15s,color .15s,border-color .15s;padding:0;line-height:1;}
+.my-icon-tog{background:var(--bg2);border:var(--br);border-radius:50%;width:30px;height:30px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tx2);flex-shrink:0;transition:background .15s,color .15s,border-color .15s;padding:0;line-height:1;}
 .my-icon-tog.on{background:var(--co);color:#FFFBF3;border-color:transparent;}
+.my-icon-add{background:var(--co);border:none;border-radius:50%;width:30px;height:30px;font-size:20px;font-weight:700;color:#FFFBF3;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;padding:0;box-shadow:0 2px 8px rgba(180,91,91,.28);transition:transform .15s cubic-bezier(.34,1.4,.64,1),box-shadow .18s ease;}
+.my-icon-add:active{transform:scale(.92);}
 #my-search-wrap{max-height:0;opacity:0;overflow:hidden;margin-bottom:0!important;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .22s ease,margin-bottom .28s cubic-bezier(.4,0,.2,1);}
 #my-search-wrap.open{max-height:56px;opacity:1;margin-bottom:12px!important;}
 .focus-banner{background:var(--col);border:none;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh);}
@@ -741,7 +743,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
         <div id="my-kind-seg" class="my-seg" style="display:none;"></div>
         <button id="my-focus-toggle" class="my-icon-tog" style="margin-left:auto;" aria-label="Focus only">🎯</button>
         <button id="my-search-toggle" class="my-icon-tog" aria-label="Search">🔍</button>
-        <button id="my-add-btn" class="my-icon-tog" aria-label="Plant a new seed" style="font-size:20px;font-weight:600;">+</button>
+        <button id="my-add-btn" class="my-icon-add" aria-label="Plant a new seed">+</button>
       </div>
       <div class="sw" id="my-search-wrap"><span class="sic">🔍</span><input class="si" id="my-search" placeholder="Search seeds…" autocomplete="off"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -764,8 +766,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div id="garden-tabs" class="my-seg" style="flex:0 0 auto;display:none;"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
         <div id="garden-count" style="font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;"></div>
-        <button id="garden-help-btn" aria-label="Growth stages" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:26px;height:26px;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">?</button>
-        <button id="garden-add-btn" aria-label="Plant / log" style="background:transparent;border:1px solid var(--bg3);border-radius:50%;width:26px;height:26px;font-size:16px;font-weight:600;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">+</button>
+        <button id="garden-help-btn" class="my-icon-tog" aria-label="Growth stages">?</button>
+        <button id="garden-add-btn" class="my-icon-add" aria-label="Plant / log">+</button>
       </div>
     </div>
     <div id="garden-svg-wrap"></div>
@@ -785,7 +787,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
         <button class="hist-fp" data-p="week">This week</button>
         <button class="hist-fp" data-p="month">This month</button>
         <button class="hist-fp" data-p="custom">Custom</button>
-        <button id="hist-add-btn" aria-label="Log a past session" style="background:var(--co);border:none;border-radius:50%;width:30px;height:30px;font-size:20px;font-weight:700;color:#FFFBF3;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;margin-left:6px;box-shadow:0 2px 8px rgba(184,92,54,.28);transition:transform .15s cubic-bezier(.34,1.4,.64,1),box-shadow .18s ease;">+</button>
+        <button id="hist-add-btn" class="my-icon-add" aria-label="Log a past session" style="margin-left:6px;">+</button>
       </div>
       <div id="hist-custom-range" style="display:none;background:var(--bg2);border:var(--br);border-radius:12px;padding:10px 12px;margin-bottom:12px;">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
