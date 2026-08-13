@@ -304,6 +304,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .my-seg-btn.on{color:#FFFBF3;}
 .my-icon-tog{background:var(--bg2);border:var(--br);border-radius:50%;width:36px;height:36px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--tx2);flex-shrink:0;transition:background .15s,color .15s,border-color .15s;padding:0;line-height:1;}
 .my-icon-tog.on{background:var(--co);color:#FFFBF3;border-color:transparent;}
+#my-search-wrap{max-height:0;opacity:0;overflow:hidden;margin-bottom:0!important;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .22s ease,margin-bottom .28s cubic-bezier(.4,0,.2,1);}
+#my-search-wrap.open{max-height:56px;opacity:1;margin-bottom:12px!important;}
 .focus-banner{background:var(--col);border:none;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh);}
 .focus-banner-text{flex:1;font-size:13px;color:var(--co2);line-height:1.4;}
 .focus-banner-edit{background:var(--co);color:#FFFBF3;border:none;border-radius:14px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;}
@@ -738,7 +740,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
         <button id="my-search-toggle" class="my-icon-tog" aria-label="Search">🔍</button>
         <button id="my-add-btn" class="my-icon-tog" aria-label="Plant a new seed" style="font-size:20px;font-weight:600;">+</button>
       </div>
-      <div class="sw" id="my-search-wrap" style="display:none;margin-bottom:12px;"><span class="sic">🔍</span><input class="si" id="my-search" placeholder="Search seeds…" autocomplete="off"></div>
+      <div class="sw" id="my-search-wrap"><span class="sic">🔍</span><input class="si" id="my-search" placeholder="Search seeds…" autocomplete="off"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div id="plot-count" style="font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;"></div>
         <button id="my-collapse-toggle" style="background:none;border:none;font-size:11px;color:var(--tx3);cursor:pointer;padding:0;font-weight:600;letter-spacing:.02em;">Collapse all</button>
@@ -1446,7 +1448,7 @@ function nav(v){
   document.getElementById('fab').style.display='none';
   var mb=document.getElementById('menu-btn');if(mb)mb.style.display=(v==='home'||v==='my'||v==='garden'||v==='hist'||v==='friends')?'flex':'none';
   if(v==='home')rHome();
-  if(v==='my'){mySearch='';mySearchOpen=false;var ms=document.getElementById('my-search');if(ms)ms.value='';var msw=document.getElementById('my-search-wrap');if(msw)msw.style.display='none';rMy();}
+  if(v==='my'){mySearch='';mySearchOpen=false;var ms=document.getElementById('my-search');if(ms)ms.value='';var msw=document.getElementById('my-search-wrap');if(msw)msw.classList.remove('open');rMy();}
   if(v==='garden')rGarden();
   if(v==='hist'){histSearch='';histPeriod='all';histCustomFrom=null;histCustomTo=null;var hs=document.getElementById('hist-search');if(hs)hs.value='';var cr=document.getElementById('hist-custom-range');if(cr)cr.style.display='none';rHist();}
   if(v==='friends'){_frTab='friends';['friends','feed','requests','messages'].forEach(function(t){document.getElementById('fr-tab-'+t).classList.toggle('on',t==='friends');});renderFriends();}
@@ -4597,13 +4599,13 @@ function rMy(){
   var srchWrap=document.getElementById('my-search-wrap');
   if(srchBtn&&srchWrap){
     srchBtn.classList.toggle('on',mySearchOpen);
-    srchWrap.style.display=mySearchOpen?'block':'none';
+    srchWrap.classList.toggle('open',mySearchOpen);
     srchBtn.onclick=function(){
       mySearchOpen=!mySearchOpen;
-      srchWrap.style.display=mySearchOpen?'block':'none';
+      srchWrap.classList.toggle('open',mySearchOpen);
       srchBtn.classList.toggle('on',mySearchOpen);
       var inp=document.getElementById('my-search');
-      if(mySearchOpen){if(inp)setTimeout(function(){inp.focus();},50);}
+      if(mySearchOpen){if(inp)setTimeout(function(){inp.focus();},280);}
       else{mySearch='';if(inp)inp.value='';rMy();}
     };
   }
