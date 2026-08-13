@@ -5087,12 +5087,28 @@ function _fadeInPanel(el){
   el.style.transition='opacity .22s ease';
   el.style.opacity='1';
 }
+function _resizeSheet(sh,work){
+  if(!sh){work();return;}
+  var oldH=sh.offsetHeight;
+  work();
+  var newH=sh.scrollHeight;
+  if(Math.abs(newH-oldH)<8){return;}
+  sh.style.overflow='hidden';
+  sh.style.height=oldH+'px';
+  sh.getBoundingClientRect();
+  sh.style.transition='height .3s cubic-bezier(.4,0,.2,1)';
+  sh.style.height=newH+'px';
+  setTimeout(function(){sh.style.height='';sh.style.transition='';sh.style.overflow='';},310);
+}
 function switchAddTab(tab){
   var isLib = tab==='library';
-  var lib=document.getElementById('add-panel-library'),cus=document.getElementById('add-panel-custom');
-  var show=isLib?lib:cus, hide=isLib?cus:lib;
-  hide.style.display='none';hide.style.opacity='';hide.style.transition='';
-  _fadeInPanel(show);
+  var sh=document.querySelector('#add-ov .sh');
+  _resizeSheet(sh,function(){
+    var lib=document.getElementById('add-panel-library'),cus=document.getElementById('add-panel-custom');
+    var show=isLib?lib:cus, hide=isLib?cus:lib;
+    hide.style.display='none';hide.style.opacity='';hide.style.transition='';
+    _fadeInPanel(show);
+  });
   document.getElementById('tab-library').style.background = isLib?'var(--gr)':'var(--bg2)';
   document.getElementById('tab-library').style.color = isLib?'#fff':'var(--tx2)';
   document.getElementById('tab-custom').style.background = isLib?'var(--bg2)':'var(--gr)';
@@ -5140,10 +5156,19 @@ function rLibGrid(){
 }
 
 function rLibCats(){
-  var wrap=document.getElementById('lib-cats');wrap.innerHTML='';
+  var wrap=document.getElementById('lib-cats');
+  if(wrap.children.length){
+    // Already built — just update on/off classes so CSS transition animates
+    wrap.querySelectorAll('.pill').forEach(function(p){
+      var isOn=p.dataset.cat===libCat;
+      p.classList.toggle('on',isOn);p.classList.toggle('off',!isOn);
+    });
+    return;
+  }
   function mkPill(label,cat){
     var p=document.createElement('div');
     p.className='pill'+(libCat===cat?' on':' off');
+    p.dataset.cat=cat;
     if(cat==='all'){p.style.background='var(--gr)';p.style.color='#fff';}
     else{var cc=CAT_COLORS[cat].split(',');p.style.background=cc[0];p.style.color=cc[1];}
     p.textContent=label;
@@ -5247,22 +5272,24 @@ function switchAddKind(kind){
   var libP=document.getElementById('add-panel-library');
   var cusP=document.getElementById('add-panel-custom');
   var projP=document.getElementById('add-panel-project');
-  if(s){
-    projP.style.display='none';projP.style.opacity='';projP.style.transition='';
-    addTabs.style.display='';addTabs.style.opacity='';addTabs.style.transition='';
-    cusP.style.display='none';cusP.style.opacity='';cusP.style.transition='';
-    _fadeInPanel(libP);
-    // Reset tab pill styling to Library-active
-    document.getElementById('tab-library').style.background='var(--gr)';
-    document.getElementById('tab-library').style.color='#fff';
-    document.getElementById('tab-custom').style.background='var(--bg2)';
-    document.getElementById('tab-custom').style.color='var(--tx2)';
-  } else {
-    addTabs.style.display='none';libP.style.display='none';cusP.style.display='none';
-    _fadeInPanel(projP);
-    renderProjectCats(CATS[0]||'Personal');
-    var pn=document.getElementById('proj-name');if(pn)setTimeout(function(){pn.focus();},50);
-  }
+  var sh=document.querySelector('#add-ov .sh');
+  _resizeSheet(sh,function(){
+    if(s){
+      projP.style.display='none';projP.style.opacity='';projP.style.transition='';
+      addTabs.style.display='';addTabs.style.opacity='';addTabs.style.transition='';
+      cusP.style.display='none';cusP.style.opacity='';cusP.style.transition='';
+      _fadeInPanel(libP);
+      document.getElementById('tab-library').style.background='var(--gr)';
+      document.getElementById('tab-library').style.color='#fff';
+      document.getElementById('tab-custom').style.background='var(--bg2)';
+      document.getElementById('tab-custom').style.color='var(--tx2)';
+    } else {
+      addTabs.style.display='none';libP.style.display='none';cusP.style.display='none';
+      _fadeInPanel(projP);
+      renderProjectCats(CATS[0]||'Personal');
+      var pn=document.getElementById('proj-name');if(pn)setTimeout(function(){pn.focus();},50);
+    }
+  });
 }
 function renderProjectCats(selected){
   var wrap=document.getElementById('proj-cat-opts');
