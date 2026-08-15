@@ -5616,7 +5616,7 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
   var cc=(CAT_COLORS[cat]||CAT_COLORS.Creative).split(',');
   var petalLite=cc[0], petalDark=cc[1];
   var STEM='#4C6641', LEAF='#6D8A5F', SOIL='#8A7256';
-  var stemH=[0,h*0.20,h*0.36,h*0.52,h*0.66][s];
+  var stemH=[0,h*0.18,h*0.32,h*0.46,h*0.56][s];
   var tipY=gy-stemH;
   var curveDir=(ph%3)-1;
   var out='<ellipse cx="'+cx+'" cy="'+(gy+h*0.02).toFixed(1)+'" rx="'+(h*0.22).toFixed(1)+'" ry="'+(h*0.05).toFixed(1)+'" fill="'+SOIL+'" opacity="0.55"/>';
