@@ -4003,6 +4003,10 @@ function openTodayOverview(){
   schedBtn.className='btn btn-p';schedBtn.textContent='+ Add to today’s schedule';
   schedBtn.addEventListener('click',function(){closeEd();setTimeout(function(){_calScheduleForm(mid);},60);});
   sh.appendChild(schedBtn);
+  var logBtn=document.createElement('button');
+  logBtn.className='btn btn-p';logBtn.style.marginTop='8px';logBtn.textContent='+ Log a session';
+  logBtn.addEventListener('click',function(){closeEd();setTimeout(function(){openGardenQuickLog();},60);});
+  sh.appendChild(logBtn);
   var closeBtn=document.createElement('button');
   closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
   closeBtn.addEventListener('click',closeEd);
