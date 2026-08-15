@@ -4936,7 +4936,7 @@ function rHist(){
     var streakEl=streak>=3?'<span style="font-size:11px;font-weight:600;color:#C05C00;">🔥 '+streak+' days</span>':'';
     var tW=52,tH=68;
     var pW=38,pH=50;
-    var plantInner=drawPlant(stage,pW,pH,a.cat);
+    var plantInner=drawPlant(stage,pW,pH,a.cat,_plantHash(a.id));
     var plantBg=['linear-gradient(180deg,rgba(216,232,216,.55),rgba(168,200,160,.55))','linear-gradient(180deg,rgba(200,232,208,.55),rgba(126,184,144,.55))','linear-gradient(180deg,rgba(176,216,184,.55),rgba(86,168,112,.55))','linear-gradient(180deg,rgba(240,200,208,.55),rgba(192,112,144,.55))','linear-gradient(180deg,rgba(248,232,160,.55),rgba(212,168,48,.55))'];
     var plantCol=plantInner?'<div style="width:'+tW+'px;flex-shrink:0;background:'+plantBg[stage]+';display:flex;align-items:flex-end;border-radius:var(--rad);overflow:hidden;box-shadow:var(--sh);"><svg viewBox="0 0 '+pW+' '+pH+'" width="'+tW+'" height="'+tH+'" xmlns="http://www.w3.org/2000/svg">'+plantInner+'</svg></div>':'';
     var isExp=!!histExpanded[s.id];
@@ -5608,23 +5608,27 @@ function getStage(hrs){if(hrs>=16)return 4;if(hrs>=8)return 3;if(hrs>=3)return 2
 var STAGE_LABELS=['Seed','Sprout','Seedling','Flowering','In full bloom'];
 var NEXT_THRESH=[0.5,3,8,16,null];
 
-function drawPlant(stage,w,h,cat){
+function _plantHash(s){if(!s)return 0;var h=0;for(var i=0;i<s.length;i++)h=(31*h+s.charCodeAt(i))|0;return Math.abs(h);}
+
+function drawPlantAt(cx,gy,h,stage,cat,ph){
   var s=Math.max(0,Math.min(stage|0,4));
+  ph=ph|0;
   var cc=(CAT_COLORS[cat]||CAT_COLORS.Creative).split(',');
   var petalLite=cc[0], petalDark=cc[1];
   var STEM='#4C6641', LEAF='#6D8A5F', SOIL='#8A7256';
-  var cx=w/2, gy=h*0.82;
   var stemH=[0,h*0.20,h*0.36,h*0.52,h*0.66][s];
   var tipY=gy-stemH;
-  var out='<ellipse cx="'+cx+'" cy="'+(gy+h*0.02).toFixed(1)+'" rx="'+(w*0.30).toFixed(1)+'" ry="'+(h*0.05).toFixed(1)+'" fill="'+SOIL+'" opacity="0.55"/>';
+  var curveDir=(ph%3)-1;
+  var out='<ellipse cx="'+cx+'" cy="'+(gy+h*0.02).toFixed(1)+'" rx="'+(h*0.22).toFixed(1)+'" ry="'+(h*0.05).toFixed(1)+'" fill="'+SOIL+'" opacity="0.55"/>';
   if(s===0){
     var sr=h*0.05;
     out+='<ellipse cx="'+cx+'" cy="'+(gy-sr*0.4).toFixed(1)+'" rx="'+(sr*1.2).toFixed(1)+'" ry="'+sr.toFixed(1)+'" fill="'+petalDark+'" opacity="0.85"/>';
     out+='<ellipse cx="'+(cx-sr*0.4).toFixed(1)+'" cy="'+(gy-sr*0.75).toFixed(1)+'" rx="'+(sr*0.35).toFixed(1)+'" ry="'+(sr*0.25).toFixed(1)+'" fill="#FFF6EA" opacity="0.55"/>';
     return out;
   }
-  var swW=Math.max(1.4,h*0.038);
-  out+='<path d="M '+cx+','+gy+' Q '+(cx+h*0.04).toFixed(1)+','+(gy-stemH*0.5).toFixed(1)+' '+cx+','+tipY.toFixed(1)+'" fill="none" stroke="'+STEM+'" stroke-width="'+swW.toFixed(1)+'" stroke-linecap="round"/>';
+  var swW=Math.max(1.4,h*0.028);
+  var mx=cx+h*0.045*curveDir;
+  out+='<path d="M '+cx+','+gy+' Q '+mx.toFixed(1)+','+(gy-stemH*0.5).toFixed(1)+' '+cx+','+tipY.toFixed(1)+'" fill="none" stroke="'+STEM+'" stroke-width="'+swW.toFixed(1)+'" stroke-linecap="round"/>';
   if(s===1){
     var lz=h*0.09;
     out+='<ellipse cx="'+(cx-lz*0.7).toFixed(1)+'" cy="'+(tipY+lz*0.3).toFixed(1)+'" rx="'+lz.toFixed(1)+'" ry="'+(lz*0.5).toFixed(1)+'" fill="'+LEAF+'" transform="rotate(-30 '+(cx-lz*0.7).toFixed(1)+' '+(tipY+lz*0.3).toFixed(1)+')"/>';
@@ -5646,21 +5650,75 @@ function drawPlant(stage,w,h,cat){
   }
   var fY=tipY-h*0.06;
   if(s===3){
-    var bw=h*0.06, bh=h*0.09;
-    out+='<ellipse cx="'+cx+'" cy="'+(fY+bh*0.2).toFixed(1)+'" rx="'+bw.toFixed(1)+'" ry="'+bh.toFixed(1)+'" fill="'+petalDark+'"/>';
-    out+='<ellipse cx="'+(cx-bw*0.2).toFixed(1)+'" cy="'+(fY-bh*0.1).toFixed(1)+'" rx="'+(bw*0.55).toFixed(1)+'" ry="'+(bh*0.55).toFixed(1)+'" fill="'+petalLite+'" opacity="0.7"/>';
+    var budType=(ph>>2)%3;
+    if(budType===0){
+      var bw=h*0.06, bh=h*0.09;
+      out+='<ellipse cx="'+cx+'" cy="'+(fY+bh*0.2).toFixed(1)+'" rx="'+bw.toFixed(1)+'" ry="'+bh.toFixed(1)+'" fill="'+petalDark+'"/>';
+      out+='<ellipse cx="'+(cx-bw*0.2).toFixed(1)+'" cy="'+(fY-bh*0.1).toFixed(1)+'" rx="'+(bw*0.55).toFixed(1)+'" ry="'+(bh*0.55).toFixed(1)+'" fill="'+petalLite+'" opacity="0.7"/>';
+    } else if(budType===1){
+      var pbw=h*0.055, pbh=h*0.11;
+      out+='<path d="M '+cx+','+(fY-pbh).toFixed(1)+' Q '+(cx+pbw).toFixed(1)+','+(fY-pbh*0.3).toFixed(1)+' '+cx+','+(fY+pbh*0.3).toFixed(1)+' Q '+(cx-pbw).toFixed(1)+','+(fY-pbh*0.3).toFixed(1)+' '+cx+','+(fY-pbh).toFixed(1)+' Z" fill="'+petalDark+'"/>';
+      out+='<path d="M '+cx+','+(fY-pbh*0.85).toFixed(1)+' Q '+(cx+pbw*0.55).toFixed(1)+','+(fY-pbh*0.35).toFixed(1)+' '+cx+','+(fY+pbh*0.1).toFixed(1)+'" fill="'+petalLite+'" opacity="0.6"/>';
+    } else {
+      var cbr=h*0.038;
+      out+='<circle cx="'+cx+'" cy="'+(fY-cbr*0.6).toFixed(1)+'" r="'+cbr.toFixed(1)+'" fill="'+petalDark+'"/>';
+      out+='<circle cx="'+(cx-cbr*1.4).toFixed(1)+'" cy="'+(fY+cbr*0.5).toFixed(1)+'" r="'+(cbr*0.78).toFixed(1)+'" fill="'+petalDark+'" opacity="0.9"/>';
+      out+='<circle cx="'+(cx+cbr*1.4).toFixed(1)+'" cy="'+(fY+cbr*0.5).toFixed(1)+'" r="'+(cbr*0.78).toFixed(1)+'" fill="'+petalDark+'" opacity="0.9"/>';
+      out+='<circle cx="'+(cx-cbr*0.2).toFixed(1)+'" cy="'+(fY-cbr*0.9).toFixed(1)+'" r="'+(cbr*0.35).toFixed(1)+'" fill="'+petalLite+'" opacity="0.7"/>';
+    }
     return out;
   }
-  var pr=h*0.10, pl=h*0.09, pw=h*0.055, petals=6;
-  for(var i=0;i<petals;i++){
-    var ang=(i/petals)*360, rad=(ang-90)*Math.PI/180;
-    var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
-    out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl.toFixed(1)+'" ry="'+pw.toFixed(1)+'" fill="'+petalDark+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-    out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.7).toFixed(1)+'" ry="'+(pw*0.7).toFixed(1)+'" fill="'+petalLite+'" opacity="0.65" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+  var species=(ph>>3)%4;
+  if(species===0){
+    var petals=7, pr=h*0.10, pl=h*0.09, pw=h*0.055;
+    for(var i=0;i<petals;i++){
+      var ang=(i/petals)*360, rad=(ang-90)*Math.PI/180;
+      var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
+      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl.toFixed(1)+'" ry="'+pw.toFixed(1)+'" fill="'+petalDark+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.7).toFixed(1)+'" ry="'+(pw*0.7).toFixed(1)+'" fill="'+petalLite+'" opacity="0.6" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+    }
+    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.055).toFixed(1)+'" fill="#F4C97A"/>';
+    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.025).toFixed(1)+'" fill="#8B5A22"/>';
+  } else if(species===1){
+    var petals=8, pr=h*0.085, pl=h*0.11, pw=h*0.032;
+    for(var i=0;i<petals;i++){
+      var ang=(i/petals)*360, rad=(ang-90)*Math.PI/180;
+      var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
+      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl.toFixed(1)+'" ry="'+pw.toFixed(1)+'" fill="'+petalDark+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.65).toFixed(1)+'" ry="'+(pw*0.55).toFixed(1)+'" fill="'+petalLite+'" opacity="0.6" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+    }
+    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.04).toFixed(1)+'" fill="#F4C97A"/>';
+  } else if(species===2){
+    var petals=5, pr=h*0.075, pl=h*0.11, pw=h*0.085;
+    for(var i=0;i<petals;i++){
+      var ang=(i/petals)*360+18, rad=(ang-90)*Math.PI/180;
+      var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
+      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl.toFixed(1)+'" ry="'+pw.toFixed(1)+'" fill="'+petalDark+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.55).toFixed(1)+'" ry="'+(pw*0.6).toFixed(1)+'" fill="'+petalLite+'" opacity="0.55" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+    }
+    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.045).toFixed(1)+'" fill="#4A3020"/>';
+    out+='<circle cx="'+(cx-h*0.012).toFixed(1)+'" cy="'+(fY-h*0.012).toFixed(1)+'" r="'+(h*0.018).toFixed(1)+'" fill="#7B5A3A" opacity="0.7"/>';
+  } else {
+    var petals=5, pr=h*0.085;
+    for(var i=0;i<petals;i++){
+      var ang=(i/petals)*360-90, rad=ang*Math.PI/180;
+      var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
+      var pl=h*0.11, pw=h*0.038;
+      var sideAR=(ang+90)*Math.PI/180, sideBR=(ang-90)*Math.PI/180;
+      var p1x=px+Math.cos(rad)*pl, p1y=py+Math.sin(rad)*pl;
+      var p2x=px+Math.cos(sideAR)*pw, p2y=py+Math.sin(sideAR)*pw;
+      var p3x=px+Math.cos(sideBR)*pw, p3y=py+Math.sin(sideBR)*pw;
+      out+='<path d="M '+px.toFixed(1)+','+py.toFixed(1)+' L '+p2x.toFixed(1)+','+p2y.toFixed(1)+' L '+p1x.toFixed(1)+','+p1y.toFixed(1)+' L '+p3x.toFixed(1)+','+p3y.toFixed(1)+' Z" fill="'+petalDark+'"/>';
+      out+='<path d="M '+px.toFixed(1)+','+py.toFixed(1)+' L '+((p2x+p1x)/2).toFixed(1)+','+((p2y+p1y)/2).toFixed(1)+' L '+p1x.toFixed(1)+','+p1y.toFixed(1)+' Z" fill="'+petalLite+'" opacity="0.5"/>';
+    }
+    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.055).toFixed(1)+'" fill="'+petalLite+'"/>';
+    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.028).toFixed(1)+'" fill="'+petalDark+'"/>';
   }
-  out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.055).toFixed(1)+'" fill="#F4C97A"/>';
-  out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.025).toFixed(1)+'" fill="#8B5A22"/>';
   return out;
+}
+
+function drawPlant(stage,w,h,cat,ph){
+  return drawPlantAt(w/2,h*0.82,h,stage,cat,ph||0);
 }
 
 function openGardenHelp(){
@@ -6061,7 +6119,7 @@ function rGarden(){
 
       svg+='<g data-pid="'+a.id+'" data-kind="'+(_isProj?'project':'skill')+'" style="cursor:pointer;"'+(dormant?' opacity="0.42"':'')+'>';
       if(_isProj)svg+=drawTree(cx,pgy,stage,getProjectDoneCount(a),ph);
-      else svg+=dp(cx,pgy,stage,fc,ph);
+      else svg+=drawPlantAt(cx,pgy,140,stage,a.cat,ph);
       svg+='<text x="'+cx+'" y="'+(gy+24)+'" text-anchor="middle" font-size="11" font-weight="600" fill="var(--tx)" font-family="ui-serif,Georgia,serif">'+shortName+'</text>';
       var ds=6,startDX=cx-(4-1)*ds/2;
       for(var di=0;di<4;di++){
