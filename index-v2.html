@@ -6104,7 +6104,7 @@ function rGarden(){
     var gy=svgH-GH-ri*RH;
 
     // Soft ground line per row
-    svg+='<line x1="8" y1="'+(gy+2)+'" x2="'+(svgW-8)+'" y2="'+(gy+2)+'" stroke="rgba(120,80,50,.18)" stroke-width="1"/>';
+    svg+='<line x1="8" y1="'+(gy+2)+'" x2="'+(svgW-8)+'" y2="'+(gy+2)+'" stroke="rgba(255,240,210,.16)" stroke-width="1"/>';
 
     rowActs.forEach(function(a,ci){
       var ph=phash(a.id,42+ri*7);
@@ -6120,7 +6120,7 @@ function rGarden(){
       svg+='<g data-pid="'+a.id+'" data-kind="'+(_isProj?'project':'skill')+'" style="cursor:pointer;"'+(dormant?' opacity="0.42"':'')+'>';
       if(_isProj)svg+=drawTree(cx,pgy,stage,getProjectDoneCount(a),ph);
       else svg+=drawPlantAt(cx,pgy,140,stage,a.cat,ph);
-      svg+='<text x="'+cx+'" y="'+(gy+24)+'" text-anchor="middle" font-size="11" font-weight="600" fill="var(--tx)" font-family="ui-serif,Georgia,serif">'+shortName+'</text>';
+      svg+='<text x="'+cx+'" y="'+(gy+24)+'" text-anchor="middle" font-size="11" font-weight="600" fill="#F5E9D2" font-family="ui-serif,Georgia,serif">'+shortName+'</text>';
       var ds=6,startDX=cx-(4-1)*ds/2;
       for(var di=0;di<4;di++){
         svg+='<circle cx="'+(startDX+di*ds).toFixed(1)+'" cy="'+(gy+38)+'" r="2.3" fill="'+(di<stage?'var(--gr)':'var(--bg3)')+'"/>';
@@ -6132,7 +6132,7 @@ function rGarden(){
   svg+='</svg>';
 
   var container=document.createElement('div');
-  container.style.cssText='margin:0 16px 20px;background:linear-gradient(180deg,#FDF3E8 0%,#F5E4D0 100%);border-radius:22px;overflow:hidden;padding:8px 0;box-shadow:0 4px 18px rgba(120,80,50,.08);';
+  container.style.cssText='margin:0 16px 20px;background:linear-gradient(180deg,#132849 0%,#1E3D6E 55%,#2A5490 100%);border-radius:22px;overflow:hidden;padding:8px 0;box-shadow:0 4px 18px rgba(20,40,80,.22);';
   container.innerHTML=svg;
   container.querySelectorAll('[data-pid]').forEach(function(el){
     el.addEventListener('click',function(){
