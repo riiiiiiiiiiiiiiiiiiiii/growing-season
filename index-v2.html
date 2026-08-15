@@ -4057,9 +4057,8 @@ function openWeeklySummary(preferLast){
   var MNAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var wkStartDate=new Date(wkStartMs),wkEndDate=new Date(wkEndMs-86400000);
   var dateStr=MNAMES[wkStartDate.getMonth()]+' '+wkStartDate.getDate()+' – '+wkEndDate.getDate();
-  var msgs=['Every session is a seed planted.','You showed up. That\'s what matters.','Progress isn\'t always loud — yours is growing.','Small steps, every day. That\'s the whole game.','Consistency is the rarest skill. You\'re building it.'];
+  var msgs=['Every session is a seed planted.','You showed up. That\'s what matters.','Progress isn\'t always loud — yours is growing.','Small steps, every day.','Consistency is the rarest skill. You\'re building it.'];
   var msg=wkSess.length?msgs[daysActive%msgs.length]:'This is your fresh start. The garden is waiting.';
-  var streak=calcStreak();
   var hdr=document.createElement('div');hdr.style.cssText='text-align:center;margin-bottom:20px;';
   hdr.innerHTML='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);margin-bottom:5px;">'+(showLast?'Last week':'This week so far')+'</div>'
     +'<div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:8px;">'+dateStr+'</div>'
@@ -4068,11 +4067,10 @@ function openWeeklySummary(preferLast){
   if(wkSess.length){
     var grid=document.createElement('div');
     grid.style.cssText='background:var(--bg2);border-radius:14px;padding:12px 10px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px;';
-    function mkStat(val,lbl){var d=document.createElement('div');d.style.cssText='flex:1;min-width:0;text-align:center;';d.innerHTML='<div style="font-family:var(--serif);font-size:16px;font-weight:700;color:var(--gr2);margin-bottom:2px;line-height:1.1;white-space:nowrap;">'+val+'</div><div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--tx3);line-height:1.2;">'+lbl+'</div>';grid.appendChild(d);}
-    mkStat(wkSess.length,'Sessions');
-    mkStat(Math.floor(wkMins/60)+'h '+(wkMins%60)+'m','Time growing');
-    mkStat(daysActive+'/7','Days active');
-    if(streak>=2)mkStat('🔥 '+streak,'Day streak');
+    function mkStat(val){var d=document.createElement('div');d.style.cssText='flex:1;min-width:0;text-align:center;';d.innerHTML='<div style="font-family:var(--serif);font-size:16px;font-weight:700;color:var(--gr2);line-height:1.1;white-space:nowrap;">'+val+'</div>';grid.appendChild(d);}
+    mkStat(wkSess.length+'×');
+    mkStat(Math.floor(wkMins/60)+'h '+(wkMins%60)+'m');
+    mkStat(daysActive+'/7');
     sh.appendChild(grid);
     if(topActs.length){
       var actLbl=document.createElement('div');actLbl.style.cssText='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--tx3);margin-bottom:8px;';actLbl.textContent='Most grown';sh.appendChild(actLbl);
@@ -4081,7 +4079,7 @@ function openWeeklySummary(preferLast){
       sh.appendChild(actList);
     }
   }
-  var closeBtn=document.createElement('button');closeBtn.className='btn btn-p';closeBtn.textContent='Keep growing 🌱';closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
+  var closeBtn=document.createElement('button');closeBtn.className='btn btn-p';closeBtn.textContent='Keep growing';closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
   ov.classList.add('on');
 }
 
