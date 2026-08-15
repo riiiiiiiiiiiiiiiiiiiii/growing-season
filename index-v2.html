@@ -4807,7 +4807,7 @@ function showArchivedList(){
       (function(act){
         restoreBtn.addEventListener('click',function(){
           var ai=archivedActs.indexOf(act);
-          if(ai>-1){archivedActs.splice(ai,1);myActs.push(act);sv();showToast(act.emoji+' '+act.name+' restored',null);showArchivedList();rMy();}
+          if(ai>-1){archivedActs.splice(ai,1);myActs.push(act);delete _tombstones[act.id];_saveTombstones();sv();showToast(act.emoji+' '+act.name+' restored',null);showArchivedList();rMy();}
         });
         deleteBtn.addEventListener('click',function(){
           if(!confirm('Delete "'+act.name+'" for good? This cannot be undone.'))return;
@@ -6202,7 +6202,7 @@ async function loadFromSupabase(){
       if(d.colorPalette)colorPalette=d.colorPalette;
       if(d.customCats)customCats=d.customCats;
       if(d.profile)profile=d.profile;
-      if(d.archivedActs)archivedActs=d.archivedActs;
+      if(d.archivedActs)archivedActs=d.archivedActs.filter(function(a){return !_isTombstoned(a.id);});
       if(d.active!==undefined)active=d.active;
     }
 
