@@ -4006,7 +4006,7 @@ function openTodayOverview(){
   schedBtn.addEventListener('click',function(){closeEd();setTimeout(function(){_calScheduleForm(mid);},60);});
   actRow.appendChild(schedBtn);
   var logBtn=document.createElement('button');
-  logBtn.className='btn btn-p';logBtn.style.flex='1';logBtn.textContent='+ Log session';
+  logBtn.className='btn btn-s';logBtn.style.flex='1';logBtn.textContent='+ Log session';
   logBtn.addEventListener('click',function(){closeEd();setTimeout(function(){openGardenQuickLog();},60);});
   actRow.appendChild(logBtn);
   sh.appendChild(actRow);
