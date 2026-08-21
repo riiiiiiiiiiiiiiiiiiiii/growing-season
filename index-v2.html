@@ -237,7 +237,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .badge-s{background:var(--vil);color:var(--vi2);}
 .badge-r{background:var(--grl);color:var(--gr2);}
 .badge-ip{background:var(--co);color:#FFFBF3;}
-.hc{background:var(--card);border:var(--br);border-radius:var(--rad);padding:16px 18px;margin-bottom:6px;box-shadow:var(--sh);animation:cardIn .22s cubic-bezier(.25,.46,.45,.94) both;}
+.hc{background:var(--card);border:var(--br);border-radius:var(--rad);padding:16px 18px;margin-bottom:6px;box-shadow:var(--sh);contain:layout style paint;}
 @keyframes cardIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .hc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
@@ -365,7 +365,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .cat-body{overflow:hidden;max-height:0;opacity:0;transition:max-height .32s cubic-bezier(.4,0,.2,1),opacity .22s ease;contain:layout;}
 .cat-body.open{opacity:1;}
 .cat-body-inner{}
-.hist-day-body{overflow:hidden;max-height:0;opacity:0;transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .22s ease;}
+.hist-day-body{overflow:hidden;max-height:0;opacity:0;transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .22s ease;contain:layout;}
 .hist-day-body.open{opacity:1;}
 .hist-day-inner{}
 .cat-body{padding-top:6px;}
@@ -4930,8 +4930,9 @@ function rHist(){
   var monthAgo=new Date(now);monthAgo.setDate(1);monthAgo.setHours(0,0,0,0);
   var q=(histSearch||'').toLowerCase().trim();
 
+  var _actMap={};myActs.forEach(function(a){_actMap[a.id]=a;});archivedActs.forEach(function(a){if(!_actMap[a.id])_actMap[a.id]=a;});
   var sorted=sessions.slice().sort(function(a,b){return b.date-a.date;}).filter(function(s){
-    var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||(s.actName?{name:s.actName}:{name:'Deleted activity'});
+    var a=_actMap[s.actId]||(s.actName?{name:s.actName}:{name:'Deleted activity'});
     if(histPeriod==='week'&&s.date<weekAgo.getTime())return false;
     if(histPeriod==='month'&&s.date<monthAgo.getTime())return false;
     if(histPeriod==='custom'){
@@ -4992,7 +4993,7 @@ function rHist(){
       }
     });})(_dk,_dayBody,_dayHdr);
     _daySess.forEach(function(s){
-    var a=myActs.find(function(x){return x.id===s.actId;})||archivedActs.find(function(x){return x.id===s.actId;})||(s.actName?{emoji:s.actEmoji||'📋',name:s.actName}:{emoji:'📋',name:'Deleted activity'});
+    var a=_actMap[s.actId]||(s.actName?{emoji:s.actEmoji||'📋',name:s.actName}:{emoji:'📋',name:'Deleted activity'});
     var dur=s.hours>0?s.hours+'h '+s.mins+'min':s.mins+'min';
     var stage=getStage(getHours(s.actId));
     var stageClrs=['#8FA89A','#3A9A70','#2E7D52','#B03870','#C87800'];
