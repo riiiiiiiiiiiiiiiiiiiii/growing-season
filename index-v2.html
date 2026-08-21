@@ -237,7 +237,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .badge-s{background:var(--vil);color:var(--vi2);}
 .badge-r{background:var(--grl);color:var(--gr2);}
 .badge-ip{background:var(--co);color:#FFFBF3;}
-.hc{background:var(--card);border:var(--br);border-radius:var(--rad);padding:16px 18px;margin-bottom:6px;box-shadow:var(--sh);contain:layout style paint;}
+.hc{background:var(--card);border:var(--br);border-radius:var(--rad);padding:16px 18px;margin-bottom:6px;box-shadow:var(--sh);}
 @keyframes cardIn{from{opacity:0;transform:translateY(7px);}to{opacity:1;transform:translateY(0);}}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .hc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
@@ -289,7 +289,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .ip:active{transform:scale(.97);}
 .ac{transition:transform .16s cubic-bezier(.34,1.4,.64,1);}
 .ac:active{transform:scale(.92);}
-.mc-wrap{position:relative;overflow:hidden;border-radius:var(--rad);margin-bottom:8px;contain:layout style paint;}
+.mc-wrap{position:relative;overflow:hidden;border-radius:var(--rad);margin-bottom:8px;}
 .mc-del{position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
 .mc-foc{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:22px;opacity:0;pointer-events:none;transition:opacity .05s;}
 .mc{transition:transform .18s cubic-bezier(.25,.46,.45,.94);margin-bottom:0;border-radius:var(--rad);touch-action:pan-y;}
@@ -758,9 +758,9 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="v2-hero-sub">Skills you're growing and projects you're building.</div>
     </header>
     <div style="padding:0 22px;">
-      <div id="my-filter-bar" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <div id="my-filter-bar" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;justify-content:flex-end;">
         <div id="my-kind-seg" class="my-seg" style="display:none;"></div>
-        <button id="my-focus-toggle" class="my-icon-tog" style="margin-left:auto;" aria-label="Focus only">🎯</button>
+        <button id="my-focus-toggle" class="my-icon-tog" aria-label="Focus only">🎯</button>
         <button id="my-search-toggle" class="my-icon-tog" aria-label="Search">🔍</button>
         <button id="my-add-btn" class="my-icon-add" aria-label="Plant a new seed"><span>+</span></button>
       </div>
