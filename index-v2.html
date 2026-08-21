@@ -1971,7 +1971,7 @@ function rHome(){
         lbl.textContent=days[idx];
         col.appendChild(circle);col.appendChild(lbl);
         if(!isFuture){col.addEventListener('click',function(){openDayRecap(d,dStart,dEnd);});}
-        else {col.style.cursor='pointer';(function(dd){col.addEventListener('click',function(){_calScheduleForm(new Date(dd));});})(d);}
+        else {col.style.cursor='pointer';(function(dd){col.addEventListener('click',function(){openFutureDayRecap(new Date(dd));});})(d);}
         row.appendChild(col);
       })(i);
     }
@@ -2023,6 +2023,37 @@ function openDayRecap(d,dStart,dEnd){
     logBtn.addEventListener('click',function(){closeEd();showQuickLog(_preDate);});
     btnRow.appendChild(logBtn);
   }
+  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.cssText='flex:1;margin:0;';closeBtn.textContent='Close';
+  closeBtn.addEventListener('click',closeEd);btnRow.appendChild(closeBtn);
+  sh.appendChild(btnRow);
+  document.getElementById('ed-ov').classList.add('on');
+}
+
+function openFutureDayRecap(d){
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
+  var dateLabel=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:14px;';title.textContent=dateLabel;sh.appendChild(title);
+  var planned=_getScheduledForDate(d);
+  if(!planned.length){
+    var empty=document.createElement('div');empty.style.cssText='font-size:14px;color:var(--tx3);padding:8px 0 16px;';empty.textContent='Nothing planned yet.';sh.appendChild(empty);
+  } else {
+    var summary=document.createElement('div');summary.style.cssText='font-size:12px;color:var(--tx3);margin-bottom:14px;';
+    summary.textContent=planned.length+' planned';sh.appendChild(summary);
+    planned.forEach(function(it){
+      var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--bg3);';
+      var name=document.createElement('div');name.style.cssText='font-size:13px;font-weight:600;color:var(--tx);';name.textContent=(it.emoji?it.emoji+' ':'')+(it.name||'Untitled');
+      var right=document.createElement('div');right.style.cssText='display:flex;align-items:center;gap:10px;flex-shrink:0;';
+      var timeEl=document.createElement('span');timeEl.style.cssText='font-size:12px;color:var(--tx3);';timeEl.textContent=(it.hour==null?'Any':_fmtHour12(it.hour));right.appendChild(timeEl);
+      if(it.kind==='routine'){var rEl=document.createElement('span');rEl.style.cssText='font-size:11px;color:var(--gr2);background:var(--grl);padding:2px 8px;border-radius:999px;font-weight:600;';rEl.textContent='routine';right.appendChild(rEl);}
+      row.appendChild(name);row.appendChild(right);sh.appendChild(row);
+    });
+  }
+  var btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px;margin-top:16px;';
+  var addBtn=document.createElement('button');addBtn.className='btn btn-p';addBtn.style.cssText='flex:1;margin:0;';
+  addBtn.textContent='+ Add to schedule';
+  var _d=new Date(d);
+  addBtn.addEventListener('click',function(){closeEd();setTimeout(function(){_calScheduleForm(_d);},60);});
+  btnRow.appendChild(addBtn);
   var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.cssText='flex:1;margin:0;';closeBtn.textContent='Close';
   closeBtn.addEventListener('click',closeEd);btnRow.appendChild(closeBtn);
   sh.appendChild(btnRow);
@@ -5450,14 +5481,13 @@ function _fmtHour12(h){
   var hr=h%12||12;
   return hr+suf;
 }
-function _getTodayScheduled(){
-  var now=new Date();
-  var midnight=new Date(now);midnight.setHours(0,0,0,0);
-  var tomorrow=midnight.getTime()+86400000;
-  var dow=(now.getDay()===0)?6:now.getDay()-1; // Mon=0..Sun=6
+function _getScheduledForDate(target){
+  var mid=new Date(target);mid.setHours(0,0,0,0);
+  var startMs=mid.getTime(),endMs=startMs+86400000;
+  var dow=(mid.getDay()===0)?6:mid.getDay()-1; // Mon=0..Sun=6
   var items=[];
   (calPlanned||[]).forEach(function(ev){
-    if(ev.date>=midnight.getTime()&&ev.date<tomorrow){
+    if(ev.date>=startMs&&ev.date<endMs){
       items.push({kind:'planned',id:ev.id,actId:ev.actId,emoji:ev.actEmoji,name:ev.actName,hour:ev.hour,duration:ev.duration});
     }
   });
@@ -5473,6 +5503,7 @@ function _getTodayScheduled(){
   });
   return items;
 }
+function _getTodayScheduled(){return _getScheduledForDate(new Date());}
 function renderTodaySection(){
   var wrap=document.getElementById('today-section');
   if(!wrap)return;
