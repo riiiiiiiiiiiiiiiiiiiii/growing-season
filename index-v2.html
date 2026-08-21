@@ -343,7 +343,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .trophy-name{font-size:11.5px;font-weight:700;margin-bottom:3px;letter-spacing:-.005em;}
 .trophy-desc{font-size:10px;color:var(--tx2);line-height:1.4;}
 .trophy-prog{font-size:10px;font-weight:600;color:var(--gr);margin-top:4px;}
-.mc-unfocused{opacity:0.65;}
+.mc-focused .mc{box-shadow:inset 3px 0 0 var(--gr),var(--sh);}
 .foc-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:1.5px solid transparent;background:var(--bg2);margin-bottom:8px;cursor:pointer;transition:background .15s,border-color .15s;}
 .foc-item:hover{background:var(--bg3);}
 .foc-item.on{border-color:var(--gr);background:var(--grl);}
@@ -4782,7 +4782,7 @@ function _rMyBody(el,allActs){
     acts.forEach(function(a){
       var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
       var isAct=active&&active.actId===a.id;
-      var wrap=document.createElement('div');wrap.className='mc-wrap'+(hasFocusSet()&&!myFocusOnly&&!isFocused(a.id)?' mc-unfocused':'');wrap.dataset.dragId=a.id;wrap.dataset.dragCat=cat;
+      var wrap=document.createElement('div');wrap.className='mc-wrap'+(hasFocusSet()&&!myFocusOnly&&isFocused(a.id)?' mc-focused':'');wrap.dataset.dragId=a.id;wrap.dataset.dragCat=cat;
       var del=document.createElement('div');del.className='mc-del';del.textContent='🗃️';wrap.appendChild(del);
       var focEl=document.createElement('div');focEl.className='mc-foc';focEl.textContent='🎯';wrap.appendChild(focEl);
       var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
