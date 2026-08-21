@@ -2014,8 +2014,18 @@ function openDayRecap(d,dStart,dEnd){
       row.appendChild(name);row.appendChild(right);sh.appendChild(row);
     });
   }
-  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='16px';closeBtn.textContent='Close';
-  closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
+  var btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px;margin-top:16px;';
+  var isFuture=d>new Date()&&!isToday;
+  if(!isFuture){
+    var logBtn=document.createElement('button');logBtn.className='btn btn-p';logBtn.style.cssText='flex:1;margin:0;';
+    logBtn.textContent='+ Log a session';
+    var _preDate=d.toLocaleDateString('en-CA');
+    logBtn.addEventListener('click',function(){closeEd();showQuickLog(_preDate);});
+    btnRow.appendChild(logBtn);
+  }
+  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.cssText='flex:1;margin:0;';closeBtn.textContent='Close';
+  closeBtn.addEventListener('click',closeEd);btnRow.appendChild(closeBtn);
+  sh.appendChild(btnRow);
   document.getElementById('ed-ov').classList.add('on');
 }
 
@@ -3725,13 +3735,14 @@ function suggestAct(){
   document.getElementById('pq-ov').classList.add('on');
 }
 
-function showQuickLog(){
+function showQuickLog(preDate){
   if(!myActs.length){openAdd();return;}
   var bCat='all', bSearch='';
   function rQL(){
     var body=document.getElementById('pq-body');body.innerHTML='';
     var h=document.createElement('div');h.style.cssText='font-family:var(--serif);font-size:17px;font-weight:700;margin-bottom:4px;';h.textContent='Log a session';body.appendChild(h);
-    var sub=document.createElement('div');sub.style.cssText='font-size:13px;color:var(--tx2);margin-bottom:12px;';sub.textContent='Which activity did you just do?';body.appendChild(sub);
+    var subTxt=preDate?'Which activity? Session will be dated '+new Date(preDate+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})+'.':'Which activity did you just do?';
+    var sub=document.createElement('div');sub.style.cssText='font-size:13px;color:var(--tx2);margin-bottom:12px;';sub.textContent=subTxt;body.appendChild(sub);
     var sw=document.createElement('div');sw.className='sw';sw.style.marginBottom='8px';
     var sic=document.createElement('span');sic.className='sic';sic.textContent='🔍';sw.appendChild(sic);
     var inp=document.createElement('input');inp.className='si';inp.placeholder='Search...';inp.value=bSearch;
@@ -3752,7 +3763,7 @@ function showQuickLog(){
       var cnt=sessions.filter(function(s){return s.actId===a.id;}).length;
       var card=document.createElement('div');card.className='bp-card';
       card.innerHTML='<span style="font-size:22px;">'+a.emoji+'</span><div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+a.name+'</div><div style="font-size:11px;color:var(--tx2);">'+a.cat+'</div></div><span style="font-size:11px;color:var(--tx3);">'+cnt+'x</span>';
-      card.addEventListener('click',function(){closePicker();openLogDirect(a.id,'home');});
+      card.addEventListener('click',function(){closePicker();openLogDirect(a.id,'home',preDate);});
       grid.appendChild(card);
     });
     if(!list.length){var empty=document.createElement('div');empty.style.cssText='font-size:13px;color:var(--tx2);padding:12px 0;';empty.textContent='No activities found';grid.appendChild(empty);}
@@ -3849,7 +3860,7 @@ function makeStarRating(wrap,initVal,onChg){
   apply(cur);
 }
 
-function setupLogScreen(id,from,startedAt){
+function setupLogScreen(id,from,startedAt,preDate){
   backFrom=from;logId=id;logRating=0;logFeels=[];logMomentum='';
   var a=myActs.find(function(x){return x.id===id;});
   var cnt=sessions.filter(function(s){return s.actId===id;}).length;
@@ -3896,12 +3907,17 @@ function setupLogScreen(id,from,startedAt){
 
   logRating=0;
   makeStarRating(document.getElementById('stars'),0,function(val,lbl){logRating=val;document.getElementById('slbl').textContent=lbl;});
-  var _logToday=true;
+  var _logToday=!preDate;
   var logTodayBtn=document.getElementById('log-today-btn');
   var logDateInp=document.getElementById('log-date');
-  logDateInp.value=new Date().toLocaleDateString('en-CA');
-  logDateInp.style.display='none';
-  logTodayBtn.style.background='var(--grl)';logTodayBtn.style.color='var(--gr2)';logTodayBtn.style.borderColor='var(--grm)';logTodayBtn.textContent='✓ Today';
+  logDateInp.value=preDate||new Date().toLocaleDateString('en-CA');
+  if(_logToday){
+    logDateInp.style.display='none';
+    logTodayBtn.style.background='var(--grl)';logTodayBtn.style.color='var(--gr2)';logTodayBtn.style.borderColor='var(--grm)';logTodayBtn.textContent='✓ Today';
+  } else {
+    logDateInp.style.display='block';
+    logTodayBtn.style.background='var(--bg2)';logTodayBtn.style.color='var(--tx2)';logTodayBtn.style.borderColor='var(--bg3)';logTodayBtn.textContent='Pick a date';
+  }
   logTodayBtn.onclick=function(){
     _logToday=!_logToday;
     if(_logToday){logDateInp.style.display='none';logTodayBtn.textContent='✓ Today';logTodayBtn.style.background='var(--grl)';logTodayBtn.style.color='var(--gr2)';logTodayBtn.style.borderColor='var(--grm)';}
@@ -4264,7 +4280,7 @@ function openActInfoEdit(actId,from){
   });
   srow.appendChild(cancelBtn);srow.appendChild(saveBtn);sh.appendChild(srow);
   });}// end _transitionSheet + openActInfoEdit
-function openLogDirect(id,from){setupLogScreen(id,from,null);}
+function openLogDirect(id,from,preDate){setupLogScreen(id,from,null,preDate);}
 function openFinish(id,from){setupLogScreen(id,from,active?active.startedAt:null);}
 
 function saveLog(){
