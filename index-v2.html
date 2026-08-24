@@ -3936,8 +3936,8 @@ function openTodayOverview(){
   }
 
   // ── Scheduled ──
-  sh.appendChild(subHdr('Scheduled'));
   if(scheduled.length){
+    sh.appendChild(subHdr('Scheduled'));
     scheduled.forEach(function(it){
       var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
       var row=document.createElement('div');
@@ -3948,11 +3948,6 @@ function openTodayOverview(){
         +'<button data-schedid="'+it.id+'" data-schedkind="'+it.kind+'" aria-label="Remove" style="background:transparent;border:1px solid rgba(184,92,54,.45);color:#B45B5B;border-radius:50%;width:26px;height:26px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>';
       sh.appendChild(row);
     });
-  } else {
-    var empty=document.createElement('div');
-    empty.style.cssText='display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--skl);border:1px solid rgba(122,155,184,.3);border-radius:12px;';
-    empty.innerHTML='<div style="font-size:18px;opacity:.85;">🗓️</div><div style="flex:1;font-size:13px;color:var(--sk2);">Nothing scheduled today.</div>';
-    sh.appendChild(empty);
   }
 
   // ── Logged today ──
@@ -5531,7 +5526,7 @@ function renderTodaySection(){
   } else {
     // No scheduled items — light-blue empty card
     html+='<div class="sched-empty">'
-        +'<div class="sched-empty-text">Nothing scheduled today.<br>Tap above to schedule or log a session.</div>'
+        +'<div class="sched-empty-text">Tap above to schedule or log a session.</div>'
         +'</div>';
   }
   html+='</div>';
