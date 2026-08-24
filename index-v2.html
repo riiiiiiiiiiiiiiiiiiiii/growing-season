@@ -783,7 +783,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <div style="display:flex;align-items:center;padding:0 22px 12px;">
       <div id="garden-tabs" class="my-seg" style="flex:0 0 auto;display:none;"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
-        <div id="garden-count" style="font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;"></div>
+        <div id="garden-count" style="font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;text-align:right;line-height:1.3;"></div>
         <button id="garden-help-btn" class="my-icon-tog" aria-label="Growth stages">?</button>
         <button id="garden-add-btn" class="my-icon-add" aria-label="Plant / log"><span>+</span></button>
       </div>
@@ -5683,7 +5683,7 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
   var out='<ellipse cx="'+cx+'" cy="'+(gy+h*0.02).toFixed(1)+'" rx="'+(h*0.22).toFixed(1)+'" ry="'+(h*0.05).toFixed(1)+'" fill="'+SOIL+'" opacity="0.55"/>';
   if(s===0){
     var sr=h*0.05;
-    out+='<ellipse cx="'+cx+'" cy="'+(gy-sr*0.4).toFixed(1)+'" rx="'+(sr*1.2).toFixed(1)+'" ry="'+sr.toFixed(1)+'" fill="'+petalDark+'" opacity="0.85"/>';
+    out+='<ellipse cx="'+cx+'" cy="'+(gy-sr*0.4).toFixed(1)+'" rx="'+(sr*1.2).toFixed(1)+'" ry="'+sr.toFixed(1)+'" fill="'+petalDark+'"/>';
     out+='<ellipse cx="'+(cx-sr*0.4).toFixed(1)+'" cy="'+(gy-sr*0.75).toFixed(1)+'" rx="'+(sr*0.35).toFixed(1)+'" ry="'+(sr*0.25).toFixed(1)+'" fill="#FFF6EA" opacity="0.55"/>';
     return out;
   }
@@ -5723,8 +5723,8 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
     } else {
       var cbr=h*0.038;
       out+='<circle cx="'+cx+'" cy="'+(fY-cbr*0.6).toFixed(1)+'" r="'+cbr.toFixed(1)+'" fill="'+petalDark+'"/>';
-      out+='<circle cx="'+(cx-cbr*1.4).toFixed(1)+'" cy="'+(fY+cbr*0.5).toFixed(1)+'" r="'+(cbr*0.78).toFixed(1)+'" fill="'+petalDark+'" opacity="0.9"/>';
-      out+='<circle cx="'+(cx+cbr*1.4).toFixed(1)+'" cy="'+(fY+cbr*0.5).toFixed(1)+'" r="'+(cbr*0.78).toFixed(1)+'" fill="'+petalDark+'" opacity="0.9"/>';
+      out+='<circle cx="'+(cx-cbr*1.4).toFixed(1)+'" cy="'+(fY+cbr*0.5).toFixed(1)+'" r="'+(cbr*0.78).toFixed(1)+'" fill="'+petalDark+'"/>';
+      out+='<circle cx="'+(cx+cbr*1.4).toFixed(1)+'" cy="'+(fY+cbr*0.5).toFixed(1)+'" r="'+(cbr*0.78).toFixed(1)+'" fill="'+petalDark+'"/>';
       out+='<circle cx="'+(cx-cbr*0.2).toFixed(1)+'" cy="'+(fY-cbr*0.9).toFixed(1)+'" r="'+(cbr*0.35).toFixed(1)+'" fill="'+petalLite+'" opacity="0.7"/>';
     }
     return out;
@@ -5850,7 +5850,7 @@ function rGarden(){
   var totalHrs=myActs.reduce(function(t,a){return t+getHours(a.id);},0);
   var bloomCount=myActs.filter(function(a){return getStage(getHours(a.id))>=4;}).length;
   var gc=document.getElementById('garden-count');
-  if(gc){var gParts=[];if(bloomCount)gParts.push(bloomCount+' blooming');gParts.push(Math.round(totalHrs)+'h grown');gc.textContent=gParts.join(' · ');}
+  if(gc){var gParts=[];if(bloomCount&&!hasFocusSet())gParts.push(bloomCount+' blooming');gParts.push(Math.round(totalHrs)+'h grown');gc.textContent=gParts.join(' · ');}
 
   if(!visibleActs.length){
     document.getElementById('garden-svg-wrap').innerHTML='';
@@ -5890,7 +5890,7 @@ function rGarden(){
     var s='';
     if(stage===0){
       s+='<ellipse cx="'+cx+'" cy="'+(gy-1)+'" rx="16" ry="5" fill="'+GROUND_BOT+'" opacity="0.55"/>';
-      s+='<path d="M '+(cx-3)+','+gy+' Q '+(cx-5)+','+(gy-11)+' '+(cx-1)+','+(gy-14)+' Q '+(cx+2)+','+(gy-11)+' '+(cx+3)+','+gy+' Z" fill="'+LEAF_A+'" opacity="0.92"/>';
+      s+='<path d="M '+(cx-3)+','+gy+' Q '+(cx-5)+','+(gy-11)+' '+(cx-1)+','+(gy-14)+' Q '+(cx+2)+','+(gy-11)+' '+(cx+3)+','+gy+' Z" fill="'+LEAF_A+'"/>';
       return s;
     }
     var trunkH=[0,36,66,96,120][stage];
@@ -5901,7 +5901,7 @@ function rGarden(){
     var trunkTopY=gy-trunkH;
     var brown='#6B4A2A', brownDark='#4A3220', brownHi='#8B6540';
     // Trunk soft outer
-    s+='<path d="M '+(cx-trunkW*0.85)+','+gy+' Q '+(trunkX-trunkW*0.5)+','+(gy-trunkH*0.5)+' '+(trunkX-trunkW*0.5)+','+trunkTopY+' L '+(trunkX+trunkW*0.5)+','+trunkTopY+' Q '+(trunkX+trunkW*0.5)+','+(gy-trunkH*0.5)+' '+(cx+trunkW*0.85)+','+gy+' Z" fill="'+brown+'" opacity="0.28"/>';
+    s+='<path d="M '+(cx-trunkW*0.85)+','+gy+' Q '+(trunkX-trunkW*0.5)+','+(gy-trunkH*0.5)+' '+(trunkX-trunkW*0.5)+','+trunkTopY+' L '+(trunkX+trunkW*0.5)+','+trunkTopY+' Q '+(trunkX+trunkW*0.5)+','+(gy-trunkH*0.5)+' '+(cx+trunkW*0.85)+','+gy+' Z" fill="'+brown+'"/>';
     // Trunk main
     s+='<path d="M '+(cx-trunkW*0.6)+','+gy+' Q '+(trunkX-trunkW*0.3)+','+(gy-trunkH*0.5)+' '+(trunkX-trunkW*0.35)+','+trunkTopY+' L '+(trunkX+trunkW*0.35)+','+trunkTopY+' Q '+(trunkX+trunkW*0.3)+','+(gy-trunkH*0.5)+' '+(cx+trunkW*0.6)+','+gy+' Z" fill="'+brown+'"/>';
     // Trunk shadow side
@@ -5909,13 +5909,10 @@ function rGarden(){
     // Canopy at top of trunk
     var cx0=trunkX, cy0=trunkTopY-canopyR*0.35;
     var canopyCol='#5F8560', canopyLite='#83AF80', canopyDark='#4C6F4E';
-    // Wash halo
-    s+='<circle cx="'+cx0+'" cy="'+cy0+'" r="'+(canopyR*1.15).toFixed(1)+'" fill="'+canopyCol+'" opacity="0.28"/>';
     // Main blobs
     var offsets=[[0,0,1.0],[-canopyR*0.55,canopyR*0.15,0.78],[canopyR*0.55,canopyR*0.1,0.75],[-canopyR*0.3,-canopyR*0.4,0.7],[canopyR*0.32,-canopyR*0.32,0.68],[0,canopyR*0.35,0.62]];
     offsets.forEach(function(o,i){
-      var opa=[0.92,0.88,0.86,0.84,0.82,0.78][i]||0.85;
-      s+='<circle cx="'+(cx0+o[0]).toFixed(1)+'" cy="'+(cy0+o[1]).toFixed(1)+'" r="'+(canopyR*o[2]).toFixed(1)+'" fill="'+canopyCol+'" opacity="'+opa+'"/>';
+      s+='<circle cx="'+(cx0+o[0]).toFixed(1)+'" cy="'+(cy0+o[1]).toFixed(1)+'" r="'+(canopyR*o[2]).toFixed(1)+'" fill="'+canopyCol+'"/>';
     });
     // Highlight
     s+='<circle cx="'+(cx0-canopyR*0.28).toFixed(1)+'" cy="'+(cy0-canopyR*0.42).toFixed(1)+'" r="'+(canopyR*0.32).toFixed(1)+'" fill="'+canopyLite+'" opacity="0.5"/>';
@@ -5932,7 +5929,7 @@ function rGarden(){
         var fx=cx0+Math.cos(ang)*rad;
         var fy=cy0+Math.sin(ang)*rad;
         var col=fruitCols[f%fruitCols.length];
-        s+='<circle cx="'+fx.toFixed(1)+'" cy="'+fy.toFixed(1)+'" r="3.2" fill="'+col+'" opacity="0.95"/>';
+        s+='<circle cx="'+fx.toFixed(1)+'" cy="'+fy.toFixed(1)+'" r="3.2" fill="'+col+'"/>';
         s+='<circle cx="'+(fx-0.9).toFixed(1)+'" cy="'+(fy-0.9).toFixed(1)+'" r="1" fill="#FFF6EA" opacity="0.6"/>';
       }
     }
