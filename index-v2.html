@@ -6047,9 +6047,10 @@ function rGarden(){
       var _isProj=isProject(a);
       var hrs=getHours(a.id);
       var stage=_isProj?getTreeStage(hrs):getStage(hrs);
+      var dormant=gardenTab==='all'&&hasFocusSet()&&!isFocused(a.id);
       var shortName=a.name.length>12?a.name.slice(0,11)+'.':a.name;
 
-      svg+='<g data-pid="'+a.id+'" data-kind="'+(_isProj?'project':'skill')+'" style="cursor:pointer;">';
+      svg+='<g data-pid="'+a.id+'" data-kind="'+(_isProj?'project':'skill')+'" style="cursor:pointer;"'+(dormant?' opacity="0.42"':'')+'>';
       if(_isProj)svg+=drawTree(cx,pgy,stage,getProjectDoneCount(a),ph);
       else svg+=drawPlantAt(cx,pgy,140,stage,a.cat,ph);
       svg+='<text x="'+cx+'" y="'+(gy+24)+'" text-anchor="middle" font-size="11" font-weight="600" fill="'+PAL.label+'" font-family="ui-serif,Georgia,serif">'+esc(shortName)+'</text>';
