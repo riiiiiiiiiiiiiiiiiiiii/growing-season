@@ -1165,8 +1165,10 @@ var ACTS = [
 
 // ── STATE ─────────────────────────────────────────────
 function genUUID(){if(crypto.randomUUID)return crypto.randomUUID();return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=crypto.getRandomValues(new Uint8Array(1))[0]&15;return(c==='x'?r:(r&0x3|0x8)).toString(16);});}
+// Escape untrusted text for innerHTML interpolation (friend names, activity names, message previews)
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function ld(){try{var s=localStorage.getItem('gs-v3');if(s)return JSON.parse(s);}catch(e){}return{myActs:[],sessions:[],onboarded:false,profile:{},active:null,weeklyFocus:{weekKey:'',actIds:[]},archivedActs:[],collection:{pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]},activityNotes:{},customCats:[],colorPalette:'green',lastWeeklyTs:0};}
-function sv(){_sessCache={_v:++_svVersion};try{localStorage.setItem('gs-v3',JSON.stringify({userId:supaUser?supaUser.id:null,myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,customCats:customCats,colorPalette:colorPalette,calPlanned:calPlanned,calRoutines:calRoutines,lastWeeklyTs:lastWeeklyTs}));}catch(e){}if(supaUser)syncToSupabase();}
+function sv(){_sessCache={_v:++_svVersion};try{localStorage.setItem('gs-v3',JSON.stringify({userId:supaUser?supaUser.id:null,myActs:myActs,sessions:sessions,onboarded:onboarded,profile:profile,active:active,weeklyFocus:weeklyFocus,archivedActs:archivedActs,collection:collection,activityNotes:activityNotes,customCats:customCats,colorPalette:colorPalette,calPlanned:calPlanned,calRoutines:calRoutines,lastWeeklyTs:lastWeeklyTs}));}catch(e){}if(supaUser)_scheduleSync();}
 var _svVersion=0,_sessCache={_v:-1,_n:-1};
 function _sessFor(actId){if(_sessCache._v!==_svVersion||_sessCache._n!==sessions.length){_sessCache={_v:_svVersion,_n:sessions.length};for(var i=0;i<sessions.length;i++){var s=sessions[i];if(!_sessCache[s.actId])_sessCache[s.actId]=[];_sessCache[s.actId].push(s);}}return _sessCache[actId]||[];}
 var st=ld(), myActs=st.myActs, sessions=st.sessions, onboarded=st.onboarded, profile=st.profile, active=st.active;
@@ -1672,7 +1674,7 @@ document.getElementById('btn-import-yes').addEventListener('click',function(){
 
 document.getElementById('btn-term-no').addEventListener('click',function(){document.getElementById('term-ov').classList.remove('on');});
 document.getElementById('btn-term-yes').addEventListener('click',function(){
-  myActs.forEach(function(a){archivedActs.push(Object.assign({},a,{_terminated:true}));});
+  myActs.forEach(function(a){archivedActs.push(Object.assign({},a,{_terminated:true}));_tombstone(a.id);});
   myActs.length=0;active=null;weeklyFocus={actIds:[]};onboarded=false;sv();
   document.getElementById('term-ov').classList.remove('on');
   document.getElementById('main-nav').classList.remove('on');
@@ -1706,7 +1708,8 @@ document.getElementById('btn-add-cat').addEventListener('click',function(){
   sv();if(_renderCats)_renderCats(name);showToast('Category saved',null);
 });
 document.getElementById('btn-lib-save').addEventListener('click',function(){
-  libSelected.forEach(function(id){var a=ACTS.find(function(x){return x.id===id;});if(a){myActs.push(Object.assign({},a,{type:'recreational',level:'beginner'}));pushFeedEvent('plant',a.name,a.emoji,null);}});
+  libSelected.forEach(function(id){var a=ACTS.find(function(x){return x.id===id;});if(a){myActs.push(Object.assign({},a,{type:'recreational',level:'beginner'}));delete _tombstones[id];pushFeedEvent('plant',a.name,a.emoji,null);}});
+  _saveTombstones();
   checkTrophies();sv();closeAdd();rMy();
 });
 document.getElementById('btn-ed-save').addEventListener('click',saveEd);
@@ -2135,8 +2138,8 @@ function rObGrid(){
 
 function togOb(id){
   var i=myActs.findIndex(function(a){return a.id===id;});
-  if(i>-1)myActs.splice(i,1);
-  else{var b=ACTS.find(function(a){return a.id===id;});myActs.push(Object.assign({},b,{type:'recreational',level:'beginner'}));}
+  if(i>-1){myActs.splice(i,1);_tombstone(id);}
+  else{var b=ACTS.find(function(a){return a.id===id;});myActs.push(Object.assign({},b,{type:'recreational',level:'beginner'}));delete _tombstones[id];_saveTombstones();}
   sv();
   var sel=myActs.some(function(a){return a.id===id;});
   var card=document.querySelector('.oc[data-act-id="'+id+'"]');
@@ -3069,13 +3072,13 @@ async function renderFeed(){
       return;
     }
     evs.forEach(function(ev){
-      var name=ev.username?('@'+ev.username):'A neighbour';
-      var em=ev.user_emoji||'🌱';
+      var name=ev.username?('@'+esc(ev.username)):'A neighbour';
+      var em=esc(ev.user_emoji||'🌱');
       var text='';
-      if(ev.type==='session')text='grew '+ev.act_emoji+' '+ev.act_name;
-      else if(ev.type==='plant')text='planted '+ev.act_emoji+' '+ev.act_name+' as a new seed';
-      else if(ev.type==='levelup')text='leveled up in '+ev.act_emoji+' '+ev.act_name+(ev.stage?' → '+ev.stage:'');
-      else text=ev.type;
+      if(ev.type==='session')text='grew '+esc(ev.act_emoji)+' '+esc(ev.act_name);
+      else if(ev.type==='plant')text='planted '+esc(ev.act_emoji)+' '+esc(ev.act_name)+' as a new seed';
+      else if(ev.type==='levelup')text='leveled up in '+esc(ev.act_emoji)+' '+esc(ev.act_name)+(ev.stage?' → '+esc(ev.stage):'');
+      else text=esc(ev.type);
       var card=document.createElement('div');
       card.style.cssText='display:flex;gap:11px;padding:12px 0;border-bottom:.5px solid var(--bg2);align-items:flex-start;';
       card.innerHTML='<div class="fr-em">'+em+'</div>'
@@ -3168,8 +3171,8 @@ async function renderFriendsList(){
       var p=profiles[fid]||{};
       var em=p.emoji||'🌱';var name=p.display_name||p.username||'?';var un=p.username||'';
       var row=document.createElement('div');row.className='fr-row';row.style.cssText='cursor:pointer;animation:fadeIn .2s ease both;animation-delay:'+(_fi*40)+'ms;';
-      row.innerHTML='<div class="fr-em">'+em+'</div>'
-        +'<div class="fr-info"><div class="fr-name">'+name+'</div><div class="fr-un">@'+un+'</div></div>'
+      row.innerHTML='<div class="fr-em">'+esc(em)+'</div>'
+        +'<div class="fr-info"><div class="fr-name">'+esc(name)+'</div><div class="fr-un">@'+esc(un)+'</div></div>'
         +'<div class="fr-acts">'
           +'<button class="fr-ic-btn" data-action="wave" title="Wave">👋</button>'
           +'<button class="fr-ic-btn" data-action="clap" title="Cheer">👏</button>'
@@ -3204,9 +3207,9 @@ async function openFriendProfile(fid,p,fshipId){
 
   // Avatar + name
   var avatar=document.createElement('div');avatar.style.cssText='text-align:center;margin-bottom:14px;';
-  avatar.innerHTML='<div style="font-size:52px;width:72px;height:72px;border-radius:50%;background:var(--bg2);border:var(--br);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">'+em+'</div>'
-    +'<div style="font-family:var(--serif);font-size:19px;font-weight:700;color:var(--tx);">'+name+'</div>'
-    +'<div style="font-size:13px;color:var(--tx3);margin-top:2px;">@'+un+'</div>';
+  avatar.innerHTML='<div style="font-size:52px;width:72px;height:72px;border-radius:50%;background:var(--bg2);border:var(--br);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">'+esc(em)+'</div>'
+    +'<div style="font-family:var(--serif);font-size:19px;font-weight:700;color:var(--tx);">'+esc(name)+'</div>'
+    +'<div style="font-size:13px;color:var(--tx3);margin-top:2px;">@'+esc(un)+'</div>';
   sh.appendChild(avatar);
 
   // Seed count stat — renders immediately with placeholder, fills in after fetch
@@ -3300,8 +3303,8 @@ async function renderRequests(){
         var p=ip[req.requester_id]||{};
         var em2=p.emoji||'🌱';var name=p.display_name||p.username||'?';var un=p.username||'';
         var row=document.createElement('div');row.className='fr-row';
-        row.innerHTML='<div class="fr-em">'+em2+'</div>'
-          +'<div class="fr-info"><div class="fr-name">'+name+'</div><div class="fr-un">@'+un+'</div></div>'
+        row.innerHTML='<div class="fr-em">'+esc(em2)+'</div>'
+          +'<div class="fr-info"><div class="fr-name">'+esc(name)+'</div><div class="fr-un">@'+esc(un)+'</div></div>'
           +'<div class="fr-acts">'
             +'<button style="background:var(--gr);color:#fff;" data-reqid="'+req.id+'" class="fr-action-btn fr-accept-btn">Accept</button>'
             +'<button aria-label="Decline request" style="background:var(--bg2);color:var(--tx2);border:var(--br);" data-reqid="'+req.id+'" class="fr-action-btn fr-decline-btn">✕</button>'
@@ -3332,8 +3335,8 @@ async function renderRequests(){
         var p=op[req.addressee_id]||{};
         var em4=p.emoji||'🌱';var name=p.display_name||p.username||'?';var un=p.username||'';
         var row=document.createElement('div');row.className='fr-row';
-        row.innerHTML='<div class="fr-em">'+em4+'</div>'
-          +'<div class="fr-info"><div class="fr-name">'+name+'</div><div class="fr-un">@'+un+'</div></div>'
+        row.innerHTML='<div class="fr-em">'+esc(em4)+'</div>'
+          +'<div class="fr-info"><div class="fr-name">'+esc(name)+'</div><div class="fr-un">@'+esc(un)+'</div></div>'
           +'<div style="font-size:12px;color:var(--tx3);font-style:italic;">Pending…</div>';
         body.appendChild(row);
       });
@@ -3378,10 +3381,10 @@ async function renderConvList(){
       var timeStr=t.toDateString()===now.toDateString()?t.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):t.toLocaleDateString([],{month:'short',day:'numeric'});
       var row=document.createElement('div');
       row.style.cssText='display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:.5px solid var(--bg3);cursor:pointer;';
-      row.innerHTML='<div class="fr-em">'+em+'</div>'
+      row.innerHTML='<div class="fr-em">'+esc(em)+'</div>'
         +'<div style="flex:1;min-width:0;">'
-          +'<div style="font-size:14px;font-weight:'+(conv.unread?700:500)+';color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+name+'</div>'
-          +'<div style="font-size:12px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(isOut?'You: ':'')+last+'</div>'
+          +'<div style="font-size:14px;font-weight:'+(conv.unread?700:500)+';color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(name)+'</div>'
+          +'<div style="font-size:12px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(isOut?'You: ':'')+esc(last)+'</div>'
         +'</div>'
         +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;">'
           +'<div style="font-size:11px;color:var(--tx3);">'+timeStr+'</div>'
@@ -3487,7 +3490,7 @@ async function searchUser(username){
   try{
     var r=await _supa.from('profiles').select('id,username,display_name,emoji').eq('username',username).maybeSingle();
     if(r.error)throw r.error;
-    if(!r.data){res.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:6px 0;">No user found with @'+username+'</div>';return;}
+    if(!r.data){res.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:6px 0;">No user found with @'+esc(username)+'</div>';return;}
     var p=r.data;
     if(p.id===supaUser.id){res.innerHTML='<div style="color:var(--tx3);font-size:13px;padding:6px 0;">That\'s you!</div>';return;}
     var fr=await _supa.from('friendships').select('id,status,requester_id').or('and(requester_id.eq.'+supaUser.id+',addressee_id.eq.'+p.id+'),and(requester_id.eq.'+p.id+',addressee_id.eq.'+supaUser.id+')').maybeSingle();
@@ -3500,8 +3503,8 @@ async function searchUser(username){
       btnHtml='<button id="fr-add-btn" class="fr-action-btn" style="background:var(--gr);color:#fff;">+ Add</button>';
     }
     res.innerHTML='<div class="fr-row" style="background:var(--bg2);border-radius:12px;padding:10px 12px;margin-top:2px;">'
-      +'<div class="fr-em">'+(p.emoji||'🌱')+'</div>'
-      +'<div class="fr-info"><div class="fr-name">'+(p.display_name||p.username||'?')+'</div><div class="fr-un">@'+(p.username||'')+'</div></div>'
+      +'<div class="fr-em">'+esc(p.emoji||'🌱')+'</div>'
+      +'<div class="fr-info"><div class="fr-name">'+esc(p.display_name||p.username||'?')+'</div><div class="fr-un">@'+esc(p.username||'')+'</div></div>'
       +'<div>'+btnHtml+'</div>'
       +'</div>';
     var addBtn=document.getElementById('fr-add-btn');
@@ -5112,7 +5115,7 @@ function openSessionDetail(s,a){
   var deleteBtn=document.createElement('button');deleteBtn.className='btn btn-s';deleteBtn.style.cssText='width:100%;margin-top:6px;color:var(--co);border-color:var(--co);';deleteBtn.textContent='Remove this session';
   deleteBtn.addEventListener('click',function(){
     var idx=sessions.findIndex(function(x){return x.date===s.date&&x.actId===s.actId;});
-    if(idx>-1){var removed=sessions.splice(idx,1)[0];sv();rHist();closeEd();showToast('Session removed',function(){sessions.splice(idx,0,removed);sv();rHist();});}
+    if(idx>-1){var removed=sessions.splice(idx,1)[0];_tombstone(removed.id);sv();rHist();closeEd();showToast('Session removed',function(){sessions.splice(idx,0,removed);if(removed.id){delete _tombstones[removed.id];_saveTombstones();}sv();rHist();});}
   });
   sh.appendChild(deleteBtn);
   document.getElementById('ed-ov').classList.add('on');
@@ -6371,6 +6374,11 @@ document.addEventListener('pointerdown',function(e){
 // ── SUPABASE SYNC ─────────────────────────────────────
 var _syncInProgress=false;
 var _syncPending=false;
+// Debounce network sync: sv() persists to localStorage instantly, Supabase upload
+// coalesces rapid actions into one request ~2.5s after the last change.
+var _syncT=null;
+function _scheduleSync(){if(_syncT)clearTimeout(_syncT);_syncT=setTimeout(function(){_syncT=null;syncToSupabase();},2500);}
+function _flushSync(){if(_syncT){clearTimeout(_syncT);_syncT=null;syncToSupabase();}}
 var _syncFailStreak=0;
 // Tombstones: items the user removed locally. Filter them out of any remote
 // load so silent RLS failures / racy background refreshes can't resurrect
@@ -6409,7 +6417,9 @@ async function syncToSupabase(){
     var _remoteActIds=await _supa.from('activities').select('id').eq('user_id',uid);
     if(_remoteActIds.data&&_remoteActIds.data.length){
       var _localActSet=new Set(myActs.map(function(a){return a.id;}));
-      var _toDeleteActs=_remoteActIds.data.filter(function(r){return!_localActSet.has(r.id);}).map(function(r){return r.id;});
+      // Only delete rows explicitly tombstoned on this device — "absent locally" alone
+      // could just mean this device's data is stale (e.g. created on another device)
+      var _toDeleteActs=_remoteActIds.data.filter(function(r){return _isTombstoned(r.id)&&!_localActSet.has(r.id);}).map(function(r){return r.id;});
       if(_toDeleteActs.length){
         var _dr=await _supa.from('activities').delete().eq('user_id',uid).in('id',_toDeleteActs);
         if(_dr&&_dr.error){console.warn('Supabase sync: activities delete',_dr.error.message,_dr.error.code);_syncHadError=true;}
@@ -6428,7 +6438,7 @@ async function syncToSupabase(){
     var _remoteIds=await _supa.from('sessions').select('id').eq('user_id',uid);
     if(_remoteIds.data&&_remoteIds.data.length){
       var _localSet=new Set(sessions.map(function(s){return s.id;}));
-      var _toDelete=_remoteIds.data.filter(function(r){return!_localSet.has(r.id);}).map(function(r){return r.id;});
+      var _toDelete=_remoteIds.data.filter(function(r){return _isTombstoned(r.id)&&!_localSet.has(r.id);}).map(function(r){return r.id;});
       if(_toDelete.length)await _supa.from('sessions').delete().eq('user_id',uid).in('id',_toDelete);
     }
     if(_syncHadError){
@@ -6461,7 +6471,8 @@ async function loadFromSupabase(){
       if(d.colorPalette)colorPalette=d.colorPalette;
       if(d.customCats)customCats=d.customCats;
       if(d.profile)profile=d.profile;
-      if(d.archivedActs)archivedActs=d.archivedActs.filter(function(a){return !_isTombstoned(a.id);});
+      // Tombstoned + still in local archive = archived (keep); tombstoned + absent = deleted for good (drop)
+      if(d.archivedActs){var _locArch=new Set(archivedActs.map(function(a){return a.id;}));archivedActs=d.archivedActs.filter(function(a){return !_isTombstoned(a.id)||_locArch.has(a.id);});}
       if(d.active!==undefined)active=d.active;
     }
 
@@ -6479,7 +6490,7 @@ async function loadFromSupabase(){
       var _supaIds=new Set(sessRes.data.map(function(s){return s.id;}));
       var _pending=sessions.filter(function(s){return s.id&&!_supaIds.has(s.id);}); // local sessions not yet in Supabase
       sessions.splice(0,sessions.length);
-      sessRes.data.forEach(function(s){sessions.push(Object.assign({},s.data||{},{id:s.id,actId:s.act_id,date:new Date(s.date).getTime(),hours:s.hours||0,mins:s.mins||0,rating:s.rating,notes:s.note||'',feel:s.feels||[],momentum:s.momentum||''}));});
+      sessRes.data.forEach(function(s){if(_isTombstoned(s.id))return;sessions.push(Object.assign({},s.data||{},{id:s.id,actId:s.act_id,date:new Date(s.date).getTime(),hours:s.hours||0,mins:s.mins||0,rating:s.rating,notes:s.note||'',feel:s.feels||[],momentum:s.momentum||''}));});
       _pending.forEach(function(s){sessions.push(s);}); // keep sessions pending their first sync
     }
 
@@ -6514,6 +6525,7 @@ async function _bgRefresh(){
   if(!cur)return;
   if(['s-auth','s-ob1','s-ob2','s-ob3','s-log'].indexOf(cur.id)>-1)return;
   if(_bgSyncing)return;
+  if(_syncT||_syncInProgress)return; // local changes not yet uploaded — don't overwrite them with remote state
   _bgSyncing=true;
   try{
     await loadFromSupabase();
@@ -6528,7 +6540,9 @@ async function _bgRefresh(){
 }
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='visible'){_bgRefresh();checkCalPlanned();}
+  else if(document.visibilityState==='hidden'){_flushSync();}
 });
+window.addEventListener('pagehide',_flushSync);
 setInterval(function(){if(document.visibilityState==='visible')_bgRefresh();},120000);
 
 async function checkProfile(){
@@ -6688,6 +6702,7 @@ async function doSignOut(){
   _guestMode=false;_authHandled=false;
   var load=document.getElementById('gs-load');
   if(load){load.style.display='flex';load.style.opacity='0';requestAnimationFrame(function(){load.style.opacity='1';});}
+  if(_syncT){clearTimeout(_syncT);_syncT=null;try{await syncToSupabase();}catch(e){}}
   await _supa.auth.signOut();
   supaUser=null;
   try{localStorage.removeItem('gs-v3');}catch(e){}
