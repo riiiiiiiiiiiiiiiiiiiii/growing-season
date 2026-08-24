@@ -5680,11 +5680,11 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
   var stemH=[0,h*0.18,h*0.32,h*0.46,h*0.56][s];
   var tipY=gy-stemH;
   var curveDir=(ph%3)-1;
-  var out='<ellipse cx="'+cx+'" cy="'+(gy+h*0.02).toFixed(1)+'" rx="'+(h*0.22).toFixed(1)+'" ry="'+(h*0.05).toFixed(1)+'" fill="'+SOIL+'" opacity="0.55"/>';
+  var out='<ellipse cx="'+cx+'" cy="'+(gy+h*0.02).toFixed(1)+'" rx="'+(h*0.22).toFixed(1)+'" ry="'+(h*0.05).toFixed(1)+'" fill="'+SOIL+'"/>';
   if(s===0){
     var sr=h*0.05;
     out+='<ellipse cx="'+cx+'" cy="'+(gy-sr*0.4).toFixed(1)+'" rx="'+(sr*1.2).toFixed(1)+'" ry="'+sr.toFixed(1)+'" fill="'+petalDark+'"/>';
-    out+='<ellipse cx="'+(cx-sr*0.4).toFixed(1)+'" cy="'+(gy-sr*0.75).toFixed(1)+'" rx="'+(sr*0.35).toFixed(1)+'" ry="'+(sr*0.25).toFixed(1)+'" fill="#FFF6EA" opacity="0.55"/>';
+    out+='<ellipse cx="'+(cx-sr*0.4).toFixed(1)+'" cy="'+(gy-sr*0.75).toFixed(1)+'" rx="'+(sr*0.35).toFixed(1)+'" ry="'+(sr*0.25).toFixed(1)+'" fill="#FFF6EA"/>';
     return out;
   }
   var swW=Math.max(1.4,h*0.028);
@@ -5715,17 +5715,17 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
     if(budType===0){
       var bw=h*0.06, bh=h*0.09;
       out+='<ellipse cx="'+cx+'" cy="'+(fY+bh*0.2).toFixed(1)+'" rx="'+bw.toFixed(1)+'" ry="'+bh.toFixed(1)+'" fill="'+petalDark+'"/>';
-      out+='<ellipse cx="'+(cx-bw*0.2).toFixed(1)+'" cy="'+(fY-bh*0.1).toFixed(1)+'" rx="'+(bw*0.55).toFixed(1)+'" ry="'+(bh*0.55).toFixed(1)+'" fill="'+petalLite+'" opacity="0.7"/>';
+      out+='<ellipse cx="'+(cx-bw*0.2).toFixed(1)+'" cy="'+(fY-bh*0.1).toFixed(1)+'" rx="'+(bw*0.55).toFixed(1)+'" ry="'+(bh*0.55).toFixed(1)+'" fill="'+petalLite+'"/>';
     } else if(budType===1){
       var pbw=h*0.055, pbh=h*0.11;
       out+='<path d="M '+cx+','+(fY-pbh).toFixed(1)+' Q '+(cx+pbw).toFixed(1)+','+(fY-pbh*0.3).toFixed(1)+' '+cx+','+(fY+pbh*0.3).toFixed(1)+' Q '+(cx-pbw).toFixed(1)+','+(fY-pbh*0.3).toFixed(1)+' '+cx+','+(fY-pbh).toFixed(1)+' Z" fill="'+petalDark+'"/>';
-      out+='<path d="M '+cx+','+(fY-pbh*0.85).toFixed(1)+' Q '+(cx+pbw*0.55).toFixed(1)+','+(fY-pbh*0.35).toFixed(1)+' '+cx+','+(fY+pbh*0.1).toFixed(1)+'" fill="'+petalLite+'" opacity="0.6"/>';
+      out+='<path d="M '+cx+','+(fY-pbh*0.85).toFixed(1)+' Q '+(cx+pbw*0.55).toFixed(1)+','+(fY-pbh*0.35).toFixed(1)+' '+cx+','+(fY+pbh*0.1).toFixed(1)+'" fill="'+petalLite+'"/>';
     } else {
       var cbr=h*0.038;
       out+='<circle cx="'+cx+'" cy="'+(fY-cbr*0.6).toFixed(1)+'" r="'+cbr.toFixed(1)+'" fill="'+petalDark+'"/>';
       out+='<circle cx="'+(cx-cbr*1.4).toFixed(1)+'" cy="'+(fY+cbr*0.5).toFixed(1)+'" r="'+(cbr*0.78).toFixed(1)+'" fill="'+petalDark+'"/>';
       out+='<circle cx="'+(cx+cbr*1.4).toFixed(1)+'" cy="'+(fY+cbr*0.5).toFixed(1)+'" r="'+(cbr*0.78).toFixed(1)+'" fill="'+petalDark+'"/>';
-      out+='<circle cx="'+(cx-cbr*0.2).toFixed(1)+'" cy="'+(fY-cbr*0.9).toFixed(1)+'" r="'+(cbr*0.35).toFixed(1)+'" fill="'+petalLite+'" opacity="0.7"/>';
+      out+='<circle cx="'+(cx-cbr*0.2).toFixed(1)+'" cy="'+(fY-cbr*0.9).toFixed(1)+'" r="'+(cbr*0.35).toFixed(1)+'" fill="'+petalLite+'"/>';
     }
     return out;
   }
@@ -5736,7 +5736,7 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
       var ang=(i/petals)*360, rad=(ang-90)*Math.PI/180;
       var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
       out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl.toFixed(1)+'" ry="'+pw.toFixed(1)+'" fill="'+petalDark+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.7).toFixed(1)+'" ry="'+(pw*0.7).toFixed(1)+'" fill="'+petalLite+'" opacity="0.6" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.7).toFixed(1)+'" ry="'+(pw*0.7).toFixed(1)+'" fill="'+petalLite+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
     }
     out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.055).toFixed(1)+'" fill="#F4C97A"/>';
     out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.025).toFixed(1)+'" fill="#8B5A22"/>';
@@ -5746,7 +5746,7 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
       var ang=(i/petals)*360, rad=(ang-90)*Math.PI/180;
       var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
       out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl.toFixed(1)+'" ry="'+pw.toFixed(1)+'" fill="'+petalDark+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.65).toFixed(1)+'" ry="'+(pw*0.55).toFixed(1)+'" fill="'+petalLite+'" opacity="0.6" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.65).toFixed(1)+'" ry="'+(pw*0.55).toFixed(1)+'" fill="'+petalLite+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
     }
     out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.04).toFixed(1)+'" fill="#F4C97A"/>';
   } else if(species===2){
@@ -5755,10 +5755,10 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
       var ang=(i/petals)*360+18, rad=(ang-90)*Math.PI/180;
       var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
       out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl.toFixed(1)+'" ry="'+pw.toFixed(1)+'" fill="'+petalDark+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.55).toFixed(1)+'" ry="'+(pw*0.6).toFixed(1)+'" fill="'+petalLite+'" opacity="0.55" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
+      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.55).toFixed(1)+'" ry="'+(pw*0.6).toFixed(1)+'" fill="'+petalLite+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
     }
     out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.045).toFixed(1)+'" fill="#4A3020"/>';
-    out+='<circle cx="'+(cx-h*0.012).toFixed(1)+'" cy="'+(fY-h*0.012).toFixed(1)+'" r="'+(h*0.018).toFixed(1)+'" fill="#7B5A3A" opacity="0.7"/>';
+    out+='<circle cx="'+(cx-h*0.012).toFixed(1)+'" cy="'+(fY-h*0.012).toFixed(1)+'" r="'+(h*0.018).toFixed(1)+'" fill="#7B5A3A"/>';
   } else {
     var petals=5, pr=h*0.085;
     for(var i=0;i<petals;i++){
@@ -5770,7 +5770,7 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
       var p2x=px+Math.cos(sideAR)*pw, p2y=py+Math.sin(sideAR)*pw;
       var p3x=px+Math.cos(sideBR)*pw, p3y=py+Math.sin(sideBR)*pw;
       out+='<path d="M '+px.toFixed(1)+','+py.toFixed(1)+' L '+p2x.toFixed(1)+','+p2y.toFixed(1)+' L '+p1x.toFixed(1)+','+p1y.toFixed(1)+' L '+p3x.toFixed(1)+','+p3y.toFixed(1)+' Z" fill="'+petalDark+'"/>';
-      out+='<path d="M '+px.toFixed(1)+','+py.toFixed(1)+' L '+((p2x+p1x)/2).toFixed(1)+','+((p2y+p1y)/2).toFixed(1)+' L '+p1x.toFixed(1)+','+p1y.toFixed(1)+' Z" fill="'+petalLite+'" opacity="0.5"/>';
+      out+='<path d="M '+px.toFixed(1)+','+py.toFixed(1)+' L '+((p2x+p1x)/2).toFixed(1)+','+((p2y+p1y)/2).toFixed(1)+' L '+p1x.toFixed(1)+','+p1y.toFixed(1)+' Z" fill="'+petalLite+'"/>';
     }
     out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.055).toFixed(1)+'" fill="'+petalLite+'"/>';
     out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.028).toFixed(1)+'" fill="'+petalDark+'"/>';
@@ -5889,7 +5889,7 @@ function rGarden(){
   function drawTree(cx,gy,stage,fruitCount,ph){
     var s='';
     if(stage===0){
-      s+='<ellipse cx="'+cx+'" cy="'+(gy-1)+'" rx="16" ry="5" fill="'+GROUND_BOT+'" opacity="0.55"/>';
+      s+='<ellipse cx="'+cx+'" cy="'+(gy-1)+'" rx="16" ry="5" fill="'+GROUND_BOT+'"/>';
       s+='<path d="M '+(cx-3)+','+gy+' Q '+(cx-5)+','+(gy-11)+' '+(cx-1)+','+(gy-14)+' Q '+(cx+2)+','+(gy-11)+' '+(cx+3)+','+gy+' Z" fill="'+LEAF_A+'"/>';
       return s;
     }
@@ -5905,7 +5905,7 @@ function rGarden(){
     // Trunk main
     s+='<path d="M '+(cx-trunkW*0.6)+','+gy+' Q '+(trunkX-trunkW*0.3)+','+(gy-trunkH*0.5)+' '+(trunkX-trunkW*0.35)+','+trunkTopY+' L '+(trunkX+trunkW*0.35)+','+trunkTopY+' Q '+(trunkX+trunkW*0.3)+','+(gy-trunkH*0.5)+' '+(cx+trunkW*0.6)+','+gy+' Z" fill="'+brown+'"/>';
     // Trunk shadow side
-    s+='<path d="M '+(cx-trunkW*0.6)+','+gy+' Q '+(trunkX-trunkW*0.3)+','+(gy-trunkH*0.5)+' '+(trunkX-trunkW*0.35)+','+trunkTopY+' L '+(trunkX-trunkW*0.05)+','+trunkTopY+' Q '+(trunkX-trunkW*0.05)+','+(gy-trunkH*0.5)+' '+(cx-trunkW*0.2)+','+gy+' Z" fill="'+brownDark+'" opacity="0.6"/>';
+    s+='<path d="M '+(cx-trunkW*0.6)+','+gy+' Q '+(trunkX-trunkW*0.3)+','+(gy-trunkH*0.5)+' '+(trunkX-trunkW*0.35)+','+trunkTopY+' L '+(trunkX-trunkW*0.05)+','+trunkTopY+' Q '+(trunkX-trunkW*0.05)+','+(gy-trunkH*0.5)+' '+(cx-trunkW*0.2)+','+gy+' Z" fill="'+brownDark+'"/>';
     // Canopy at top of trunk
     var cx0=trunkX, cy0=trunkTopY-canopyR*0.35;
     var canopyCol='#5F8560', canopyLite='#83AF80', canopyDark='#4C6F4E';
@@ -5915,9 +5915,9 @@ function rGarden(){
       s+='<circle cx="'+(cx0+o[0]).toFixed(1)+'" cy="'+(cy0+o[1]).toFixed(1)+'" r="'+(canopyR*o[2]).toFixed(1)+'" fill="'+canopyCol+'"/>';
     });
     // Highlight
-    s+='<circle cx="'+(cx0-canopyR*0.28).toFixed(1)+'" cy="'+(cy0-canopyR*0.42).toFixed(1)+'" r="'+(canopyR*0.32).toFixed(1)+'" fill="'+canopyLite+'" opacity="0.5"/>';
+    s+='<circle cx="'+(cx0-canopyR*0.28).toFixed(1)+'" cy="'+(cy0-canopyR*0.42).toFixed(1)+'" r="'+(canopyR*0.32).toFixed(1)+'" fill="'+canopyLite+'"/>';
     // Shadow underside
-    s+='<circle cx="'+(cx0+canopyR*0.15).toFixed(1)+'" cy="'+(cy0+canopyR*0.42).toFixed(1)+'" r="'+(canopyR*0.28).toFixed(1)+'" fill="'+canopyDark+'" opacity="0.35"/>';
+    s+='<circle cx="'+(cx0+canopyR*0.15).toFixed(1)+'" cy="'+(cy0+canopyR*0.42).toFixed(1)+'" r="'+(canopyR*0.28).toFixed(1)+'" fill="'+canopyDark+'"/>';
     // Fruits — only after fruiting stage
     if(stage>=4&&fruitCount>0){
       var fruitCols=['#D5544A','#C97050','#F5C842','#8E4066','#D4855A','#B44A28'];
@@ -5930,7 +5930,7 @@ function rGarden(){
         var fy=cy0+Math.sin(ang)*rad;
         var col=fruitCols[f%fruitCols.length];
         s+='<circle cx="'+fx.toFixed(1)+'" cy="'+fy.toFixed(1)+'" r="3.2" fill="'+col+'"/>';
-        s+='<circle cx="'+(fx-0.9).toFixed(1)+'" cy="'+(fy-0.9).toFixed(1)+'" r="1" fill="#FFF6EA" opacity="0.6"/>';
+        s+='<circle cx="'+(fx-0.9).toFixed(1)+'" cy="'+(fy-0.9).toFixed(1)+'" r="1" fill="#FFF6EA"/>';
       }
     }
     return s;
