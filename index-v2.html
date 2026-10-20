@@ -1236,6 +1236,29 @@ function getWeekKey(){var d=new Date(),y=d.getFullYear(),s=new Date(y,0,1),w=Mat
 function isFocused(id){return weeklyFocus.actIds.length===0||weeklyFocus.actIds.indexOf(id)>-1;}
 function hasFocusSet(){return weeklyFocus.actIds.length>0;}
 
+// Scheduled plans/routines keep their own copy of a seed's name+emoji, so an
+// archived or deleted seed would otherwise keep showing up on the calendar and
+// in Today (routines recur forever). Read through these filters so orphans
+// vanish from the UI, and purge them for real when a seed leaves the packet.
+function _seedAlive(actId){return !!actId&&myActs.some(function(a){return a.id===actId;});}
+function _livePlanned(){return (calPlanned||[]).filter(function(ev){return _seedAlive(ev.actId);});}
+function _liveRoutines(){return (calRoutines||[]).filter(function(r){return _seedAlive(r.actId);});}
+// Drops every schedule/focus reference to a seed; returns what it removed so
+// the archive undo can put it back.
+function _purgeSeedRefs(id){
+  var removed={planned:(calPlanned||[]).filter(function(ev){return ev.actId===id;}),routines:(calRoutines||[]).filter(function(r){return r.actId===id;}),focused:weeklyFocus.actIds.indexOf(id)>-1};
+  calPlanned=(calPlanned||[]).filter(function(ev){return ev.actId!==id;});
+  calRoutines=(calRoutines||[]).filter(function(r){return r.actId!==id;});
+  if(removed.focused)weeklyFocus.actIds.splice(weeklyFocus.actIds.indexOf(id),1);
+  return removed;
+}
+function _restoreSeedRefs(id,removed){
+  if(!removed)return;
+  removed.planned.forEach(function(ev){calPlanned.push(ev);});
+  removed.routines.forEach(function(r){calRoutines.push(r);});
+  if(removed.focused&&weeklyFocus.actIds.indexOf(id)===-1)weeklyFocus.actIds.push(id);
+}
+
 // ── COLLECTIONS ───────────────────────────────────────
 var STAGE_ITEMS=[
   {type:'drop', emoji:'💧', label:'Water Drop', desc:'Earned when a plant sprouts — log your first 30 min on any activity.'},
@@ -1637,8 +1660,8 @@ document.getElementById('btn-import-yes').addEventListener('click',function(){
 
 document.getElementById('btn-term-no').addEventListener('click',function(){document.getElementById('term-ov').classList.remove('on');});
 document.getElementById('btn-term-yes').addEventListener('click',function(){
-  myActs.forEach(function(a){archivedActs.push(Object.assign({},a,{_terminated:true}));_tombstone(a.id);});
-  myActs.length=0;active=null;weeklyFocus={actIds:[]};onboarded=false;sv();
+  myActs.forEach(function(a){archivedActs.push(Object.assign({},a,{_terminated:true}));_tombstone(a.id,'arch');});
+  myActs.length=0;active=null;weeklyFocus={actIds:[]};calPlanned=[];calRoutines=[];onboarded=false;sv();
   document.getElementById('term-ov').classList.remove('on');
   document.getElementById('main-nav').classList.remove('on');
   document.getElementById('fab').style.display='none';
@@ -1671,7 +1694,7 @@ document.getElementById('btn-add-cat').addEventListener('click',function(){
   sv();if(_renderCats)_renderCats(name);showToast('Category saved',null);
 });
 document.getElementById('btn-lib-save').addEventListener('click',function(){
-  libSelected.forEach(function(id){var a=ACTS.find(function(x){return x.id===id;});if(a){myActs.push(Object.assign({},a,{type:'recreational',level:'beginner'}));delete _tombstones[id];pushFeedEvent('plant',a.name,a.emoji,null);}});
+  libSelected.forEach(function(id){var a=ACTS.find(function(x){return x.id===id;});if(a){myActs.push(Object.assign({},a,{type:'recreational',level:'beginner'}));_untombstone(id);pushFeedEvent('plant',a.name,a.emoji,null);}});
   _saveTombstones();
   checkTrophies();sv();closeAdd();rMy();
 });
@@ -2105,7 +2128,7 @@ function rObGrid(){
 function togOb(id){
   var i=myActs.findIndex(function(a){return a.id===id;});
   if(i>-1){myActs.splice(i,1);_tombstone(id);}
-  else{var b=ACTS.find(function(a){return a.id===id;});myActs.push(Object.assign({},b,{type:'recreational',level:'beginner'}));delete _tombstones[id];_saveTombstones();}
+  else{var b=ACTS.find(function(a){return a.id===id;});myActs.push(Object.assign({},b,{type:'recreational',level:'beginner'}));_untombstone(id);}
   sv();
   var sel=myActs.some(function(a){return a.id===id;});
   var card=document.querySelector('.oc[data-act-id="'+id+'"]');
@@ -2389,9 +2412,9 @@ function renderCalWeek(){
         var isToday=d.getTime()===today.getTime();
         var dayMid=d.getTime(),dayEnd=dayMid+86400000;
         var daySess=sessions.filter(function(s){return s.date>=dayMid&&s.date<dayEnd;});
-        var dayPlanned=calPlanned.filter(function(ev){return _calMidnight(new Date(ev.date)).getTime()===dayMid;});
+        var dayPlanned=_livePlanned().filter(function(ev){return _calMidnight(new Date(ev.date)).getTime()===dayMid;});
         var dayOfWeek=d.getDay()===0?6:d.getDay()-1;
-        var dayRoutines=calRoutines.filter(function(r){return r.days.indexOf(dayOfWeek)>-1;});
+        var dayRoutines=_liveRoutines().filter(function(r){return r.days.indexOf(dayOfWeek)>-1;});
         var cell=document.createElement('div');
         cell.style.cssText='border-radius:10px;padding:6px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:transform .12s;min-height:54px;'+(isToday?'background:var(--co);':'background:var(--bg2);');
         cell.addEventListener('touchstart',function(){cell.style.transform='scale(.94)';},{passive:true});
@@ -2410,11 +2433,12 @@ function renderCalWeek(){
   });
 
   // Routines section
-  if(calRoutines.length){
+  var _liveRt=_liveRoutines();
+  if(_liveRt.length){
     var rtSec=document.createElement('div');rtSec.style.cssText='margin-top:18px;';
     var rtHdr=document.createElement('div');rtHdr.style.cssText='font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;';rtHdr.textContent='Routines';rtSec.appendChild(rtHdr);
     var DNAMES_SHORT=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    calRoutines.forEach(function(r){
+    _liveRt.forEach(function(r){
       var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--bg2);border-radius:10px;margin-bottom:6px;cursor:pointer;';
       var dayStr=r.days.length===7?'Every day':r.days.length===5&&r.days.every(function(d){return d<5;})?'Weekdays':r.days.map(function(d){return DNAMES_SHORT[d];}).join(', ');
       row.innerHTML='<span style="font-size:18px;">'+r.actEmoji+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+r.actName+'</div><div style="font-size:11px;color:var(--tx3);">'+dayStr+' · '+_fmtHour(r.hour)+'</div></div><button aria-label="Remove routine" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--tx3);padding:2px 4px;flex-shrink:0;">✕</button>';
@@ -2599,8 +2623,8 @@ function renderCalDay(dateObj){
 
   // Scheduled section
   var dayOfWeek=_calDayDate.getDay()===0?6:_calDayDate.getDay()-1;
-  var dayPlanned=calPlanned.filter(function(ev){return _calMidnight(new Date(ev.date)).getTime()===dayMid;}).sort(function(a,b){var ah=a.hour==null?9999:a.hour;var bh=b.hour==null?9999:b.hour;return ah-bh;});
-  var dayRoutines=calRoutines.filter(function(r){return r.days.indexOf(dayOfWeek)>-1;});
+  var dayPlanned=_livePlanned().filter(function(ev){return _calMidnight(new Date(ev.date)).getTime()===dayMid;}).sort(function(a,b){var ah=a.hour==null?9999:a.hour;var bh=b.hour==null?9999:b.hour;return ah-bh;});
+  var dayRoutines=_liveRoutines().filter(function(r){return r.days.indexOf(dayOfWeek)>-1;});
 
   if(dayPlanned.length||dayRoutines.length||true){
     var schHdr=document.createElement('div');schHdr.style.cssText='font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;margin-top:16px;margin-bottom:8px;';schHdr.textContent='Scheduled';
@@ -2752,7 +2776,7 @@ function updateHomeNudge(){
 
 function checkCalPlanned(){
   var now=Date.now();
-  var due=calPlanned.filter(function(ev){if(ev.notified)return false;if(ev.hour==null)return false;var evEnd=ev.date+ev.hour*3600000+(ev.duration||1)*3600000;return evEnd<=now;});
+  var due=_livePlanned().filter(function(ev){if(ev.notified)return false;if(ev.hour==null)return false;var evEnd=ev.date+ev.hour*3600000+(ev.duration||1)*3600000;return evEnd<=now;});
   if(!due.length)return;
   var ev=due[0];ev.notified=true;sv();
   var ov=document.getElementById('ed-ov'),sh=document.getElementById('ed-sh');sh.innerHTML='';
@@ -4750,8 +4774,8 @@ function _rMyBody(el,allActs){
       if(!isAct){(function(act){
         addSwipe(wrap,card,function(){
           var idx=myActs.findIndex(function(x){return x.id===act.id;});
-          if(idx>-1){myActs.splice(idx,1);archivedActs.push(act);_tombstone(act.id);sv();rMy();
-            showToast(act.emoji+' '+act.name+' archived',function(){archivedActs.splice(archivedActs.indexOf(act),1);myActs.splice(idx,0,act);delete _tombstones[act.id];_saveTombstones();sv();rMy();});}
+          if(idx>-1){myActs.splice(idx,1);archivedActs.push(act);_tombstone(act.id,'arch');var _rmRefs=_purgeSeedRefs(act.id);sv();rMy();rHome();
+            showToast(act.emoji+' '+act.name+' archived',function(){archivedActs.splice(archivedActs.indexOf(act),1);myActs.splice(idx,0,act);_untombstone(act.id);_restoreSeedRefs(act.id,_rmRefs);sv();rMy();rHome();});}
         },function(){
           var fi=weeklyFocus.actIds.indexOf(act.id);
           if(fi>-1){weeklyFocus.actIds.splice(fi,1);showToast(act.emoji+' '+act.name+' removed from focus',null);}
@@ -4829,12 +4853,12 @@ function showArchivedList(){
       (function(act){
         restoreBtn.addEventListener('click',function(){
           var ai=archivedActs.indexOf(act);
-          if(ai>-1){archivedActs.splice(ai,1);myActs.push(act);delete _tombstones[act.id];_saveTombstones();sv();showToast(act.emoji+' '+act.name+' restored',null);showArchivedList();rMy();}
+          if(ai>-1){archivedActs.splice(ai,1);myActs.push(_normalizeSeed(act));_untombstone(act.id);sv();showToast(act.emoji+' '+act.name+' restored',null);showArchivedList();rMy();rHome();}
         });
         deleteBtn.addEventListener('click',function(){
           if(!confirm('Delete "'+act.name+'" for good? This cannot be undone.'))return;
           var ai=archivedActs.indexOf(act);
-          if(ai>-1){archivedActs.splice(ai,1);_tombstone(act.id);sv();showToast(act.emoji+' '+act.name+' deleted',null);showArchivedList();rMy();}
+          if(ai>-1){archivedActs.splice(ai,1);_tombstone(act.id,'del');_purgeSeedRefs(act.id);delete activityNotes[act.id];sv();_flushSync();showToast(act.emoji+' '+act.name+' deleted',null);showArchivedList();rMy();rHome();}
         });
       })(a);
       btns.appendChild(restoreBtn);btns.appendChild(deleteBtn);
@@ -5013,7 +5037,7 @@ function openSessionDetail(s,a){
   var deleteBtn=document.createElement('button');deleteBtn.className='btn btn-s';deleteBtn.style.cssText='width:100%;margin-top:6px;color:var(--co);border-color:var(--co);';deleteBtn.textContent='Remove this session';
   deleteBtn.addEventListener('click',function(){
     var idx=sessions.findIndex(function(x){return x.date===s.date&&x.actId===s.actId;});
-    if(idx>-1){var removed=sessions.splice(idx,1)[0];_tombstone(removed.id);sv();rHist();closeEd();showToast('Session removed',function(){sessions.splice(idx,0,removed);if(removed.id){delete _tombstones[removed.id];_saveTombstones();}sv();rHist();});}
+    if(idx>-1){var removed=sessions.splice(idx,1)[0];_tombstone(removed.id);sv();rHist();closeEd();showToast('Session removed',function(){sessions.splice(idx,0,removed);if(removed.id)_untombstone(removed.id);sv();rHist();});}
   });
   sh.appendChild(deleteBtn);
   document.getElementById('ed-ov').classList.add('on');
@@ -5500,12 +5524,12 @@ function _getScheduledForDate(target){
   var startMs=mid.getTime(),endMs=startMs+86400000;
   var dow=(mid.getDay()===0)?6:mid.getDay()-1; // Mon=0..Sun=6
   var items=[];
-  (calPlanned||[]).forEach(function(ev){
+  _livePlanned().forEach(function(ev){
     if(ev.date>=startMs&&ev.date<endMs){
       items.push({kind:'planned',id:ev.id,actId:ev.actId,emoji:ev.actEmoji,name:ev.actName,hour:ev.hour,duration:ev.duration});
     }
   });
-  (calRoutines||[]).forEach(function(r){
+  _liveRoutines().forEach(function(r){
     if(r.days&&r.days.indexOf(dow)>-1){
       items.push({kind:'routine',id:r.id,actId:r.actId,emoji:r.actEmoji,name:r.actName,hour:r.hour,duration:r.duration});
     }
@@ -6189,13 +6213,53 @@ var _syncT=null;
 function _scheduleSync(){if(_syncT)clearTimeout(_syncT);_syncT=setTimeout(function(){_syncT=null;syncToSupabase();},2500);}
 function _flushSync(){if(_syncT){clearTimeout(_syncT);_syncT=null;syncToSupabase();}}
 var _syncFailStreak=0;
-// Tombstones: items the user removed locally. Filter them out of any remote
-// load so silent RLS failures / racy background refreshes can't resurrect
-// deleted projects/skills. Purged after 30 days.
-var _tombstones=(function(){try{var t=JSON.parse(localStorage.getItem('gs-tombstones')||'{}');var cutoff=Date.now()-30*86400000;Object.keys(t).forEach(function(k){if(t[k]<cutoff)delete t[k];});return t;}catch(e){return {};}})();
+// Tombstones: items the user removed. Filter them out of any remote load so
+// silent RLS failures / racy background refreshes can't resurrect deleted
+// projects/skills. Mirrored into user_state, so they outlive a cleared
+// localStorage and reach the user's other devices.
+//   {t:<ms>, k:'del'|'arch'|'live'}
+//   del  — gone for good: never restore it anywhere
+//   arch — only out of the packet; it still lives on in archivedActs
+//   live — a revival, recorded so it out-votes an older tombstone on merge
+// Newest timestamp per id wins, which makes merging order-independent.
+var TOMB_TTL=365*86400000, TOMB_MAX=1000;
+function _tombNorm(v,id){
+  // Legacy entries were a bare timestamp with no kind. Still in the local
+  // archive = it was archived; otherwise it was a delete.
+  if(typeof v==='number')return {t:v,k:archivedActs.some(function(a){return a.id===id;})?'arch':'del'};
+  if(v&&typeof v==='object'&&v.t)return {t:v.t,k:v.k||'del'};
+  return null;
+}
+function _tombPrune(t){
+  var cutoff=Date.now()-TOMB_TTL;
+  Object.keys(t).forEach(function(k){if(!t[k]||t[k].t<cutoff)delete t[k];});
+  var keys=Object.keys(t);
+  if(keys.length>TOMB_MAX)keys.sort(function(a,b){return t[b].t-t[a].t;}).slice(TOMB_MAX).forEach(function(k){delete t[k];});
+  return t;
+}
+var _tombstones=(function(){
+  try{
+    var raw=JSON.parse(localStorage.getItem('gs-tombstones')||'{}'),out={};
+    Object.keys(raw).forEach(function(k){var e=_tombNorm(raw[k],k);if(e)out[k]=e;});
+    return _tombPrune(out);
+  }catch(e){return {};}
+})();
 function _saveTombstones(){try{localStorage.setItem('gs-tombstones',JSON.stringify(_tombstones));}catch(e){}}
-function _tombstone(id){if(!id)return;_tombstones[id]=Date.now();_saveTombstones();}
-function _isTombstoned(id){return !!_tombstones[id];}
+function _tombstone(id,kind){if(!id)return;_tombstones[id]={t:Date.now(),k:kind||'del'};_saveTombstones();}
+function _untombstone(id){if(!id)return;_tombstones[id]={t:Date.now(),k:'live'};_saveTombstones();}
+function _isTombstoned(id){var e=_tombstones[id];return !!e&&e.k!=='live';} // not in the packet
+function _isDeleted(id){var e=_tombstones[id];return !!e&&e.k==='del';}     // gone for good
+function _mergeTombstones(remote){
+  if(!remote||typeof remote!=='object')return;
+  Object.keys(remote).forEach(function(k){
+    var e=_tombNorm(remote[k],k);
+    if(!e)return;
+    var cur=_tombstones[k];
+    if(!cur||e.t>cur.t)_tombstones[k]=e;
+  });
+  _tombPrune(_tombstones);
+  _saveTombstones();
+}
 async function syncToSupabase(){
   if(!supaUser)return;
   if(_syncInProgress){_syncPending=true;return;}
@@ -6210,7 +6274,7 @@ async function syncToSupabase(){
     var _r;
     _r=await _supa.from('user_state').upsert({
       user_id:uid,
-      data:{onboarded:onboarded,weeklyFocus:weeklyFocus,collection:collection,activityNotes:activityNotes,colorPalette:colorPalette,customCats:customCats,profile:profile,archivedActs:archivedActs,active:active},
+      data:{onboarded:onboarded,weeklyFocus:weeklyFocus,collection:collection,activityNotes:activityNotes,colorPalette:colorPalette,customCats:customCats,profile:profile,archivedActs:archivedActs,active:active,calPlanned:calPlanned,calRoutines:calRoutines,tombstones:_tombstones},
       updated_at:new Date().toISOString()
     },{onConflict:'user_id'});
     if(_r&&_r.error){console.warn('Supabase sync: user_state',_r.error.message,_r.error.code);_syncHadError=true;}
@@ -6273,6 +6337,7 @@ async function loadFromSupabase(){
     if(stateRes&&stateRes.data&&stateRes.data.data){
       gotData=true;
       var d=stateRes.data.data;
+      _mergeTombstones(d.tombstones); // before anything is filtered through them
       if(d.onboarded!==undefined)onboarded=d.onboarded;
       if(d.weeklyFocus)weeklyFocus=d.weeklyFocus;
       if(d.collection)collection=d.collection;
@@ -6280,8 +6345,11 @@ async function loadFromSupabase(){
       if(d.colorPalette)colorPalette=d.colorPalette;
       if(d.customCats)customCats=d.customCats;
       if(d.profile)profile=d.profile;
-      // Tombstoned + still in local archive = archived (keep); tombstoned + absent = deleted for good (drop)
-      if(d.archivedActs){var _locArch=new Set(archivedActs.map(function(a){return a.id;}));archivedActs=d.archivedActs.filter(function(a){return !_isTombstoned(a.id)||_locArch.has(a.id);});}
+      // Only a hard delete drops an archived seed — an 'arch' tombstone is what
+      // put it in this list, and another device may not have seen it yet.
+      if(d.archivedActs)archivedActs=d.archivedActs.filter(function(a){return !_isDeleted(a.id);}).map(_normalizeSeed);
+      if(d.calPlanned)calPlanned=d.calPlanned.filter(function(ev){return !_isDeleted(ev.actId);});
+      if(d.calRoutines)calRoutines=d.calRoutines.filter(function(r){return !_isDeleted(r.actId);});
       if(d.active!==undefined)active=d.active;
     }
 
@@ -6311,11 +6379,15 @@ async function loadFromSupabase(){
       var locOwned=!loc.userId||loc.userId===uid; // treat old entries without userId as owned
       if(locOwned&&(loc.onboarded||(loc.myActs&&loc.myActs.length))){
         if(loc.onboarded!==undefined)onboarded=loc.onboarded;
-        if(loc.myActs&&loc.myActs.length){onboarded=true;myActs.splice(0);loc.myActs.forEach(function(a){myActs.push(_normalizeSeed(a));});}
-        if(loc.sessions&&loc.sessions.length){sessions.splice(0);loc.sessions.forEach(function(s){sessions.push(s);});}
+        var _locActs=(loc.myActs||[]).filter(function(a){return !_isTombstoned(a.id);});
+        if(_locActs.length){onboarded=true;myActs.splice(0);_locActs.forEach(function(a){myActs.push(_normalizeSeed(a));});}
+        if(loc.sessions&&loc.sessions.length){sessions.splice(0);loc.sessions.forEach(function(s){if(!_isDeleted(s.id))sessions.push(s);});}
         if(loc.profile)profile=loc.profile;
         if(loc.weeklyFocus)weeklyFocus=loc.weeklyFocus;
-        if(loc.archivedActs&&loc.archivedActs.length){archivedActs.splice(0);loc.archivedActs.forEach(function(a){archivedActs.push(_normalizeSeed(a));});}
+        var _locArch=(loc.archivedActs||[]).filter(function(a){return !_isDeleted(a.id);});
+        if(_locArch.length){archivedActs.splice(0);_locArch.forEach(function(a){archivedActs.push(_normalizeSeed(a));});}
+        if(loc.calPlanned)calPlanned=loc.calPlanned.filter(function(ev){return !_isDeleted(ev.actId);});
+        if(loc.calRoutines)calRoutines=loc.calRoutines.filter(function(r){return !_isDeleted(r.actId);});
         if(loc.activityNotes)activityNotes=loc.activityNotes;
         if(loc.collection)collection=loc.collection;
         if(loc.customCats)customCats=loc.customCats;
@@ -6389,11 +6461,15 @@ async function checkProfile(){
     // Supabase unavailable (timeout, paused project, network) — boot from localStorage
     var _loc=ld();
     if(_loc.onboarded||(_loc.myActs&&_loc.myActs.length)){
-      if(_loc.myActs&&_loc.myActs.length){onboarded=true;myActs.splice(0);_loc.myActs.forEach(function(a){myActs.push(_normalizeSeed(a));});}
-      if(_loc.sessions&&_loc.sessions.length){sessions.splice(0);_loc.sessions.forEach(function(s){sessions.push(s);});}
+      var _lActs=(_loc.myActs||[]).filter(function(a){return !_isTombstoned(a.id);});
+      if(_lActs.length){onboarded=true;myActs.splice(0);_lActs.forEach(function(a){myActs.push(_normalizeSeed(a));});}
+      if(_loc.sessions&&_loc.sessions.length){sessions.splice(0);_loc.sessions.forEach(function(s){if(!_isDeleted(s.id))sessions.push(s);});}
       if(_loc.profile)profile=_loc.profile;
       if(_loc.weeklyFocus)weeklyFocus=_loc.weeklyFocus;
-      if(_loc.archivedActs&&_loc.archivedActs.length){archivedActs.splice(0);_loc.archivedActs.forEach(function(a){archivedActs.push(a);});}
+      var _lArch=(_loc.archivedActs||[]).filter(function(a){return !_isDeleted(a.id);});
+      if(_lArch.length){archivedActs.splice(0);_lArch.forEach(function(a){archivedActs.push(_normalizeSeed(a));});}
+      if(_loc.calPlanned)calPlanned=_loc.calPlanned.filter(function(ev){return !_isDeleted(ev.actId);});
+      if(_loc.calRoutines)calRoutines=_loc.calRoutines.filter(function(r){return !_isDeleted(r.actId);});
       if(_loc.activityNotes)activityNotes=_loc.activityNotes;
       if(_loc.colorPalette)colorPalette=_loc.colorPalette;
       bootApp();
@@ -6515,9 +6591,13 @@ async function doSignOut(){
   await _supa.auth.signOut();
   supaUser=null;
   try{localStorage.removeItem('gs-v3');}catch(e){}
+  // Tombstones live in the signed-in account's user_state now, so drop the
+  // local copy rather than carrying one account's ledger into the next.
+  try{localStorage.removeItem('gs-tombstones');}catch(e){}
+  _tombstones={};
   myActs.splice(0);sessions.splice(0);archivedActs.splice(0);
   onboarded=false;profile={};active=null;
-  weeklyFocus={weekKey:'',actIds:[]};activityNotes={};
+  weeklyFocus={weekKey:'',actIds:[]};activityNotes={};calPlanned=[];calRoutines=[];
   collection={pending:[],counts:{drop:0,leaf:0,petal:0,bee:0},trophies:[],awarded:[]};
   setTimeout(function(){_hideLoading();_showAuth();},350);
 }
