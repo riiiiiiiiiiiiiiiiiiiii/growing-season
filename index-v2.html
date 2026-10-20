@@ -65,9 +65,11 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .sess-lock-emoji{font-size:56px;line-height:1;margin-bottom:12px;}
 .sess-lock-name{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--tx);margin-bottom:34px;letter-spacing:-.01em;line-height:1.15;max-width:320px;}
 .sess-lock-timer{font-size:56px;font-weight:700;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.02em;color:var(--gr2);margin-bottom:44px;line-height:1;font-variant-numeric:tabular-nums;}
+.sess-lock-timer.paused{color:var(--tx3);}
 .sess-lock-btn{width:100%;max-width:300px;padding:16px 22px;border-radius:16px;border:none;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;touch-action:manipulation;transition:transform .12s;}
 .sess-lock-btn:active{transform:scale(.97);}
 .sess-lock-btn-p{background:var(--co);color:#FFFBF3;box-shadow:0 4px 14px rgba(201,112,80,.32);}
+.sess-lock-btn-s{background:var(--bg2);color:var(--tx);border:0.5px solid var(--bg3);}
 .sess-lock-btn-d{background:transparent;color:var(--tx3);border:none;font-size:13px;font-weight:500;padding:10px;margin-top:4px;}
 .today-sec{margin:0 16px 23px;}
 .today-hdr{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:10px;}
@@ -575,7 +577,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
           <div class="pal-dot" data-pal="green" data-season="Spring" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#60C090,#3D9E6A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
           <div class="pal-dot" data-pal="blue" data-season="Summer" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#40B0D0,#1898C0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
           <div class="pal-dot" data-pal="pink" data-season="Winter" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6898D0,#4A80C0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="yellow" data-season="Autumn" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#D89050,#B87030);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="yellow" data-season="Autumn" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#DCC578,#C46325);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
         </div>
       </div>
     </div>
@@ -1207,7 +1209,7 @@ var PALETTES={
   green:{gr:'#6B8E6A',gr2:'#4A6A4A',grl:'#E4EAD9',grm:'#8AA783',bg:'#FAF5EB',bg2:'#F1E9D9',bg3:'#E1D5BE',tx:'#2A2418',tx2:'#5D4E3A',tx3:'#96866D',brC:'#DDD0B4',br2C:'#C2B296',sh:'0 1px 2px rgba(90,70,40,.04),0 2px 6px rgba(90,70,40,.06)',pcGrad:'linear-gradient(150deg,#6B8E6A,#4A6A4A,#2E4530)',mfGrad:'linear-gradient(90deg,#6B8E6A,#8AA783)',fabSh:'0 4px 16px rgba(201,112,80,.32)',btnSh:'0 3px 10px rgba(107,142,106,.28)',fabActSh:'0 1px 6px rgba(201,112,80,.22)',pcSh:'0 6px 20px rgba(74,106,74,.22)',homeBg:'linear-gradient(135deg,#F5CCDA,#8FBC6C)',homeTc:'#22301C',co:'#C97050',co2:'#A15535',col:'#F5E3D4',decoGround:'#8A7256',decoGrass1:'#6C8562',decoGrass2:'#4F6A48',decoStem:'#4C6641'},
   blue:{gr:'#1898C0',gr2:'#0E7098',grl:'#C8E8F8',grm:'#40B0D0',bg:'#F2F8FC',bg2:'#E0EEF8',bg3:'#C0D8EC',tx:'#081820',tx2:'#1A4860',tx3:'#487898',brC:'#A8C8E0',br2C:'#88A8D0',sh:'0 1px 4px rgba(8,24,32,.08)',pcGrad:'linear-gradient(150deg,#1898C0,#0E7098,#073858)',mfGrad:'linear-gradient(90deg,#1898C0,#40B0D0)',fabSh:'0 4px 16px rgba(24,152,192,.4)',btnSh:'0 3px 10px rgba(24,152,192,.28)',fabActSh:'0 1px 6px rgba(24,152,192,.25)',pcSh:'0 4px 18px rgba(24,152,192,.3)',homeBg:'linear-gradient(135deg,#70C8E0,#1898C0)',homeTc:'#041820',co:'#DB7873',co2:'#B45B5B',col:'#FDD5D0',decoGround:'#107898',decoGrass1:'#085878',decoGrass2:'#107890',decoStem:'#087080'},
   pink:{gr:'#4A80C0',gr2:'#3468A8',grl:'#D8E8F8',grm:'#6898D0',bg:'#F0F6FC',bg2:'#E4EEF8',bg3:'#C8D8EE',tx:'#0A1030',tx2:'#1E3870',tx3:'#5070A8',brC:'#B8CCE4',br2C:'#98B4D8',sh:'0 1px 4px rgba(10,16,48,.07)',pcGrad:'linear-gradient(150deg,#4A80C0,#3468A8,#182858)',mfGrad:'linear-gradient(90deg,#4A80C0,#6898D0)',fabSh:'0 4px 16px rgba(74,128,192,.4)',btnSh:'0 3px 10px rgba(74,128,192,.28)',fabActSh:'0 1px 6px rgba(74,128,192,.25)',pcSh:'0 4px 18px rgba(74,128,192,.3)',homeBg:'linear-gradient(135deg,#78B0D8,#4878B0)',homeTc:'#0A1828',co:'#2A8BC0',co2:'#1A6090',col:'#D8EEF8',decoGround:'#2A4870',decoGrass1:'#1A3860',decoGrass2:'#2A4878',decoStem:'#1A3868'},
-  yellow:{gr:'#B87030',gr2:'#8C5010',grl:'#FCECD8',grm:'#D89050',bg:'#FFFAF4',bg2:'#FEF0DC',bg3:'#F8D8A0',tx:'#1C0800',tx2:'#5C2000',tx3:'#A06020',brC:'#E8C090',br2C:'#D4A870',sh:'0 1px 4px rgba(40,12,0,.10)',pcGrad:'linear-gradient(150deg,#B87030,#8C5010,#501800)',mfGrad:'linear-gradient(90deg,#B87030,#D89050)',fabSh:'0 4px 16px rgba(184,112,48,.4)',btnSh:'0 3px 10px rgba(184,112,48,.28)',fabActSh:'0 1px 6px rgba(184,112,48,.25)',pcSh:'0 4px 18px rgba(184,112,48,.3)',homeBg:'linear-gradient(135deg,#E09050,#B87030)',homeTc:'#1C0800',co:'#C04028',co2:'#922818',col:'#FCE2D8',decoGround:'#A05020',decoGrass1:'#803A18',decoGrass2:'#A04A20',decoStem:'#803818'}
+  yellow:{gr:'#C46325',gr2:'#A14E1C',grl:'#DCEAE2',grm:'#93B5A2',bg:'#FDF8EE',bg2:'#F7EDD9',bg3:'#E6D199',tx:'#2B1409',tx2:'#6B3221',tx3:'#926449',brC:'#EBDBB2',br2C:'#D8BF88',sh:'0 1px 4px rgba(62,26,10,.10)',pcGrad:'linear-gradient(150deg,#D9762E,#B04824,#7C2A18)',mfGrad:'linear-gradient(90deg,#C46325,#DCC578)',fabSh:'0 4px 16px rgba(196,99,37,.4)',btnSh:'0 3px 10px rgba(196,99,37,.28)',fabActSh:'0 1px 6px rgba(196,99,37,.25)',pcSh:'0 4px 18px rgba(158,54,32,.3)',homeBg:'linear-gradient(135deg,#DCC578,#C46325)',homeTc:'#2B1409',co:'#9E3620',co2:'#7A2715',col:'#F6DDD2',decoGround:'#B99A5E',decoGrass1:'#7FA48E',decoGrass2:'#5E8A74',decoStem:'#6E9682'}
 };
 function applyPalette(){
   var pal=PALETTES[colorPalette]||PALETTES.green;
@@ -1683,7 +1685,7 @@ document.getElementById('obs').addEventListener('input',function(){obSearch=this
 var SEAS = {
   spring:{m:[2,3,4],label:'🌱 Spring',title:'New things are sprouting.',sub:'A good time to start something new.',bg:'linear-gradient(135deg,#F5CCDA,#8FBC6C)',tc:'#22301C',deco:'🌸'},
   summer:{m:[5,6,7],label:'☀️ Summer',title:'Everything is in full bloom.',sub:'A perfect time to grow what matters most to you.',bg:'linear-gradient(135deg,#DDC8A0,#B08E5C)',tc:'#2D2010',deco:'🌻'},
-  autumn:{m:[8,9,10],label:'🍂 Autumn',title:'Time to harvest what you have grown.',sub:'Reflect, finish, appreciate what you have built.',bg:'linear-gradient(135deg,#E4B098,#A85535)',tc:'#2D1005',deco:'🍁'},
+  autumn:{m:[8,9,10],label:'🍂 Autumn',title:'Time to harvest what you have grown.',sub:'Reflect, finish, appreciate what you have built.',bg:'linear-gradient(135deg,#DCC578,#C46325)',tc:'#2B1409',deco:'🍁'},
   winter:{m:[11,0,1],label:'❄️ Winter',title:'A quieter time to go deep.',sub:'Perfect for calm, focused, indoor activities.',bg:'linear-gradient(135deg,#C4CCD4,#7E8894)',tc:'#141C24',deco:'🕯️'},
 };
 function getSeason(){var m=new Date().getMonth();return Object.values(SEAS).find(function(s){return s.m.includes(m);})||SEAS.winter;}
@@ -1722,7 +1724,7 @@ function homeDecoSVG(sk){
     s+='<circle cx="'+f.x+'" cy="'+f.y+'" r="'+(f.r*0.22).toFixed(1)+'" fill="'+centerFill2+'" opacity="0.9"/>';
   });
   if(sk==='summer'){s+='<circle cx="350" cy="23" r="20" fill="#FFE090" opacity="0.2"/><circle cx="350" cy="23" r="7" fill="#FFC030" opacity="0.45"/>';}
-  if(sk==='autumn'){[{x:50,y:30,c:'#D4703A'},{x:160,y:20,c:'#C85820'},{x:280,y:28,c:'#B84A18'}].forEach(function(l,i){s+='<ellipse cx="'+l.x+'" cy="'+l.y+'" rx="7" ry="4.5" fill="'+l.c+'" opacity="0.65" transform="rotate('+(i*30-20)+','+l.x+','+l.y+')"/>';});}
+  if(sk==='autumn'){[{x:50,y:30,c:'#D9762E'},{x:160,y:20,c:'#C25A28'},{x:280,y:28,c:'#9E3620'}].forEach(function(l,i){s+='<ellipse cx="'+l.x+'" cy="'+l.y+'" rx="7" ry="4.5" fill="'+l.c+'" opacity="0.65" transform="rotate('+(i*30-20)+','+l.x+','+l.y+')"/>';});}
   if(sk==='winter'){for(var w2=0;w2<8;w2++){s+='<circle cx="'+(w2*52+18)+'" cy="'+(15+(w2%3)*12)+'" r="2.5" fill="white" opacity="0.6"/>';}}
   s+='</svg>';
   return s;
@@ -1835,14 +1837,17 @@ function rHome(){
     var lockAct=myActs.find(function(a){return a.id===active.actId;})||{emoji:'🌱',name:'Unknown'};
     var lockEl=document.getElementById('s-lock');
     if(lockEl){
+      var lockPaused=!!active.pausedAt;
       lockEl.style.display='flex';
       lockEl.innerHTML=
-        '<div class="sess-lock-lbl">🌱 Currently growing</div>'
+        '<div class="sess-lock-lbl">'+(lockPaused?'⏸ Session paused':'🌱 Currently growing')+'</div>'
        +'<div class="sess-lock-emoji">'+lockAct.emoji+'</div>'
        +'<div class="sess-lock-name">'+lockAct.name+'</div>'
-       +'<div class="sess-lock-timer" id="sess-lock-timer">00:00</div>'
+       +'<div class="sess-lock-timer'+(lockPaused?' paused':'')+'" id="sess-lock-timer">00:00</div>'
+       +'<button class="sess-lock-btn sess-lock-btn-s" id="sess-lock-pause">'+(lockPaused?'Resume session':'Pause session')+'</button>'
        +'<button class="sess-lock-btn sess-lock-btn-p" id="sess-lock-log">Log this session</button>'
        +'<button class="sess-lock-btn sess-lock-btn-d" id="sess-lock-discard">Discard session</button>';
+      document.getElementById('sess-lock-pause').addEventListener('click',toggleSessPause);
       document.getElementById('sess-lock-log').addEventListener('click',resumeSess);
       document.getElementById('sess-lock-discard').addEventListener('click',function(){
         if(!confirm('Discard this session? Your time won\'t be saved.'))return;
@@ -1850,7 +1855,7 @@ function rHome(){
       });
     }
     if(_activeTimerInt)clearInterval(_activeTimerInt);
-    (function(t0){function tick(){var el=document.getElementById('sess-lock-timer');if(el)el.textContent=_fmtElapsed(Date.now()-t0);else{clearInterval(_activeTimerInt);_activeTimerInt=null;}}tick();_activeTimerInt=setInterval(tick,1000);})(active.startedAt);
+    (function(){function tick(){var el=document.getElementById('sess-lock-timer');if(el)el.textContent=_fmtElapsed(_activeElapsed());else{clearInterval(_activeTimerInt);_activeTimerInt=null;}}tick();if(!active.pausedAt)_activeTimerInt=setInterval(tick,1000);})();
     return;
   }
   document.body.classList.remove('session-lock');
@@ -1883,7 +1888,7 @@ function rHome(){
     ipW.innerHTML='<div class="ip" id="ip-card"><div class="ip-dot"></div><div class="ip-lbl">🌱 Currently growing</div><div class="ip-name">'+act.emoji+' '+act.name+'</div><div class="ip-time" id="ip-elapsed" style="font-size:22px;font-weight:700;font-family:var(--mono,monospace);letter-spacing:.04em;color:#fff;margin-bottom:8px;"></div><div class="ip-btn">Finish &amp; log</div></div>';
     document.getElementById('ip-card').addEventListener('click',resumeSess);
     if(_activeTimerInt)clearInterval(_activeTimerInt);
-    (function(t0){function tick(){var el=document.getElementById('ip-elapsed');if(el)el.textContent=_fmtElapsed(Date.now()-t0);else{clearInterval(_activeTimerInt);_activeTimerInt=null;}}tick();_activeTimerInt=setInterval(tick,1000);})(active.startedAt);
+    (function(){function tick(){var el=document.getElementById('ip-elapsed');if(el)el.textContent=_fmtElapsed(_activeElapsed());else{clearInterval(_activeTimerInt);_activeTimerInt=null;}}tick();if(!active.pausedAt)_activeTimerInt=setInterval(tick,1000);})();
     pcW.innerHTML='';
   } else {
     if(_activeTimerInt){clearInterval(_activeTimerInt);_activeTimerInt=null;}
@@ -3657,8 +3662,16 @@ function showBrowse(){
   animateIn(body);
 }
 
-function startFrom(id){closePicker();active={actId:id,startedAt:Date.now()};sv();nav('home');}
+function startFrom(id){closePicker();active={actId:id,startedAt:Date.now(),pausedAt:null,pauseMs:0};sv();nav('home');}
 function resumeSess(){if(!active)return;openFinish(active.actId,'home');}
+// Running time of the active session: wall clock minus whatever was spent paused
+function _activeElapsed(){if(!active)return 0;return Math.max(0,(active.pausedAt||Date.now())-active.startedAt-(active.pauseMs||0));}
+function toggleSessPause(){
+  if(!active)return;
+  if(active.pausedAt){active.pauseMs=(active.pauseMs||0)+(Date.now()-active.pausedAt);active.pausedAt=null;}
+  else active.pausedAt=Date.now();
+  sv();rHome();
+}
 
 var _lastSuggestedId=null;
 function suggestAct(){
@@ -3811,12 +3824,16 @@ function setupLogScreen(id,from,startedAt,preDate){
 
   if(startedAt){
     document.getElementById('lbadge-wrap').innerHTML='<div class="lbadge">🌱 Started at '+new Date(startedAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div>';
-    var elMin=Math.max(0,Math.round((Date.now()-startedAt)/60000));
+    var elapsedMin=function(){
+      if(active&&active.startedAt===startedAt)return Math.round(_activeElapsed()/60000);
+      return Math.max(0,Math.round((Date.now()-startedAt)/60000));
+    };
+    var elMin=elapsedMin();
     document.getElementById('lh').value=Math.floor(elMin/60);
     document.getElementById('lm').value=elMin%60;
     var auBtn=document.getElementById('au-btn');
     auBtn.textContent='Use actual time ('+elMin+'min)';
-    auBtn.onclick=function(){var e=Math.max(0,Math.round((Date.now()-startedAt)/60000));document.getElementById('lh').value=Math.floor(e/60);document.getElementById('lm').value=e%60;};
+    auBtn.onclick=function(){var e=elapsedMin();document.getElementById('lh').value=Math.floor(e/60);document.getElementById('lm').value=e%60;};
   } else {
     document.getElementById('lbadge-wrap').innerHTML='';
     document.getElementById('lh').value=0;
