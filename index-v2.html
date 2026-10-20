@@ -574,10 +574,10 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div id="mp-palette" class="mp-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
         <span style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;">Theme</span>
         <div style="display:flex;gap:9px;">
-          <div class="pal-dot" data-pal="green" data-season="Spring" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#60C090,#3D9E6A);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="blue" data-season="Summer" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#40B0D0,#1898C0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="pink" data-season="Winter" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6898D0,#4A80C0);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
-          <div class="pal-dot" data-pal="yellow" data-season="Autumn" style="width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#DCC578,#C46325);cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="green" data-season="Spring" style="width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="blue" data-season="Summer" style="width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="pink" data-season="Winter" style="width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
+          <div class="pal-dot" data-pal="yellow" data-season="Autumn" style="width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;transition:box-shadow .15s;"></div>
         </div>
       </div>
     </div>
@@ -1227,6 +1227,10 @@ function applyPalette(){
   if(g('col'))r.setProperty('--col',g('col'));else r.removeProperty('--col');
   document.querySelectorAll('.pal-dot').forEach(function(d){
     d.style.boxShadow=d.dataset.pal===colorPalette?'0 0 0 2.5px #fff,0 0 0 4.5px '+g('gr'):'none';
+    // Split swatch: theme colour one half, accent the other, both read straight
+    // off that season's palette so a dot can never drift out of date.
+    var dp=PALETTES[d.dataset.pal];
+    if(dp)d.style.background='linear-gradient(135deg,'+dp.gr+' 0 50%,'+(dp.co||dp.grm)+' 50% 100%)';
   });
   CAT_COLORS.Outdoor=g('grl')+','+g('gr2');
   if(document.getElementById('s-home').classList.contains('on'))rHome();
