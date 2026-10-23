@@ -6611,7 +6611,7 @@ document.getElementById('btn-send-reset').addEventListener('click',async functio
   var email=document.getElementById('reset-email').value.trim();
   if(!email){return;}
   this.disabled=true;this.textContent='Sending…';
-  var res=await _supa.auth.resetPasswordForEmail(email,{redirectTo:location.href});
+  var res=await _supa.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
   var msg=document.getElementById('reset-msg');
   msg.style.display='block';
   if(res.error){msg.textContent=res.error.message;msg.style.color='var(--co)';}
@@ -6656,11 +6656,40 @@ document.getElementById('btn-guest').addEventListener('click',function(){
 var _authHandled=false;
 var _guestMode=false;
 function _hideLoading(){var el=document.getElementById('gs-load');if(!el||el.style.display==='none')return;el.style.opacity='0';setTimeout(function(){el.style.display='none';el.style.opacity='1';},280);}
+// Supabase reports a bad/expired link in the URL (query or hash) rather than
+// through the client, so an expired reset would otherwise show a blank sign-in
+// screen with no reason given.
+function _urlAuthError(){
+  try{
+    var out=null;
+    [location.search,location.hash].forEach(function(part){
+      if(!part||part.length<2)return;
+      var q=new URLSearchParams(part.slice(1));
+      var d=q.get('error_description')||q.get('error');
+      if(d&&!out)out=d.replace(/\+/g,' ');
+    });
+    return out;
+  }catch(e){return null;}
+}
+function _clearUrlAuthError(){
+  try{history.replaceState(null,'',location.pathname);}catch(e){}
+}
 function _showAuth(){
   _hideLoading();
   document.body.classList.add('auth-mode');
   show('s-auth');
   showAuthPanel('auth-form');
+  var _ue=_urlAuthError();
+  if(_ue){
+    // "code verifier" = the link was opened in a different browser than the one
+    // that asked for it (a mail app's in-app browser is the usual culprit).
+    showAuthErr(/code.?verifier/i.test(_ue)
+      ? 'Open the reset link in the same browser you requested it from, then try again.'
+      : /expired|invalid/i.test(_ue)
+      ? 'That reset link has expired or was already used. Request a new one below.'
+      : _ue, false);
+    _clearUrlAuthError();
+  }
   document.getElementById('main-nav').classList.remove('on');
   document.getElementById('menu-btn').style.display='none';
   // Quick connection test — only show banner on true network failure (not non-2xx)
