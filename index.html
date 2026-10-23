@@ -2426,14 +2426,14 @@ function renderCalWeek(){
         var dayOfWeek=d.getDay()===0?6:d.getDay()-1;
         var dayRoutines=_liveRoutines().filter(function(r){return r.days.indexOf(dayOfWeek)>-1;});
         var cell=document.createElement('div');
-        // justify-content centres the number + dots as a group; the dots keep a
-        // reserved min-height, so the number sits at the same spot in every cell
-        // whether or not that day has any marks.
-        cell.style.cssText='border-radius:10px;padding:6px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:transform .12s;min-height:54px;'+(isToday?'background:var(--co);':'background:var(--bg2);');
+        // The date is the only child in flow, so it centres on the cell itself.
+        // The dots are taken out of flow and pinned near the bottom — inside the
+        // flex group they shifted the number up by half their height.
+        cell.style.cssText='position:relative;border-radius:10px;padding:6px 3px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s;min-height:54px;'+(isToday?'background:var(--co);':'background:var(--bg2);');
         cell.addEventListener('touchstart',function(){cell.style.transform='scale(.94)';},{passive:true});
         cell.addEventListener('touchend',function(){cell.style.transform='';},{passive:true});
         var num=document.createElement('div');num.style.cssText='font-size:13px;font-weight:'+(isToday?'700':'500')+';color:'+(isToday?'#fff':'var(--tx)')+';line-height:1;';num.textContent=d.getDate();cell.appendChild(num);
-        var dotsWrap=document.createElement('div');dotsWrap.style.cssText='display:flex;flex-wrap:wrap;justify-content:center;gap:2px;min-height:8px;';
+        var dotsWrap=document.createElement('div');dotsWrap.style.cssText='position:absolute;left:0;right:0;bottom:5px;display:flex;flex-wrap:wrap;justify-content:center;gap:2px;pointer-events:none;';
         var cats=[...new Set(daySess.map(function(s){var a=myActs.find(function(x){return x.id===s.actId;})||{};return a.cat||'';}))].slice(0,3);
         cats.forEach(function(cat){var dot=document.createElement('div');dot.style.cssText='width:5px;height:5px;border-radius:50%;background:'+(_CAT_DOT[cat]||'var(--gr)')+';flex-shrink:0;'+(isToday?'opacity:.85;':'');dotsWrap.appendChild(dot);});
         if(dayPlanned.length||dayRoutines.length){var pd=document.createElement('div');pd.style.cssText='width:5px;height:5px;border-radius:50%;border:1.5px solid '+(isToday?'rgba(255,255,255,.7)':'var(--co)')+';flex-shrink:0;';dotsWrap.appendChild(pd);}
