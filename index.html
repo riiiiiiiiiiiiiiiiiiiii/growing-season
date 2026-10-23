@@ -2688,30 +2688,34 @@ function _calScheduleForm(dayDate){
   // Activity picker with search (multi-select)
   var aLbl=document.createElement('div');aLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';aLbl.textContent='Activities';sh.appendChild(aLbl);
   var _selActs=[];
+  // Search and the focus filter share one row — the filter is a compact
+  // square toggle so the search field keeps nearly all the width.
+  var aSearchRow=document.createElement('div');
+  aSearchRow.style.cssText='display:flex;align-items:stretch;gap:6px;margin-bottom:8px;';
   var aSearch=document.createElement('input');
   aSearch.type='search';aSearch.placeholder='Search seeds…';aSearch.className='sinp';
-  aSearch.style.cssText='width:100%;padding:9px 12px;border-radius:10px;border:1px solid var(--bg3);background:var(--card);font-size:14px;margin-bottom:8px;outline:none;-webkit-appearance:none;';
-  sh.appendChild(aSearch);
-  // Focus filter — only worth showing when a focus set actually exists,
-  // otherwise it would filter to everything and read as broken.
+  aSearch.style.cssText='flex:1;min-width:0;padding:9px 12px;border-radius:10px;border:1px solid var(--bg3);background:var(--card);font-size:14px;outline:none;-webkit-appearance:none;';
+  aSearchRow.appendChild(aSearch);
+  // Only worth showing when a focus set exists — otherwise it would filter to
+  // everything and read as broken.
   var _aFocusOnly=false;
-  var aFiltRow=null,aFocBtn=null;
+  var aFocBtn=null;
   if(hasFocusSet()){
-    aFiltRow=document.createElement('div');
-    aFiltRow.style.cssText='display:flex;gap:6px;margin-bottom:8px;';
     aFocBtn=document.createElement('button');
     aFocBtn.type='button';
-    aFocBtn.textContent='🎯 In focus';
+    aFocBtn.textContent='🎯';
+    aFocBtn.title='Show only seeds in focus';
+    aFocBtn.setAttribute('aria-label','Show only seeds in focus');
     aFocBtn.setAttribute('aria-pressed','false');
     function _paintFocBtn(){
-      aFocBtn.style.cssText='border:1.5px solid '+(_aFocusOnly?'var(--gr)':'var(--bg3)')+';background:'+(_aFocusOnly?'var(--gr)':'var(--bg2)')+';color:'+(_aFocusOnly?'#FFFBF3':'var(--tx2)')+';border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s,color .12s;';
+      aFocBtn.style.cssText='flex-shrink:0;width:38px;border:1px solid '+(_aFocusOnly?'var(--gr)':'var(--bg3)')+';background:'+(_aFocusOnly?'var(--grl)':'var(--card)')+';border-radius:10px;font-size:15px;line-height:1;cursor:pointer;font-family:inherit;padding:0;display:flex;align-items:center;justify-content:center;opacity:'+(_aFocusOnly?'1':'.55')+';transition:background .12s,border-color .12s,opacity .12s;';
       aFocBtn.setAttribute('aria-pressed',_aFocusOnly?'true':'false');
     }
     _paintFocBtn();
     aFocBtn.addEventListener('click',function(){_aFocusOnly=!_aFocusOnly;_paintFocBtn();_renderActPicker();});
-    aFiltRow.appendChild(aFocBtn);
-    sh.appendChild(aFiltRow);
+    aSearchRow.appendChild(aFocBtn);
   }
+  sh.appendChild(aSearchRow);
   var aList=document.createElement('div');
   aList.style.cssText='display:flex;flex-direction:column;gap:4px;margin-bottom:22px;max-height:140px;overflow-y:auto;';
   sh.appendChild(aList);
