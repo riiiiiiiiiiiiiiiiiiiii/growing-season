@@ -2496,7 +2496,7 @@ function renderCalWeekDetails(mon,wkSess){
   var closeBtn=document.createElement('button');closeBtn.className='iconbtn';closeBtn.setAttribute('aria-label','Close');closeBtn.textContent='×';
   closeBtn.addEventListener('click',function(){document.getElementById('cal-ov').classList.remove('on');});
   topRow.appendChild(lbl);topRow.appendChild(closeBtn);
-  var dateRow=document.createElement('div');dateRow.style.cssText='display:flex;align-items:center;gap:8px;';
+  var dateRow=document.createElement('div');dateRow.style.cssText='display:flex;align-items:center;gap:16px;';
   var backBtn=document.createElement('button');
   backBtn.className='iconbtn back';backBtn.setAttribute('aria-label','Back');backBtn.textContent='‹';
   backBtn.addEventListener('click',function(){sh.style.cssText='max-width:480px;padding:28px 20px 28px;';_transitionSheet(sh,renderCalWeek);});
@@ -2582,7 +2582,10 @@ function renderCalDay(dateObj){
 
   // Header
   var navHdr=document.createElement('div');
-  navHdr.style.cssText='display:flex;align-items:center;gap:8px;padding:16px 16px 18px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
+  // gap must clear the back button's hover background: .iconbtn bleeds 10px
+  // past its layout box (padding 6/10 with matching negative margin), so an
+  // 8px gap let the hover tint run under the date.
+  navHdr.style.cssText='display:flex;align-items:center;gap:16px;padding:16px 16px 18px;border-bottom:.5px solid var(--bg2);flex-shrink:0;background:var(--bg);';
   var backBtn=document.createElement('button');
   backBtn.className='iconbtn back';backBtn.setAttribute('aria-label','Back');
   backBtn.textContent='‹';
