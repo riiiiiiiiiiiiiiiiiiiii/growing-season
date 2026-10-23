@@ -2682,7 +2682,6 @@ function renderCalDay(dateObj){
 
 function _calScheduleForm(dayDate){
   var ov=document.getElementById('ed-ov'),sh=document.getElementById('ed-sh');sh.innerHTML='';
-  var DNAMES_SHORT=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var t=document.createElement('div');t.style.cssText='font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:16px;';t.textContent='Schedule';sh.appendChild(t);
 
   // Activity picker with search (multi-select)
@@ -2796,9 +2795,18 @@ function _calScheduleForm(dayDate){
     quickRow.appendChild(b);
   });
   dayPicker.appendChild(quickRow);
-  var dpRow=document.createElement('div');dpRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;';
-  DNAMES_SHORT.forEach(function(dn,i){
-    var db=document.createElement('div');db.className='fb';db.textContent=dn;db.style.minWidth='40px';db.style.textAlign='center';
+  // Seven equal columns with initials, so the week always reads as one row —
+  // "Sun" used to wrap onto a line of its own. Full names stay in the title
+  // and aria-label, which also tells the two S's apart.
+  var DINITIALS=['M','T','W','Th','F','S','S'];
+  var DNAMES_FULL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  var dpRow=document.createElement('div');dpRow.style.cssText='display:grid;grid-template-columns:repeat(7,1fr);gap:5px;';
+  DINITIALS.forEach(function(dn,i){
+    var db=document.createElement('div');db.className='fb';db.textContent=dn;
+    db.style.cssText='min-width:0;text-align:center;padding-left:0;padding-right:0;';
+    db.title=DNAMES_FULL[i];
+    db.setAttribute('role','button');
+    db.setAttribute('aria-label',DNAMES_FULL[i]);
     db.addEventListener('click',function(){
       var idx=_selDays.indexOf(i);
       if(idx>-1)_selDays.splice(idx,1); else _selDays.push(i);
