@@ -2754,11 +2754,42 @@ function _calScheduleForm(dayDate){
   var routBtn=document.createElement('div');routBtn.className='fb';routBtn.textContent='Routine (weekly)';
   var dayPicker=document.createElement('div');dayPicker.style.cssText='display:none;margin-bottom:16px;';
   var dpLbl=document.createElement('div');dpLbl.style.cssText='font-size:11px;font-weight:600;color:var(--tx3);margin-bottom:8px;';dpLbl.textContent='Which days?';dayPicker.appendChild(dpLbl);
-  var dpRow=document.createElement('div');dpRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;';
+  // Quick sets, named the way the calendar already labels a saved routine
+  // ("Every day", "Weekdays"), so picking and reading back use one vocabulary.
   var _selDays=[];
+  var _dayBtns=[];
+  function _paintDays(){
+    _dayBtns.forEach(function(b,i){b.classList.toggle('on',_selDays.indexOf(i)>-1);});
+    _quickBtns.forEach(function(q){
+      var same=q.days.length===_selDays.length&&q.days.every(function(d){return _selDays.indexOf(d)>-1;});
+      q.el.classList.toggle('on',same);
+    });
+  }
+  function _setDays(days){
+    // Tapping the set you're already on clears it, so it works as a toggle.
+    var same=days.length===_selDays.length&&days.every(function(d){return _selDays.indexOf(d)>-1;});
+    _selDays=same?[]:days.slice();
+    _paintDays();
+  }
+  var _quickBtns=[];
+  var quickRow=document.createElement('div');quickRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;';
+  [{l:'Every day',days:[0,1,2,3,4,5,6]},{l:'Weekdays',days:[0,1,2,3,4]},{l:'Weekend',days:[5,6]}].forEach(function(q){
+    var b=document.createElement('button');b.type='button';b.className='fb';b.textContent=q.l;
+    b.style.cssText='font-family:inherit;cursor:pointer;';
+    b.addEventListener('click',function(){_setDays(q.days);});
+    _quickBtns.push({el:b,days:q.days});
+    quickRow.appendChild(b);
+  });
+  dayPicker.appendChild(quickRow);
+  var dpRow=document.createElement('div');dpRow.style.cssText='display:flex;gap:6px;flex-wrap:wrap;';
   DNAMES_SHORT.forEach(function(dn,i){
     var db=document.createElement('div');db.className='fb';db.textContent=dn;db.style.minWidth='40px';db.style.textAlign='center';
-    db.addEventListener('click',function(){var idx=_selDays.indexOf(i);if(idx>-1){_selDays.splice(idx,1);db.classList.remove('on');}else{_selDays.push(i);db.classList.add('on');}});
+    db.addEventListener('click',function(){
+      var idx=_selDays.indexOf(i);
+      if(idx>-1)_selDays.splice(idx,1); else _selDays.push(i);
+      _paintDays();
+    });
+    _dayBtns.push(db);
     dpRow.appendChild(db);
   });
   dayPicker.appendChild(dpRow);
