@@ -3,12 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="refresh" content="0; url=index-v2.html">
 <link rel="canonical" href="index-v2.html">
 <title>Growing Season</title>
-<script>window.location.replace('index-v2.html');</script>
+<script>
+// Forward the query string and hash along with the redirect. Auth links land
+// here (this root URL is what Supabase's redirect allowlist accepts) carrying
+// the recovery token as ?code=… or #access_token=…, and dropping it would turn
+// a valid password reset into a dead link. No meta refresh: it cannot preserve
+// either part.
+(function(){
+  var to='index-v2.html'+(location.search||'')+(location.hash||'');
+  location.replace(to);
+})();
+</script>
 </head>
 <body>
-<p style="font-family:system-ui,sans-serif;text-align:center;padding:40px 20px;color:#555;">Redirecting to <a href="index-v2.html">Growing Season</a>…</p>
+<p style="font-family:system-ui,sans-serif;text-align:center;padding:40px 20px;color:#555;">
+  Redirecting to <a id="go" href="index-v2.html">Growing Season</a>…
+</p>
+<script>
+// Keep the manual link usable too, if the replace above was blocked.
+(function(){
+  var a=document.getElementById('go');
+  if(a)a.href='index-v2.html'+(location.search||'')+(location.hash||'');
+})();
+</script>
 </body>
 </html>

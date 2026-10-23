@@ -6611,7 +6611,11 @@ document.getElementById('btn-send-reset').addEventListener('click',async functio
   var email=document.getElementById('reset-email').value.trim();
   if(!email){return;}
   this.disabled=true;this.textContent='Sending…';
-  var res=await _supa.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  // Supabase only honours a redirectTo that exactly matches an entry in the
+  // dashboard's Redirect URLs allowlist — anything else silently falls back to
+  // the project's Site URL. The directory root is what's allowlisted, and
+  // index.html there forwards the recovery token on to this file.
+  var res=await _supa.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname.replace(/[^/]*$/,'')});
   var msg=document.getElementById('reset-msg');
   msg.style.display='block';
   if(res.error){msg.textContent=res.error.message;msg.style.color='var(--co)';}
