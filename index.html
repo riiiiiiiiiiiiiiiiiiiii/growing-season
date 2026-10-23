@@ -2426,7 +2426,10 @@ function renderCalWeek(){
         var dayOfWeek=d.getDay()===0?6:d.getDay()-1;
         var dayRoutines=_liveRoutines().filter(function(r){return r.days.indexOf(dayOfWeek)>-1;});
         var cell=document.createElement('div');
-        cell.style.cssText='border-radius:10px;padding:6px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:transform .12s;min-height:54px;'+(isToday?'background:var(--co);':'background:var(--bg2);');
+        // justify-content centres the number + dots as a group; the dots keep a
+        // reserved min-height, so the number sits at the same spot in every cell
+        // whether or not that day has any marks.
+        cell.style.cssText='border-radius:10px;padding:6px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:transform .12s;min-height:54px;'+(isToday?'background:var(--co);':'background:var(--bg2);');
         cell.addEventListener('touchstart',function(){cell.style.transform='scale(.94)';},{passive:true});
         cell.addEventListener('touchend',function(){cell.style.transform='';},{passive:true});
         var num=document.createElement('div');num.style.cssText='font-size:13px;font-weight:'+(isToday?'700':'500')+';color:'+(isToday?'#fff':'var(--tx)')+';line-height:1;';num.textContent=d.getDate();cell.appendChild(num);
