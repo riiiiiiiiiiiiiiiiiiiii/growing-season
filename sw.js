@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v94';
+const CACHE_VERSION = 'v95';
 const CACHE_NAME = 'gs-' + CACHE_VERSION;
 const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 const PRECACHE = ['./', './index.html', './index-v2.html', './manifest.json', './icon.svg'];
@@ -43,7 +43,7 @@ self.addEventListener('fetch', e => {
           }
           return r;
         })
-        .catch(() => caches.match(req).then(r => r || caches.match('./index-v2.html')))
+        .catch(() => caches.match(req).then(r => r || caches.match('./')))
     );
     return;
   }
