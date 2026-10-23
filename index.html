@@ -2734,11 +2734,14 @@ function _calScheduleForm(dayDate){
   timeRow.appendChild(hourSel);sh.appendChild(timeRow);
 
   // Duration
-  var dLbl=document.createElement('div');dLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';dLbl.textContent='Duration';sh.appendChild(dLbl);
+  var dLbl=document.createElement('div');dLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';dLbl.innerHTML='Duration <span class="opt">optional</span>';sh.appendChild(dLbl);
   var durRow=document.createElement('div');durRow.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;';
   var _dur=1;
-  [{v:.5,l:'30m'},{v:1,l:'1h'},{v:1.5,l:'1.5h'},{v:2,l:'2h'},{v:3,l:'3h'}].forEach(function(d){
-    var b=document.createElement('div');b.className='fb'+(d.v===1?' on':'');b.textContent=d.l;
+  // null = no set duration. Every display site already guards on a falsy
+  // duration, and the "is it past yet?" checks fall back to an hour.
+  [{v:null,l:'Open'},{v:.5,l:'30m'},{v:1,l:'1h'},{v:1.5,l:'1.5h'},{v:2,l:'2h'},{v:3,l:'3h'}].forEach(function(d){
+    var b=document.createElement('div');b.className='fb'+(d.v===_dur?' on':'');b.textContent=d.l;
+    if(d.v===null)b.title='No set duration';
     b.addEventListener('click',function(){_dur=d.v;durRow.querySelectorAll('.fb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
     durRow.appendChild(b);
   });sh.appendChild(durRow);
