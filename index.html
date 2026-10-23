@@ -3964,9 +3964,26 @@ function openTodayOverview(){
   focusProjects.forEach(function(p){getProjectTasks(p).forEach(function(t){if(!t.done)openTasks.push({proj:p,task:t});});});
 
   var hdr=document.createElement('div');
-  hdr.style.cssText='margin-bottom:18px;';
-  hdr.innerHTML='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.005em;line-height:1.2;">Today</div>'
+  hdr.style.cssText='margin-bottom:18px;display:flex;align-items:flex-start;gap:12px;';
+  var hdrText=document.createElement('div');
+  hdrText.style.cssText='flex:1;min-width:0;';
+  hdrText.innerHTML='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.005em;line-height:1.2;">Today</div>'
     +'<div style="font-size:12px;color:var(--tx3);margin-top:4px;font-weight:500;letter-spacing:.02em;">'+dateStr+' · '+todaySess.length+' session'+(todaySess.length!==1?'s':'')+' · '+(todayMins>=60?Math.floor(todayMins/60)+'h '+(todayMins%60)+'m':todayMins+'m')+'</div>';
+  hdr.appendChild(hdrText);
+  // Shortcut straight to the calendar — this sheet is where you land when
+  // you're thinking about the day, so the month view is one tap away.
+  var calBtn=document.createElement('button');
+  calBtn.type='button';
+  calBtn.setAttribute('aria-label','Open calendar');
+  calBtn.title='Calendar';
+  calBtn.textContent='🗓️';
+  calBtn.style.cssText='flex-shrink:0;width:40px;height:40px;border-radius:12px;background:var(--bg2);border:var(--br);font-size:19px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:transform .12s ease,background .15s ease;';
+  calBtn.addEventListener('pointerdown',function(){calBtn.style.transform='scale(.92)';});
+  ['pointerup','pointerleave','pointercancel'].forEach(function(ev){
+    calBtn.addEventListener(ev,function(){calBtn.style.transform='';});
+  });
+  calBtn.addEventListener('click',function(){closeEd();setTimeout(openCalendar,60);});
+  hdr.appendChild(calBtn);
   sh.appendChild(hdr);
 
   function subHdr(text){
