@@ -4031,7 +4031,10 @@ function openTodayOverview(){
   focusProjects.forEach(function(p){getProjectTasks(p).forEach(function(t){if(!t.done)openTasks.push({proj:p,task:t});});});
 
   var hdr=document.createElement('div');
-  hdr.style.cssText='margin-bottom:18px;display:flex;align-items:flex-start;gap:12px;';
+  // Centre the button against the whole header block: flex-start lined its box
+  // up with the text box, but the heading's line-height leaves leading above the
+  // glyphs, so the button's visible edge sat higher than 'Today'.
+  hdr.style.cssText='margin-bottom:18px;display:flex;align-items:center;gap:12px;';
   var hdrText=document.createElement('div');
   hdrText.style.cssText='flex:1;min-width:0;';
   hdrText.innerHTML='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.005em;line-height:1.2;">Today</div>'
