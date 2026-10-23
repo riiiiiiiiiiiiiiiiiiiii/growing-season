@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <defs>
+    <linearGradient id="card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FAF5EB"/>
+      <stop offset="100%" stop-color="#F1E9D9"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6B8E6A"/>
+      <stop offset="100%" stop-color="#3D6540"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#2A2418" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+<g transform="translate(0,285)">
+
+  <rect width="1200" height="630" fill="url(#card)"/>
+
+  <!-- ground line + grass, echoing the app's home decoration -->
+  <rect x="0" y="548" width="1200" height="82" fill="#8A7256" opacity="0.14"/>
+  <g stroke-linecap="round" opacity="0.5">
+    <g stroke="#6C8562" stroke-width="3">
+      <path d="M60 548 L54 526"/><path d="M110 548 L117 522"/><path d="M168 548 L161 530"/>
+      <path d="M980 548 L974 524"/><path d="M1038 548 L1045 528"/><path d="M1104 548 L1098 522"/>
+      <path d="M1152 548 L1159 532"/>
+    </g>
+    <g stroke="#4F6A48" stroke-width="2.2">
+      <path d="M86 548 L92 530"/><path d="M140 548 L134 528"/><path d="M196 548 L203 534"/>
+      <path d="M1008 548 L1014 532"/><path d="M1070 548 L1064 526"/><path d="M1130 548 L1136 534"/>
+    </g>
+  </g>
+
+  <!-- app tile -->
+  <g filter="url(#soft)" transform="translate(96,168)">
+    <rect width="208" height="208" rx="48" fill="url(#tile)"/>
+    <g transform="translate(104,104) scale(0.355) translate(-256,-256)">
+      <path d="M256 375 L256 192" stroke="#FFFBF3" stroke-width="26" stroke-linecap="round" fill="none" opacity="0.96"/>
+      <path d="M 256 305 C 244 286 212 268 164 278 C 154 296 168 322 210 322 C 234 322 250 314 256 305 Z" fill="#FFFBF3" opacity="0.95"/>
+      <path d="M 256 262 C 268 243 300 225 348 235 C 358 253 344 279 302 279 C 278 279 262 271 256 262 Z" fill="#FFFBF3" opacity="0.95"/>
+      <path d="M 256 192 C 272 180 282 160 272 140 C 264 124 248 124 240 140 C 230 160 240 180 256 192 Z" fill="#FFFBF3" opacity="0.97"/>
+      <circle cx="196" cy="376" r="9" fill="#FFFBF3" opacity="0.24"/>
+      <circle cx="224" cy="385" r="7" fill="#FFFBF3" opacity="0.2"/>
+      <circle cx="256" cy="388" r="8" fill="#FFFBF3" opacity="0.22"/>
+      <circle cx="288" cy="385" r="7" fill="#FFFBF3" opacity="0.2"/>
+      <circle cx="316" cy="376" r="9" fill="#FFFBF3" opacity="0.24"/>
+    </g>
+  </g>
+
+  <!-- wordmark -->
+  <text x="368" y="268" font-family="Georgia, 'Times New Roman', serif" font-size="92" font-weight="700" fill="#2A2418" letter-spacing="-1.5">Growing Season</text>
+  <text x="372" y="330" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-style="italic" fill="#5D4E3A">A quieter way to plan your days.</text>
+
+  <!-- three stage marks, the app's own vocabulary -->
+  <g transform="translate(372,392)">
+    <g>
+      <circle cx="13" cy="13" r="13" fill="#6B8E6A" opacity="0.9"/>
+      <text x="40" y="21" font-family="Georgia, serif" font-size="25" fill="#5D4E3A">Plant a seed</text>
+    </g>
+    <g transform="translate(248,0)">
+      <circle cx="13" cy="13" r="13" fill="#C97050" opacity="0.9"/>
+      <text x="40" y="21" font-family="Georgia, serif" font-size="25" fill="#5D4E3A">Log a session</text>
+    </g>
+    <g transform="translate(508,0)">
+      <circle cx="13" cy="13" r="13" fill="#8AA783" opacity="0.9"/>
+      <text x="40" y="21" font-family="Georgia, serif" font-size="25" fill="#5D4E3A">Watch it grow</text>
+    </g>
+  </g>
+</g>
+</svg>
