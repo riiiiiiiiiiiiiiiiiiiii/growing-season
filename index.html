@@ -5966,7 +5966,7 @@ function showProjectInfo(id){
   // Steps
   html+='<div style="margin-bottom:14px;">';
   html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Steps ('+doneCount+'/'+tasks.length+(tasks.length>=MAX_TASKS_PER_PROJECT?' · max':'')+')</div>';
-  html+='<div id="proj-tasks-list">';
+  html+='<div id="proj-tasks-list" style="max-height:224px;overflow-y:auto;overscroll-behavior:contain;">'; // 5 steps visible, scroll for the rest
   tasks.forEach(function(t){
     var safeText=(t.text||'').replace(/</g,'&lt;');
     html+='<div class="task-row" data-tid="'+t.id+'" style="display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--bg2);border-radius:10px;margin-bottom:6px;">';
@@ -6011,18 +6011,26 @@ function showProjectInfo(id){
   logBtn.addEventListener('click',function(){closeEd();openLogDirect(id,'my');});sh.appendChild(logBtn);
   var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
   closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
+  // Re-render without losing the steps list's scroll position (or jump to the end after adding)
+  var rerender=function(toEnd){
+    var l=sh.querySelector('#proj-tasks-list'),top=l?l.scrollTop:0,shTop=sh.scrollTop;
+    showProjectInfo(id);
+    var nl=sh.querySelector('#proj-tasks-list');if(nl)nl.scrollTop=toEnd?nl.scrollHeight:top;
+    sh.scrollTop=shTop;
+    if(toEnd){var ni=sh.querySelector('#proj-new-task');if(ni)ni.focus();}
+  };
   // Wire tasks
   sh.querySelectorAll('.task-check').forEach(function(btn){
     btn.addEventListener('click',function(){
       var tid=this.dataset.tid;var task=a.tasks.find(function(t){return t.id===tid;});if(!task)return;
-      task.done=!task.done;task.doneAt=task.done?Date.now():null;sv();showProjectInfo(id);
+      task.done=!task.done;task.doneAt=task.done?Date.now():null;sv();rerender();
     });
   });
   sh.querySelectorAll('.task-del').forEach(function(btn){
     btn.addEventListener('click',function(){
       var tid=this.dataset.tid;
       if(!confirm('Delete this step?'))return;
-      a.tasks=a.tasks.filter(function(t){return t.id!==tid;});sv();showProjectInfo(id);
+      a.tasks=a.tasks.filter(function(t){return t.id!==tid;});sv();rerender();
     });
   });
   var addBtn=sh.querySelector('#proj-add-task-btn');
@@ -6031,7 +6039,7 @@ function showProjectInfo(id){
       var inp=sh.querySelector('#proj-new-task');var text=inp.value.trim();
       if(!text)return;if(a.tasks.length>=MAX_TASKS_PER_PROJECT)return;
       a.tasks.push({id:genUUID(),text:text.slice(0,80),done:false,doneAt:null,createdAt:Date.now()});
-      sv();showProjectInfo(id);
+      sv();rerender(true);
     };
     addBtn.addEventListener('click',addNew);
     sh.querySelector('#proj-new-task').addEventListener('keypress',function(e){if(e.key==='Enter'){e.preventDefault();addNew();}});
