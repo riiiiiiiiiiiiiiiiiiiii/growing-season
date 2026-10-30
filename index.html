@@ -749,6 +749,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-today"><span>Today's list<span class="v2-chev">›</span></span></div>
       <div id="today-section"></div>
       <div id="pc-wrap"></div>
+      <div id="home-deadline"></div>
     </section>
     <div id="streak-wrap" style="display:none;"></div>
     <!-- THIS WEEK'S FOCUS -->
@@ -1271,6 +1272,11 @@ function wireDeadlineField(inp){
   if(!inp)return;
   inp.addEventListener('change',function(){syncDeadlineField(this);});
   inp.addEventListener('click',function(){try{if(this.showPicker)this.showPicker();}catch(e){}});
+}
+function fmtDeadlineShort(v){
+  var p=v.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]);
+  var o={weekday:'short',month:'short',day:'numeric'};if(d.getFullYear()!==new Date().getFullYear())o.year='numeric';
+  return d.toLocaleDateString('en-US',o);
 }
 function deadlineLabel(a){
   var d=getDeadlineDays(a);if(d===null)return null;
@@ -1943,6 +1949,18 @@ function showTodayDetail(todaySess){
   document.getElementById('ed-ov').classList.add('on');
 }
 
+// One quiet line under Today's list: the nearest project deadline, plus how many others.
+function renderHomeDeadline(){
+  var el=document.getElementById('home-deadline');if(!el)return;
+  var due=myActs.filter(function(a){return getDeadlineDays(a)!==null;})
+    .sort(function(x,y){return getDeadlineDays(x)-getDeadlineDays(y);});
+  if(!due.length){el.innerHTML='';return;}
+  var a=due[0],dl=deadlineLabel(a);
+  el.innerHTML='<button type="button" style="display:flex;align-items:center;gap:6px;width:100%;background:none;border:none;padding:10px 2px 0;font-family:inherit;font-size:12px;cursor:pointer;text-align:left;color:var(--tx2);">'
+    +'<span>⏳</span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(a.name)+' · <span style="color:'+dl.color+';font-weight:600;">'+dl.text+'</span>'
+    +(due.length>1?' <span style="color:var(--tx3);">· +'+(due.length-1)+' more</span>':'')+'</span></button>';
+  el.firstChild.addEventListener('click',function(){showProjectInfo(a.id);});
+}
 function rHome(){
   // ── Session lock: when a session is in progress, take over the home
   if(active){
@@ -1992,6 +2010,7 @@ function rHome(){
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
   // Render Today section (schedule or empty) + tasks from focused projects
   renderTodaySection();
+  renderHomeDeadline();
   // Render This week's focus (chips) into its own slot under the weekly overview
   renderWeekFocus();
   if(active){
@@ -4401,7 +4420,7 @@ function openActInfo(actId,from){
   var sorted=actSess.slice().sort(function(a,b){return (a.date||0)-(b.date||0);});
   var lastSess=sorted.length?sorted[sorted.length-1]:null;
   var rows='';
-  rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--bg3);"><span style="font-size:13px;color:var(--tx3);">Sessions</span><span style="font-size:13px;font-weight:600;">'+actSess.length+'</span></div>';
+  rows+='<div id="act-info-sess" role="button" tabindex="0" style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:.5px solid var(--bg3);cursor:pointer;"><span style="font-size:13px;color:var(--tx3);">Sessions</span><span style="font-size:13px;font-weight:600;">'+actSess.length+(actSess.length?'<span style="color:var(--tx3);font-weight:400;margin-left:6px;">›</span>':'')+'</span></div>';
   rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
   if(lastSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span>'+agoToggleHTML(lastSess.date)+'</div>';
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
@@ -4409,21 +4428,30 @@ function openActInfo(actId,from){
     +'<div style="background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;">'+rows+'</div>';
   wireAgoToggles(sh);
   document.getElementById('act-info-edit-btn').addEventListener('click',function(){openActInfoEdit(actId,from);});
-  var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-bottom:10px;';
-  var notesBtn=document.createElement('button');notesBtn.className='btn btn-s';notesBtn.style.cssText='flex:1;margin-top:0;font-size:13px;';notesBtn.textContent='Notes';
-  notesBtn.addEventListener('click',function(){closeEd();openNotes();rNoteEditor(act);});
-  row.appendChild(notesBtn);
-  var sessBtn=document.createElement('button');sessBtn.className='btn btn-s';sessBtn.style.cssText='flex:1;margin-top:0;font-size:13px;';sessBtn.textContent='Sessions';
-  sessBtn.addEventListener('click',function(){closeEd();show('s-hist');['home','my','garden','hist'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t==='hist');});document.getElementById('fab').style.display='none';histSearch=act.name;histPeriod='all';var hs=document.getElementById('hist-search');if(hs)hs.value=act.name;rHist();});
-  row.appendChild(sessBtn);sh.appendChild(row);
+  // Sessions row opens this skill's sessions in the logbook
+  var sessRow=sh.querySelector('#act-info-sess');
+  if(actSess.length){
+    var openSess=function(){closeEd();show('s-hist');['home','my','garden','hist'].forEach(function(t){document.getElementById('nb-'+t).classList.toggle('on',t==='hist');});document.getElementById('fab').style.display='none';histSearch=act.name;histPeriod='all';var hs=document.getElementById('hist-search');if(hs)hs.value=act.name;rHist();};
+    sessRow.addEventListener('click',openSess);
+    sessRow.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();openSess();}});
+  } else {sessRow.style.cursor='default';sessRow.removeAttribute('role');sessRow.removeAttribute('tabindex');}
+  // Notes row — same as on the project sheet
+  var _nd=activityNotes[actId]||{},_ne=(_nd.entries||[])[0]||{};
+  var _nPrev=(_ne.goals||_ne.ideas||_ne.blockers||_ne.general||'').trim().split('\n')[0];
+  var _nCnt=(_nd.entries||[]).length;
+  var notesRow=document.createElement('button');notesRow.type='button';
+  notesRow.style.cssText='width:100%;display:flex;align-items:center;gap:12px;background:var(--bg2);border:none;border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;text-align:left;font-family:inherit;color:var(--tx);';
+  notesRow.innerHTML='<span style="flex:1;min-width:0;"><span style="display:block;font-size:13px;font-weight:600;">Notes'+(_nCnt?' ('+_nCnt+')':'')+'</span>'
+    +'<span style="display:block;font-size:12px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(_nPrev?esc(_nPrev):'Nothing written yet')+'</span></span>'
+    +'<span style="font-size:18px;color:var(--tx3);line-height:1;">›</span>';
+  notesRow.addEventListener('click',function(){closeEd();openNotes();rNoteEditor(act);});
+  sh.appendChild(notesRow);
   var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start activity';
   startBtn.addEventListener('click',function(){closeEd();startFrom(actId);});
   sh.appendChild(startBtn);
   var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='+ Log a session';
   logBtn.addEventListener('click',function(){closeEd();openLogDirect(actId,from);});
   sh.appendChild(logBtn);
-  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
-  closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
   document.getElementById('ed-ov').classList.add('on');
 }
 function openActInfoEdit(actId,from){
@@ -5954,15 +5982,15 @@ function showProjectInfo(id){
   var html='';
   html+='<div style="text-align:center;margin-bottom:16px;">';
   html+='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+a.name+'</div>';
+  // Deadline under the title: countdown + date; tap to change (date input sits invisibly on top)
   var _dl=deadlineLabel(a);
-  if(_dl)html+='<div style="font-size:12px;color:'+_dl.color+';margin-top:4px;font-weight:600;">⏳ '+_dl.text+'</div>';
+  html+='<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:6px;">';
+  html+='<span class="dl-field" style="flex:none;display:inline-block;"><span style="font-size:12px;font-weight:600;color:'+(_dl?_dl.color:'var(--tx3)')+';">'
+    +(_dl?'⏳ '+_dl.text+' · '+fmtDeadlineShort(a.deadline):'+ Add deadline')
+    +'</span><input type="date" id="proj-deadline-edit" aria-label="Deadline" value="'+(a.deadline||'')+'"></span>';
+  if(a.deadline)html+='<button id="proj-deadline-clear" type="button" aria-label="Remove deadline" style="background:none;border:none;color:var(--tx3);font-size:15px;line-height:1;cursor:pointer;padding:2px 4px;">×</button>';
   html+='</div>';
-  // Deadline
-  html+='<div style="margin-bottom:16px;">';
-  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Deadline</div>';
-  html+='<div style="display:flex;gap:6px;align-items:stretch;"><div class="dl-field"><div class="sinp dl-txt'+(a.deadline?'':' empty')+'">'+fmtDeadline(a.deadline)+'</div><input type="date" id="proj-deadline-edit" aria-label="Deadline" value="'+(a.deadline||'')+'"></div>';
-  if(a.deadline)html+='<button id="proj-deadline-clear" type="button" style="padding:0 14px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx2);font-size:13px;font-weight:600;cursor:pointer;">Clear</button>';
-  html+='</div></div>';
+  html+='</div>';
   // Steps
   html+='<div style="margin-bottom:14px;">';
   html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Steps ('+doneCount+'/'+tasks.length+(tasks.length>=MAX_TASKS_PER_PROJECT?' · max':'')+')</div>';
@@ -6008,8 +6036,6 @@ function showProjectInfo(id){
   startBtn.addEventListener('click',function(){closeEd();startFrom(id);});sh.appendChild(startBtn);
   var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='+ Log a session';
   logBtn.addEventListener('click',function(){closeEd();openLogDirect(id,'my');});sh.appendChild(logBtn);
-  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
-  closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
   // Re-render without losing the steps list's scroll position (or jump to the end after adding)
   var rerender=function(toEnd){
     var l=sh.querySelector('#proj-tasks-list'),top=l?l.scrollTop:0,shTop=sh.scrollTop;
@@ -6050,11 +6076,11 @@ function showProjectInfo(id){
     dlEl.addEventListener('change',function(){
       var v=this.value;
       if(v)a.deadline=v;else delete a.deadline;
-      sv();rMy();showProjectInfo(id);
+      sv();rMy();renderHomeDeadline();showProjectInfo(id);
     });
   }
   var dlClear=sh.querySelector('#proj-deadline-clear');
-  if(dlClear)dlClear.addEventListener('click',function(){delete a.deadline;sv();rMy();showProjectInfo(id);});
+  if(dlClear)dlClear.addEventListener('click',function(){delete a.deadline;sv();rMy();renderHomeDeadline();showProjectInfo(id);});
   wireAgoToggles(sh);
   sh.querySelector('#proj-notebook-btn').addEventListener('click',function(){closeEd();openNotes();rNoteEditor(a);});
   document.getElementById('ed-ov').classList.add('on');
