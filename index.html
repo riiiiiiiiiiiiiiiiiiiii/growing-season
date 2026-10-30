@@ -1064,7 +1064,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <!-- Kind selector -->
     <div id="kind-tabs" style="display:flex;gap:6px;margin-bottom:18px;">
       <button id="kind-tab-skill" style="flex:1;padding:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--gr);color:#FFFBF3;transition:all .15s;border-radius:12px;letter-spacing:.01em;">🌱 Skill</button>
-      <button id="kind-tab-project" style="flex:1;padding:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--tx2);transition:all .15s;border-radius:12px;letter-spacing:.01em;">🌲 Project</button>
+      <button id="kind-tab-project" style="flex:1;padding:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:var(--bg2);color:var(--tx2);transition:all .15s;border-radius:12px;letter-spacing:.01em;">🌳 Project</button>
     </div>
     <!-- SKILL mode: existing library/custom tabs -->
     <div id="add-tabs" style="display:flex;gap:6px;margin-bottom:18px;">
@@ -1095,7 +1095,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="sf"><div class="sl">Notes <span class="opt">optional</span></div><textarea class="nta" id="proj-notes" placeholder="What is this project about?" style="min-height:60px;"></textarea></div>
       <div class="sf"><div class="sl">Deadline <span class="opt">optional</span></div><div class="dl-field"><div class="sinp dl-txt empty">No deadline</div><input type="date" id="proj-deadline" aria-label="Deadline"></div></div>
       <div class="sf"><div class="sl">Steps <span class="opt">optional</span></div><div id="proj-task-inputs"></div></div>
-      <button class="btn btn-p" id="btn-proj-save" style="margin-top:4px;">🌲 Plant tree</button>
+      <button class="btn btn-p" id="btn-proj-save" style="margin-top:4px;">🌳 Plant tree</button>
       <button class="btn btn-s" id="btn-proj-cancel" style="margin-top:6px;width:100%;">Cancel</button>
     </div>
   </div>
@@ -1229,6 +1229,7 @@ function _normalizeSeed(a){
   if(!a)return a;
   if(!a.kind)a.kind='skill';
   if(a.kind==='project'){
+    if(a.emoji==='🌲')a.emoji='🌳'; // projects' symbol changed from 🌲 to 🌳
     if(!Array.isArray(a.tasks))a.tasks=[];
     if(typeof a.notes!=='string')a.notes='';
   }
@@ -2686,7 +2687,8 @@ function renderCalWeek(){
       var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--bg2);border-radius:10px;margin-bottom:6px;cursor:pointer;';
       var dayStr=r.days.length===7?'Every day':r.days.length===5&&r.days.every(function(d){return d<5;})?'Weekdays':r.days.map(function(d){return DNAMES_SHORT[d];}).join(', ');
       var untilStr=r.until?(_dayKey(Date.now())>r.until?' · ended ':' · until ')+fmtDeadlineShort(r.until):'';
-      row.innerHTML='<span style="font-size:18px;">'+r.actEmoji+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+r.actName+'</div><div style="font-size:11px;color:var(--tx3);">'+dayStr+' · '+_fmtHour(r.hour)+untilStr+'</div></div><button class="rt-edit" aria-label="Edit routine" style="background:none;border:none;cursor:pointer;color:var(--tx3);padding:4px;flex-shrink:0;display:flex;">'+EDIT_PEN_SVG.replace('width="12" height="12"','width="14" height="14"')+'</button><button class="rt-del" aria-label="Remove routine" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--tx3);padding:2px 4px;flex-shrink:0;">✕</button>';
+      var _ra=_actById(r.actId)||{};
+      row.innerHTML='<span style="font-size:18px;">'+(_ra.emoji||r.actEmoji)+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+esc(_ra.name||r.actName)+'</div><div style="font-size:11px;color:var(--tx3);">'+dayStr+' · '+_fmtHour(r.hour)+untilStr+'</div></div><button class="rt-edit" aria-label="Edit routine" style="background:none;border:none;cursor:pointer;color:var(--tx3);padding:4px;flex-shrink:0;display:flex;">'+EDIT_PEN_SVG.replace('width="12" height="12"','width="14" height="14"')+'</button><button class="rt-del" aria-label="Remove routine" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--tx3);padding:2px 4px;flex-shrink:0;">✕</button>';
       row.querySelector('.rt-edit').addEventListener('click',function(e){e.stopPropagation();editRoutine(r);});
       row.querySelector('.rt-del').addEventListener('click',function(e){e.stopPropagation();if(!confirm('Remove this routine?'))return;calRoutines=calRoutines.filter(function(x){return x.id!==r.id;});sv();renderCalWeek();updateHomeNudge();});
       rtSec.appendChild(row);
@@ -5295,7 +5297,7 @@ function _rMyBody(el,allActs){
       var _dl=deadlineLabel(a),_dd=getDeadlineDays(a);
       var _steps=getProjectTasks(a),_fin=isFinished(a);
       var _dlShort=_dd===null?'':_dd<0?(-_dd)+' day'+(_dd===-1?'':'s')+' overdue':_dd===0?'due today':_dd===1?'due tomorrow':'in '+_dd+' days';
-      inner.innerHTML='<div style="flex:1;min-width:0;"><div class="mc-n"><span style="margin-right:6px;font-size:14px;opacity:.85;">'+(isProject(a)?'🌲':'🌱')+'</span>'+esc(a.name)+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div></div>'
+      inner.innerHTML='<div style="flex:1;min-width:0;"><div class="mc-n"><span style="margin-right:6px;font-size:14px;opacity:.85;">'+(isProject(a)?'🌳':'🌱')+'</span>'+esc(a.name)+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'')
         +(_fin?'<span style="font-size:12px;color:var(--gr);font-weight:600;white-space:nowrap;">✓ Finished</span>':'')
@@ -6073,12 +6075,12 @@ function saveProject(){
     if(t&&tasks.length<MAX_TASKS_PER_PROJECT)tasks.push({id:genUUID(),text:t.slice(0,80),done:false,doneAt:null,createdAt:Date.now()});
   });
   var deadline=document.getElementById('proj-deadline').value;
-  var newProj={id:genUUID(),name:name,emoji:'🌲',cat:cat,kind:'project',notes:'',tasks:tasks,tags:[]};
+  var newProj={id:genUUID(),name:name,emoji:'🌳',cat:cat,kind:'project',notes:'',tasks:tasks,tags:[]};
   if(notes)_addNoteBlock(newProj.id,'general',notes);
   if(deadline)newProj.deadline=deadline;
   _normalizeSeed(newProj);
   myActs.push(newProj);
-  pushFeedEvent('plant',name,'🌲',null);
+  pushFeedEvent('plant',name,'🌳',null);
   checkTrophies();sv();closeAdd();
   // Clear form for next time
   document.getElementById('proj-name').value='';
@@ -6087,7 +6089,7 @@ function saveProject(){
   var _pdl=document.getElementById('proj-deadline');_pdl.value='';syncDeadlineField(_pdl);
   // Navigate to plot so user sees the new tree
   nav('my');
-  showToast('🌲 Tree planted!',null);
+  showToast('🌳 Tree planted!',null);
   if(newProj.deadline)setTimeout(function(){offerDeadlineSchedule(newProj,null);},350);
 }
 
