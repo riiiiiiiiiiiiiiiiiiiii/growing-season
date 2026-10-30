@@ -1241,6 +1241,18 @@ function fmtDaysAgo(ts){
   if(days<365)return n(Math.floor(days/30),'month');
   return n(Math.floor(days/365),'year');
 }
+// Tappable 'x ago' value that flips to the full date and back.
+function agoToggleHTML(ts){
+  var full=new Date(ts).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+  return '<span class="ago-toggle" role="button" tabindex="0" data-ago="'+fmtDaysAgo(ts)+'" data-full="'+full+'" style="font-size:13px;font-weight:600;cursor:pointer;border-bottom:1px dotted var(--tx3);">'+fmtDaysAgo(ts)+'</span>';
+}
+function wireAgoToggles(root){
+  root.querySelectorAll('.ago-toggle').forEach(function(el){
+    var flip=function(){el.textContent=el.textContent===el.dataset.ago?el.dataset.full:el.dataset.ago;};
+    el.addEventListener('click',flip);
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();flip();}});
+  });
+}
 function lastSessionTs(sessList){
   return sessList.reduce(function(m,x){return Math.max(m,new Date(x.date||0).getTime()||0);},0)||null;
 }
@@ -4358,10 +4370,11 @@ function openActInfo(actId,from){
   var rows='';
   rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--bg3);"><span style="font-size:13px;color:var(--tx3);">Sessions</span><span style="font-size:13px;font-weight:600;">'+actSess.length+'</span></div>';
   rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
-  if(lastSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span><span style="font-size:13px;font-weight:600;">'+fmtDaysAgo(lastSess.date)+'</span></div>';
+  if(lastSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span>'+agoToggleHTML(lastSess.date)+'</div>';
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
   sh.innerHTML='<div style="text-align:center;margin-bottom:16px;"><div style="display:inline-flex;align-items:center;gap:6px;"><span style="font-family:var(--serif);font-size:20px;font-weight:700;">'+act.name+'</span><button id="act-info-edit-btn" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 5px;border-radius:6px;line-height:1;" title="Edit activity">✏️</button></div></div>'
     +'<div style="background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;">'+rows+'</div>';
+  wireAgoToggles(sh);
   document.getElementById('act-info-edit-btn').addEventListener('click',function(){openActInfoEdit(actId,from);});
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-bottom:10px;';
   var notesBtn=document.createElement('button');notesBtn.className='btn btn-s';notesBtn.style.cssText='flex:1;margin-top:0;font-size:13px;';notesBtn.textContent='Notes';
@@ -5948,7 +5961,7 @@ function showProjectInfo(id){
   html+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--bg3);"><span style="font-size:13px;color:var(--tx3);">Sessions</span><span style="font-size:13px;font-weight:600;">'+actSess.length+'</span></div>';
   var _lastTs=lastSessionTs(actSess);
   html+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(_lastTs?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
-  if(_lastTs)html+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span><span style="font-size:13px;font-weight:600;">'+fmtDaysAgo(_lastTs)+'</span></div>';
+  if(_lastTs)html+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span>'+agoToggleHTML(_lastTs)+'</div>';
   html+='</div>';
   // Notebook entry — opens the project's own notes page
   var _nbPreview=(a.notes||'').trim().split('\n')[0];
@@ -6002,6 +6015,7 @@ function showProjectInfo(id){
   }
   var dlClear=sh.querySelector('#proj-deadline-clear');
   if(dlClear)dlClear.addEventListener('click',function(){delete a.deadline;sv();rMy();showProjectInfo(id);});
+  wireAgoToggles(sh);
   sh.querySelector('#proj-notebook-btn').addEventListener('click',function(){showProjectNotebook(id);});
   document.getElementById('ed-ov').classList.add('on');
 }
