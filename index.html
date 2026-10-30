@@ -443,7 +443,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     z-index:1;
   }
   .nav{position:absolute;left:0;right:0;bottom:0;max-width:none;width:100%;transform:none;}
-  #menu-btn{position:absolute;}
+  #app #menu-btn{position:absolute;} /* beats the base #menu-btn rule further down */
   .fab,#fab{right:max(16px,calc(50vw - 199px));bottom:calc(102px + env(safe-area-inset-bottom));}
   .toast{max-width:calc(430px - 32px);bottom:calc(110px + env(safe-area-inset-bottom));}
 }
