@@ -5999,7 +5999,6 @@ function showProjectInfo(id){
   var _nbPreview=(_ne.goals||_ne.ideas||_ne.blockers||_ne.general||'').trim().split('\n')[0];
   var _nbCount=(_nd.entries||[]).length;
   html+='<button id="proj-notebook-btn" type="button" style="width:100%;display:flex;align-items:center;gap:12px;background:var(--bg2);border:none;border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;text-align:left;font-family:inherit;color:var(--tx);">';
-  html+='<span style="font-size:20px;line-height:1;">📓</span>';
   html+='<span style="flex:1;min-width:0;"><span style="display:block;font-size:13px;font-weight:600;">Notes'+(_nbCount?' ('+_nbCount+')':'')+'</span>';
   html+='<span style="display:block;font-size:12px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(_nbPreview?esc(_nbPreview):'Nothing written yet')+'</span></span>';
   html+='<span style="font-size:18px;color:var(--tx3);line-height:1;">›</span></button>';
