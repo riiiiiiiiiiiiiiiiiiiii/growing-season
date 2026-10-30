@@ -1337,8 +1337,8 @@ function offerDeadlineSchedule(a,onDone){
   var back=function(){if(onDone)onDone();else ov.classList.remove('on');};
   var days=getDeadlineDays(a);
   routineForm({
-    title:'Make time for '+esc(a.name)+'?',
-    sub:'Due '+fmtDeadlineShort(a.deadline)+(days===0?' (today)':days===1?' (tomorrow)':' · '+days+' days away')+'. Add it to your schedule until then?',
+    title:'Add it to your schedule?',
+    sub:'<b style="color:var(--tx);">'+esc(a.name)+'</b> is due '+(days===0?'today':days===1?'tomorrow':'in '+days+' days')+' ('+fmtDeadlineShort(a.deadline)+').',
     days:[],hour:null,duration:1,
     cancelLabel:'Not now',saveLabel:'Add to schedule',onCancel:back,
     onSave:function(v){
