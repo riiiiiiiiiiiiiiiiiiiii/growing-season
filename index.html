@@ -271,6 +271,20 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .sop{background:var(--bg2);border:var(--br);border-radius:var(--rsm);padding:6px 13px;font-size:13px;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .16s cubic-bezier(.34,1.4,.64,1),box-shadow .18s ease;user-select:none;}
 .sop:active{transform:scale(.95);}
 .sop.on{background:var(--grl);border-color:var(--gr);color:var(--gr2);font-weight:600;box-shadow:0 2px 8px rgba(24,152,192,.18),0 0 0 1.5px var(--gr) inset;}
+.nb-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-4px 0 14px;}
+.nb-flip{width:34px;height:34px;border-radius:50%;border:1px solid var(--bg3);background:var(--bg2);color:var(--tx2);font-size:18px;line-height:1;cursor:pointer;flex-shrink:0;}
+.nb-flip:disabled{opacity:.3;cursor:default;}
+.nb-day{text-align:center;font-family:var(--serif);font-size:16px;font-weight:700;color:var(--tx);}
+.nb-pg{font-family:inherit;font-size:11px;font-weight:600;color:var(--tx3);margin-top:2px;letter-spacing:.02em;}
+.nb-page{background:var(--card);border:var(--br);border-radius:14px;padding:10px 14px;min-height:42vh;}
+.nb-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:.5px solid var(--bg3);}
+.nb-row:last-child{border-bottom:none;}
+.nb-chip{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;width:104px;padding:4px 8px;margin-top:1px;border:none;border-radius:20px;font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;background:var(--grl);background:color-mix(in srgb,var(--gr) 14%,var(--bg));color:var(--gr2);white-space:nowrap;overflow:hidden;}
+.nb-ta{flex:1;min-width:0;border:none;background:transparent;resize:none;overflow:hidden;font-family:inherit;font-size:14px;line-height:1.5;color:var(--tx);padding:2px 0;outline:none;}
+.nb-ta::placeholder{color:var(--tx3);opacity:.75;font-style:italic;}
+.nb-add{display:block;margin:10px auto 0;background:none;border:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--tx3);cursor:pointer;padding:6px 10px;}
+@keyframes nbInR{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:none;}}
+@keyframes nbInL{from{opacity:0;transform:translateX(-24px);}to{opacity:1;transform:none;}}
 .name-edit{display:inline-flex;align-items:center;gap:7px;background:none;border:none;padding:2px 4px;margin:0;cursor:pointer;color:var(--tx3);font-family:inherit;border-radius:8px;}
 .name-edit>span{color:var(--tx);}
 .name-edit:active{opacity:.6;}
@@ -2980,8 +2994,10 @@ function checkCalPlanned(){
 
 
 function openNotes(){rNotesList();document.getElementById('notes-ov').classList.add('on');}
-function closeNotes(){document.getElementById('notes-ov').classList.remove('on');}
+function closeNotes(){if(_nbPendingCommit)_nbPendingCommit();document.getElementById('notes-ov').classList.remove('on');}
 function rNotesList(){
+  _nbPendingCommit=null;
+  var nb=document.getElementById('notes-body');nb.ontouchstart=nb.ontouchend=null;
   document.getElementById('notes-title').textContent='Notes';
   document.getElementById('btn-notes-back').style.display='none';
   var body=document.getElementById('notes-body');body.innerHTML='';
@@ -2989,17 +3005,15 @@ function rNotesList(){
   var meName=(profile&&profile.name)?profile.name:'Me';
   var meEmoji=(profile&&profile.emoji)?profile.emoji:'🌿';
   var meAct={id:'__me__',name:meName,emoji:meEmoji,_personal:true};
-  var meN=activityNotes['__me__']||{};
-  function _noteHas(n,sections){if(n&&n.entries)return n.entries.length>0;return sections.some(function(s){var v=n[s.key];return Array.isArray(v)?v.length>0:(v&&v.trim());});}
-  function _notePreview(n,sections){if(n&&n.entries&&n.entries.length){var e=n.entries[0];var sec=sections.find(function(s){return e[s.key]&&e[s.key].trim();});if(!sec)return '';var txt=e[sec.key].trim();return txt.slice(0,50)+(txt.length>50?'…':'');}var first=sections.find(function(s){var v=n[s.key];return Array.isArray(v)?v.length>0:(v&&v.trim());});if(!first)return '';var v=n[first.key];var txt2=Array.isArray(v)?v[0].text:(v||'');return txt2.slice(0,50)+(txt2.length>50?'…':'');}
-  var meHas=_noteHas(meN,PERSONAL_NOTE_SECTIONS);
-  var mePreview=_notePreview(meN,PERSONAL_NOTE_SECTIONS);
+  var meSum=noteSummary('__me__');
+  var meHas=meSum.count>0;
+  var mePreview=meSum.preview;
   var meCard=document.createElement('div');meCard.className='notes-act-card';
   meCard.style.cssText='background:var(--grl);border-color:var(--grm);';
   meCard.innerHTML='<div class="notes-act-em">'+meEmoji+'</div>'
     +'<div style="flex:1;min-width:0;">'
       +'<div class="notes-act-name">'+meName+' <span style="font-size:10px;font-weight:500;color:var(--gr);background:var(--grl);border:1px solid var(--grm);border-radius:8px;padding:1px 6px;">Personal</span></div>'
-      +(meHas?'<div class="notes-act-preview">'+mePreview+'</div>':'<div class="notes-act-preview" style="color:var(--tx3);">Your personal space</div>')
+      +(meHas?'<div class="notes-act-preview">'+esc(mePreview)+'</div>':'<div class="notes-act-preview" style="color:var(--tx3);">Your personal space</div>')
     +'</div>'
     +'<span style="font-size:16px;color:var(--tx3);">›</span>';
   meCard.addEventListener('click',function(){_transitionNotesBody(function(){rNoteEditor(meAct);});});
@@ -3034,8 +3048,8 @@ function rNotesList(){
     }
     // Activities with notes first, most recently written at the top
     var rows=filtered.map(function(a,i){
-      var n=activityNotes[a.id]||{};
-      return {a:a,n:n,has:_noteHas(n,NOTE_SECTIONS),last:_noteLastDate(n),i:i};
+      var sum=noteSummary(a.id);
+      return {a:a,sum:sum,has:sum.count>0,last:sum.last,i:i};
     });
     rows.sort(function(x,y){
       if(x.has!==y.has)return x.has?-1:1;
@@ -3043,9 +3057,9 @@ function rNotesList(){
       return x.i-y.i;
     });
     rows.forEach(function(r){
-      var a=r.a,n=r.n,hasNotes=r.has;
-      var preview=_notePreview(n,NOTE_SECTIONS);
-      var cnt=n.entries?n.entries.length:(hasNotes?1:0);
+      var a=r.a,hasNotes=r.has;
+      var preview=r.sum.preview;
+      var cnt=r.sum.count;
       var card=document.createElement('div');card.className='notes-act-card';
       if(a._archived)card.style.opacity='.6';
       card.innerHTML='<div class="notes-act-em">'+a.emoji+'</div>'
@@ -3053,7 +3067,7 @@ function rNotesList(){
           +'<div class="notes-act-name">'+esc(a.name)+(a._archived?' <span style="font-size:10px;color:var(--tx3);">(archived)</span>':'')+'</div>'
           +(hasNotes
             ?'<div class="notes-act-preview">'+esc(preview)+'</div>'
-             +'<div style="font-size:11px;color:var(--gr);font-weight:600;margin-top:3px;">📝 '+cnt+' note'+(cnt===1?'':'s')+(r.last?' · '+fmtDaysAgo(r.last):'')+'</div>'
+             +'<div style="font-size:11px;color:var(--gr);font-weight:600;margin-top:3px;">📝 '+cnt+' page'+(cnt===1?'':'s')+(r.last?' · '+fmtDaysAgo(r.last):'')+'</div>'
             :'<div class="notes-act-preview" style="color:var(--bg3);">No notes yet</div>')
         +'</div>'
         +'<span style="font-size:16px;color:var(--tx3);">›</span>';
@@ -3063,119 +3077,195 @@ function rNotesList(){
   }
 
   renderNotesList();
+  _flushNoteMigration();
 }
-function _noteLastDate(n){
-  return (n&&n.entries||[]).reduce(function(m,e){return Math.max(m,e.date||0);},0);
+// ── NOTEBOOK ──────────────────────────────────────────
+// Notes are a notebook per seed: one page per day, each page a list of
+// paragraphs tagged with a category. activityNotes[id].pages =
+//   [{day:'YYYY-MM-DD', updatedAt, blocks:[{cat:'ideas', text:'…'}]}]
+var NOTE_CHIPS={
+  goals:{emoji:'🎯',label:'To work on',prompts:['What do you want to get better at?','What would make the next session feel like progress?','What’s the smallest next step?']},
+  ideas:{emoji:'💡',label:'Ideas',prompts:['What would you try if it couldn’t fail?','What inspired you lately?','Is there a different way to approach this?']},
+  blockers:{emoji:'🚧',label:'Obstacles',prompts:['What’s getting in the way right now?','What are you putting off, and why?','What would make this easier?']},
+  general:{emoji:'📝',label:'General',prompts:['Anything else on your mind?','Links, references, random thoughts…','What do you want to remember about today?']},
+  thoughts:{emoji:'💭',label:'Thoughts',prompts:['What’s on your mind right now?','What surprised you today?']},
+  intentions:{emoji:'🌟',label:'Intentions',prompts:['What do you want to cultivate in yourself?','How do you want tomorrow to feel?']},
+  patterns:{emoji:'🧠',label:'Patterns',prompts:['What are you noticing about your habits or energy?','When did you feel most like yourself?']},
+  freewrite:{emoji:'📓',label:'Free write',prompts:['Open space — no structure needed…']}
+};
+var _noteMigrated=false;
+function _flushNoteMigration(){if(_noteMigrated){_noteMigrated=false;sv();}}
+function _dayKey(ts){var d=new Date(ts);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function _dayTs(day){var p=day.split('-');return new Date(+p[0],+p[1]-1,+p[2]).getTime();}
+function _pageHasText(pg){return (pg.blocks||[]).some(function(b){return b.text&&b.text.trim();});}
+function _byDay(x,y){return x.day<y.day?-1:x.day>y.day?1:0;}
+// Returns the seed's pages (oldest first), folding in any older-format notes:
+// dated entries become that day's page, one paragraph per filled section.
+function _getNotePages(actId){
+  var n=activityNotes[actId]||(activityNotes[actId]={});
+  var secs=NOTE_SECTIONS.concat(PERSONAL_NOTE_SECTIONS);
+  var entries=Array.isArray(n.entries)?n.entries.slice():[];
+  var flat={},hasFlat=false;
+  secs.forEach(function(sec){
+    var v=n[sec.key];
+    if(typeof v==='string'&&v.trim()){flat[sec.key]=v.trim();hasFlat=true;}
+    else if(Array.isArray(v)&&v.length){flat[sec.key]=v.map(function(e){return e.text;}).join('\n\n');hasFlat=true;}
+    if(v!==undefined){delete n[sec.key];_noteMigrated=true;}
+  });
+  if(hasFlat)entries.push(Object.assign({date:Date.now()},flat));
+  if(!Array.isArray(n.pages)){n.pages=[];_noteMigrated=true;}
+  if(entries.length){
+    entries.slice().reverse().forEach(function(e){ // entries were newest first
+      var day=_dayKey(e.date||Date.now());
+      var pg=n.pages.find(function(x){return x.day===day;});
+      if(!pg){pg={day:day,updatedAt:e.date||Date.now(),blocks:[]};n.pages.push(pg);}
+      secs.forEach(function(sec){if(e[sec.key]&&String(e[sec.key]).trim())pg.blocks.push({cat:sec.key,text:String(e[sec.key]).trim()});});
+      pg.updatedAt=Math.max(pg.updatedAt||0,e.date||0);
+    });
+    n.pages.sort(_byDay);
+    _noteMigrated=true;
+  }
+  if(n.entries!==undefined){delete n.entries;_noteMigrated=true;}
+  return n.pages;
+}
+// Count of written pages, the latest page's first paragraph, last-written time
+function noteSummary(actId){
+  var pages=_getNotePages(actId).filter(_pageHasText);
+  if(!pages.length)return {count:0,preview:'',last:0};
+  var latest=pages[pages.length-1];
+  var b=latest.blocks.find(function(x){return x.text&&x.text.trim();});
+  var txt=b?b.text.trim().split('\n')[0]:'';
+  return {count:pages.length,preview:txt.slice(0,60)+(txt.length>60?'…':''),last:latest.updatedAt||_dayTs(latest.day)};
+}
+// Add a paragraph to today's page (for text that arrives from elsewhere)
+function _addNoteBlock(actId,cat,text){
+  var pages=_getNotePages(actId),day=_dayKey(Date.now());
+  var pg=pages.find(function(x){return x.day===day;});
+  if(!pg){pg={day:day,updatedAt:Date.now(),blocks:[]};pages.push(pg);pages.sort(_byDay);}
+  pg.blocks.push({cat:cat,text:text});pg.updatedAt=Date.now();
 }
 // Projects used to keep a separate free-text notebook (a.notes). Fold any
-// such text into the shared Notes as a 'General' entry, once.
+// such text into the notebook as a 'General' paragraph, once.
 function migrateProjectNotes(){
   var changed=false;
   myActs.concat(archivedActs).forEach(function(a){
     if(!isProject(a)||!a.notes||!a.notes.trim())return;
-    var d=_getNoteData(a.id),txt=a.notes.trim();
-    if(!d.entries.some(function(e){return (e.general||'').trim()===txt;}))d.entries.push({date:Date.now(),general:txt});
+    _addNoteBlock(a.id,'general',a.notes.trim());
     a.notes='';changed=true;
   });
-  if(changed)sv();
+  if(changed){_noteMigrated=false;sv();}else _flushNoteMigration();
 }
-var _noteBackFn=null;
-function _getNoteData(actId){
-  if(!activityNotes[actId])activityNotes[actId]={};
-  var n=activityNotes[actId];
-  if(!n.entries){
-    var allSecs=NOTE_SECTIONS.concat(PERSONAL_NOTE_SECTIONS);
-    var old={};var hasSomething=false;
-    allSecs.forEach(function(s){
-      var v=n[s.key];
-      if(typeof v==='string'&&v.trim()){old[s.key]=v.trim();hasSomething=true;}
-      else if(Array.isArray(v)&&v.length){old[s.key]=v.map(function(e){return e.text;}).join('\n\n');hasSomething=true;}
-    });
-    n.entries=hasSomething?[Object.assign({date:Date.now()},old)]:[];
-    allSecs.forEach(function(s){delete n[s.key];});
-    sv();
-  }
-  return n;
-}
-function rNoteEditor(a,editIdx,editEntry,onBack){
+var _noteBackFn=null,_nbPendingCommit=null;
+function rNoteEditor(a,day){
   document.getElementById('notes-title').textContent=a.emoji+' '+a.name;
   document.getElementById('btn-notes-back').style.display='block';
-  _noteBackFn=onBack||rNotesList;
+  var cats=(a._personal?PERSONAL_NOTE_SECTIONS:NOTE_SECTIONS).map(function(sec){return sec.key;});
+  var pages=_getNotePages(a.id);_flushNoteMigration();
+  var today=_dayKey(Date.now());
+  day=day||today;
+  // Pages you can flip to: every written page, plus today's
+  var days=pages.filter(_pageHasText).map(function(pg){return pg.day;});
+  if(days.indexOf(today)<0)days.push(today);
+  if(days.indexOf(day)<0)days.push(day);
+  days.sort();
+  var idx=days.indexOf(day);
+  var page=pages.find(function(x){return x.day===day;})||{day:day,updatedAt:0,blocks:[]};
+  // Edit a copy so empty paragraphs never get stored
+  var blocks=(page.blocks||[]).map(function(b){return {cat:cats.indexOf(b.cat)>-1?b.cat:cats[cats.length-1],text:b.text};});
+  if(!blocks.length)blocks.push({cat:cats[0],text:''});
+
   var body=document.getElementById('notes-body');body.innerHTML='';
-  var sections=a._personal?PERSONAL_NOTE_SECTIONS:NOTE_SECTIONS;
-  var data=_getNoteData(a.id);
-  var tas={};
-  var _editingIdx=editIdx!==undefined?editIdx:null;
-  sections.forEach(function(sec){
-    var wrap=document.createElement('div');wrap.className='notes-section';
-    var lbl=document.createElement('div');lbl.className='notes-section-lbl';
-    lbl.innerHTML='<span>'+sec.emoji+'</span><span>'+sec.label+'</span>';
-    var ta=document.createElement('textarea');ta.className='nta';ta.placeholder=sec.placeholder;
-    ta.value=editEntry?(editEntry[sec.key]||''):'';ta.style.minHeight='64px';
-    tas[sec.key]=ta;wrap.appendChild(lbl);wrap.appendChild(ta);body.appendChild(wrap);
-  });
-  var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;position:sticky;bottom:-26px;background:var(--bg);padding:12px 22px 26px;margin:16px -22px -26px;border-top:0.5px solid var(--bg3);';
-  var histBtn=document.createElement('button');histBtn.type='button';histBtn.className='btn btn-s';histBtn.style.cssText='flex:1;margin-top:0;';
-  function _refreshHistBtn(){var d=_getNoteData(a.id);histBtn.textContent=d.entries.length?'History ('+d.entries.length+')':'History';}
-  _refreshHistBtn();
-  histBtn.addEventListener('click',function(){_transitionNotesBody(function(){rNoteHistory(a,sections,_refreshHistBtn);});});
-  var saveBtn=document.createElement('button');saveBtn.type='button';saveBtn.className='btn btn-p';saveBtn.style.cssText='flex:1;margin-top:0;';saveBtn.textContent=_editingIdx!==null?'Update':'Save';
-  saveBtn.addEventListener('click',function(){
-    var entry={date:Date.now()};var hasContent=false;
-    sections.forEach(function(sec){var val=tas[sec.key].value.trim();entry[sec.key]=val;if(val)hasContent=true;});
-    if(!hasContent){showToast('Nothing to save',null);return;}
-    var d=_getNoteData(a.id);
-    if(_editingIdx!==null&&_editingIdx>=0&&_editingIdx<d.entries.length){
-      entry.date=d.entries[_editingIdx].date;
-      d.entries[_editingIdx]=entry;
-      _editingIdx=null;saveBtn.textContent='Save';
-    } else {
-      d.entries.unshift(entry);
-    }
+  var t=_dayTs(day),diff=Math.round((_dayTs(today)-t)/86400000);
+  var o={weekday:'short',month:'short',day:'numeric'};if(new Date(t).getFullYear()!==new Date().getFullYear())o.year='numeric';
+  var label=diff===0?'Today':diff===1?'Yesterday':new Date(t).toLocaleDateString('en-US',o);
+  var nav=document.createElement('div');nav.className='nb-nav';
+  nav.innerHTML='<button type="button" class="nb-flip" data-dir="-1" aria-label="Previous page"'+(idx>0?'':' disabled')+'>‹</button>'
+    +'<div class="nb-day"><div>'+label+'</div><div class="nb-pg">Page '+(idx+1)+' of '+days.length+'</div></div>'
+    +'<button type="button" class="nb-flip" data-dir="1" aria-label="Next page"'+(idx<days.length-1?'':' disabled')+'>›</button>';
+  body.appendChild(nav);
+  var list=document.createElement('div');list.className='nb-page';body.appendChild(list);
+  var addRow=document.createElement('button');addRow.type='button';addRow.className='nb-add';addRow.textContent='+ New paragraph';body.appendChild(addRow);
+
+  // Saves as you type (debounced); flipping, going back or closing saves at once
+  var saveT=null;
+  function commit(){
+    if(saveT){clearTimeout(saveT);saveT=null;}
+    var kept=blocks.filter(function(b){return b.text&&b.text.trim();}).map(function(b){return {cat:b.cat,text:b.text.replace(/\s+$/,'')};});
+    var pi=pages.indexOf(page);
+    if(kept.length){
+      if(pi>-1&&JSON.stringify(kept)===JSON.stringify(page.blocks))return;
+      page.blocks=kept;page.updatedAt=Date.now();
+      if(pi<0){pages.push(page);pages.sort(_byDay);}
+    } else if(pi>-1)pages.splice(pi,1);
+    else return;
     sv();
-    sections.forEach(function(sec){tas[sec.key].value='';});
-    _refreshHistBtn();
-    showToast('Saved',null);
-  });
-  row.appendChild(histBtn);row.appendChild(saveBtn);body.appendChild(row);
-}
-function rNoteHistory(a,sections,refreshHistBtn){
-  document.getElementById('notes-title').textContent=a.emoji+' '+a.name;
-  document.getElementById('btn-notes-back').style.display='block';
-  _noteBackFn=function(){_transitionNotesBody(function(){rNoteEditor(a);});};
-  var body=document.getElementById('notes-body');body.innerHTML='';
-  var data=_getNoteData(a.id);
-  var subHdr=document.createElement('div');subHdr.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;';subHdr.textContent='Saved notes';body.appendChild(subHdr);
-  if(!data.entries.length){
-    var emp=document.createElement('div');emp.style.cssText='color:var(--tx2);font-size:14px;text-align:center;padding:24px 0;';emp.textContent='No saved notes yet.';body.appendChild(emp);return;
   }
-  data.entries.forEach(function(entry,idx){
-    var card=document.createElement('div');card.style.cssText='background:var(--bg2);border-radius:14px;padding:14px;margin-bottom:12px;';
-    var dateStr=new Date(entry.date).toLocaleDateString([],{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-    var hdr=document.createElement('div');hdr.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;';
-    var hdrLeft=document.createElement('div');hdrLeft.style.cssText='font-size:12px;font-weight:600;color:var(--tx2);';hdrLeft.textContent=dateStr;
-    var hdrBtns=document.createElement('div');hdrBtns.style.cssText='display:flex;gap:8px;align-items:center;';
-    var editBtn=document.createElement('button');editBtn.type='button';editBtn.style.cssText='background:none;border:none;font-size:12px;font-weight:600;color:var(--gr);cursor:pointer;padding:0;';editBtn.textContent='Edit';
-    var del=document.createElement('button');del.type='button';del.style.cssText='background:none;border:none;font-size:10px;color:var(--tx3);cursor:pointer;padding:0;line-height:1;';del.textContent='🗑️';
-    (function(i,e){
-      editBtn.addEventListener('click',function(){
-        _transitionNotesBody(function(){
-          rNoteEditor(a,i,e,function(){_transitionNotesBody(function(){rNoteHistory(a,sections,refreshHistBtn);});});
-        });
-      });
-      del.addEventListener('click',function(){data.entries.splice(i,1);sv();if(refreshHistBtn)refreshHistBtn();_transitionNotesBody(function(){rNoteHistory(a,sections,refreshHistBtn);});});
-    })(idx,entry);
-    hdrBtns.appendChild(editBtn);hdrBtns.appendChild(del);
-    hdr.appendChild(hdrLeft);hdr.appendChild(hdrBtns);card.appendChild(hdr);
-    sections.forEach(function(sec){
-      if(!entry[sec.key]||!entry[sec.key].trim())return;
-      var r=document.createElement('div');r.style.cssText='margin-bottom:8px;';
-      r.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;">'+sec.emoji+' '+sec.label+'</div>'
-        +'<div style="font-size:13px;white-space:pre-wrap;word-break:break-word;line-height:1.5;">'+entry[sec.key].replace(/</g,'&lt;')+'</div>';
-      card.appendChild(r);
+  function queueSave(){if(saveT)clearTimeout(saveT);saveT=setTimeout(commit,500);}
+  _nbPendingCommit=commit;
+  _noteBackFn=function(){commit();rNotesList();};
+
+  function grow(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}
+  function prompt(b,i){var p=NOTE_CHIPS[b.cat].prompts;return p[i%p.length];}
+  function chipHTML(cat){var c=NOTE_CHIPS[cat];return '<span>'+c.emoji+'</span><span>'+c.label+'</span>';}
+  // Rows are built and focused synchronously so the keyboard stays up on phones
+  function focusAt(ta,c){ta.focus();if(c==null)c=ta.value.length;try{ta.setSelectionRange(c,c);}catch(_){}}
+  function makeRow(b){
+    var row=document.createElement('div');row.className='nb-row';
+    var chip=document.createElement('button');chip.type='button';chip.className='nb-chip';chip.innerHTML=chipHTML(b.cat);
+    chip.title='Tap to change category';
+    var ta=document.createElement('textarea');ta.className='nb-ta';ta.rows=1;ta.value=b.text;ta.placeholder=prompt(b,blocks.indexOf(b));
+    chip.addEventListener('click',function(){
+      b.cat=cats[(cats.indexOf(b.cat)+1)%cats.length];
+      chip.innerHTML=chipHTML(b.cat);ta.placeholder=prompt(b,blocks.indexOf(b));queueSave();
     });
-    body.appendChild(card);
+    ta.addEventListener('input',function(){b.text=ta.value;grow(ta);queueSave();});
+    ta.addEventListener('keydown',function(e){
+      var i=blocks.indexOf(b);
+      if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){
+        // New paragraph, same category; text after the cursor moves with it
+        e.preventDefault();
+        var pos=ta.selectionStart,nb={cat:b.cat,text:b.text.slice(ta.selectionEnd)};
+        b.text=b.text.slice(0,pos);ta.value=b.text;grow(ta);
+        blocks.splice(i+1,0,nb);
+        var nr=makeRow(nb);row.parentNode.insertBefore(nr.row,row.nextSibling);grow(nr.ta);
+        focusAt(nr.ta,0);queueSave();
+      } else if(e.key==='Backspace'&&ta.selectionStart===0&&ta.selectionEnd===0&&i>0){
+        // Join with the paragraph above
+        e.preventDefault();
+        var prev=blocks[i-1],at=prev.text.length,prevTa=row.previousSibling.querySelector('textarea');
+        prev.text=prev.text+b.text;prevTa.value=prev.text;blocks.splice(i,1);
+        row.remove();grow(prevTa);focusAt(prevTa,at);queueSave();
+      }
+    });
+    row.appendChild(chip);row.appendChild(ta);
+    return {row:row,ta:ta};
+  }
+  function render(){
+    list.innerHTML='';
+    blocks.forEach(function(b){var r=makeRow(b);list.appendChild(r.row);requestAnimationFrame(function(){grow(r.ta);});});
+  }
+  render();
+  addRow.addEventListener('click',function(){
+    var last=blocks[blocks.length-1],tas=list.querySelectorAll('textarea');
+    if(last&&!last.text.trim()){focusAt(tas[tas.length-1]);return;}
+    var nb={cat:last?last.cat:cats[0],text:''};blocks.push(nb);
+    var nr=makeRow(nb);list.appendChild(nr.row);grow(nr.ta);focusAt(nr.ta);
   });
+  function flip(dir){
+    var ni=idx+dir;if(ni<0||ni>=days.length)return;
+    commit();
+    rNoteEditor(a,days[ni]);
+    var pg=document.querySelector('#notes-body .nb-page');
+    if(pg)pg.style.animation=(dir>0?'nbInR':'nbInL')+' .22s ease';
+  }
+  nav.querySelectorAll('.nb-flip').forEach(function(btn){btn.addEventListener('click',function(){flip(+this.dataset.dir);});});
+  // Swipe sideways to turn the page
+  var sx=null,sy=null;
+  body.ontouchstart=function(e){var t0=e.touches[0];sx=t0.clientX;sy=t0.clientY;};
+  body.ontouchend=function(e){
+    if(sx==null)return;var t1=e.changedTouches[0],dx=t1.clientX-sx,dy=t1.clientY-sy;sx=null;
+    if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5)flip(dx<0?1:-1);
+  };
 }
 document.getElementById('btn-notes-close').addEventListener('click',closeNotes);
 document.getElementById('btn-notes-back').addEventListener('click',function(){_transitionNotesBody(function(){if(_noteBackFn)_noteBackFn();else rNotesList();});});
@@ -4432,9 +4522,7 @@ function openActInfo(actId,from){
     sessRow.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();openSess();}});
   } else {sessRow.style.cursor='default';sessRow.removeAttribute('role');sessRow.removeAttribute('tabindex');}
   // Notes row — same as on the project sheet
-  var _nd=activityNotes[actId]||{},_ne=(_nd.entries||[])[0]||{};
-  var _nPrev=(_ne.goals||_ne.ideas||_ne.blockers||_ne.general||'').trim().split('\n')[0];
-  var _nCnt=(_nd.entries||[]).length;
+  var _nSum=noteSummary(actId),_nPrev=_nSum.preview,_nCnt=_nSum.count;
   var notesRow=document.createElement('button');notesRow.type='button';
   notesRow.style.cssText='width:100%;display:flex;align-items:center;gap:12px;background:var(--bg2);border:none;border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;text-align:left;font-family:inherit;color:var(--tx);';
   notesRow.innerHTML='<span style="flex:1;min-width:0;"><span style="display:block;font-size:13px;font-weight:600;">Notes'+(_nCnt?' ('+_nCnt+')':'')+'</span>'
@@ -5863,7 +5951,7 @@ function saveProject(){
   });
   var deadline=document.getElementById('proj-deadline').value;
   var newProj={id:genUUID(),name:name,emoji:'🌲',cat:cat,kind:'project',notes:'',tasks:tasks,tags:[]};
-  if(notes)_getNoteData(newProj.id).entries.unshift({date:Date.now(),general:notes});
+  if(notes)_addNoteBlock(newProj.id,'general',notes);
   if(deadline)newProj.deadline=deadline;
   _normalizeSeed(newProj);
   myActs.push(newProj);
@@ -6041,9 +6129,7 @@ function showProjectInfo(id){
   html+='</div>';
   // Notes row — opens this project in the shared Notes screen
   migrateProjectNotes();
-  var _nd=activityNotes[a.id]||{},_ne=(_nd.entries||[])[0]||{};
-  var _nbPreview=(_ne.goals||_ne.ideas||_ne.blockers||_ne.general||'').trim().split('\n')[0];
-  var _nbCount=(_nd.entries||[]).length;
+  var _nbSum=noteSummary(a.id),_nbPreview=_nbSum.preview,_nbCount=_nbSum.count;
   html+='<button id="proj-notebook-btn" type="button" style="width:100%;display:flex;align-items:center;gap:12px;background:var(--bg2);border:none;border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;text-align:left;font-family:inherit;color:var(--tx);">';
   html+='<span style="flex:1;min-width:0;"><span style="display:block;font-size:13px;font-weight:600;">Notes'+(_nbCount?' ('+_nbCount+')':'')+'</span>';
   html+='<span style="display:block;font-size:12px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(_nbPreview?esc(_nbPreview):'Nothing written yet')+'</span></span>';
