@@ -4460,12 +4460,12 @@ function openActInfoEdit(actId,from){
   var sh=document.getElementById('ed-sh');
   _transitionSheet(sh,function(){sh.innerHTML='';
   var editCat=act.cat||CATS[0];
-  var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:13px;';title.textContent='Edit activity';sh.appendChild(title);
+  var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:13px;';title.textContent=isProject(act)?'Edit project':'Edit activity';sh.appendChild(title);
   var sf1=document.createElement('div');sf1.className='sf';
   var sl1=document.createElement('div');sl1.className='sl';sl1.textContent='Name';
   var nameRow=document.createElement('div');nameRow.style.cssText='display:flex;gap:8px;';
   var emojiInp=document.createElement('input');emojiInp.className='sinp';emojiInp.style.cssText='width:52px;text-align:center;flex-shrink:0;';emojiInp.maxLength=2;emojiInp.placeholder='🌱';emojiInp.value=act.emoji;
-  var nameInp=document.createElement('input');nameInp.className='sinp';nameInp.style.flex='1';nameInp.placeholder='Activity name';nameInp.value=act.name;
+  var nameInp=document.createElement('input');nameInp.className='sinp';nameInp.style.flex='1';nameInp.placeholder=isProject(act)?'Project name':'Activity name';nameInp.value=act.name;
   nameRow.appendChild(emojiInp);nameRow.appendChild(nameInp);sf1.appendChild(sl1);sf1.appendChild(nameRow);sh.appendChild(sf1);
   var sf2=document.createElement('div');sf2.className='sf';
   var sl2=document.createElement('div');sl2.className='sl';sl2.textContent='Category';
@@ -5983,7 +5983,7 @@ function showProjectInfo(id){
   var sh=document.getElementById('ed-sh');
   var html='';
   html+='<div style="text-align:center;margin-bottom:16px;">';
-  html+='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+a.name+'</div>';
+  html+='<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><span style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+esc(a.name)+'</span><button id="proj-edit-btn" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 5px;border-radius:6px;line-height:1;" title="Edit project">✏️</button></div>';
   // Deadline under the title: countdown + date; tap to change (date input sits invisibly on top)
   var _dl=deadlineLabel(a);
   html+='<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:6px;">';
@@ -6085,6 +6085,7 @@ function showProjectInfo(id){
   if(dlClear)dlClear.addEventListener('click',function(){delete a.deadline;sv();rMy();renderHomeDeadline();showProjectInfo(id);});
   wireAgoToggles(sh);
   sh.querySelector('#proj-notebook-btn').addEventListener('click',function(){closeEd();openNotes();rNoteEditor(a);});
+  sh.querySelector('#proj-edit-btn').addEventListener('click',function(){openActInfoEdit(id,'my');});
   document.getElementById('ed-ov').classList.add('on');
 }
 
