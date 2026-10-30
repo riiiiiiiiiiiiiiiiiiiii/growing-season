@@ -1332,18 +1332,35 @@ function offerDeadlineSchedule(a,onDone){
     existing.forEach(function(r){r.until=a.deadline;});sv();renderTodaySection();
     showToast('Schedule now runs until '+fmtDeadlineShort(a.deadline),null);return;
   }
-  var ov=document.getElementById('ed-ov'),sh=document.getElementById('ed-sh');
+  var ov=document.getElementById('ed-ov');
   var back=function(){if(onDone)onDone();else ov.classList.remove('on');};
   var days=getDeadlineDays(a);
+  routineForm({
+    title:'Make time for '+esc(a.name)+'?',
+    sub:'Due '+fmtDeadlineShort(a.deadline)+(days===0?' (today)':days===1?' (tomorrow)':' · '+days+' days away')+'. Add it to your schedule until then?',
+    days:[],hour:null,duration:1,
+    cancelLabel:'Not now',saveLabel:'Add to schedule',onCancel:back,
+    onSave:function(v){
+      calRoutines.push({id:genUUID(),actId:a.id,actName:a.name,actEmoji:a.emoji,cat:a.cat||'',days:v.days,hour:v.hour,duration:v.duration,until:a.deadline,fromDeadline:true});
+      sv();renderTodaySection();
+      showToast('Added to your schedule until '+fmtDeadlineShort(a.deadline),null);
+      back();
+    }
+  });
+}
+// Shared days / time / duration (/ end date) form, shown in the edit sheet
+function routineForm(o){
+  var ov=document.getElementById('ed-ov'),sh=document.getElementById('ed-sh');
   var lbl='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';
-  sh.innerHTML='<div style="font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:6px;">Make time for '+esc(a.name)+'?</div>'
-    +'<div style="font-size:13px;color:var(--tx2);line-height:1.5;margin-bottom:18px;">Due '+fmtDeadlineShort(a.deadline)+(days===0?' (today)':days===1?' (tomorrow)':' · '+days+' days away')+'. Add it to your schedule until then?</div>'
-    +'<div style="'+lbl+'">Which days?</div><div id="dls-quick" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>'
-    +'<div id="dls-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:20px;"></div>'
-    +'<div style="'+lbl+'">Time <span class="opt">optional</span></div><select id="dls-hour" class="sinp" style="width:100%;padding:8px;font-size:14px;margin-bottom:20px;"></select>'
-    +'<div style="'+lbl+'">Duration <span class="opt">optional</span></div><div id="dls-dur" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>'
-    +'<div style="display:flex;gap:8px;"><button id="dls-skip" class="btn btn-s" style="flex:1;margin-top:0;">Not now</button><button id="dls-add" class="btn btn-p" style="flex:1;margin-top:0;">Add to schedule</button></div>';
-  var sel=[],dayBtns=[],quick=[];
+  sh.innerHTML='<div style="font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:6px;">'+o.title+'</div>'
+    +(o.sub?'<div style="font-size:13px;color:var(--tx2);line-height:1.5;margin-bottom:18px;">'+o.sub+'</div>':'<div style="height:10px;"></div>')
+    +'<div style="'+lbl+'">Which days?</div><div id="rf-quick" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>'
+    +'<div id="rf-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:20px;"></div>'
+    +'<div style="'+lbl+'">Time <span class="opt">optional</span></div><select id="rf-hour" class="sinp" style="width:100%;padding:8px;font-size:14px;margin-bottom:20px;"></select>'
+    +'<div style="'+lbl+'">Duration <span class="opt">optional</span></div><div id="rf-dur" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>'
+    +(o.endDate?'<div style="'+lbl+'">Ends <span class="opt">optional</span></div><div style="display:flex;gap:6px;align-items:stretch;margin-bottom:20px;"><div class="dl-field"><div class="sinp dl-txt'+(o.until?'':' empty')+'">'+(o.until?fmtDeadline(o.until):'No end date')+'</div><input type="date" id="rf-until" aria-label="End date" value="'+(o.until||'')+'"></div><button id="rf-until-clear" type="button" style="padding:0 14px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx2);font-size:13px;font-weight:600;cursor:pointer;'+(o.until?'':'display:none;')+'">Clear</button></div>':'')
+    +'<div style="display:flex;gap:8px;"><button id="rf-cancel" class="btn btn-s" style="flex:1;margin-top:0;">'+o.cancelLabel+'</button><button id="rf-save" class="btn btn-p" style="flex:1;margin-top:0;">'+o.saveLabel+'</button></div>';
+  var sel=(o.days||[]).slice(),dayBtns=[],quick=[];
   function paint(){
     dayBtns.forEach(function(b,i){b.classList.toggle('on',sel.indexOf(i)>-1);});
     quick.forEach(function(q){q.el.classList.toggle('on',q.days.length===sel.length&&q.days.every(function(d){return sel.indexOf(d)>-1;}));});
@@ -1351,33 +1368,56 @@ function offerDeadlineSchedule(a,onDone){
   [{l:'Every day',days:[0,1,2,3,4,5,6]},{l:'Weekdays',days:[0,1,2,3,4]},{l:'Weekend',days:[5,6]}].forEach(function(q){
     var b=document.createElement('button');b.type='button';b.className='fb';b.style.cssText='font-family:inherit;cursor:pointer;';b.textContent=q.l;
     b.addEventListener('click',function(){var same=q.days.length===sel.length&&q.days.every(function(d){return sel.indexOf(d)>-1;});sel=same?[]:q.days.slice();paint();});
-    quick.push({el:b,days:q.days});sh.querySelector('#dls-quick').appendChild(b);
+    quick.push({el:b,days:q.days});sh.querySelector('#rf-quick').appendChild(b);
   });
   ['M','T','W','Th','F','S','S'].forEach(function(dn,i){
     var b=document.createElement('div');b.className='fb';b.textContent=dn;b.setAttribute('role','button');
     b.setAttribute('aria-label',['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][i]);
     b.style.cssText='min-width:0;text-align:center;padding-left:0;padding-right:0;cursor:pointer;';
     b.addEventListener('click',function(){var k=sel.indexOf(i);if(k>-1)sel.splice(k,1);else sel.push(i);paint();});
-    dayBtns.push(b);sh.querySelector('#dls-days').appendChild(b);
+    dayBtns.push(b);sh.querySelector('#rf-days').appendChild(b);
   });
-  var hs=sh.querySelector('#dls-hour');
-  hs.innerHTML='<option value="-1" selected>Any time</option>'+Array.from({length:24},function(_,h){return '<option value="'+h+'">'+(h<10?'0':'')+h+':00</option>';}).join('');
-  var dur=1;
+  paint();
+  var hs=sh.querySelector('#rf-hour');
+  hs.innerHTML='<option value="-1">Any time</option>'+Array.from({length:24},function(_,h){return '<option value="'+h+'">'+(h<10?'0':'')+h+':00</option>';}).join('');
+  hs.value=o.hour==null?'-1':String(o.hour);
+  var dur=o.duration===undefined?1:o.duration;
   [{v:null,l:'Open'},{v:.5,l:'30m'},{v:1,l:'1h'},{v:1.5,l:'1.5h'},{v:2,l:'2h'},{v:3,l:'3h'}].forEach(function(d){
     var b=document.createElement('div');b.className='fb'+(d.v===dur?' on':'');b.textContent=d.l;b.style.cursor='pointer';
-    b.addEventListener('click',function(){dur=d.v;sh.querySelectorAll('#dls-dur .fb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
-    sh.querySelector('#dls-dur').appendChild(b);
+    b.addEventListener('click',function(){dur=d.v;sh.querySelectorAll('#rf-dur .fb').forEach(function(x){x.classList.remove('on');});b.classList.add('on');});
+    sh.querySelector('#rf-dur').appendChild(b);
   });
-  sh.querySelector('#dls-skip').addEventListener('click',back);
-  sh.querySelector('#dls-add').addEventListener('click',function(){
+  var ui=sh.querySelector('#rf-until'),uc=sh.querySelector('#rf-until-clear');
+  if(ui){
+    wireDeadlineField(ui);
+    ui.addEventListener('change',function(){uc.style.display=this.value?'':'none';});
+    uc.addEventListener('click',function(){ui.value='';syncDeadlineField(ui);uc.style.display='none';});
+  }
+  sh.querySelector('#rf-cancel').addEventListener('click',o.onCancel);
+  sh.querySelector('#rf-save').addEventListener('click',function(){
     if(!sel.length){showToast('Pick at least one day',null);return;}
     var h=parseInt(hs.value);
-    calRoutines.push({id:genUUID(),actId:a.id,actName:a.name,actEmoji:a.emoji,cat:a.cat||'',days:sel.slice().sort(),hour:h>=0?h:null,duration:dur,until:a.deadline,fromDeadline:true});
-    sv();renderTodaySection();
-    showToast('Added to your schedule until '+fmtDeadlineShort(a.deadline),null);
-    back();
+    o.onSave({days:sel.slice().sort(),hour:h>=0?h:null,duration:dur,until:ui?(ui.value||null):undefined});
   });
   ov.classList.add('on');
+}
+// ✎ on a routine in the calendar: change its days, time, length or end date
+function editRoutine(r){
+  var ov=document.getElementById('ed-ov');
+  routineForm({
+    title:'Edit routine',sub:esc(r.actName),
+    days:r.days,hour:r.hour,duration:r.duration===undefined?1:r.duration,endDate:true,until:r.until||'',
+    cancelLabel:'Cancel',saveLabel:'Save',
+    onCancel:function(){ov.classList.remove('on');},
+    onSave:function(v){
+      r.days=v.days;r.hour=v.hour;r.duration=v.duration;
+      if(v.until)r.until=v.until;else delete r.until;
+      sv();ov.classList.remove('on');
+      if(document.getElementById('cal-ov').classList.contains('on'))renderCalWeek();
+      renderTodaySection();updateHomeNudge();
+      showToast('Routine updated',null);
+    }
+  });
 }
 function deadlineLabel(a){
   var d=getDeadlineDays(a);if(d===null)return null;
@@ -2613,18 +2653,16 @@ function renderCalWeek(){
         var dayOfWeek=d.getDay()===0?6:d.getDay()-1;
         var dayRoutines=_liveRoutines().filter(function(r){return _routineOnDay(r,d);});
         var cell=document.createElement('div');
-        // The date is the only child in flow, so it centres on the cell itself.
-        // The dots are taken out of flow and pinned near the bottom — inside the
-        // flex group they shifted the number up by half their height.
-        cell.style.cssText='position:relative;border-radius:10px;padding:6px 3px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .12s;min-height:54px;'+(isToday?'background:var(--co);':'background:var(--bg2);');
+        // Date with its dots right underneath, the pair centred in the cell
+        cell.style.cssText='position:relative;border-radius:10px;padding:6px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;transition:transform .12s;min-height:54px;'+(isToday?'background:var(--co);':'background:var(--bg2);');
         cell.addEventListener('touchstart',function(){cell.style.transform='scale(.94)';},{passive:true});
         cell.addEventListener('touchend',function(){cell.style.transform='';},{passive:true});
         var num=document.createElement('div');num.style.cssText='font-size:13px;font-weight:'+(isToday?'700':'500')+';color:'+(isToday?'#fff':'var(--tx)')+';line-height:1;';num.textContent=d.getDate();cell.appendChild(num);
-        var dotsWrap=document.createElement('div');dotsWrap.style.cssText='position:absolute;left:0;right:0;bottom:5px;display:flex;flex-wrap:wrap;justify-content:center;gap:2px;pointer-events:none;';
+        var dotsWrap=document.createElement('div');dotsWrap.style.cssText='display:flex;flex-wrap:wrap;justify-content:center;gap:2px;pointer-events:none;';
         var cats=[...new Set(daySess.map(function(s){var a=myActs.find(function(x){return x.id===s.actId;})||{};return a.cat||'';}))].slice(0,3);
         cats.forEach(function(cat){var dot=document.createElement('div');dot.style.cssText='width:5px;height:5px;border-radius:50%;background:'+(_CAT_DOT[cat]||'var(--gr)')+';flex-shrink:0;'+(isToday?'opacity:.85;':'');dotsWrap.appendChild(dot);});
         if(dayPlanned.length||dayRoutines.length){var pd=document.createElement('div');pd.style.cssText='width:5px;height:5px;border-radius:50%;border:1.5px solid '+(isToday?'rgba(255,255,255,.7)':'var(--co)')+';flex-shrink:0;';dotsWrap.appendChild(pd);}
-        cell.appendChild(dotsWrap);
+        if(dotsWrap.childNodes.length)cell.appendChild(dotsWrap);
         cell.addEventListener('click',function(){_transitionSheet(sh,function(){renderCalDay(d);});});
         grid.appendChild(cell);
       })(di);
@@ -2641,9 +2679,10 @@ function renderCalWeek(){
     _liveRt.forEach(function(r){
       var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--bg2);border-radius:10px;margin-bottom:6px;cursor:pointer;';
       var dayStr=r.days.length===7?'Every day':r.days.length===5&&r.days.every(function(d){return d<5;})?'Weekdays':r.days.map(function(d){return DNAMES_SHORT[d];}).join(', ');
-      if(r.until)dayStr+=(_dayKey(Date.now())>r.until?' · ended ':' · until ')+fmtDeadlineShort(r.until);
-      row.innerHTML='<span style="font-size:18px;">'+r.actEmoji+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+r.actName+'</div><div style="font-size:11px;color:var(--tx3);">'+dayStr+' · '+_fmtHour(r.hour)+'</div></div><button aria-label="Remove routine" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--tx3);padding:2px 4px;flex-shrink:0;">✕</button>';
-      row.querySelector('button').addEventListener('click',function(e){e.stopPropagation();if(!confirm('Remove this routine?'))return;calRoutines=calRoutines.filter(function(x){return x.id!==r.id;});sv();renderCalWeek();updateHomeNudge();});
+      var untilStr=r.until?(_dayKey(Date.now())>r.until?' · ended ':' · until ')+fmtDeadlineShort(r.until):'';
+      row.innerHTML='<span style="font-size:18px;">'+r.actEmoji+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+r.actName+'</div><div style="font-size:11px;color:var(--tx3);">'+dayStr+' · '+_fmtHour(r.hour)+untilStr+'</div></div><button class="rt-edit" aria-label="Edit routine" style="background:none;border:none;cursor:pointer;color:var(--tx3);padding:4px;flex-shrink:0;display:flex;">'+EDIT_PEN_SVG.replace('width="12" height="12"','width="14" height="14"')+'</button><button class="rt-del" aria-label="Remove routine" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--tx3);padding:2px 4px;flex-shrink:0;">✕</button>';
+      row.querySelector('.rt-edit').addEventListener('click',function(e){e.stopPropagation();editRoutine(r);});
+      row.querySelector('.rt-del').addEventListener('click',function(e){e.stopPropagation();if(!confirm('Remove this routine?'))return;calRoutines=calRoutines.filter(function(x){return x.id!==r.id;});sv();renderCalWeek();updateHomeNudge();});
       rtSec.appendChild(row);
     });
     body.appendChild(rtSec);
