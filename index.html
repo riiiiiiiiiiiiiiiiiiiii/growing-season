@@ -5274,8 +5274,7 @@ function rHist(){
 function openSessionDetail(s,a){
   var dur=s.hours>0?s.hours+'h '+s.mins+'min':s.mins+'min';
   var sh=document.getElementById('ed-sh');
-  sh.innerHTML='<div style="font-size:36px;text-align:center;margin-bottom:6px;">'+a.emoji+'</div>'
-    +'<div style="font-family:var(--serif);font-size:18px;font-weight:700;text-align:center;margin-bottom:2px;">'+a.name+'</div>'
+  sh.innerHTML='<div style="font-family:var(--serif);font-size:18px;font-weight:700;text-align:center;margin-bottom:2px;">'+a.name+'</div>'
     +'<div style="font-size:12px;color:var(--tx2);text-align:center;margin-bottom:16px;">'+new Date(s.date).toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'})+'</div>'
     +(s.rating
       ?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">'
@@ -5915,15 +5914,12 @@ function getTreeStage(hrs){
 function showProjectInfo(id){
   var a=myActs.find(function(x){return x.id===id;});
   if(!a)return;
-  var hrs=getHours(id);
-  var stage=getTreeStage(hrs);
   var tasks=getProjectTasks(a);
   var doneCount=tasks.filter(function(t){return t.done;}).length;
   var sh=document.getElementById('ed-sh');
   var html='';
   html+='<div style="text-align:center;margin-bottom:16px;">';
   html+='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+a.name+'</div>';
-  html+='<div style="font-size:11px;color:var(--tx3);margin-top:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Stage '+stage+'/4 · '+TREE_STAGE_LABELS[stage]+(stage<4?'':' · fully grown')+'</div>';
   var _dl=deadlineLabel(a);
   if(_dl)html+='<div style="font-size:12px;color:'+_dl.color+';margin-top:4px;font-weight:600;">⏳ '+_dl.text+'</div>';
   html+='</div>';
