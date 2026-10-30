@@ -2981,10 +2981,17 @@ function rNotesList(){
   // Activity tabs + list
   var tabRow=document.createElement('div');
   tabRow.style.cssText='display:flex;gap:6px;padding:10px 0 8px;';
-  var _notesTab='with';
-  var tabAll=document.createElement('div');tabAll.className='fb';tabAll.textContent='All activities';
-  var tabWith=document.createElement('div');tabWith.className='fb on';tabWith.textContent='With notes';
-  tabRow.appendChild(tabWith);tabRow.appendChild(tabAll);
+  migrateProjectNotes();
+  var _notesTab='all';
+  var _tabs=[{id:'all',label:'All activities'},{id:'skill',label:'Skills'},{id:'project',label:'Projects'}].map(function(t){
+    var el=document.createElement('div');el.className='fb'+(t.id===_notesTab?' on':'');el.textContent=t.label;
+    el.addEventListener('click',function(){
+      if(_notesTab===t.id)return;_notesTab=t.id;
+      _tabs.forEach(function(x){x.classList.toggle('on',x===el);});
+      renderNotesList();animateIn(listWrap);
+    });
+    tabRow.appendChild(el);return el;
+  });
   body.appendChild(tabRow);
 
   var listWrap=document.createElement('div');body.appendChild(listWrap);
@@ -2995,20 +3002,33 @@ function rNotesList(){
     if(!all.length){
       var emp=document.createElement('p');emp.style.cssText='color:var(--tx2);font-size:14px;text-align:center;padding:16px 0;';emp.textContent='Plant some seeds first to add notes.';listWrap.appendChild(emp);return;
     }
-    var filtered=_notesTab==='with'?all.filter(function(a){return _noteHas(activityNotes[a.id]||{},NOTE_SECTIONS);}):all;
+    var filtered=_notesTab==='skill'?all.filter(isSkill):_notesTab==='project'?all.filter(isProject):all;
     if(!filtered.length){
-      var none=document.createElement('p');none.style.cssText='color:var(--tx2);font-size:13px;text-align:center;padding:20px 0;';none.textContent='No activities with notes yet.';listWrap.appendChild(none);return;
+      var none=document.createElement('p');none.style.cssText='color:var(--tx2);font-size:13px;text-align:center;padding:20px 0;';none.textContent=_notesTab==='project'?'No projects yet.':'No skills yet.';listWrap.appendChild(none);return;
     }
-    filtered.forEach(function(a){
+    // Activities with notes first, most recently written at the top
+    var rows=filtered.map(function(a,i){
       var n=activityNotes[a.id]||{};
-      var hasNotes=_noteHas(n,NOTE_SECTIONS);
+      return {a:a,n:n,has:_noteHas(n,NOTE_SECTIONS),last:_noteLastDate(n),i:i};
+    });
+    rows.sort(function(x,y){
+      if(x.has!==y.has)return x.has?-1:1;
+      if(x.has&&x.last!==y.last)return y.last-x.last;
+      return x.i-y.i;
+    });
+    rows.forEach(function(r){
+      var a=r.a,n=r.n,hasNotes=r.has;
       var preview=_notePreview(n,NOTE_SECTIONS);
+      var cnt=n.entries?n.entries.length:(hasNotes?1:0);
       var card=document.createElement('div');card.className='notes-act-card';
       if(a._archived)card.style.opacity='.6';
       card.innerHTML='<div class="notes-act-em">'+a.emoji+'</div>'
         +'<div style="flex:1;min-width:0;">'
-          +'<div class="notes-act-name">'+a.name+(a._archived?' <span style="font-size:10px;color:var(--tx3);">(archived)</span>':'')+'</div>'
-          +(hasNotes?'<div class="notes-act-preview">'+preview+'</div>':'<div class="notes-act-preview" style="color:var(--bg3);">No notes yet</div>')
+          +'<div class="notes-act-name">'+esc(a.name)+(a._archived?' <span style="font-size:10px;color:var(--tx3);">(archived)</span>':'')+'</div>'
+          +(hasNotes
+            ?'<div class="notes-act-preview">'+esc(preview)+'</div>'
+             +'<div style="font-size:11px;color:var(--gr);font-weight:600;margin-top:3px;">📝 '+cnt+' note'+(cnt===1?'':'s')+(r.last?' · '+fmtDaysAgo(r.last):'')+'</div>'
+            :'<div class="notes-act-preview" style="color:var(--bg3);">No notes yet</div>')
         +'</div>'
         +'<span style="font-size:16px;color:var(--tx3);">›</span>';
       card.addEventListener('click',function(){_transitionNotesBody(function(){rNoteEditor(a);});});
@@ -3016,9 +3036,22 @@ function rNotesList(){
     });
   }
 
-  tabWith.addEventListener('click',function(){if(_notesTab==='with')return;_notesTab='with';tabWith.classList.add('on');tabAll.classList.remove('on');renderNotesList();animateIn(listWrap);});
-  tabAll.addEventListener('click',function(){if(_notesTab==='all')return;_notesTab='all';tabAll.classList.add('on');tabWith.classList.remove('on');renderNotesList();animateIn(listWrap);});
   renderNotesList();
+}
+function _noteLastDate(n){
+  return (n&&n.entries||[]).reduce(function(m,e){return Math.max(m,e.date||0);},0);
+}
+// Projects used to keep a separate free-text notebook (a.notes). Fold any
+// such text into the shared Notes as a 'General' entry, once.
+function migrateProjectNotes(){
+  var changed=false;
+  myActs.concat(archivedActs).forEach(function(a){
+    if(!isProject(a)||!a.notes||!a.notes.trim())return;
+    var d=_getNoteData(a.id),txt=a.notes.trim();
+    if(!d.entries.some(function(e){return (e.general||'').trim()===txt;}))d.entries.push({date:Date.now(),general:txt});
+    a.notes='';changed=true;
+  });
+  if(changed)sv();
 }
 var _noteBackFn=null;
 function _getNoteData(actId){
@@ -5792,7 +5825,8 @@ function saveProject(){
     if(t&&tasks.length<MAX_TASKS_PER_PROJECT)tasks.push({id:genUUID(),text:t.slice(0,80),done:false,doneAt:null,createdAt:Date.now()});
   });
   var deadline=document.getElementById('proj-deadline').value;
-  var newProj={id:genUUID(),name:name,emoji:'🌲',cat:cat,kind:'project',notes:notes,tasks:tasks,tags:[]};
+  var newProj={id:genUUID(),name:name,emoji:'🌲',cat:cat,kind:'project',notes:'',tasks:tasks,tags:[]};
+  if(notes)_getNoteData(newProj.id).entries.unshift({date:Date.now(),general:notes});
   if(deadline)newProj.deadline=deadline;
   _normalizeSeed(newProj);
   myActs.push(newProj);
@@ -5959,11 +5993,14 @@ function showProjectInfo(id){
   html+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(_lastTs?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
   if(_lastTs)html+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span>'+agoToggleHTML(_lastTs)+'</div>';
   html+='</div>';
-  // Notebook entry — opens the project's own notes page
-  var _nbPreview=(a.notes||'').trim().split('\n')[0];
+  // Notes row — opens this project in the shared Notes screen
+  migrateProjectNotes();
+  var _nd=activityNotes[a.id]||{},_ne=(_nd.entries||[])[0]||{};
+  var _nbPreview=(_ne.goals||_ne.ideas||_ne.blockers||_ne.general||'').trim().split('\n')[0];
+  var _nbCount=(_nd.entries||[]).length;
   html+='<button id="proj-notebook-btn" type="button" style="width:100%;display:flex;align-items:center;gap:12px;background:var(--bg2);border:none;border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;text-align:left;font-family:inherit;color:var(--tx);">';
   html+='<span style="font-size:20px;line-height:1;">📓</span>';
-  html+='<span style="flex:1;min-width:0;"><span style="display:block;font-size:13px;font-weight:600;">Notebook</span>';
+  html+='<span style="flex:1;min-width:0;"><span style="display:block;font-size:13px;font-weight:600;">Notes'+(_nbCount?' ('+_nbCount+')':'')+'</span>';
   html+='<span style="display:block;font-size:12px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(_nbPreview?esc(_nbPreview):'Nothing written yet')+'</span></span>';
   html+='<span style="font-size:18px;color:var(--tx3);line-height:1;">›</span></button>';
   sh.innerHTML=html;
@@ -6012,33 +6049,7 @@ function showProjectInfo(id){
   var dlClear=sh.querySelector('#proj-deadline-clear');
   if(dlClear)dlClear.addEventListener('click',function(){delete a.deadline;sv();rMy();showProjectInfo(id);});
   wireAgoToggles(sh);
-  sh.querySelector('#proj-notebook-btn').addEventListener('click',function(){showProjectNotebook(id);});
-  document.getElementById('ed-ov').classList.add('on');
-}
-var NOTEBOOK_MAX=10000;
-function showProjectNotebook(id){
-  var a=myActs.find(function(x){return x.id===id;});
-  if(!a)return;
-  var sh=document.getElementById('ed-sh');
-  var html='';
-  html+='<div style="text-align:center;margin-bottom:16px;">';
-  html+='<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;font-weight:600;">📓 Notebook</div>';
-  html+='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;margin-top:6px;">'+esc(a.name)+'</div>';
-  html+='</div>';
-  html+='<textarea id="proj-notebook" class="nta" maxlength="'+NOTEBOOK_MAX+'" style="min-height:50vh;line-height:1.55;" placeholder="Ideas, plans, links, anything for this project...">'+esc(a.notes||'')+'</textarea>';
-  sh.innerHTML=html;
-  var ta=sh.querySelector('#proj-notebook');
-  // Saves as you type (debounced), so closing the sheet any way keeps the text
-  var _t=null;
-  var save=function(){
-    if(_t){clearTimeout(_t);_t=null;}
-    var v=ta.value.slice(0,NOTEBOOK_MAX);
-    if(v!==a.notes){a.notes=v;sv();}
-  };
-  ta.addEventListener('input',function(){if(_t)clearTimeout(_t);_t=setTimeout(save,600);});
-  ta.addEventListener('blur',save);
-  var backBtn=document.createElement('button');backBtn.className='btn btn-p';backBtn.style.marginTop='12px';backBtn.textContent='Done';
-  backBtn.addEventListener('click',function(){save();showProjectInfo(id);});sh.appendChild(backBtn);
+  sh.querySelector('#proj-notebook-btn').addEventListener('click',function(){closeEd();openNotes();rNoteEditor(a);});
   document.getElementById('ed-ov').classList.add('on');
 }
 
