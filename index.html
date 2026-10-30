@@ -1073,6 +1073,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="sf"><div class="sl">Category</div><div class="so" id="proj-cat-opts"></div></div>
       <div class="sf" id="proj-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:stretch;"><input class="sinp" id="proj-custom-cat" placeholder="e.g. Home, Career..." style="flex:1;min-width:0;"><button id="btn-proj-cat-save" type="button" style="padding:0 16px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save</button></div></div>
       <div class="sf"><div class="sl">Notes <span class="opt">optional</span></div><textarea class="nta" id="proj-notes" placeholder="What is this project about?" style="min-height:60px;"></textarea></div>
+      <div class="sf"><div class="sl">Deadline <span class="opt">optional</span></div><input type="date" class="sinp" id="proj-deadline"></div>
       <div class="sf"><div class="sl">First point <span class="opt">optional</span></div><input class="sinp" id="proj-first-task" placeholder="e.g. Draft the onboarding copy" maxlength="80"></div>
       <button class="btn btn-p" id="btn-proj-save" style="margin-top:4px;">🌲 Plant tree</button>
       <button class="btn btn-s" id="btn-proj-cancel" style="margin-top:6px;width:100%;">Cancel</button>
@@ -1217,6 +1218,19 @@ function isProject(a){return !!(a&&a.kind==='project');}
 function isSkill(a){return !isProject(a);}
 function getProjectTasks(a){return isProject(a)&&Array.isArray(a.tasks)?a.tasks:[];}
 function getProjectDoneCount(a){return getProjectTasks(a).filter(function(t){return t&&t.done;}).length;}
+// Deadline is a local 'YYYY-MM-DD' string, or absent.
+function getDeadlineDays(a){
+  if(!isProject(a)||!a.deadline)return null;
+  var p=a.deadline.split('-');if(p.length!==3)return null;
+  var due=new Date(+p[0],+p[1]-1,+p[2]),now=new Date();
+  var today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  return Math.round((due-today)/86400000);
+}
+function deadlineLabel(a){
+  var d=getDeadlineDays(a);if(d===null)return null;
+  var text=d<0?'Overdue by '+(-d)+' day'+(d===-1?'':'s'):d===0?'Due today':d===1?'Due tomorrow':d+' days left';
+  return {text:text,color:d<0?'var(--co2)':d<=3?'var(--su2)':'var(--tx3)'};
+}
 myActs.forEach(_normalizeSeed);
 archivedActs.forEach(_normalizeSeed);
 var PALETTES={
@@ -4963,7 +4977,8 @@ function _rMyBody(el,allActs){
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
       var streak=getStreakAt(a.id,Date.now());
       var _kindIcon=isProject(a)?'🌲':'🌱';
-      inner.innerHTML='<div style="flex:1;"><div class="mc-n"><span style="margin-right:6px;font-size:14px;opacity:.85;">'+_kindIcon+'</span>'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</div></div>'
+      var _dl=deadlineLabel(a);
+      inner.innerHTML='<div style="flex:1;"><div class="mc-n"><span style="margin-right:6px;font-size:14px;opacity:.85;">'+_kindIcon+'</span>'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h'+(_dl?' · <span style="color:'+_dl.color+';font-weight:600;">'+_dl.text+'</span>':'')+'</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'')
         +'<span style="font-size:11px;color:var(--tx3);">'+STAGE_LABELS[getStage(getHours(a.id))]+'</span>'
@@ -5603,6 +5618,7 @@ function openAdd(){
   var pn=document.getElementById('proj-name');if(pn)pn.value='';
   var pnt=document.getElementById('proj-notes');if(pnt)pnt.value='';
   var pft=document.getElementById('proj-first-task');if(pft)pft.value='';
+  var pdl=document.getElementById('proj-deadline');if(pdl)pdl.value='';
 
   // Search wiring
   var si=document.getElementById('lib-search');si.value='';
@@ -5698,7 +5714,9 @@ function saveProject(){
   var firstTaskText=document.getElementById('proj-first-task').value.trim();
   var tasks=[];
   if(firstTaskText)tasks.push({id:genUUID(),text:firstTaskText.slice(0,80),done:false,doneAt:null,createdAt:Date.now()});
+  var deadline=document.getElementById('proj-deadline').value;
   var newProj={id:genUUID(),name:name,emoji:'🌲',cat:cat,kind:'project',notes:notes,tasks:tasks,tags:[]};
+  if(deadline)newProj.deadline=deadline;
   _normalizeSeed(newProj);
   myActs.push(newProj);
   pushFeedEvent('plant',name,'🌲',null);
@@ -5707,6 +5725,7 @@ function saveProject(){
   document.getElementById('proj-name').value='';
   document.getElementById('proj-notes').value='';
   document.getElementById('proj-first-task').value='';
+  document.getElementById('proj-deadline').value='';
   // Navigate to plot so user sees the new tree
   nav('my');
   showToast('🌲 Tree planted!',null);
@@ -5828,7 +5847,15 @@ function showProjectInfo(id){
   html+='<div style="text-align:center;margin-bottom:16px;">';
   html+='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+a.name+'</div>';
   html+='<div style="font-size:11px;color:var(--tx3);margin-top:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Stage '+stage+'/4 · '+TREE_STAGE_LABELS[stage]+(nextH?' · '+Math.max(0,Math.round((nextH-hrs)*10)/10)+'h to next':' · fully grown')+'</div>';
+  var _dl=deadlineLabel(a);
+  if(_dl)html+='<div style="font-size:12px;color:'+_dl.color+';margin-top:4px;font-weight:600;">⏳ '+_dl.text+'</div>';
   html+='</div>';
+  // Deadline
+  html+='<div style="margin-bottom:16px;">';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Deadline</div>';
+  html+='<div style="display:flex;gap:6px;align-items:stretch;"><input type="date" id="proj-deadline-edit" class="sinp" style="flex:1;min-width:0;" value="'+(a.deadline||'')+'">';
+  if(a.deadline)html+='<button id="proj-deadline-clear" type="button" style="padding:0 14px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx2);font-size:13px;font-weight:600;cursor:pointer;">Clear</button>';
+  html+='</div></div>';
   // Notes
   html+='<div style="margin-bottom:16px;">';
   html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Notes</div>';
@@ -5892,6 +5919,17 @@ function showProjectInfo(id){
     addBtn.addEventListener('click',addNew);
     sh.querySelector('#proj-new-task').addEventListener('keypress',function(e){if(e.key==='Enter'){e.preventDefault();addNew();}});
   }
+  // Deadline
+  var dlEl=sh.querySelector('#proj-deadline-edit');
+  if(dlEl){
+    dlEl.addEventListener('change',function(){
+      var v=this.value;
+      if(v)a.deadline=v;else delete a.deadline;
+      sv();rMy();showProjectInfo(id);
+    });
+  }
+  var dlClear=sh.querySelector('#proj-deadline-clear');
+  if(dlClear)dlClear.addEventListener('click',function(){delete a.deadline;sv();rMy();showProjectInfo(id);});
   // Notes autosave on blur
   var notesEl=sh.querySelector('#proj-notes-edit');
   if(notesEl){
