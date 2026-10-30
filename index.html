@@ -752,7 +752,6 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="v2-sec-hdr v2-sec-hdr-clickable" data-action="open-today"><span>Today's list<span class="v2-chev">›</span></span></div>
       <div id="today-section"></div>
       <div id="pc-wrap"></div>
-      <div id="home-deadline"></div>
     </section>
     <div id="streak-wrap" style="display:none;"></div>
     <!-- THIS WEEK'S FOCUS -->
@@ -1296,7 +1295,7 @@ function deadlineLineHTML(a){
   return h+'</div>';
 }
 function wireDeadlineLine(root,a,rerender){
-  var after=function(){sv();rMy();renderHomeDeadline();rerender();};
+  var after=function(){sv();rMy();rerender();};
   var inp=root.querySelector('.seed-deadline-edit');
   wireDeadlineField(inp);
   if(inp)inp.addEventListener('change',function(){if(this.value)a.deadline=this.value;else delete a.deadline;after();});
@@ -1971,18 +1970,6 @@ function showTodayDetail(todaySess){
   document.getElementById('ed-ov').classList.add('on');
 }
 
-// One quiet line under Today's list: the nearest deadline (skill or project), plus how many others.
-function renderHomeDeadline(){
-  var el=document.getElementById('home-deadline');if(!el)return;
-  var due=myActs.filter(function(a){return getDeadlineDays(a)!==null;})
-    .sort(function(x,y){return getDeadlineDays(x)-getDeadlineDays(y);});
-  if(!due.length){el.innerHTML='';return;}
-  var a=due[0],dl=deadlineLabel(a);
-  el.innerHTML='<button type="button" style="display:flex;align-items:center;gap:6px;width:100%;background:none;border:none;padding:10px 2px 0;font-family:inherit;font-size:12px;cursor:pointer;text-align:left;color:var(--tx2);">'
-    +'<span>⏳</span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(a.name)+' · <span style="color:'+dl.color+';font-weight:600;">'+dl.text+'</span>'
-    +(due.length>1?' <span style="color:var(--tx3);">· +'+(due.length-1)+' more</span>':'')+'</span></button>';
-  el.firstChild.addEventListener('click',function(){openActInfo(a.id,'home');});
-}
 function rHome(){
   // ── Session lock: when a session is in progress, take over the home
   if(active){
@@ -2032,7 +2019,6 @@ function rHome(){
   var ipW=document.getElementById('ip-wrap'), pcW=document.getElementById('pc-wrap');
   // Render Today section (schedule or empty) + tasks from focused projects
   renderTodaySection();
-  renderHomeDeadline();
   // Render This week's focus (chips) into its own slot under the weekly overview
   renderWeekFocus();
   if(active){
@@ -4184,9 +4170,7 @@ function openTodayOverview(){
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
   var now=new Date();
   var mid=new Date(now);mid.setHours(0,0,0,0);
-  var dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
   var todaySess=sessions.filter(function(s){return new Date(s.date).toDateString()===now.toDateString();});
-  var todayMins=todaySess.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
   var scheduled=_getTodayScheduled();
   var focusActs=_focusedActs();
   var focusProjects=focusActs.filter(isProject);
@@ -4200,8 +4184,7 @@ function openTodayOverview(){
   hdr.style.cssText='margin-bottom:18px;display:flex;align-items:center;gap:12px;';
   var hdrText=document.createElement('div');
   hdrText.style.cssText='flex:1;min-width:0;';
-  hdrText.innerHTML='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.005em;line-height:1.2;">Today</div>'
-    +'<div style="font-size:12px;color:var(--tx3);margin-top:4px;font-weight:500;letter-spacing:.02em;">'+dateStr+' · '+todaySess.length+' session'+(todaySess.length!==1?'s':'')+' · '+(todayMins>=60?Math.floor(todayMins/60)+'h '+(todayMins%60)+'m':todayMins+'m')+'</div>';
+  hdrText.innerHTML='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.005em;line-height:1.2;">Today</div>';
   hdr.appendChild(hdrText);
   // Shortcut straight to the calendar — this sheet is where you land when
   // you're thinking about the day, so the month view is one tap away.
@@ -6036,8 +6019,8 @@ function showProjectInfo(id){
   sh.innerHTML=html;
   // Finish: a prominent button once every step is ticked, otherwise a quiet link under Start / Log
   var finish=function(){
-    a.finishedAt=Date.now();sv();rMy();renderHomeDeadline();showProjectInfo(id);
-    showToast('🌳 '+a.name+' finished',function(){delete a.finishedAt;sv();rMy();renderHomeDeadline();if(document.getElementById('ed-ov').classList.contains('on'))showProjectInfo(id);});
+    a.finishedAt=Date.now();sv();rMy();showProjectInfo(id);
+    showToast('🌳 '+a.name+' finished',function(){delete a.finishedAt;sv();rMy();if(document.getElementById('ed-ov').classList.contains('on'))showProjectInfo(id);});
   };
   var allDone=tasks.length>0&&doneCount===tasks.length;
   if(!isFinished(a)){
@@ -6055,7 +6038,7 @@ function showProjectInfo(id){
       finLink.addEventListener('click',finish);sh.appendChild(finLink);
     }
   } else {
-    sh.querySelector('#proj-reopen').addEventListener('click',function(){delete a.finishedAt;sv();rMy();renderHomeDeadline();showProjectInfo(id);});
+    sh.querySelector('#proj-reopen').addEventListener('click',function(){delete a.finishedAt;sv();rMy();showProjectInfo(id);});
   }
   // Re-render without losing the steps list's scroll position (or jump to the end after adding)
   var rerender=function(toEnd){
