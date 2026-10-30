@@ -5373,15 +5373,12 @@ function openSessionDetail(s,a){
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-top:8px;';
   var editBtn=document.createElement('button');editBtn.className='btn btn-p';editBtn.style.cssText='flex:1;margin-top:0;';editBtn.textContent='Edit';
   editBtn.addEventListener('click',function(){closeEd();openSessionEdit(s,a);});
-  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.cssText='flex:1;margin-top:0;';closeBtn.textContent='Close';
-  closeBtn.addEventListener('click',closeEd);
-  row.appendChild(editBtn);row.appendChild(closeBtn);sh.appendChild(row);
-  var deleteBtn=document.createElement('button');deleteBtn.className='btn btn-s';deleteBtn.style.cssText='width:100%;margin-top:6px;color:var(--co);border-color:var(--co);';deleteBtn.textContent='Remove this session';
+  var deleteBtn=document.createElement('button');deleteBtn.className='btn btn-s';deleteBtn.style.cssText='flex:1;margin-top:0;color:var(--co);border-color:var(--co);';deleteBtn.textContent='Delete';
   deleteBtn.addEventListener('click',function(){
     var idx=sessions.findIndex(function(x){return x.date===s.date&&x.actId===s.actId;});
     if(idx>-1){var removed=sessions.splice(idx,1)[0];_tombstone(removed.id);sv();rHist();closeEd();showToast('Session removed',function(){sessions.splice(idx,0,removed);if(removed.id)_untombstone(removed.id);sv();rHist();});}
   });
-  sh.appendChild(deleteBtn);
+  row.appendChild(editBtn);row.appendChild(deleteBtn);sh.appendChild(row);
   document.getElementById('ed-ov').classList.add('on');
 }
 
