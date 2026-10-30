@@ -5855,11 +5855,6 @@ function showProjectInfo(id){
   html+='<div style="display:flex;gap:6px;align-items:stretch;"><input type="date" id="proj-deadline-edit" class="sinp" style="flex:1;min-width:0;" value="'+(a.deadline||'')+'">';
   if(a.deadline)html+='<button id="proj-deadline-clear" type="button" style="padding:0 14px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx2);font-size:13px;font-weight:600;cursor:pointer;">Clear</button>';
   html+='</div></div>';
-  // Notes
-  html+='<div style="margin-bottom:16px;">';
-  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Notes</div>';
-  html+='<textarea id="proj-notes-edit" class="nta" style="min-height:60px;" placeholder="What is this project about?">'+(a.notes||'').replace(/</g,'&lt;')+'</textarea>';
-  html+='</div>';
   // Points
   html+='<div style="margin-bottom:14px;">';
   html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Points ('+doneCount+'/'+tasks.length+(tasks.length>=MAX_TASKS_PER_PROJECT?' · max':'')+')</div>';
@@ -5886,6 +5881,13 @@ function showProjectInfo(id){
   html+='<div style="background:var(--bg2);border-radius:12px;padding:10px 14px;margin-bottom:16px;font-size:13px;">';
   html+='<div style="display:flex;justify-content:space-between;"><span style="color:var(--tx3);">Total time</span><span style="font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
   html+='<div style="display:flex;justify-content:space-between;margin-top:6px;"><span style="color:var(--tx3);">Sessions</span><span style="font-weight:600;">'+actSess.length+'</span></div></div>';
+  // Notebook entry — opens the project's own notes page
+  var _nbPreview=(a.notes||'').trim().split('\n')[0];
+  html+='<button id="proj-notebook-btn" type="button" style="width:100%;display:flex;align-items:center;gap:12px;background:var(--bg2);border:none;border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;text-align:left;font-family:inherit;color:var(--tx);">';
+  html+='<span style="font-size:20px;line-height:1;">📓</span>';
+  html+='<span style="flex:1;min-width:0;"><span style="display:block;font-size:13px;font-weight:600;">Notebook</span>';
+  html+='<span style="display:block;font-size:12px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(_nbPreview?esc(_nbPreview):'Nothing written yet')+'</span></span>';
+  html+='<span style="font-size:18px;color:var(--tx3);line-height:1;">›</span></button>';
   sh.innerHTML=html;
   // Start / log buttons
   var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start working';
@@ -5930,14 +5932,33 @@ function showProjectInfo(id){
   }
   var dlClear=sh.querySelector('#proj-deadline-clear');
   if(dlClear)dlClear.addEventListener('click',function(){delete a.deadline;sv();rMy();showProjectInfo(id);});
-  // Notes autosave on blur
-  var notesEl=sh.querySelector('#proj-notes-edit');
-  if(notesEl){
-    notesEl.addEventListener('blur',function(){
-      var newNotes=this.value.slice(0,2000);
-      if(newNotes!==a.notes){a.notes=newNotes;sv();}
-    });
-  }
+  sh.querySelector('#proj-notebook-btn').addEventListener('click',function(){showProjectNotebook(id);});
+  document.getElementById('ed-ov').classList.add('on');
+}
+var NOTEBOOK_MAX=10000;
+function showProjectNotebook(id){
+  var a=myActs.find(function(x){return x.id===id;});
+  if(!a)return;
+  var sh=document.getElementById('ed-sh');
+  var html='';
+  html+='<div style="text-align:center;margin-bottom:16px;">';
+  html+='<div style="font-size:11px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;font-weight:600;">📓 Notebook</div>';
+  html+='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;margin-top:6px;">'+esc(a.name)+'</div>';
+  html+='</div>';
+  html+='<textarea id="proj-notebook" class="nta" maxlength="'+NOTEBOOK_MAX+'" style="min-height:50vh;line-height:1.55;" placeholder="Ideas, plans, links, anything for this project...">'+esc(a.notes||'')+'</textarea>';
+  sh.innerHTML=html;
+  var ta=sh.querySelector('#proj-notebook');
+  // Saves as you type (debounced), so closing the sheet any way keeps the text
+  var _t=null;
+  var save=function(){
+    if(_t){clearTimeout(_t);_t=null;}
+    var v=ta.value.slice(0,NOTEBOOK_MAX);
+    if(v!==a.notes){a.notes=v;sv();}
+  };
+  ta.addEventListener('input',function(){if(_t)clearTimeout(_t);_t=setTimeout(save,600);});
+  ta.addEventListener('blur',save);
+  var backBtn=document.createElement('button');backBtn.className='btn btn-p';backBtn.style.marginTop='12px';backBtn.textContent='Done';
+  backBtn.addEventListener('click',function(){save();showProjectInfo(id);});sh.appendChild(backBtn);
   document.getElementById('ed-ov').classList.add('on');
 }
 
