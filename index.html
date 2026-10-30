@@ -878,7 +878,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       </div>
     </div>
     <div class="fl" id="log-tasks-wrap" style="display:none;">
-      <div class="fl-lbl">Points completed <span class="opt">optional</span></div>
+      <div class="fl-lbl">Steps completed <span class="opt">optional</span></div>
       <div id="log-tasks-list"></div>
     </div>
     <div class="fl">
@@ -1074,7 +1074,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="sf" id="proj-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:stretch;"><input class="sinp" id="proj-custom-cat" placeholder="e.g. Home, Career..." style="flex:1;min-width:0;"><button id="btn-proj-cat-save" type="button" style="padding:0 16px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save</button></div></div>
       <div class="sf"><div class="sl">Notes <span class="opt">optional</span></div><textarea class="nta" id="proj-notes" placeholder="What is this project about?" style="min-height:60px;"></textarea></div>
       <div class="sf"><div class="sl">Deadline <span class="opt">optional</span></div><input type="date" class="sinp" id="proj-deadline"></div>
-      <div class="sf"><div class="sl">Points <span class="opt">optional</span></div><div id="proj-task-inputs"></div></div>
+      <div class="sf"><div class="sl">Steps <span class="opt">optional</span></div><div id="proj-task-inputs"></div></div>
       <button class="btn btn-p" id="btn-proj-save" style="margin-top:4px;">🌲 Plant tree</button>
       <button class="btn btn-s" id="btn-proj-cancel" style="margin-top:6px;width:100%;">Cancel</button>
     </div>
@@ -5698,7 +5698,7 @@ function switchAddKind(kind){
 function renderProjectCats(selected){
   renderCatPicker({wrap:document.getElementById('proj-cat-opts'),customWrap:document.getElementById('proj-custom-wrap'),inputId:'proj-custom-cat',selected:selected,deletable:false});
 }
-// Points list in the new-project form: one input per point, + on the last
+// Steps list in the new-project form: one input per step, + on the last
 // row adds another, × removes a row.
 function readProjTaskInputs(){
   return Array.prototype.map.call(document.querySelectorAll('#proj-task-inputs .proj-task-inp'),function(i){return i.value;});
@@ -5712,16 +5712,16 @@ function renderProjTaskInputs(vals,focusIdx){
     var last=i===vals.length-1;
     var row=document.createElement('div');row.style.cssText='display:flex;gap:6px;align-items:stretch;'+(last?'':'margin-bottom:6px;');
     var inp=document.createElement('input');inp.className='sinp proj-task-inp';inp.maxLength=80;inp.value=v;inp.style.cssText='flex:1;min-width:0;';
-    inp.placeholder=i===0?'e.g. Draft the onboarding copy':'Another point...';
+    inp.placeholder=i===0?'e.g. Draft the onboarding copy':'Another step...';
     row.appendChild(inp);
     var btn=document.createElement('button');btn.type='button';
     if(last&&vals.length<MAX_TASKS_PER_PROJECT){
-      btn.textContent='+';btn.setAttribute('aria-label','Add another point');
+      btn.textContent='+';btn.setAttribute('aria-label','Add another step');
       btn.style.cssText=btnCss+'border:none;background:var(--gr);color:#FFFBF3;';
       btn.addEventListener('click',function(){var cur=readProjTaskInputs();cur.push('');renderProjTaskInputs(cur,cur.length-1);});
       inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&this.value.trim()){e.preventDefault();btn.click();}});
     } else {
-      btn.textContent='×';btn.setAttribute('aria-label','Remove point');
+      btn.textContent='×';btn.setAttribute('aria-label','Remove step');
       btn.style.cssText=btnCss+'border:1.5px solid var(--bg3);background:var(--bg2);color:var(--tx3);';
       btn.addEventListener('click',function(){var cur=readProjTaskInputs();cur.splice(i,1);renderProjTaskInputs(cur);});
     }
@@ -5888,22 +5888,22 @@ function showProjectInfo(id){
   html+='<div style="display:flex;gap:6px;align-items:stretch;"><input type="date" id="proj-deadline-edit" class="sinp" style="flex:1;min-width:0;" value="'+(a.deadline||'')+'">';
   if(a.deadline)html+='<button id="proj-deadline-clear" type="button" style="padding:0 14px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx2);font-size:13px;font-weight:600;cursor:pointer;">Clear</button>';
   html+='</div></div>';
-  // Points
+  // Steps
   html+='<div style="margin-bottom:14px;">';
-  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Points ('+doneCount+'/'+tasks.length+(tasks.length>=MAX_TASKS_PER_PROJECT?' · max':'')+')</div>';
+  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Steps ('+doneCount+'/'+tasks.length+(tasks.length>=MAX_TASKS_PER_PROJECT?' · max':'')+')</div>';
   html+='<div id="proj-tasks-list">';
   tasks.forEach(function(t){
     var safeText=(t.text||'').replace(/</g,'&lt;');
     html+='<div class="task-row" data-tid="'+t.id+'" style="display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--bg2);border-radius:10px;margin-bottom:6px;">';
-    html+='<button class="task-check" data-tid="'+t.id+'" aria-label="'+(t.done?'Uncheck':'Check')+' point" style="width:22px;height:22px;border-radius:6px;border:1.5px solid '+(t.done?'var(--gr)':'var(--bg3)')+';background:'+(t.done?'var(--gr)':'transparent')+';color:#FFFBF3;font-size:14px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">'+(t.done?'✓':'')+'</button>';
+    html+='<button class="task-check" data-tid="'+t.id+'" aria-label="'+(t.done?'Uncheck':'Check')+' step" style="width:22px;height:22px;border-radius:6px;border:1.5px solid '+(t.done?'var(--gr)':'var(--bg3)')+';background:'+(t.done?'var(--gr)':'transparent')+';color:#FFFBF3;font-size:14px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">'+(t.done?'✓':'')+'</button>';
     html+='<div style="flex:1;font-size:13px;color:'+(t.done?'var(--tx3)':'var(--tx)')+';'+(t.done?'text-decoration:line-through;':'')+'">'+safeText+'</div>';
-    html+='<button class="task-del" data-tid="'+t.id+'" aria-label="Delete point" style="background:none;border:none;font-size:16px;color:var(--tx3);cursor:pointer;padding:2px 6px;line-height:1;">×</button>';
+    html+='<button class="task-del" data-tid="'+t.id+'" aria-label="Delete step" style="background:none;border:none;font-size:16px;color:var(--tx3);cursor:pointer;padding:2px 6px;line-height:1;">×</button>';
     html+='</div>';
   });
   html+='</div>';
   if(tasks.length<MAX_TASKS_PER_PROJECT){
     html+='<div style="display:flex;gap:6px;margin-top:6px;">';
-    html+='<input type="text" id="proj-new-task" class="sinp" placeholder="Add a point..." maxlength="80" style="flex:1;">';
+    html+='<input type="text" id="proj-new-task" class="sinp" placeholder="Add a step..." maxlength="80" style="flex:1;">';
     html+='<button id="proj-add-task-btn" style="padding:0 14px;border:none;border-radius:var(--rsm);background:var(--gr);color:#FFFBF3;font-size:14px;font-weight:600;cursor:pointer;">Add</button>';
     html+='</div>';
   }
@@ -5939,7 +5939,7 @@ function showProjectInfo(id){
   sh.querySelectorAll('.task-del').forEach(function(btn){
     btn.addEventListener('click',function(){
       var tid=this.dataset.tid;
-      if(!confirm('Delete this point?'))return;
+      if(!confirm('Delete this step?'))return;
       a.tasks=a.tasks.filter(function(t){return t.id!==tid;});sv();showProjectInfo(id);
     });
   });
