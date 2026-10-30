@@ -1223,6 +1223,9 @@ function _normalizeSeed(a){
 function isProject(a){return !!(a&&a.kind==='project');}
 function isSkill(a){return !isProject(a);}
 function isFinished(a){return isProject(a)&&!!a.finishedAt;}
+// Seeds list grouping: finished projects leave their category for one 'Finished' group
+var FINISHED_GROUP='__finished__';
+function _seedGroup(a){return isFinished(a)?FINISHED_GROUP:(a.cat||'Other');}
 function getProjectTasks(a){return isProject(a)&&Array.isArray(a.tasks)?a.tasks:[];}
 function getProjectDoneCount(a){return getProjectTasks(a).filter(function(t){return t&&t.done;}).length;}
 // Deadline is a local 'YYYY-MM-DD' string, or absent.
@@ -5005,7 +5008,7 @@ function rMy(){
 
   // Collapse-all button — based on visible category set
   var colBtn=document.getElementById('my-collapse-toggle');
-  var visCatSet={};_filtered.forEach(function(a){visCatSet[a.cat||'Other']=true;});
+  var visCatSet={};_filtered.forEach(function(a){visCatSet[_seedGroup(a)]=true;});
   var visCats=Object.keys(visCatSet);
   if(colBtn){
     if(visCats.length){
@@ -5052,8 +5055,10 @@ function _rMyBody(el,allActs){
   var _mySrch=mySearch.trim().toLowerCase();
 
   var groups={};
-  myActs.filter(function(a){return !_mySrch||a.name.toLowerCase().includes(_mySrch)||a.emoji.includes(_mySrch);}).forEach(function(a){var c=a.cat||'Other';if(!groups[c])groups[c]=[];groups[c].push(a);});
-  var _cats=Object.keys(groups);
+  myActs.filter(function(a){return !_mySrch||a.name.toLowerCase().includes(_mySrch)||a.emoji.includes(_mySrch);}).forEach(function(a){var c=_seedGroup(a);if(!groups[c])groups[c]=[];groups[c].push(a);});
+  // Finished projects get their own group, always last (collapsed until opened)
+  var _cats=Object.keys(groups).filter(function(c){return c!==FINISHED_GROUP;});
+  if(groups[FINISHED_GROUP])_cats.push(FINISHED_GROUP);
   _cats.forEach(function(cat){
     var acts=groups[cat];
     var isOpen=catOpen[cat]===true;
@@ -5061,7 +5066,7 @@ function _rMyBody(el,allActs){
     var hdr=document.createElement('div');hdr.className='cat-hdr';hdr.dataset.cat=cat;
     hdr.setAttribute('role','button');hdr.tabIndex=0;hdr.setAttribute('aria-expanded',isOpen?'true':'false');
     hdr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();hdr.click();}});
-    hdr.innerHTML='<span class="cat-hdr-label">'+cat+'</span>'
+    hdr.innerHTML='<span class="cat-hdr-label">'+(cat===FINISHED_GROUP?'Finished':cat)+'</span>'
       +'<span class="cat-arrow'+(isOpen?' open':'')+'">›</span>'
       +'<span class="cat-hdr-count">'+acts.length+'</span>';
     var body=document.createElement('div');body.className='cat-body'+(isOpen?' open':'');
