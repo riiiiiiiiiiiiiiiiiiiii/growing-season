@@ -271,6 +271,9 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .sop{background:var(--bg2);border:var(--br);border-radius:var(--rsm);padding:6px 13px;font-size:13px;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .16s cubic-bezier(.34,1.4,.64,1),box-shadow .18s ease;user-select:none;}
 .sop:active{transform:scale(.95);}
 .sop.on{background:var(--grl);border-color:var(--gr);color:var(--gr2);font-weight:600;box-shadow:0 2px 8px rgba(24,152,192,.18),0 0 0 1.5px var(--gr) inset;}
+.dl-field{position:relative;flex:1;min-width:0;}
+.dl-field input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
+.dl-txt.empty{color:var(--tx3);}
 .sinp{width:100%;padding:9px 11px;border-radius:var(--rsm);border:var(--br2);background:var(--bg2);color:var(--tx);font-size:14px;font-family:inherit;-webkit-appearance:none;}
 .pw-eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;opacity:.5;padding:2px;line-height:1;transition:opacity .15s;}
 .pw-eye:hover{opacity:1;}
@@ -1073,7 +1076,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="sf"><div class="sl">Category</div><div class="so" id="proj-cat-opts"></div></div>
       <div class="sf" id="proj-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:stretch;"><input class="sinp" id="proj-custom-cat" placeholder="e.g. Home, Career..." style="flex:1;min-width:0;"><button id="btn-proj-cat-save" type="button" style="padding:0 16px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save</button></div></div>
       <div class="sf"><div class="sl">Notes <span class="opt">optional</span></div><textarea class="nta" id="proj-notes" placeholder="What is this project about?" style="min-height:60px;"></textarea></div>
-      <div class="sf"><div class="sl">Deadline <span class="opt">optional</span></div><input type="date" class="sinp" id="proj-deadline"></div>
+      <div class="sf"><div class="sl">Deadline <span class="opt">optional</span></div><div class="dl-field"><div class="sinp dl-txt empty">No deadline</div><input type="date" id="proj-deadline" aria-label="Deadline"></div></div>
       <div class="sf"><div class="sl">Steps <span class="opt">optional</span></div><div id="proj-task-inputs"></div></div>
       <button class="btn btn-p" id="btn-proj-save" style="margin-top:4px;">🌲 Plant tree</button>
       <button class="btn btn-s" id="btn-proj-cancel" style="margin-top:6px;width:100%;">Cancel</button>
@@ -1225,6 +1228,22 @@ function getDeadlineDays(a){
   var due=new Date(+p[0],+p[1]-1,+p[2]),now=new Date();
   var today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   return Math.round((due-today)/86400000);
+}
+function fmtDeadline(v){
+  if(!v)return 'No deadline';
+  var p=v.split('-');
+  return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+}
+// Date inputs sit invisibly over a text box: an empty iOS date input shows
+// today's date faintly, which reads as if a deadline were set.
+function syncDeadlineField(inp){
+  var txt=inp.parentNode.querySelector('.dl-txt');if(!txt)return;
+  txt.textContent=fmtDeadline(inp.value);txt.classList.toggle('empty',!inp.value);
+}
+function wireDeadlineField(inp){
+  if(!inp)return;
+  inp.addEventListener('change',function(){syncDeadlineField(this);});
+  inp.addEventListener('click',function(){try{if(this.showPicker)this.showPicker();}catch(e){}});
 }
 function deadlineLabel(a){
   var d=getDeadlineDays(a);if(d===null)return null;
@@ -1728,6 +1747,7 @@ document.getElementById('btn-proj-cat-save').addEventListener('click',function()
   sv();renderProjectCats(name);showToast('Category saved',null);
 });
 document.getElementById('btn-proj-save').addEventListener('click',saveProject);
+wireDeadlineField(document.getElementById('proj-deadline'));
 document.getElementById('kind-tab-skill').addEventListener('click',function(){switchAddKind('skill');});
 document.getElementById('kind-tab-project').addEventListener('click',function(){switchAddKind('project');});
 document.getElementById('btn-add-cat').addEventListener('click',function(){
@@ -5618,7 +5638,7 @@ function openAdd(){
   var pn=document.getElementById('proj-name');if(pn)pn.value='';
   var pnt=document.getElementById('proj-notes');if(pnt)pnt.value='';
   renderProjTaskInputs(['']);
-  var pdl=document.getElementById('proj-deadline');if(pdl)pdl.value='';
+  var pdl=document.getElementById('proj-deadline');if(pdl){pdl.value='';syncDeadlineField(pdl);}
 
   // Search wiring
   var si=document.getElementById('lib-search');si.value='';
@@ -5758,7 +5778,7 @@ function saveProject(){
   document.getElementById('proj-name').value='';
   document.getElementById('proj-notes').value='';
   renderProjTaskInputs(['']);
-  document.getElementById('proj-deadline').value='';
+  var _pdl=document.getElementById('proj-deadline');_pdl.value='';syncDeadlineField(_pdl);
   // Navigate to plot so user sees the new tree
   nav('my');
   showToast('🌲 Tree planted!',null);
@@ -5885,7 +5905,7 @@ function showProjectInfo(id){
   // Deadline
   html+='<div style="margin-bottom:16px;">';
   html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Deadline</div>';
-  html+='<div style="display:flex;gap:6px;align-items:stretch;"><input type="date" id="proj-deadline-edit" class="sinp" style="flex:1;min-width:0;" value="'+(a.deadline||'')+'">';
+  html+='<div style="display:flex;gap:6px;align-items:stretch;"><div class="dl-field"><div class="sinp dl-txt'+(a.deadline?'':' empty')+'">'+fmtDeadline(a.deadline)+'</div><input type="date" id="proj-deadline-edit" aria-label="Deadline" value="'+(a.deadline||'')+'"></div>';
   if(a.deadline)html+='<button id="proj-deadline-clear" type="button" style="padding:0 14px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx2);font-size:13px;font-weight:600;cursor:pointer;">Clear</button>';
   html+='</div></div>';
   // Steps
@@ -5957,6 +5977,7 @@ function showProjectInfo(id){
   }
   // Deadline
   var dlEl=sh.querySelector('#proj-deadline-edit');
+  wireDeadlineField(dlEl);
   if(dlEl){
     dlEl.addEventListener('change',function(){
       var v=this.value;
