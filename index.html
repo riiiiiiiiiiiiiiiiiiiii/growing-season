@@ -5839,14 +5839,13 @@ function showProjectInfo(id){
   if(!a)return;
   var hrs=getHours(id);
   var stage=getTreeStage(hrs);
-  var nextH=stage<4?TREE_HRS[stage+1]:null;
   var tasks=getProjectTasks(a);
   var doneCount=tasks.filter(function(t){return t.done;}).length;
   var sh=document.getElementById('ed-sh');
   var html='';
   html+='<div style="text-align:center;margin-bottom:16px;">';
   html+='<div style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+a.name+'</div>';
-  html+='<div style="font-size:11px;color:var(--tx3);margin-top:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Stage '+stage+'/4 · '+TREE_STAGE_LABELS[stage]+(nextH?' · '+Math.max(0,Math.round((nextH-hrs)*10)/10)+'h to next':' · fully grown')+'</div>';
+  html+='<div style="font-size:11px;color:var(--tx3);margin-top:6px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Stage '+stage+'/4 · '+TREE_STAGE_LABELS[stage]+(stage<4?'':' · fully grown')+'</div>';
   var _dl=deadlineLabel(a);
   if(_dl)html+='<div style="font-size:12px;color:'+_dl.color+';margin-top:4px;font-weight:600;">⏳ '+_dl.text+'</div>';
   html+='</div>';
