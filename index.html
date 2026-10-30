@@ -5080,14 +5080,16 @@ function _rMyBody(el,allActs){
       var del=document.createElement('div');del.className='mc-del';del.textContent='🗃️';wrap.appendChild(del);
       var focEl=document.createElement('div');focEl.className='mc-foc';focEl.textContent='🎯';wrap.appendChild(focEl);
       var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
-      var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;';
+      var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;min-height:34px;'; // room for two right-hand lines, so cards stay one height
       var streak=getStreakAt(a.id,Date.now());
-      var _kindIcon=isProject(a)?'🌲':'🌱';
-      var _dl=deadlineLabel(a);
-      inner.innerHTML='<div style="flex:1;"><div class="mc-n"><span style="margin-right:6px;font-size:14px;opacity:.85;">'+_kindIcon+'</span>'+a.name+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div><div class="mc-s">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h'+(_dl?' · <span style="color:'+_dl.color+';font-weight:600;">'+_dl.text+'</span>':'')+'</div></div>'
+      // Right side: sessions/time once there are any, and the deadline countdown
+      var _dl=deadlineLabel(a),_dd=getDeadlineDays(a);
+      var _dlShort=_dd===null?'':_dd<0?(-_dd)+' day'+(_dd===-1?'':'s')+' overdue':_dd===0?'due today':_dd===1?'due tomorrow':'in '+_dd+' days';
+      inner.innerHTML='<div style="flex:1;min-width:0;"><div class="mc-n">'+esc(a.name)+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'')
-        +'<span style="font-size:11px;color:var(--tx3);">'+STAGE_LABELS[getStage(getHours(a.id))]+'</span>'
+        +(cnt?'<span style="font-size:12px;color:var(--tx3);white-space:nowrap;">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</span>':'')
+        +(_dl?'<span style="font-size:12px;color:'+_dl.color+';font-weight:600;white-space:nowrap;">'+_dlShort+'</span>':'')
         +'</div>';
       card.appendChild(inner);
       card.addEventListener('click',function(){if(isAct)resumeSess();else openActInfo(a.id,'my');});
