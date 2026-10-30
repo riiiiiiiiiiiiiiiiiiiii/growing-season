@@ -1223,11 +1223,12 @@ function _normalizeSeed(a){
 }
 function isProject(a){return !!(a&&a.kind==='project');}
 function isSkill(a){return !isProject(a);}
+function isFinished(a){return isProject(a)&&!!a.finishedAt;}
 function getProjectTasks(a){return isProject(a)&&Array.isArray(a.tasks)?a.tasks:[];}
 function getProjectDoneCount(a){return getProjectTasks(a).filter(function(t){return t&&t.done;}).length;}
 // Deadline is a local 'YYYY-MM-DD' string, or absent.
 function getDeadlineDays(a){
-  if(!a||!a.deadline)return null;
+  if(!a||!a.deadline||isFinished(a))return null;
   var p=a.deadline.split('-');if(p.length!==3)return null;
   var due=new Date(+p[0],+p[1]-1,+p[2]),now=new Date();
   var today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -5091,13 +5092,16 @@ function _rMyBody(el,allActs){
       var card=document.createElement('div');card.className='mc'+(isAct?' ip-card':'');
       var inner=document.createElement('div');inner.style.cssText='flex:1;display:flex;align-items:center;gap:12px;min-height:34px;'; // room for two right-hand lines, so cards stay one height
       var streak=getStreakAt(a.id,Date.now());
-      // Right side: the deadline countdown, then sessions/time once there are any
+      // Right side: finished / deadline countdown, step progress, then sessions/time once there are any
       var _dl=deadlineLabel(a),_dd=getDeadlineDays(a);
+      var _steps=getProjectTasks(a),_fin=isFinished(a);
       var _dlShort=_dd===null?'':_dd<0?(-_dd)+' day'+(_dd===-1?'':'s')+' overdue':_dd===0?'due today':_dd===1?'due tomorrow':'in '+_dd+' days';
       inner.innerHTML='<div style="flex:1;min-width:0;"><div class="mc-n">'+esc(a.name)+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'')
+        +(_fin?'<span style="font-size:12px;color:var(--gr);font-weight:600;white-space:nowrap;">✓ Finished</span>':'')
         +(_dl?'<span style="font-size:12px;color:'+_dl.color+';font-weight:600;white-space:nowrap;">'+_dlShort+'</span>':'')
+        +(!_fin&&_steps.length?'<span style="font-size:12px;color:var(--tx3);white-space:nowrap;">'+getProjectDoneCount(a)+'/'+_steps.length+' steps</span>':'')
         +(cnt?'<span style="font-size:12px;color:var(--tx3);white-space:nowrap;">'+cnt+' session'+(cnt!==1?'s':'')+' · '+Math.round(getHours(a.id)*10)/10+'h</span>':'')
         +'</div>';
       card.appendChild(inner);
@@ -5985,7 +5989,10 @@ function showProjectInfo(id){
   var html='';
   html+='<div style="text-align:center;margin-bottom:16px;">';
   html+='<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><button id="proj-edit-btn" class="name-edit" title="Edit project"><span style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+esc(a.name)+'</span>'+EDIT_PEN_SVG+'</button></div>';
-  html+=deadlineLineHTML(a);
+  if(isFinished(a)){
+    html+='<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-top:6px;font-size:12px;font-weight:600;color:var(--gr);">🌳 Finished '+new Date(a.finishedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'})
+      +'<button id="proj-reopen" type="button" style="background:none;border:none;padding:0;font-family:inherit;font-size:12px;font-weight:600;color:var(--tx3);text-decoration:underline;cursor:pointer;">Reopen</button></div>';
+  } else html+=deadlineLineHTML(a);
   html+='</div>';
   // Steps
   html+='<div style="margin-bottom:14px;">';
@@ -6000,7 +6007,7 @@ function showProjectInfo(id){
     html+='</div>';
   });
   html+='</div>';
-  if(tasks.length<MAX_TASKS_PER_PROJECT){
+  if(!isFinished(a)&&tasks.length<MAX_TASKS_PER_PROJECT){
     html+='<div style="display:flex;gap:6px;margin-top:6px;">';
     html+='<input type="text" id="proj-new-task" class="sinp" placeholder="Add a step..." maxlength="80" style="flex:1;">';
     html+='<button id="proj-add-task-btn" style="padding:0 14px;border:none;border-radius:var(--rsm);background:var(--gr);color:#FFFBF3;font-size:14px;font-weight:600;cursor:pointer;">Add</button>';
@@ -6027,11 +6034,29 @@ function showProjectInfo(id){
   html+='<span style="display:block;font-size:12px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(_nbPreview?esc(_nbPreview):'Nothing written yet')+'</span></span>';
   html+='<span style="font-size:18px;color:var(--tx3);line-height:1;">›</span></button>';
   sh.innerHTML=html;
-  // Start / log buttons
-  var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start';
-  startBtn.addEventListener('click',function(){closeEd();startFrom(id);});sh.appendChild(startBtn);
-  var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='+ Log session';
-  logBtn.addEventListener('click',function(){closeEd();openLogDirect(id,'my');});sh.appendChild(logBtn);
+  // Finish: a prominent button once every step is ticked, otherwise a quiet link under Start / Log
+  var finish=function(){
+    a.finishedAt=Date.now();sv();rMy();renderHomeDeadline();showProjectInfo(id);
+    showToast('🌳 '+a.name+' finished',function(){delete a.finishedAt;sv();rMy();renderHomeDeadline();if(document.getElementById('ed-ov').classList.contains('on'))showProjectInfo(id);});
+  };
+  var allDone=tasks.length>0&&doneCount===tasks.length;
+  if(!isFinished(a)){
+    if(allDone){
+      var finBtn=document.createElement('button');finBtn.className='btn btn-p';finBtn.style.marginBottom='8px';finBtn.textContent='🌳 Mark as finished';
+      finBtn.addEventListener('click',finish);sh.appendChild(finBtn);
+    }
+    var startBtn=document.createElement('button');startBtn.className=allDone?'btn btn-s':'btn btn-p';startBtn.textContent='▶ Start';
+    startBtn.addEventListener('click',function(){closeEd();startFrom(id);});sh.appendChild(startBtn);
+    var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='+ Log session';
+    logBtn.addEventListener('click',function(){closeEd();openLogDirect(id,'my');});sh.appendChild(logBtn);
+    if(!allDone){
+      var finLink=document.createElement('button');finLink.type='button';finLink.textContent='Mark as finished';
+      finLink.style.cssText='display:block;margin:14px auto 0;background:none;border:none;padding:0;font-family:inherit;font-size:12px;font-weight:600;color:var(--tx3);cursor:pointer;';
+      finLink.addEventListener('click',finish);sh.appendChild(finLink);
+    }
+  } else {
+    sh.querySelector('#proj-reopen').addEventListener('click',function(){delete a.finishedAt;sv();rMy();renderHomeDeadline();showProjectInfo(id);});
+  }
   // Re-render without losing the steps list's scroll position (or jump to the end after adding)
   var rerender=function(toEnd){
     var l=sh.querySelector('#proj-tasks-list'),top=l?l.scrollTop:0,shTop=sh.scrollTop;
@@ -6454,7 +6479,7 @@ function rGarden(){
       var pgy=gy;
       var _isProj=isProject(a);
       var hrs=getHours(a.id);
-      var stage=_isProj?getTreeStage(hrs):getStage(hrs);
+      var stage=_isProj?(isFinished(a)?4:getTreeStage(hrs)):getStage(hrs);
       var dormant=gardenTab==='all'&&hasFocusSet()&&!isFocused(a.id);
       var shortName=a.name.length>12?a.name.slice(0,11)+'.':a.name;
 
