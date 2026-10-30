@@ -5289,7 +5289,7 @@ function _rMyBody(el,allActs){
       var _dl=deadlineLabel(a),_dd=getDeadlineDays(a);
       var _steps=getProjectTasks(a),_fin=isFinished(a);
       var _dlShort=_dd===null?'':_dd<0?(-_dd)+' day'+(_dd===-1?'':'s')+' overdue':_dd===0?'due today':_dd===1?'due tomorrow':'in '+_dd+' days';
-      inner.innerHTML='<div style="flex:1;min-width:0;"><div class="mc-n">'+esc(a.name)+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div></div>'
+      inner.innerHTML='<div style="flex:1;min-width:0;"><div class="mc-n"><span style="margin-right:6px;font-size:14px;opacity:.85;">'+(isProject(a)?'🌲':'🌱')+'</span>'+esc(a.name)+(streak>=2?'<span style="margin-left:6px;font-size:11px;background:var(--grm);color:#fff;border-radius:8px;padding:1px 6px;font-weight:600;">🔥'+streak+'</span>':'')+'</div></div>'
         +'<div class="mc-r">'
         +(isAct?'<span class="badge badge-ip">active</span>':'')
         +(_fin?'<span style="font-size:12px;color:var(--gr);font-weight:600;white-space:nowrap;">✓ Finished</span>':'')
