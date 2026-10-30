@@ -5883,8 +5883,9 @@ function showProjectInfo(id){
   // Session stats compact
   var actSess=_sessFor(id);
   var totalMins=actSess.reduce(function(t,s){return t+(s.hours||0)*60+(s.mins||0);},0);
-  html+='<div style="background:var(--bg2);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;font-size:13px;">';
-  html+='<span style="color:var(--tx3);">Total time</span><span style="font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
+  html+='<div style="background:var(--bg2);border-radius:12px;padding:10px 14px;margin-bottom:16px;font-size:13px;">';
+  html+='<div style="display:flex;justify-content:space-between;"><span style="color:var(--tx3);">Total time</span><span style="font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
+  html+='<div style="display:flex;justify-content:space-between;margin-top:6px;"><span style="color:var(--tx3);">Sessions</span><span style="font-weight:600;">'+actSess.length+'</span></div></div>';
   sh.innerHTML=html;
   // Start / log buttons
   var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start working';
