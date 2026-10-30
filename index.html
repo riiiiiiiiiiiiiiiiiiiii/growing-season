@@ -1074,7 +1074,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
       <div class="sf" id="proj-custom-wrap" style="display:none;"><div class="sl">New category name</div><div style="display:flex;gap:8px;align-items:stretch;"><input class="sinp" id="proj-custom-cat" placeholder="e.g. Home, Career..." style="flex:1;min-width:0;"><button id="btn-proj-cat-save" type="button" style="padding:0 16px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">Save</button></div></div>
       <div class="sf"><div class="sl">Notes <span class="opt">optional</span></div><textarea class="nta" id="proj-notes" placeholder="What is this project about?" style="min-height:60px;"></textarea></div>
       <div class="sf"><div class="sl">Deadline <span class="opt">optional</span></div><input type="date" class="sinp" id="proj-deadline"></div>
-      <div class="sf"><div class="sl">First point <span class="opt">optional</span></div><input class="sinp" id="proj-first-task" placeholder="e.g. Draft the onboarding copy" maxlength="80"></div>
+      <div class="sf"><div class="sl">Points <span class="opt">optional</span></div><div id="proj-task-inputs"></div></div>
       <button class="btn btn-p" id="btn-proj-save" style="margin-top:4px;">🌲 Plant tree</button>
       <button class="btn btn-s" id="btn-proj-cancel" style="margin-top:6px;width:100%;">Cancel</button>
     </div>
@@ -5617,7 +5617,7 @@ function openAdd(){
   // Clear project form
   var pn=document.getElementById('proj-name');if(pn)pn.value='';
   var pnt=document.getElementById('proj-notes');if(pnt)pnt.value='';
-  var pft=document.getElementById('proj-first-task');if(pft)pft.value='';
+  renderProjTaskInputs(['']);
   var pdl=document.getElementById('proj-deadline');if(pdl)pdl.value='';
 
   // Search wiring
@@ -5698,6 +5698,37 @@ function switchAddKind(kind){
 function renderProjectCats(selected){
   renderCatPicker({wrap:document.getElementById('proj-cat-opts'),customWrap:document.getElementById('proj-custom-wrap'),inputId:'proj-custom-cat',selected:selected,deletable:false});
 }
+// Points list in the new-project form: one input per point, + on the last
+// row adds another, × removes a row.
+function readProjTaskInputs(){
+  return Array.prototype.map.call(document.querySelectorAll('#proj-task-inputs .proj-task-inp'),function(i){return i.value;});
+}
+function renderProjTaskInputs(vals,focusIdx){
+  var wrap=document.getElementById('proj-task-inputs');if(!wrap)return;
+  if(!vals.length)vals=[''];
+  var btnCss='width:44px;flex-shrink:0;border-radius:var(--rsm);font-size:20px;font-weight:600;cursor:pointer;line-height:1;';
+  wrap.innerHTML='';
+  vals.forEach(function(v,i){
+    var last=i===vals.length-1;
+    var row=document.createElement('div');row.style.cssText='display:flex;gap:6px;align-items:stretch;'+(last?'':'margin-bottom:6px;');
+    var inp=document.createElement('input');inp.className='sinp proj-task-inp';inp.maxLength=80;inp.value=v;inp.style.cssText='flex:1;min-width:0;';
+    inp.placeholder=i===0?'e.g. Draft the onboarding copy':'Another point...';
+    row.appendChild(inp);
+    var btn=document.createElement('button');btn.type='button';
+    if(last&&vals.length<MAX_TASKS_PER_PROJECT){
+      btn.textContent='+';btn.setAttribute('aria-label','Add another point');
+      btn.style.cssText=btnCss+'border:none;background:var(--gr);color:#FFFBF3;';
+      btn.addEventListener('click',function(){var cur=readProjTaskInputs();cur.push('');renderProjTaskInputs(cur,cur.length-1);});
+      inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&this.value.trim()){e.preventDefault();btn.click();}});
+    } else {
+      btn.textContent='×';btn.setAttribute('aria-label','Remove point');
+      btn.style.cssText=btnCss+'border:1.5px solid var(--bg3);background:var(--bg2);color:var(--tx3);';
+      btn.addEventListener('click',function(){var cur=readProjTaskInputs();cur.splice(i,1);renderProjTaskInputs(cur);});
+    }
+    row.appendChild(btn);wrap.appendChild(row);
+  });
+  if(focusIdx!=null){var ins=wrap.querySelectorAll('.proj-task-inp');if(ins[focusIdx])ins[focusIdx].focus();}
+}
 function saveProject(){
   var name=document.getElementById('proj-name').value.trim();
   var catEl=document.querySelector('#proj-cat-opts .pill.on');
@@ -5711,9 +5742,11 @@ function saveProject(){
     cat=catEl.dataset.cat;
   }
   var notes=document.getElementById('proj-notes').value.trim();
-  var firstTaskText=document.getElementById('proj-first-task').value.trim();
   var tasks=[];
-  if(firstTaskText)tasks.push({id:genUUID(),text:firstTaskText.slice(0,80),done:false,doneAt:null,createdAt:Date.now()});
+  readProjTaskInputs().forEach(function(t){
+    t=t.trim();
+    if(t&&tasks.length<MAX_TASKS_PER_PROJECT)tasks.push({id:genUUID(),text:t.slice(0,80),done:false,doneAt:null,createdAt:Date.now()});
+  });
   var deadline=document.getElementById('proj-deadline').value;
   var newProj={id:genUUID(),name:name,emoji:'🌲',cat:cat,kind:'project',notes:notes,tasks:tasks,tags:[]};
   if(deadline)newProj.deadline=deadline;
@@ -5724,7 +5757,7 @@ function saveProject(){
   // Clear form for next time
   document.getElementById('proj-name').value='';
   document.getElementById('proj-notes').value='';
-  document.getElementById('proj-first-task').value='';
+  renderProjTaskInputs(['']);
   document.getElementById('proj-deadline').value='';
   // Navigate to plot so user sees the new tree
   nav('my');
