@@ -1419,6 +1419,12 @@ function editRoutine(r){
     }
   });
 }
+// Short countdown for list rows: 'due in 30 days' / 'due tomorrow' / '2 days overdue'
+function dueShort(a){
+  var d=getDeadlineDays(a);if(d===null)return null;
+  return {text:d<0?(-d)+' day'+(d===-1?'':'s')+' overdue':d===0?'due today':d===1?'due tomorrow':'due in '+d+' days',overdue:d<0};
+}
+function _actById(id){return myActs.find(function(x){return x.id===id;});}
 function deadlineLabel(a){
   var d=getDeadlineDays(a);if(d===null)return null;
   var text=d<0?'Overdue by '+(-d)+' day'+(d===-1?'':'s'):d===0?'Due today':d===1?'Due tomorrow':d+' days left';
@@ -4419,7 +4425,7 @@ function openTodayOverview(){
       var row=document.createElement('div');
       row.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--grl);background:color-mix(in srgb,var(--gr) 14%,var(--bg));border:1px solid color-mix(in srgb,var(--gr) 30%,var(--bg));border-radius:12px;margin-bottom:6px;';
       row.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--gr2);min-width:36px;letter-spacing:.02em;text-transform:uppercase;">'+(it.hour==null?'Any':_fmtHour12(it.hour))+'</div>'
-        +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--gr2);line-height:1.2;">'+(it.name||'Untitled')+'</div><div style="font-size:11px;color:var(--gr2);opacity:.75;margin-top:2px;">'+(it.kind==='routine'?'Routine':'Planned')+dur+'</div></div>'
+        +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--gr2);line-height:1.2;">'+(it.name||'Untitled')+'</div><div style="font-size:11px;color:var(--gr2);opacity:.75;margin-top:2px;">'+(it.kind==='routine'?'Routine':'Planned')+dur+(function(){var du=dueShort(_actById(it.actId));return du?' · <span style="'+(du.overdue?'color:var(--co2);opacity:1;':'')+'font-weight:600;">'+du.text+'</span>':'';})()+'</div></div>'
         +'<button data-startid="'+(it.actId||'')+'" style="background:var(--gr);color:#FFFBF3;border:none;border-radius:12px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">Start</button>'
         +'<button data-schedid="'+it.id+'" data-schedkind="'+it.kind+'" aria-label="Remove" style="background:transparent;border:1px solid color-mix(in srgb,var(--gr2) 45%,transparent);color:var(--gr2);border-radius:50%;width:26px;height:26px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>';
       sh.appendChild(row);
@@ -6133,18 +6139,19 @@ function renderTodaySection(){
   if(scheduled.length||dueSoon.length){
     html+='<div class="sched-scroll" style="max-height:160px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;">';
     dueSoon.forEach(function(a){
-      var d=getDeadlineDays(a);
-      var txt=d<0?(-d)+' day'+(d===-1?'':'s')+' overdue':d===0?'due today':d===1?'due tomorrow':'due in '+d+' days';
+      var du=dueShort(a);
       html+='<div class="sched-item" data-startid="'+a.id+'">'
           +'<div class="sched-time">Due</div>'
-          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+esc(a.name)+'</div><div class="sched-meta"'+(d<0?' style="color:var(--co2);opacity:1;font-weight:600;"':'')+'>'+txt+'</div></div>'
+          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+esc(a.name)+'</div><div class="sched-meta"'+(du.overdue?' style="color:var(--co2);opacity:1;font-weight:600;"':'')+'>'+du.text+'</div></div>'
           +'<button class="sched-start" data-startid="'+a.id+'">Start</button>'
           +'</div>';
     });
     scheduled.forEach(function(it){
+      var du=dueShort(_actById(it.actId));
       html+='<div class="sched-item" data-startid="'+(it.actId||'')+'">'
           +'<div class="sched-time">'+(it.hour==null?'Any':_fmtHour12(it.hour))+'</div>'
-          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+(it.name||'Untitled')+'</div></div>'
+          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+(it.name||'Untitled')+'</div>'
+          +(du?'<div class="sched-meta"'+(du.overdue?' style="color:var(--co2);opacity:1;font-weight:600;"':'')+'>'+du.text+'</div>':'')+'</div>'
           +'<button class="sched-start" data-startid="'+(it.actId||'')+'">Start</button>'
           +'</div>';
     });
