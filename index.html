@@ -271,6 +271,9 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .sop{background:var(--bg2);border:var(--br);border-radius:var(--rsm);padding:6px 13px;font-size:13px;cursor:pointer;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .16s cubic-bezier(.34,1.4,.64,1),box-shadow .18s ease;user-select:none;}
 .sop:active{transform:scale(.95);}
 .sop.on{background:var(--grl);border-color:var(--gr);color:var(--gr2);font-weight:600;box-shadow:0 2px 8px rgba(24,152,192,.18),0 0 0 1.5px var(--gr) inset;}
+.name-edit{display:inline-flex;align-items:center;gap:7px;background:none;border:none;padding:2px 4px;margin:0;cursor:pointer;color:var(--tx3);font-family:inherit;border-radius:8px;}
+.name-edit>span{color:var(--tx);}
+.name-edit:active{opacity:.6;}
 .dl-field{position:relative;flex:1;min-width:0;}
 .dl-field input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
 .dl-txt.empty{color:var(--tx3);}
@@ -1280,6 +1283,8 @@ function fmtDeadlineShort(v){
 }
 // Deadline line under a seed's title (skill or project): countdown + date;
 // tap to change (date input sits invisibly on top), × to remove.
+// Small outline pencil after a seed's name: the name itself is the edit button.
+var EDIT_PEN_SVG='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;opacity:.55;"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
 function deadlineLineHTML(a){
   var dl=deadlineLabel(a),h='';
   h+='<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:6px;">';
@@ -4443,7 +4448,7 @@ function openActInfo(actId,from){
   rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
   if(lastSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span>'+agoToggleHTML(lastSess.date)+'</div>';
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
-  sh.innerHTML='<div style="text-align:center;margin-bottom:16px;"><div style="display:inline-flex;align-items:center;gap:6px;"><span style="font-family:var(--serif);font-size:20px;font-weight:700;">'+act.name+'</span><button id="act-info-edit-btn" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 5px;border-radius:6px;line-height:1;" title="Edit activity">✏️</button></div>'+deadlineLineHTML(act)+'</div>'
+  sh.innerHTML='<div style="text-align:center;margin-bottom:16px;"><div style="display:inline-flex;align-items:center;gap:6px;"><button id="act-info-edit-btn" class="name-edit" title="Edit activity"><span style="font-family:var(--serif);font-size:20px;font-weight:700;">'+esc(act.name)+'</span>'+EDIT_PEN_SVG+'</button></div>'+deadlineLineHTML(act)+'</div>'
     +'<div style="background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;">'+rows+'</div>';
   wireAgoToggles(sh);
   wireDeadlineLine(sh,act,function(){openActInfo(actId,from);});
@@ -6003,7 +6008,7 @@ function showProjectInfo(id){
   var sh=document.getElementById('ed-sh');
   var html='';
   html+='<div style="text-align:center;margin-bottom:16px;">';
-  html+='<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><span style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+esc(a.name)+'</span><button id="proj-edit-btn" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 5px;border-radius:6px;line-height:1;" title="Edit project">✏️</button></div>';
+  html+='<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><button id="proj-edit-btn" class="name-edit" title="Edit project"><span style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+esc(a.name)+'</span>'+EDIT_PEN_SVG+'</button></div>';
   html+=deadlineLineHTML(a);
   html+='</div>';
   // Steps
