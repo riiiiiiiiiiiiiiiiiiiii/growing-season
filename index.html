@@ -4442,6 +4442,14 @@ function openTodayOverview(){
     sh.appendChild(lWrap);
   }
 
+  // Nothing scheduled or logged yet: say what this sheet is for
+  if(sh.childElementCount===1){
+    var empty=document.createElement('div');
+    empty.style.cssText='background:var(--bg2);border-radius:12px;padding:16px;text-align:center;font-size:13px;line-height:1.5;color:var(--tx2);';
+    empty.innerHTML='Nothing here yet.<br><span style="color:var(--tx3);">What you schedule and log today will show up here.</span>';
+    sh.appendChild(empty);
+  }
+
   // ── Quick actions ──
   var spacer=document.createElement('div');spacer.style.height='18px';sh.appendChild(spacer);
   var actRow=document.createElement('div');
