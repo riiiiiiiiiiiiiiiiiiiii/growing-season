@@ -5375,7 +5375,7 @@ function openSessionDetail(s,a){
     +(s.well?'<div class="hc-note" style="border-left:3px solid #56AB74;background:var(--bg2);border-radius:0 8px 8px 0;padding:8px 10px;margin-bottom:8px;"><div style="font-size:10px;font-weight:700;color:#56AB74;margin-bottom:2px;">✓ WENT WELL</div><div style="font-size:13px;line-height:1.5;">'+s.well+'</div></div>':'')
     +(s.diff?'<div class="hc-note" style="border-left:3px solid #F59E0B;background:var(--bg2);border-radius:0 8px 8px 0;padding:8px 10px;margin-bottom:8px;"><div style="font-size:10px;font-weight:700;color:#F59E0B;margin-bottom:2px;">→ NEXT TIME</div><div style="font-size:13px;line-height:1.5;">'+s.diff+'</div></div>':'');
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-top:8px;';
-  var editBtn=document.createElement('button');editBtn.className='btn btn-p';editBtn.style.cssText='flex:1;margin-top:0;';editBtn.textContent='✏️ Edit session';
+  var editBtn=document.createElement('button');editBtn.className='btn btn-p';editBtn.style.cssText='flex:1;margin-top:0;';editBtn.textContent='Edit';
   editBtn.addEventListener('click',function(){closeEd();openSessionEdit(s,a);});
   var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.cssText='flex:1;margin-top:0;';closeBtn.textContent='Close';
   closeBtn.addEventListener('click',closeEd);
