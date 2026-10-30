@@ -1229,6 +1229,21 @@ function getDeadlineDays(a){
   var today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   return Math.round((due-today)/86400000);
 }
+// Calendar-day distance from a timestamp to today: 'Today', '3 days ago', '5 weeks ago'...
+function fmtDaysAgo(ts){
+  var d=new Date(ts),now=new Date();
+  var days=Math.round((new Date(now.getFullYear(),now.getMonth(),now.getDate())-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/86400000);
+  if(days<=0)return 'Today';
+  if(days===1)return 'Yesterday';
+  function n(v,u){return v+' '+u+(v===1?'':'s')+' ago';}
+  if(days<7)return n(days,'day');
+  if(days<30)return n(Math.floor(days/7),'week');
+  if(days<365)return n(Math.floor(days/30),'month');
+  return n(Math.floor(days/365),'year');
+}
+function lastSessionTs(sessList){
+  return sessList.reduce(function(m,x){return Math.max(m,new Date(x.date||0).getTime()||0);},0)||null;
+}
 function fmtDeadline(v){
   if(!v)return 'No deadline';
   var p=v.split('-');
@@ -4339,14 +4354,11 @@ function openActInfo(actId,from){
   var actSess=_sessFor(actId);
   var totalMins=actSess.reduce(function(t,s){return t+(s.hours||0)*60+(s.mins||0);},0);
   var sorted=actSess.slice().sort(function(a,b){return (a.date||0)-(b.date||0);});
-  var firstSess=sorted.length?sorted[0]:null;
   var lastSess=sorted.length?sorted[sorted.length-1]:null;
-  function fmtD(ts){if(!ts)return null;var d=new Date(ts);var nowY=new Date().getFullYear();var y=d.getFullYear();var base=d.toLocaleDateString('en-US',{month:'short',day:'numeric'});return y===nowY?base:base+", '"+String(y).slice(-2);}
   var rows='';
   rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--bg3);"><span style="font-size:13px;color:var(--tx3);">Sessions</span><span style="font-size:13px;font-weight:600;">'+actSess.length+'</span></div>';
-  rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(firstSess||lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
-  if(firstSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Growing since</span><span style="font-size:13px;font-weight:600;">'+fmtD(firstSess.date)+'</span></div>';
-  if(lastSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span><span style="font-size:13px;font-weight:600;">'+fmtD(lastSess.date)+'</span></div>';
+  rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
+  if(lastSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span><span style="font-size:13px;font-weight:600;">'+fmtDaysAgo(lastSess.date)+'</span></div>';
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
   sh.innerHTML='<div style="text-align:center;margin-bottom:16px;"><div style="display:inline-flex;align-items:center;gap:6px;"><span style="font-family:var(--serif);font-size:20px;font-weight:700;">'+act.name+'</span><button id="act-info-edit-btn" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 5px;border-radius:6px;line-height:1;" title="Edit activity">✏️</button></div></div>'
     +'<div style="background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;">'+rows+'</div>';
@@ -5934,7 +5946,10 @@ function showProjectInfo(id){
   // Same stat rows as the skill info sheet
   html+='<div style="background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;">';
   html+='<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:.5px solid var(--bg3);"><span style="font-size:13px;color:var(--tx3);">Sessions</span><span style="font-size:13px;font-weight:600;">'+actSess.length+'</span></div>';
-  html+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div></div>';
+  var _lastTs=lastSessionTs(actSess);
+  html+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(_lastTs?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
+  if(_lastTs)html+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span><span style="font-size:13px;font-weight:600;">'+fmtDaysAgo(_lastTs)+'</span></div>';
+  html+='</div>';
   // Notebook entry — opens the project's own notes page
   var _nbPreview=(a.notes||'').trim().split('\n')[0];
   html+='<button id="proj-notebook-btn" type="button" style="width:100%;display:flex;align-items:center;gap:12px;background:var(--bg2);border:none;border-radius:12px;padding:12px 14px;margin-bottom:16px;cursor:pointer;text-align:left;font-family:inherit;color:var(--tx);">';
