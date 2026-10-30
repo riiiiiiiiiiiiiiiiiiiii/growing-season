@@ -1224,7 +1224,7 @@ function getProjectTasks(a){return isProject(a)&&Array.isArray(a.tasks)?a.tasks:
 function getProjectDoneCount(a){return getProjectTasks(a).filter(function(t){return t&&t.done;}).length;}
 // Deadline is a local 'YYYY-MM-DD' string, or absent.
 function getDeadlineDays(a){
-  if(!isProject(a)||!a.deadline)return null;
+  if(!a||!a.deadline)return null;
   var p=a.deadline.split('-');if(p.length!==3)return null;
   var due=new Date(+p[0],+p[1]-1,+p[2]),now=new Date();
   var today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -1277,6 +1277,25 @@ function fmtDeadlineShort(v){
   var p=v.split('-'),d=new Date(+p[0],+p[1]-1,+p[2]);
   var o={weekday:'short',month:'short',day:'numeric'};if(d.getFullYear()!==new Date().getFullYear())o.year='numeric';
   return d.toLocaleDateString('en-US',o);
+}
+// Deadline line under a seed's title (skill or project): countdown + date;
+// tap to change (date input sits invisibly on top), × to remove.
+function deadlineLineHTML(a){
+  var dl=deadlineLabel(a),h='';
+  h+='<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:6px;">';
+  h+='<span class="dl-field" style="flex:none;display:inline-block;"><span style="font-size:12px;font-weight:600;color:'+(dl?dl.color:'var(--tx3)')+';">'
+    +(dl?'⏳ '+dl.text+' · '+fmtDeadlineShort(a.deadline):'+ Add deadline')
+    +'</span><input type="date" class="seed-deadline-edit" aria-label="Deadline" value="'+(a.deadline||'')+'"></span>';
+  if(a.deadline)h+='<button class="seed-deadline-clear" type="button" aria-label="Remove deadline" style="background:none;border:none;color:var(--tx3);font-size:15px;line-height:1;cursor:pointer;padding:2px 4px;">×</button>';
+  return h+'</div>';
+}
+function wireDeadlineLine(root,a,rerender){
+  var after=function(){sv();rMy();renderHomeDeadline();rerender();};
+  var inp=root.querySelector('.seed-deadline-edit');
+  wireDeadlineField(inp);
+  if(inp)inp.addEventListener('change',function(){if(this.value)a.deadline=this.value;else delete a.deadline;after();});
+  var clr=root.querySelector('.seed-deadline-clear');
+  if(clr)clr.addEventListener('click',function(){delete a.deadline;after();});
 }
 function deadlineLabel(a){
   var d=getDeadlineDays(a);if(d===null)return null;
@@ -1949,7 +1968,7 @@ function showTodayDetail(todaySess){
   document.getElementById('ed-ov').classList.add('on');
 }
 
-// One quiet line under Today's list: the nearest project deadline, plus how many others.
+// One quiet line under Today's list: the nearest deadline (skill or project), plus how many others.
 function renderHomeDeadline(){
   var el=document.getElementById('home-deadline');if(!el)return;
   var due=myActs.filter(function(a){return getDeadlineDays(a)!==null;})
@@ -1959,7 +1978,7 @@ function renderHomeDeadline(){
   el.innerHTML='<button type="button" style="display:flex;align-items:center;gap:6px;width:100%;background:none;border:none;padding:10px 2px 0;font-family:inherit;font-size:12px;cursor:pointer;text-align:left;color:var(--tx2);">'
     +'<span>⏳</span><span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(a.name)+' · <span style="color:'+dl.color+';font-weight:600;">'+dl.text+'</span>'
     +(due.length>1?' <span style="color:var(--tx3);">· +'+(due.length-1)+' more</span>':'')+'</span></button>';
-  el.firstChild.addEventListener('click',function(){showProjectInfo(a.id);});
+  el.firstChild.addEventListener('click',function(){openActInfo(a.id,'home');});
 }
 function rHome(){
   // ── Session lock: when a session is in progress, take over the home
@@ -4424,9 +4443,10 @@ function openActInfo(actId,from){
   rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;'+(lastSess?'border-bottom:.5px solid var(--bg3);':'')+'"><span style="font-size:13px;color:var(--tx3);">Time spent</span><span style="font-size:13px;font-weight:600;">'+Math.floor(totalMins/60)+'h '+(totalMins%60)+'m</span></div>';
   if(lastSess)rows+='<div style="display:flex;justify-content:space-between;padding:10px 0;"><span style="font-size:13px;color:var(--tx3);">Last session</span>'+agoToggleHTML(lastSess.date)+'</div>';
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
-  sh.innerHTML='<div style="text-align:center;margin-bottom:16px;"><div style="display:inline-flex;align-items:center;gap:6px;"><span style="font-family:var(--serif);font-size:20px;font-weight:700;">'+act.name+'</span><button id="act-info-edit-btn" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 5px;border-radius:6px;line-height:1;" title="Edit activity">✏️</button></div></div>'
+  sh.innerHTML='<div style="text-align:center;margin-bottom:16px;"><div style="display:inline-flex;align-items:center;gap:6px;"><span style="font-family:var(--serif);font-size:20px;font-weight:700;">'+act.name+'</span><button id="act-info-edit-btn" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 5px;border-radius:6px;line-height:1;" title="Edit activity">✏️</button></div>'+deadlineLineHTML(act)+'</div>'
     +'<div style="background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;">'+rows+'</div>';
   wireAgoToggles(sh);
+  wireDeadlineLine(sh,act,function(){openActInfo(actId,from);});
   document.getElementById('act-info-edit-btn').addEventListener('click',function(){openActInfoEdit(actId,from);});
   // Sessions row opens this skill's sessions in the logbook
   var sessRow=sh.querySelector('#act-info-sess');
@@ -5984,14 +6004,7 @@ function showProjectInfo(id){
   var html='';
   html+='<div style="text-align:center;margin-bottom:16px;">';
   html+='<div style="display:flex;align-items:center;justify-content:center;gap:6px;"><span style="font-family:var(--serif);font-size:22px;font-weight:700;letter-spacing:-.01em;">'+esc(a.name)+'</span><button id="proj-edit-btn" style="background:none;border:none;font-size:13px;cursor:pointer;color:var(--tx3);padding:2px 5px;border-radius:6px;line-height:1;" title="Edit project">✏️</button></div>';
-  // Deadline under the title: countdown + date; tap to change (date input sits invisibly on top)
-  var _dl=deadlineLabel(a);
-  html+='<div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:6px;">';
-  html+='<span class="dl-field" style="flex:none;display:inline-block;"><span style="font-size:12px;font-weight:600;color:'+(_dl?_dl.color:'var(--tx3)')+';">'
-    +(_dl?'⏳ '+_dl.text+' · '+fmtDeadlineShort(a.deadline):'+ Add deadline')
-    +'</span><input type="date" id="proj-deadline-edit" aria-label="Deadline" value="'+(a.deadline||'')+'"></span>';
-  if(a.deadline)html+='<button id="proj-deadline-clear" type="button" aria-label="Remove deadline" style="background:none;border:none;color:var(--tx3);font-size:15px;line-height:1;cursor:pointer;padding:2px 4px;">×</button>';
-  html+='</div>';
+  html+=deadlineLineHTML(a);
   html+='</div>';
   // Steps
   html+='<div style="margin-bottom:14px;">';
@@ -6071,18 +6084,7 @@ function showProjectInfo(id){
     addBtn.addEventListener('click',addNew);
     sh.querySelector('#proj-new-task').addEventListener('keypress',function(e){if(e.key==='Enter'){e.preventDefault();addNew();}});
   }
-  // Deadline
-  var dlEl=sh.querySelector('#proj-deadline-edit');
-  wireDeadlineField(dlEl);
-  if(dlEl){
-    dlEl.addEventListener('change',function(){
-      var v=this.value;
-      if(v)a.deadline=v;else delete a.deadline;
-      sv();rMy();renderHomeDeadline();showProjectInfo(id);
-    });
-  }
-  var dlClear=sh.querySelector('#proj-deadline-clear');
-  if(dlClear)dlClear.addEventListener('click',function(){delete a.deadline;sv();rMy();renderHomeDeadline();showProjectInfo(id);});
+  wireDeadlineLine(sh,a,function(){showProjectInfo(id);});
   wireAgoToggles(sh);
   sh.querySelector('#proj-notebook-btn').addEventListener('click',function(){closeEd();openNotes();rNoteEditor(a);});
   sh.querySelector('#proj-edit-btn').addEventListener('click',function(){openActInfoEdit(id,'my');});
