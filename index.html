@@ -1295,7 +1295,7 @@ function deadlineLineHTML(a){
   return h+'</div>';
 }
 function wireDeadlineLine(root,a,rerender){
-  var after=function(){sv();rMy();rerender();};
+  var after=function(){sv();rMy();renderTodaySection();rerender();};
   var inp=root.querySelector('.seed-deadline-edit');
   wireDeadlineField(inp);
   if(inp)inp.addEventListener('change',function(){if(this.value)a.deadline=this.value;else delete a.deadline;after();});
@@ -5339,7 +5339,21 @@ function openSessionDetail(s,a){
         +'<div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">'+dur+'</div><div style="font-size:11px;color:var(--tx3);">Time spent</div></div>'
         +'<div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">★ '+normRating(s.rating)+'</div><div style="font-size:11px;color:var(--tx3);">Rating</div></div>'
       +'</div>'
-      :'<div style="display:flex;justify-content:center;margin-bottom:14px;"><div style="background:var(--bg2);border-radius:10px;padding:10px 24px;text-align:center;min-width:160px;"><div style="font-size:18px;font-weight:700;color:var(--gr);">'+dur+'</div><div style="font-size:11px;color:var(--tx3);">Time spent</div></div></div>');
+      :'<div style="margin-bottom:14px;"><div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">'+dur+'</div><div style="font-size:11px;color:var(--tx3);">Time spent</div></div></div>');
+  // What was written when logging: feeling/momentum tags, then the notes in one box
+  var feels=Array.isArray(s.feel)?s.feel:(s.feel?[s.feel]:[]);
+  var tags=feels.concat(s.momentum?[s.momentum]:[]);
+  var extra='';
+  if(tags.length)extra+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">'+tags.map(function(t){
+    return '<span style="font-size:12px;font-weight:600;padding:5px 11px;border-radius:20px;background:var(--grl);background:color-mix(in srgb,var(--gr) 14%,var(--bg));color:var(--gr2);">'+esc(t)+'</span>';
+  }).join('')+'</div>';
+  var noteRows=[['Field notes',s.notes],['Went well',s.well],['Next time',s.diff]].filter(function(r){return r[1]&&String(r[1]).trim();});
+  if(noteRows.length)extra+='<div style="background:var(--bg2);border-radius:10px;padding:0 14px;margin-bottom:14px;">'+noteRows.map(function(r,i){
+    return '<div style="padding:11px 0;'+(i<noteRows.length-1?'border-bottom:.5px solid var(--bg3);':'')+'">'
+      +'<div style="font-size:10.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">'+r[0]+'</div>'
+      +'<div style="font-size:13px;color:var(--tx);line-height:1.5;white-space:pre-wrap;word-break:break-word;">'+esc(r[1])+'</div></div>';
+  }).join('')+'</div>';
+  if(extra)sh.insertAdjacentHTML('beforeend',extra);
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-top:8px;';
   var editBtn=document.createElement('button');editBtn.className='btn btn-p';editBtn.style.cssText='flex:1;margin-top:0;';editBtn.textContent='Edit';
   editBtn.addEventListener('click',function(){closeEd();openSessionEdit(s,a);});
@@ -5899,10 +5913,23 @@ function renderTodaySection(){
   var openTasks=[];
   focusProjects.forEach(function(p){getProjectTasks(p).forEach(function(t){if(!t.done)openTasks.push({proj:p,task:t});});});
   if(!myActs.length){wrap.innerHTML='';return;}
+  // Deadlines 3 days out or overdue join the list (unless already scheduled today)
+  var schedIds={};scheduled.forEach(function(it){if(it.actId)schedIds[it.actId]=true;});
+  var dueSoon=myActs.filter(function(a){var d=getDeadlineDays(a);return d!==null&&d<=3&&!schedIds[a.id];})
+    .sort(function(x,y){return getDeadlineDays(x)-getDeadlineDays(y);});
   var html='<div class="today-sec">';
   // Scheduled items (planned events + routines) sit under On today's list
-  if(scheduled.length){
+  if(scheduled.length||dueSoon.length){
     html+='<div class="sched-scroll" style="max-height:160px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;">';
+    dueSoon.forEach(function(a){
+      var d=getDeadlineDays(a);
+      var txt=d<0?(-d)+' day'+(d===-1?'':'s')+' overdue':d===0?'due today':d===1?'due tomorrow':'due in '+d+' days';
+      html+='<div class="sched-item" data-startid="'+a.id+'">'
+          +'<div class="sched-time">Due</div>'
+          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+esc(a.name)+'</div><div class="sched-meta"'+(d<0?' style="color:var(--co2);opacity:1;font-weight:600;"':'')+'>'+txt+'</div></div>'
+          +'<button class="sched-start" data-startid="'+a.id+'">Start</button>'
+          +'</div>';
+    });
     scheduled.forEach(function(it){
       html+='<div class="sched-item" data-startid="'+(it.actId||'')+'">'
           +'<div class="sched-time">'+(it.hour==null?'Any':_fmtHour12(it.hour))+'</div>'
@@ -6019,8 +6046,8 @@ function showProjectInfo(id){
   sh.innerHTML=html;
   // Finish: a prominent button once every step is ticked, otherwise a quiet link under Start / Log
   var finish=function(){
-    a.finishedAt=Date.now();sv();rMy();showProjectInfo(id);
-    showToast('🌳 '+a.name+' finished',function(){delete a.finishedAt;sv();rMy();if(document.getElementById('ed-ov').classList.contains('on'))showProjectInfo(id);});
+    a.finishedAt=Date.now();sv();rMy();renderTodaySection();showProjectInfo(id);
+    showToast('🌳 '+a.name+' finished',function(){delete a.finishedAt;sv();rMy();renderTodaySection();if(document.getElementById('ed-ov').classList.contains('on'))showProjectInfo(id);});
   };
   var allDone=tasks.length>0&&doneCount===tasks.length;
   if(!isFinished(a)){
@@ -6038,7 +6065,7 @@ function showProjectInfo(id){
       finLink.addEventListener('click',finish);sh.appendChild(finLink);
     }
   } else {
-    sh.querySelector('#proj-reopen').addEventListener('click',function(){delete a.finishedAt;sv();rMy();showProjectInfo(id);});
+    sh.querySelector('#proj-reopen').addEventListener('click',function(){delete a.finishedAt;sv();rMy();renderTodaySection();showProjectInfo(id);});
   }
   // Re-render without losing the steps list's scroll position (or jump to the end after adding)
   var rerender=function(toEnd){
