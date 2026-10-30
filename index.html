@@ -1662,7 +1662,7 @@ document.getElementById('nb-friends').addEventListener('click',function(){nav('f
 function openGardenQuickLog(){
   if(!myActs.length){openAdd();return;}
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
-  buildActPicker({container:sh,sheet:sh,title:'Log a session',sub:'Which activity?',
+  buildActPicker({container:sh,sheet:sh,title:'Log session',sub:'Which activity?',
     onPick:function(a){closeEd();openLogDirect(a.id,'garden');},
     footer:function(c){c.appendChild(_pickerStickyRow([{label:'Cancel',fn:closeEd}]));},
     autofocus:80});
@@ -1673,7 +1673,7 @@ function openGardenFabMenu(){
   var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:4px;';title.textContent='What would you like to do?';sh.appendChild(title);
   var sub=document.createElement('div');sub.style.cssText='font-size:13px;color:var(--tx2);margin-bottom:18px;';sub.textContent='Choose an action for your garden.';sh.appendChild(sub);
   [{em:'🌱',title:'Plant a new seed',desc:'Add a new activity to your garden',fn:function(){closeEd();openAdd();}},
-   {em:'📋',title:'Log a session',desc:'Record time you grew today',fn:function(){closeEd();openGardenQuickLog();}}
+   {em:'📋',title:'Log session',desc:'Record time you grew today',fn:function(){closeEd();openGardenQuickLog();}}
   ].forEach(function(opt){
     var card=document.createElement('div');
     card.style.cssText='display:flex;align-items:center;gap:14px;background:var(--card);border:var(--br);border-radius:var(--rad);padding:16px;cursor:pointer;margin-bottom:10px;box-shadow:var(--sh);transition:transform .12s cubic-bezier(.34,1.56,.64,1);';
@@ -1967,9 +1967,6 @@ function showTodayDetail(todaySess){
     list.appendChild(card);
   });
   sh.appendChild(list);
-  var row=document.createElement('div');row.style.cssText='position:sticky;bottom:-26px;background:var(--bg);padding:12px 22px 26px;margin:12px -22px -26px;border-top:0.5px solid var(--bg3);';
-  var close=document.createElement('button');close.className='btn btn-s';close.style.width='100%';close.textContent='Close';close.addEventListener('click',closeEd);row.appendChild(close);
-  sh.appendChild(row);
   document.getElementById('ed-ov').classList.add('on');
 }
 
@@ -2154,13 +2151,11 @@ function openDayRecap(d,dStart,dEnd){
   var isFuture=d>new Date()&&!isToday;
   if(!isFuture){
     var logBtn=document.createElement('button');logBtn.className='btn btn-p';logBtn.style.cssText='flex:1;margin:0;';
-    logBtn.textContent='+ Log a session';
+    logBtn.textContent='+ Log session';
     var _preDate=d.toLocaleDateString('en-CA');
     logBtn.addEventListener('click',function(){closeEd();showQuickLog(_preDate);});
     btnRow.appendChild(logBtn);
   }
-  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.cssText='flex:1;margin:0;';closeBtn.textContent='Close';
-  closeBtn.addEventListener('click',closeEd);btnRow.appendChild(closeBtn);
   sh.appendChild(btnRow);
   document.getElementById('ed-ov').classList.add('on');
 }
@@ -2190,8 +2185,6 @@ function openFutureDayRecap(d){
   var _d=new Date(d);
   addBtn.addEventListener('click',function(){closeEd();setTimeout(function(){_calScheduleForm(_d);},60);});
   btnRow.appendChild(addBtn);
-  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.cssText='flex:1;margin:0;';closeBtn.textContent='Close';
-  closeBtn.addEventListener('click',closeEd);btnRow.appendChild(closeBtn);
   sh.appendChild(btnRow);
   document.getElementById('ed-ov').classList.add('on');
 }
@@ -3495,9 +3488,6 @@ async function openFriendProfile(fid,p,fshipId){
     await _supa.from('friendships').delete().eq('id',fshipId);
     ov.classList.remove('on');renderFriendsList();
   });
-  var cancelBtn=document.createElement('button');cancelBtn.className='btn btn-s';cancelBtn.style.cssText='width:100%;margin-top:6px;';cancelBtn.textContent='Close';
-  cancelBtn.addEventListener('click',function(){ov.classList.remove('on');});
-  sh.appendChild(cancelBtn);
   sh.appendChild(removeBtn);
 }
 
@@ -3984,7 +3974,7 @@ function showQuickLog(preDate){
   if(!myActs.length){openAdd();return;}
   var body=document.getElementById('pq-body');body.innerHTML='';
   var subTxt=preDate?'Which activity? Session will be dated '+new Date(preDate+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})+'.':'Which activity did you just do?';
-  buildActPicker({container:body,sheet:document.querySelector('#pq-ov .sh'),title:'Log a session',titleSize:17,sub:subTxt,
+  buildActPicker({container:body,sheet:document.querySelector('#pq-ov .sh'),title:'Log session',titleSize:17,sub:subTxt,
     onPick:function(a){closePicker();openLogDirect(a.id,'home',preDate);},
     footer:function(c){var cancel=document.createElement('button');cancel.className='btn btn-s';cancel.style.marginTop='10px';cancel.textContent='Cancel';cancel.addEventListener('click',closePicker);c.appendChild(cancel);},
     autofocus:0});
@@ -4279,10 +4269,6 @@ function openTodayOverview(){
   logBtn.addEventListener('click',function(){closeEd();setTimeout(function(){openGardenQuickLog();},60);});
   actRow.appendChild(logBtn);
   sh.appendChild(actRow);
-  var closeBtn=document.createElement('button');
-  closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
-  closeBtn.addEventListener('click',closeEd);
-  sh.appendChild(closeBtn);
 
   // Wire schedule Start buttons
   sh.querySelectorAll('button[data-startid]').forEach(function(b){
@@ -4391,7 +4377,6 @@ function openSessionsStats(){
     tbl.appendChild(row);
   });
   sh.appendChild(tbl);
-  var close=document.createElement('button');close.className='btn btn-s';close.style.width='100%';close.textContent='Close';close.addEventListener('click',closeEd);sh.appendChild(close);
   document.getElementById('ed-ov').classList.add('on');
 }
 
@@ -4431,7 +4416,6 @@ function openTimeStats(){
     totTbl.appendChild(row);
   });
   sh.appendChild(totTbl);
-  var close=document.createElement('button');close.className='btn btn-s';close.style.width='100%';close.textContent='Close';close.addEventListener('click',closeEd);sh.appendChild(close);
   document.getElementById('ed-ov').classList.add('on');
 }
 
@@ -4471,10 +4455,10 @@ function openActInfo(actId,from){
     +'<span style="font-size:18px;color:var(--tx3);line-height:1;">›</span>';
   notesRow.addEventListener('click',function(){closeEd();openNotes();rNoteEditor(act);});
   sh.appendChild(notesRow);
-  var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start activity';
+  var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start';
   startBtn.addEventListener('click',function(){closeEd();startFrom(actId);});
   sh.appendChild(startBtn);
-  var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='+ Log a session';
+  var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='+ Log session';
   logBtn.addEventListener('click',function(){closeEd();openLogDirect(actId,from);});
   sh.appendChild(logBtn);
   document.getElementById('ed-ov').classList.add('on');
@@ -5031,8 +5015,8 @@ function rMy(){
   var pc=document.getElementById('plot-count');
   if(pc){
     var label=myKind==='skill'?'skill':myKind==='project'?'tree':'seed';
-    var suffix=myFocusOnly?' in focus':(_filtered.length?' planted':'');
-    pc.textContent=_filtered.length+' '+label+(_filtered.length!==1?'s':'')+suffix;
+    // Only worth a line when the focus filter is on; otherwise the tabs and category counts say it
+    pc.textContent=myFocusOnly?_filtered.length+' '+label+(_filtered.length!==1?'s':'')+' in focus':'';
   }
 
   // Collapse-all button — based on visible category set
@@ -5214,7 +5198,6 @@ function showArchivedList(){
     });
     sh.appendChild(list);
   }
-  var close=document.createElement('button');close.className='btn btn-s';close.textContent='Close';close.addEventListener('click',closeEd);sh.appendChild(close);
   document.getElementById('ed-ov').classList.add('on');
 }
 
@@ -5548,7 +5531,7 @@ function _pickerStickyRow(buttons){
 function openHarvestQuickLog(){
   if(!myActs.length){openAdd();return;}
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
-  buildActPicker({container:sh,sheet:sh,title:'Log a session',sub:'Which activity?',
+  buildActPicker({container:sh,sheet:sh,title:'Log session',sub:'Which activity?',
     onPick:function(a){closeEd();openLogDirect(a.id,'hist');},
     footer:function(c){c.appendChild(_pickerStickyRow([{label:'Cancel',fn:closeEd}]));},
     autofocus:80});
@@ -6006,7 +5989,7 @@ function showProjectInfo(id){
   html+='</div>';
   // Steps
   html+='<div style="margin-bottom:14px;">';
-  html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Steps ('+doneCount+'/'+tasks.length+(tasks.length>=MAX_TASKS_PER_PROJECT?' · max':'')+')</div>';
+  if(tasks.length)html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Steps ('+doneCount+'/'+tasks.length+(tasks.length>=MAX_TASKS_PER_PROJECT?' · max':'')+')</div>';
   html+='<div id="proj-tasks-list" style="max-height:224px;overflow-y:auto;overscroll-behavior:contain;">'; // 5 steps visible, scroll for the rest
   tasks.forEach(function(t){
     var safeText=(t.text||'').replace(/</g,'&lt;');
@@ -6045,9 +6028,9 @@ function showProjectInfo(id){
   html+='<span style="font-size:18px;color:var(--tx3);line-height:1;">›</span></button>';
   sh.innerHTML=html;
   // Start / log buttons
-  var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start working';
+  var startBtn=document.createElement('button');startBtn.className='btn btn-p';startBtn.textContent='▶ Start';
   startBtn.addEventListener('click',function(){closeEd();startFrom(id);});sh.appendChild(startBtn);
-  var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='+ Log a session';
+  var logBtn=document.createElement('button');logBtn.className='btn btn-s';logBtn.style.marginTop='8px';logBtn.textContent='+ Log session';
   logBtn.addEventListener('click',function(){closeEd();openLogDirect(id,'my');});sh.appendChild(logBtn);
   // Re-render without losing the steps list's scroll position (or jump to the end after adding)
   var rerender=function(toEnd){
@@ -6223,7 +6206,6 @@ function openGardenHelp(){
     return '<div style="display:flex;align-items:center;gap:14px;padding:11px 0;'+(i<4?'border-bottom:1px solid var(--bg3);':'')+'">'+svg+'<div><div style="font-weight:600;font-size:14px;">'+s.label+'</div><div style="font-size:12px;color:var(--tx3);margin-top:2px;">'+s.range+'</div></div></div>';
   }).join('');
   sh.innerHTML='<div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:14px;">Plant stages</div>'+rows;
-  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.cssText='width:100%;margin-top:16px;';closeBtn.textContent='Close';closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
 }
 
 function rGarden(){
@@ -6559,10 +6541,8 @@ function showPlantInfo(id){
     });
     sh.innerHTML+='<div style="margin-bottom:16px;">'+rHtml+'</div>';
   }
-  var logBtn=document.createElement('button');logBtn.className='btn btn-p';logBtn.textContent='Log a session';
+  var logBtn=document.createElement('button');logBtn.className='btn btn-p';logBtn.textContent='+ Log session';
   logBtn.addEventListener('click',function(){closeEd();openLogDirect(id,'garden');});sh.appendChild(logBtn);
-  var closeBtn=document.createElement('button');closeBtn.className='btn btn-s';closeBtn.style.marginTop='8px';closeBtn.textContent='Close';
-  closeBtn.addEventListener('click',closeEd);sh.appendChild(closeBtn);
   document.getElementById('ed-ov').classList.add('on');
 }
 
