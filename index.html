@@ -277,12 +277,20 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .nb-day{text-align:center;font-family:var(--serif);font-size:16px;font-weight:700;color:var(--tx);}
 .nb-pg{font-family:inherit;font-size:11px;font-weight:600;color:var(--tx3);margin-top:2px;letter-spacing:.02em;}
 .nb-page{background:var(--card);border:var(--br);border-radius:14px;padding:10px 14px;min-height:42vh;}
-.nb-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:.5px solid var(--bg3);}
+.nb-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:.5px solid var(--bg3);position:relative;}
 .nb-row:last-child{border-bottom:none;}
 .nb-chip{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;width:104px;padding:4px 8px;margin-top:1px;border:none;border-radius:20px;font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;background:var(--grl);background:color-mix(in srgb,var(--gr) 14%,var(--bg));color:var(--gr2);white-space:nowrap;overflow:hidden;}
 .nb-ta{flex:1;min-width:0;border:none;background:transparent;resize:none;overflow:hidden;font-family:inherit;font-size:14px;line-height:1.5;color:var(--tx);padding:2px 0;outline:none;}
 .nb-ta::placeholder{color:var(--tx3);opacity:.75;font-style:italic;}
 .nb-add{display:block;margin:10px auto 0;background:none;border:none;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--tx3);cursor:pointer;padding:6px 10px;}
+.nb-chipmenu{position:absolute;z-index:40;top:100%;left:0;margin-top:4px;min-width:190px;background:var(--card);border:1px solid var(--bg3);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.16);padding:5px;animation:nbMenuIn .14s ease both;}
+@keyframes nbMenuIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:none;}}
+.nb-mi{display:flex;align-items:center;gap:8px;width:100%;padding:8px 9px;border:none;border-radius:9px;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--tx);text-align:left;cursor:pointer;touch-action:manipulation;}
+.nb-mi:hover,.nb-mi:active{background:var(--bg2);}
+.nb-mi.on{background:color-mix(in srgb,var(--gr) 14%,var(--bg));color:var(--gr2);}
+.nb-mi-em{font-size:15px;line-height:1;flex-shrink:0;}
+.nb-mi-lbl{flex:1;}
+.nb-mi-ck{color:var(--gr);font-weight:700;flex-shrink:0;}
 @keyframes nbInR{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:none;}}
 @keyframes nbInL{from{opacity:0;transform:translateX(-24px);}to{opacity:1;transform:none;}}
 .name-edit{display:inline-flex;align-items:center;gap:7px;background:none;border:none;padding:2px 4px;margin:0;cursor:pointer;color:var(--tx3);font-family:inherit;border-radius:8px;}
@@ -3113,6 +3121,7 @@ function checkCalPlanned(){
 function openNotes(){rNotesList();document.getElementById('notes-ov').classList.add('on');}
 function closeNotes(){if(_nbPendingCommit)_nbPendingCommit();document.getElementById('notes-ov').classList.remove('on');}
 function rNotesList(){
+  _nbShutChipMenu();
   _nbPendingCommit=null;
   var nb=document.getElementById('notes-body');nb.ontouchstart=nb.ontouchend=null;
   document.getElementById('notes-title').textContent='Notes';
@@ -3272,11 +3281,13 @@ function migrateProjectNotes(){
   });
   if(changed){_noteMigrated=false;sv();}else _flushNoteMigration();
 }
-var _noteBackFn=null,_nbPendingCommit=null;
+var _noteBackFn=null,_nbPendingCommit=null,_nbCloseChipMenu=null,_nbChipOwner=null;
+function _nbShutChipMenu(){if(_nbCloseChipMenu)_nbCloseChipMenu();}
 function rNoteEditor(a,day){
   document.getElementById('notes-title').textContent=a.emoji+' '+a.name;
   document.getElementById('btn-notes-back').style.display='block';
   var cats=(a._personal?PERSONAL_NOTE_SECTIONS:NOTE_SECTIONS).map(function(sec){return sec.key;});
+  _nbShutChipMenu();
   var pages=_getNotePages(a.id);_flushNoteMigration();
   var today=_dayKey(Date.now());
   day=day||today;
@@ -3308,13 +3319,19 @@ function rNoteEditor(a,day){
   function commit(){
     if(saveT){clearTimeout(saveT);saveT=null;}
     var kept=blocks.filter(function(b){return b.text&&b.text.trim();}).map(function(b){return {cat:b.cat,text:b.text.replace(/\s+$/,'')};});
-    var pi=pages.indexOf(page);
+    // Re-resolve against live state: a background sync can replace activityNotes
+    // wholesale, which would orphan the array captured when this page opened.
+    var live=_getNotePages(a.id),pi=-1;
+    for(var k=0;k<live.length;k++)if(live[k].day===day){pi=k;break;}
     if(kept.length){
-      if(pi>-1&&JSON.stringify(kept)===JSON.stringify(page.blocks))return;
-      page.blocks=kept;page.updatedAt=Date.now();
-      if(pi<0){pages.push(page);pages.sort(_byDay);}
-    } else if(pi>-1)pages.splice(pi,1);
+      if(pi>-1&&JSON.stringify(kept)===JSON.stringify(live[pi].blocks))return;
+      var tgt=pi>-1?live[pi]:{day:day,updatedAt:0,blocks:[]};
+      tgt.blocks=kept;tgt.updatedAt=Date.now();
+      if(pi<0){live.push(tgt);live.sort(_byDay);}
+      page=tgt;pages=live;
+    } else if(pi>-1){live.splice(pi,1);pages=live;}
     else return;
+    _noteMigrated=false;
     sv();
   }
   function queueSave(){if(saveT)clearTimeout(saveT);saveT=setTimeout(commit,500);}
@@ -3329,11 +3346,42 @@ function rNoteEditor(a,day){
   function makeRow(b){
     var row=document.createElement('div');row.className='nb-row';
     var chip=document.createElement('button');chip.type='button';chip.className='nb-chip';chip.innerHTML=chipHTML(b.cat);
-    chip.title='Tap to change category';
+    chip.title='Change category';chip.setAttribute('aria-haspopup','true');chip.setAttribute('aria-expanded','false');
     var ta=document.createElement('textarea');ta.className='nb-ta';ta.rows=1;ta.value=b.text;ta.placeholder=prompt(b,blocks.indexOf(b));
-    chip.addEventListener('click',function(){
-      b.cat=cats[(cats.indexOf(b.cat)+1)%cats.length];
-      chip.innerHTML=chipHTML(b.cat);ta.placeholder=prompt(b,blocks.indexOf(b));queueSave();
+    chip.addEventListener('click',function(e){
+      e.stopPropagation();
+      // Pressing the open chip again just closes the picker
+      var mine=_nbChipOwner===chip;
+      _nbShutChipMenu();
+      if(mine)return;
+      var menu=document.createElement('div');menu.className='nb-chipmenu';
+      cats.forEach(function(key){
+        var c=NOTE_CHIPS[key];
+        var mi=document.createElement('button');mi.type='button';mi.className='nb-mi'+(key===b.cat?' on':'');
+        mi.innerHTML='<span class="nb-mi-em">'+c.emoji+'</span><span class="nb-mi-lbl">'+c.label+'</span>'
+          +(key===b.cat?'<span class="nb-mi-ck">\u2713</span>':'');
+        mi.addEventListener('click',function(ev){
+          ev.stopPropagation();
+          b.cat=key;chip.innerHTML=chipHTML(b.cat);ta.placeholder=prompt(b,blocks.indexOf(b));
+          _nbShutChipMenu();queueSave();focusAt(ta);
+        });
+        menu.appendChild(mi);
+      });
+      row.appendChild(menu);
+      chip.setAttribute('aria-expanded','true');
+      function away(ev){if(!menu.contains(ev.target)&&ev.target!==chip)_nbShutChipMenu();}
+      function esc(ev){if(ev.key==='Escape'){ev.preventDefault();_nbShutChipMenu();focusAt(ta);}}
+      _nbChipOwner=chip;
+      _nbCloseChipMenu=function(){
+        document.removeEventListener('click',away,true);
+        document.removeEventListener('keydown',esc,true);
+        if(menu.parentNode)menu.parentNode.removeChild(menu);
+        chip.setAttribute('aria-expanded','false');
+        _nbCloseChipMenu=null;_nbChipOwner=null;
+      };
+      // Safe to bind now: this click already passed the document capture phase
+      document.addEventListener('click',away,true);
+      document.addEventListener('keydown',esc,true);
     });
     ta.addEventListener('input',function(){b.text=ta.value;grow(ta);queueSave();});
     ta.addEventListener('keydown',function(e){
@@ -3401,7 +3449,7 @@ document.getElementById('menu-ov').addEventListener('click',function(e){if(e.tar
 // Tap outside the sheet dismisses these overlays too
 ['ed-ov','foc-ov','cal-ov','notes-ov','add-ov','collect-ov','pq-ov'].forEach(function(oid){
   var ov=document.getElementById(oid);
-  if(ov)ov.addEventListener('click',function(e){if(e.target===this)ov.classList.remove('on');});
+  if(ov)ov.addEventListener('click',function(e){if(e.target!==this)return;if(oid==='notes-ov'&&_nbPendingCommit)_nbPendingCommit();ov.classList.remove('on');});
 });
 document.getElementById('mp-profile').addEventListener('click',function(){closeMenuPanel();setTimeout(openProfileEdit,220);});
 document.getElementById('mp-signin').addEventListener('click',function(){closeMenuPanel();goToSignIn();});
@@ -7039,9 +7087,11 @@ async function _bgRefresh(){
 }
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='visible'){_bgRefresh();checkCalPlanned();}
-  else if(document.visibilityState==='hidden'){_flushSync();}
+  else if(document.visibilityState==='hidden'){if(_nbPendingCommit)_nbPendingCommit();_flushSync();}
 });
-window.addEventListener('pagehide',_flushSync);
+// Commit the open notebook page before the sync flush, so backgrounding or
+// killing the app can't drop whatever is still inside the 500ms debounce.
+window.addEventListener('pagehide',function(){if(_nbPendingCommit)_nbPendingCommit();_flushSync();});
 setInterval(function(){if(document.visibilityState==='visible')_bgRefresh();},120000);
 
 async function checkProfile(){
