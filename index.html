@@ -5598,9 +5598,11 @@ function rHist(){
     var streakEl=streak>=3?'<span style="font-size:11px;font-weight:600;color:#C05C00;">🔥 '+streak+' days</span>':'';
     var tW=52,tH=68;
     var pW=38,pH=50;
+    // Widen the viewBox so the plant draws 8% smaller, centred, still on the ground
+    var vW=pW/0.92,vH=pH/0.92,vX=((pW-vW)/2).toFixed(2),vY=(pH-vH).toFixed(2);
     var plantInner=drawPlant(stage,pW,pH,a.cat,_plantHash(a.id));
     var plantBg=['linear-gradient(180deg,rgba(216,232,216,.55),rgba(168,200,160,.55))','linear-gradient(180deg,rgba(200,232,208,.55),rgba(126,184,144,.55))','linear-gradient(180deg,rgba(176,216,184,.55),rgba(86,168,112,.55))','linear-gradient(180deg,rgba(240,200,208,.55),rgba(192,112,144,.55))','linear-gradient(180deg,rgba(248,232,160,.55),rgba(212,168,48,.55))'];
-    var plantCol=plantInner?'<div style="width:'+tW+'px;flex-shrink:0;background:'+plantBg[stage]+';display:flex;align-items:flex-end;border-radius:var(--rad);overflow:hidden;box-shadow:var(--sh);"><svg viewBox="0 0 '+pW+' '+pH+'" width="'+tW+'" height="'+tH+'" xmlns="http://www.w3.org/2000/svg">'+plantInner+'</svg></div>':'';
+    var plantCol=plantInner?'<div style="width:'+tW+'px;flex-shrink:0;background:'+plantBg[stage]+';display:flex;align-items:flex-end;border-radius:var(--rad);overflow:hidden;box-shadow:var(--sh);"><svg viewBox="'+vX+' '+vY+' '+vW.toFixed(2)+' '+vH.toFixed(2)+'" width="'+tW+'" height="'+tH+'" xmlns="http://www.w3.org/2000/svg">'+plantInner+'</svg></div>':'';
     var isExp=!!histExpanded[s.id];
     var hasText=!!(s.notes||s.well||s.diff);
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;gap:6px;padding:0;background:none;border:none;box-shadow:none;animation-delay:'+(_hi*36)+'ms;margin-left:8px;margin-right:8px;width:calc(100% - 20px);';_hi++;
