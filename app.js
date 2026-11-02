@@ -3807,28 +3807,58 @@ function renderFocusOrder(){
   focusTmp.forEach(function(id,i){
     var a=byId[id];
     if(!a)return;
-    var row=document.createElement('div');
+    var row=document.createElement('div');row.dataset.id=id;
     row.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg2);border-radius:12px;flex-shrink:0;';
     row.innerHTML='<span style="font-size:11px;font-weight:700;color:var(--tx3);width:14px;flex-shrink:0;font-variant-numeric:tabular-nums;">'+(i+1)+'</span>'
       +'<span style="font-size:16px;flex-shrink:0;width:22px;text-align:center;">'+esc(a.emoji)+'</span>'
       +'<span style="flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+esc(a.name)+'</span>';
-    function arrow(label,delta,disabled){
-      var b=document.createElement('button');
-      b.type='button';
-      b.textContent=label;
-      b.setAttribute('aria-label',(delta<0?'Move up: ':'Move down: ')+a.name);
-      b.disabled=disabled;
-      b.style.cssText='border:none;background:none;font-size:15px;line-height:1;cursor:'+(disabled?'default':'pointer')+';opacity:'+(disabled?'.25':'.75')+';padding:4px 5px;flex-shrink:0;color:var(--tx2);';
-      if(!disabled)b.addEventListener('click',function(){
-        var j=i+delta;
-        focusTmp.splice(j,0,focusTmp.splice(i,1)[0]);
-        renderFocusOrder();
-      });
-      return b;
-    }
-    row.appendChild(arrow('↑',-1,i===0));
-    row.appendChild(arrow('↓',1,i===focusTmp.length-1));
+    var grip=document.createElement('span');
+    grip.textContent='⠿';grip.setAttribute('aria-hidden','true');
+    grip.style.cssText='font-size:18px;line-height:1;color:var(--tx3);padding:6px 8px;margin:-6px -8px -6px 0;cursor:grab;flex-shrink:0;touch-action:none;';
+    row.appendChild(grip);
+    _focDragRow(grip,row,list);
     list.appendChild(row);
+  });
+}
+// Drag a focus row by its grip: the row follows the finger, the others slide
+// out of the way, and the order is committed on release.
+function _focDragRow(grip,row,list){
+  grip.addEventListener('pointerdown',function(e){
+    if(e.button>0)return;
+    e.preventDefault();
+    var rows=Array.prototype.slice.call(list.children),from=rows.indexOf(row);
+    var step=row.offsetHeight+(parseFloat(getComputedStyle(list).rowGap)||0);
+    var startY=e.clientY,to=from;
+    try{grip.setPointerCapture(e.pointerId);}catch(_){}
+    row.style.position='relative';row.style.zIndex='2';row.style.transition='box-shadow .15s';
+    row.style.boxShadow='0 8px 24px rgba(0,0,0,.16)';grip.style.cursor='grabbing';
+    rows.forEach(function(r){if(r!==row)r.style.transition='transform .16s cubic-bezier(.4,0,.2,1)';});
+    function move(ev){
+      var dy=ev.clientY-startY;
+      // Keep the lifted row within the list
+      dy=Math.max(-from*step,Math.min((rows.length-1-from)*step,dy));
+      row.style.transform='translateY('+dy+'px)';
+      to=Math.max(0,Math.min(rows.length-1,from+Math.round(dy/step)));
+      rows.forEach(function(r,j){
+        if(r===row)return;
+        var shift=(from<j&&j<=to)?-step:(to<=j&&j<from)?step:0;
+        r.style.transform=shift?'translateY('+shift+'px)':'';
+      });
+    }
+    function up(){
+      grip.removeEventListener('pointermove',move);
+      grip.removeEventListener('pointerup',up);
+      grip.removeEventListener('pointercancel',up);
+      if(to!==from){
+        var ids=rows.map(function(r){return r.dataset.id;});
+        ids.splice(to,0,ids.splice(from,1)[0]);
+        focusTmp=ids.concat(focusTmp.filter(function(id){return ids.indexOf(id)<0;}));
+      }
+      renderFocusOrder();
+    }
+    grip.addEventListener('pointermove',move);
+    grip.addEventListener('pointerup',up);
+    grip.addEventListener('pointercancel',up);
   });
 }
 function renderFocusList(query){
