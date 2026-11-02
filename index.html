@@ -3185,7 +3185,6 @@ function rNotesList(){
     });
     rows.forEach(function(r){
       var a=r.a,hasNotes=r.has;
-      var preview=r.sum.preview;
       var cnt=r.sum.count;
       var card=document.createElement('div');card.className='notes-act-card';
       if(a._archived)card.style.opacity='.6';
@@ -3193,8 +3192,7 @@ function rNotesList(){
         +'<div style="flex:1;min-width:0;">'
           +'<div class="notes-act-name">'+esc(a.name)+(a._archived?' <span style="font-size:10px;color:var(--tx3);">(archived)</span>':'')+'</div>'
           +(hasNotes
-            ?'<div class="notes-act-preview">'+esc(preview)+'</div>'
-             +'<div style="font-size:11px;color:var(--gr);font-weight:600;margin-top:3px;">📝 '+cnt+' page'+(cnt===1?'':'s')+(r.last?' · '+fmtDaysAgo(r.last):'')+'</div>'
+            ?'<div style="font-size:11px;color:var(--gr);font-weight:600;margin-top:3px;">📝 '+cnt+' page'+(cnt===1?'':'s')+(r.last?' · '+fmtDaysAgo(r.last):'')+'</div>'
             :'<div class="notes-act-preview" style="color:var(--bg3);">No notes yet</div>')
         +'</div>'
         +'<span style="font-size:16px;color:var(--tx3);">›</span>';
