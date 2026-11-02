@@ -3121,6 +3121,13 @@ function showBrowse(){
 }
 
 function startFrom(id){closePicker();active={actId:id,startedAt:Date.now(),pausedAt:null,pauseMs:0};sv();nav('home');}
+// ▶ on today's list: start straight away, without replacing a running session
+function quickStart(id){
+  if(!id)return;
+  if(active&&active.actId!==id){showToast('Finish the session that’s running first',null);return;}
+  closeEd();
+  if(active)nav('home');else startFrom(id);
+}
 function resumeSess(){if(!active)return;openFinish(active.actId,'home');}
 // Running time of the active session: wall clock minus whatever was spent paused
 function _activeElapsed(){if(!active)return 0;return Math.max(0,(active.pausedAt||Date.now())-active.startedAt-(active.pauseMs||0));}
@@ -3491,7 +3498,7 @@ function openTodayOverview(){
 
   // Wire schedule Start buttons
   sh.querySelectorAll('button[data-startid]').forEach(function(b){
-    b.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id){closeEd();openActInfo(id,'home');}});
+    b.addEventListener('click',function(e){e.stopPropagation();quickStart(this.dataset.startid);});
   });
   // Wire 📌 pins: which seeds take the home screen's few spots
   sh.querySelectorAll('button[data-pinid]').forEach(function(b){
@@ -5220,7 +5227,7 @@ function renderTodaySection(){
   wrap.innerHTML=html;
   // Wire schedule Start buttons → confirm modal
   wrap.querySelectorAll('.sched-start').forEach(function(el){
-    el.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id)openActInfo(id,'home');});
+    el.addEventListener('click',function(e){e.stopPropagation();quickStart(this.dataset.startid);});
   });
   wrap.querySelectorAll('.sched-item').forEach(function(el){
     el.addEventListener('click',function(){var id=this.dataset.startid;if(id)openActInfo(id,'home');});
