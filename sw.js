@@ -1,7 +1,7 @@
-const CACHE_VERSION = 'v164';
+const CACHE_VERSION = 'v165';
 const CACHE_NAME = 'gs-' + CACHE_VERSION;
 const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-const PRECACHE = ['./', './index.html', './index-v2.html', './manifest.json', './icon.svg'];
+const PRECACHE = ['./', './index.html', './styles.css', './app.js', './agentation.js', './index-v2.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -32,8 +32,11 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
 
-  // HTML: network-first (fresh when online), cached copy when offline
-  if (req.mode === 'navigate' || req.destination === 'document') {
+  // HTML and the app's own JS/CSS: network-first (fresh when online), cached
+  // copy when offline. Kept together so a new page never runs with stale code.
+  const isDoc = req.mode === 'navigate' || req.destination === 'document';
+  const isAppCode = new URL(req.url).origin === self.location.origin && (req.destination === 'script' || req.destination === 'style');
+  if (isDoc || isAppCode) {
     e.respondWith(
       fetch(new Request(req.url, {cache: 'no-store'}))
         .then(r => {
@@ -43,7 +46,7 @@ self.addEventListener('fetch', e => {
           }
           return r;
         })
-        .catch(() => caches.match(req).then(r => r || caches.match('./')))
+        .catch(() => caches.match(req).then(r => r || (isDoc ? caches.match('./') : r)))
     );
     return;
   }
