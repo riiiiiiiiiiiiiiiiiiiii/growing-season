@@ -3437,21 +3437,22 @@ function openTodayOverview(){
   // ── Scheduled ──
   if(scheduled.length){
     sh.appendChild(subHdr('Scheduled'));
+    var homePlan=_todayHomePlan();
     if(scheduled.length>TODAY_HOME_MAX){
       var pinHint=document.createElement('div');
       pinHint.style.cssText='font-size:12px;color:var(--tx3);margin:-2px 0 10px;';
-      pinHint.textContent='Home shows '+TODAY_HOME_MAX+'. Tap 📌 to choose which.';
+      pinHint.textContent='★ Starred ones show on your home screen.';
       sh.appendChild(pinHint);
     }
     scheduled.forEach(function(it){
       var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
-      var a=_actById(it.actId),du=dueShort(a),pinned=_isHomePinned(it.actId);
+      var a=_actById(it.actId),du=dueShort(a),onHome=!!homePlan.shownIds[it.actId];
       // Same light row as home's list, plus the pin and remove controls
       var row=document.createElement('div');row.className='sched-item';row.style.cursor='default';
-      row.innerHTML='<div style="flex:1;min-width:0;"><div class="sched-name">'+esc(it.name||'Untitled')+'</div>'
+      row.innerHTML=(it.actId?'<button class="sched-star'+(onHome?' on':'')+'" data-pinid="'+it.actId+'" aria-label="Show on home" aria-pressed="'+onHome+'">'+(onHome?'★':'☆')+'</button>':'<span class="sched-star"></span>')
+        +'<div style="flex:1;min-width:0;"><div class="sched-name">'+esc(it.name||'Untitled')+'</div>'
         +'<div class="sched-meta">'+(it.hour!=null?_fmtHour12(it.hour)+' · ':'')+(it.kind==='routine'?'Routine':'Planned')+dur
         +(du?' · <span'+(du.overdue?' style="color:var(--co2);font-weight:600;"':'')+'>'+du.text+'</span>':'')+'</div></div>'
-        +(it.actId?'<button data-pinid="'+it.actId+'" aria-label="Show on home" aria-pressed="'+pinned+'" title="Show on home" style="background:none;border:none;font-size:15px;line-height:1;cursor:pointer;padding:4px 2px;flex-shrink:0;opacity:'+(pinned?'1':'.28')+';filter:'+(pinned?'none':'grayscale(1)')+';">📌</button>':'')
         +'<button class="sched-start" data-startid="'+(it.actId||'')+'" aria-label="Start '+esc(it.name||'')+'">▶</button>'
         +'<button data-schedid="'+it.id+'" data-schedkind="'+it.kind+'" aria-label="Remove" style="background:none;border:none;color:var(--tx3);font-size:13px;line-height:1;cursor:pointer;padding:6px 2px 6px 4px;flex-shrink:0;">✕</button>';
       sh.appendChild(row);
@@ -3500,16 +3501,27 @@ function openTodayOverview(){
   sh.querySelectorAll('button[data-startid]').forEach(function(b){
     b.addEventListener('click',function(e){e.stopPropagation();quickStart(this.dataset.startid);});
   });
-  // Wire 📌 pins: which seeds take the home screen's few spots
+  // Wire ★: which of today's seeds take the home screen's few spots
   sh.querySelectorAll('button[data-pinid]').forEach(function(b){
     b.addEventListener('click',function(e){
       e.stopPropagation();
-      var a=_actById(this.dataset.pinid);if(!a)return;
-      if(!a.homePin){
-        var pinnedToday={};scheduled.forEach(function(it){if(_isHomePinned(it.actId))pinnedToday[it.actId]=true;});
-        if(Object.keys(pinnedToday).length>=TODAY_HOME_MAX){showToast('Home shows '+TODAY_HOME_MAX+' — unpin one first',null);return;}
+      var id=this.dataset.pinid,a=_actById(id);if(!a)return;
+      var plan=_todayHomePlan();
+      // Home's current picks, as seeds from today's schedule
+      var picks=plan.shown.filter(function(r){return !r.due;}).map(function(r){return r.actId;});
+      if(plan.shownIds[id]){
+        // Take it off home. Before anything's starred, the other defaults become stars.
+        if(!plan.starMode)picks.forEach(function(pid){var pa=_actById(pid);if(pa&&pid!==id)pa.homePin=true;});
+        delete a.homePin;
+      } else {
+        if(plan.starMode){
+          if(picks.length>=TODAY_HOME_MAX){showToast('Home holds '+TODAY_HOME_MAX+' — unstar one first',null);return;}
+        } else {
+          // Before anything's starred: keep the top defaults and swap out the last
+          picks.slice(0,TODAY_HOME_MAX-1).forEach(function(pid){var pa=_actById(pid);if(pa)pa.homePin=true;});
+        }
         a.homePin=true;
-      } else delete a.homePin;
+      }
       sv();
       if(document.getElementById('s-home').classList.contains('on'))rHome();
       openTodayOverview();
@@ -5185,6 +5197,25 @@ function _getTodayScheduled(){return _getScheduledForDate(new Date());}
 // sheet (a.homePin) take those spots first.
 var TODAY_HOME_MAX=3;
 function _isHomePinned(actId){var a=actId&&_actById(actId);return !!(a&&a.homePin);}
+// What home shows from today's list. Once any of today's seeds is starred
+// (a.homePin) home shows the starred ones, topped up with urgent deadlines;
+// until then it shows the first few by time. The Today sheet fills a star for
+// exactly what this returns as shown, so the two always agree.
+function _todayHomePlan(){
+  var scheduled=_getTodayScheduled();
+  var schedIds={};scheduled.forEach(function(it){if(it.actId)schedIds[it.actId]=true;});
+  // Deadlines 3 days out or overdue join the list (unless already scheduled today)
+  var dueSoon=myActs.filter(function(a){var d=getDeadlineDays(a);return d!==null&&d<=3&&!schedIds[a.id];})
+    .sort(function(x,y){return getDeadlineDays(x)-getDeadlineDays(y);});
+  var rows=dueSoon.map(function(a){return {actId:a.id,name:esc(a.name),du:dueShort(a),hour:null,due:true};})
+    .concat(scheduled.map(function(it){var a=_actById(it.actId);return {actId:it.actId,name:esc(it.name||'Untitled'),du:dueShort(a),hour:it.hour};}));
+  var starred=rows.filter(function(r){return !r.due&&_isHomePinned(r.actId);});
+  var shown=starred.length
+    ?starred.concat(rows.filter(function(r){return r.due;})).slice(0,TODAY_HOME_MAX)
+    :rows.slice(0,TODAY_HOME_MAX);
+  var shownIds={};shown.forEach(function(r){if(r.actId)shownIds[r.actId]=true;});
+  return {scheduled:scheduled,rows:rows,shown:shown,shownIds:shownIds,starMode:starred.length>0};
+}
 function renderTodaySection(){
   var wrap=document.getElementById('today-section');
   if(!wrap)return;
@@ -5195,19 +5226,11 @@ function renderTodaySection(){
   var openTasks=[];
   focusProjects.forEach(function(p){getProjectTasks(p).forEach(function(t){if(!t.done)openTasks.push({proj:p,task:t});});});
   if(!myActs.length){wrap.innerHTML='';return;}
-  // Deadlines 3 days out or overdue join the list (unless already scheduled today)
-  var schedIds={};scheduled.forEach(function(it){if(it.actId)schedIds[it.actId]=true;});
-  var dueSoon=myActs.filter(function(a){var d=getDeadlineDays(a);return d!==null&&d<=3&&!schedIds[a.id];})
-    .sort(function(x,y){return getDeadlineDays(x)-getDeadlineDays(y);});
+  var plan=_todayHomePlan(),rows=plan.rows;
   var html='<div class="today-sec">';
-  // One list: due-soon deadlines, then the schedule by time. Seeds pinned in
-  // the Today sheet jump to the front; home only ever shows the first few.
-  var rows=dueSoon.map(function(a){return {actId:a.id,emoji:a.emoji,name:esc(a.name),du:dueShort(a),hour:null};})
-    .concat(scheduled.map(function(it){var a=_actById(it.actId);return {actId:it.actId,emoji:it.emoji||(a&&a.emoji)||'',name:esc(it.name||'Untitled'),du:dueShort(a),hour:it.hour};}));
-  rows=rows.filter(function(r){return _isHomePinned(r.actId);}).concat(rows.filter(function(r){return !_isHomePinned(r.actId);}));
   if(rows.length){
     html+='<div class="sched-list">';
-    rows.slice(0,TODAY_HOME_MAX).forEach(function(r){
+    plan.shown.forEach(function(r){
       html+='<div class="sched-item" data-startid="'+(r.actId||'')+'">'
           +'<div style="flex:1;min-width:0;"><div class="sched-name">'+r.name+'</div>'
           +(r.du?'<div class="sched-meta'+(r.du.overdue?' overdue':'')+'">'+r.du.text+'</div>':'')+'</div>'
@@ -5216,7 +5239,7 @@ function renderTodaySection(){
           +'</div>';
     });
     html+='</div>';
-    if(rows.length>TODAY_HOME_MAX)html+='<div class="sched-more">+'+(rows.length-TODAY_HOME_MAX)+' more on today\'s list</div>';
+    if(rows.length>plan.shown.length)html+='<div class="sched-more">+'+(rows.length-plan.shown.length)+' more on today\'s list</div>';
   } else {
     // No scheduled items — light-blue empty card
     html+='<div class="sched-empty">'
