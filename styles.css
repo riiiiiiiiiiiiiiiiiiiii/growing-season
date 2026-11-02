@@ -75,6 +75,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .streak-inline{display:inline-flex;align-items:center;gap:4px;background:rgba(201,112,80,.16);color:inherit;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;letter-spacing:.02em;margin-left:8px;vertical-align:middle;}
 .sched-item{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:.5px solid var(--bg3);cursor:pointer;}
 .sched-item:last-of-type{border-bottom:none;}
+.sched-list{margin-top:-6px;}
 .sched-list .sched-item:first-child{padding-top:0;}
 .sched-time{font-size:11.5px;font-weight:600;color:var(--tx3);flex-shrink:0;font-variant-numeric:tabular-nums;}
 .sched-name{font-size:14px;font-weight:600;color:var(--tx);line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
