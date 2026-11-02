@@ -3430,12 +3430,19 @@ function openTodayOverview(){
   // ── Scheduled ──
   if(scheduled.length){
     sh.appendChild(subHdr('Scheduled'));
+    if(scheduled.length>TODAY_HOME_MAX){
+      var pinHint=document.createElement('div');
+      pinHint.style.cssText='font-size:12px;color:var(--tx3);margin:-2px 0 10px;';
+      pinHint.textContent='Home shows '+TODAY_HOME_MAX+'. Tap 📌 to choose which.';
+      sh.appendChild(pinHint);
+    }
     scheduled.forEach(function(it){
       var dur=it.duration?(' · '+(it.duration>=1?it.duration+'h':(Math.round(it.duration*60))+'m')):'';
       var row=document.createElement('div');
       row.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--grl);background:color-mix(in srgb,var(--gr) 14%,var(--bg));border:1px solid color-mix(in srgb,var(--gr) 30%,var(--bg));border-radius:12px;margin-bottom:6px;';
       row.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--gr2);min-width:36px;letter-spacing:.02em;text-transform:uppercase;">'+(it.hour==null?'Any':_fmtHour12(it.hour))+'</div>'
         +'<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--gr2);line-height:1.2;">'+(it.name||'Untitled')+'</div><div style="font-size:11px;color:var(--gr2);opacity:.75;margin-top:2px;">'+(it.kind==='routine'?'Routine':'Planned')+dur+(function(){var du=dueShort(_actById(it.actId));return du?' · <span style="'+(du.overdue?'color:var(--co2);opacity:1;':'')+'font-weight:600;">'+du.text+'</span>':'';})()+'</div></div>'
+        +(it.actId?'<button data-pinid="'+it.actId+'" aria-label="Show on home" aria-pressed="'+_isHomePinned(it.actId)+'" title="Show on home" style="background:none;border:none;font-size:15px;line-height:1;cursor:pointer;padding:4px 2px;opacity:'+(_isHomePinned(it.actId)?'1':'.28')+';filter:'+(_isHomePinned(it.actId)?'none':'grayscale(1)')+';">📌</button>':'')
         +'<button data-startid="'+(it.actId||'')+'" style="background:var(--gr);color:#FFFBF3;border:none;border-radius:12px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">Start</button>'
         +'<button data-schedid="'+it.id+'" data-schedkind="'+it.kind+'" aria-label="Remove" style="background:transparent;border:1px solid color-mix(in srgb,var(--gr2) 45%,transparent);color:var(--gr2);border-radius:50%;width:26px;height:26px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;">✕</button>';
       sh.appendChild(row);
@@ -3483,6 +3490,21 @@ function openTodayOverview(){
   // Wire schedule Start buttons
   sh.querySelectorAll('button[data-startid]').forEach(function(b){
     b.addEventListener('click',function(e){e.stopPropagation();var id=this.dataset.startid;if(id){closeEd();openActInfo(id,'home');}});
+  });
+  // Wire 📌 pins: which seeds take the home screen's few spots
+  sh.querySelectorAll('button[data-pinid]').forEach(function(b){
+    b.addEventListener('click',function(e){
+      e.stopPropagation();
+      var a=_actById(this.dataset.pinid);if(!a)return;
+      if(!a.homePin){
+        var pinnedToday={};scheduled.forEach(function(it){if(_isHomePinned(it.actId))pinnedToday[it.actId]=true;});
+        if(Object.keys(pinnedToday).length>=TODAY_HOME_MAX){showToast('Home shows '+TODAY_HOME_MAX+' — unpin one first',null);return;}
+        a.homePin=true;
+      } else delete a.homePin;
+      sv();
+      if(document.getElementById('s-home').classList.contains('on'))rHome();
+      openTodayOverview();
+    });
   });
   // Wire schedule × remove buttons
   sh.querySelectorAll('button[data-schedid]').forEach(function(b){
@@ -5150,6 +5172,10 @@ function _getScheduledForDate(target){
   return items;
 }
 function _getTodayScheduled(){return _getScheduledForDate(new Date());}
+// Home shows only the first few of today's list; seeds pinned in the Today
+// sheet (a.homePin) take those spots first.
+var TODAY_HOME_MAX=3;
+function _isHomePinned(actId){var a=actId&&_actById(actId);return !!(a&&a.homePin);}
 function renderTodaySection(){
   var wrap=document.getElementById('today-section');
   if(!wrap)return;
@@ -5165,27 +5191,24 @@ function renderTodaySection(){
   var dueSoon=myActs.filter(function(a){var d=getDeadlineDays(a);return d!==null&&d<=3&&!schedIds[a.id];})
     .sort(function(x,y){return getDeadlineDays(x)-getDeadlineDays(y);});
   var html='<div class="today-sec">';
-  // Scheduled items (planned events + routines) sit under On today's list
-  if(scheduled.length||dueSoon.length){
-    html+='<div class="sched-scroll" style="max-height:160px;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;">';
-    dueSoon.forEach(function(a){
-      var du=dueShort(a);
-      html+='<div class="sched-item" data-startid="'+a.id+'">'
-          +'<div class="sched-time">Due</div>'
-          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+esc(a.name)+'</div><div class="sched-meta"'+(du.overdue?' style="color:var(--co2);opacity:1;font-weight:600;"':'')+'>'+du.text+'</div></div>'
-          +'<button class="sched-start" data-startid="'+a.id+'">Start</button>'
-          +'</div>';
-    });
-    scheduled.forEach(function(it){
-      var du=dueShort(_actById(it.actId));
-      html+='<div class="sched-item" data-startid="'+(it.actId||'')+'">'
-          +'<div class="sched-time">'+(it.hour==null?'Any':_fmtHour12(it.hour))+'</div>'
-          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+(it.name||'Untitled')+'</div>'
-          +(du?'<div class="sched-meta"'+(du.overdue?' style="color:var(--co2);opacity:1;font-weight:600;"':'')+'>'+du.text+'</div>':'')+'</div>'
-          +'<button class="sched-start" data-startid="'+(it.actId||'')+'">Start</button>'
+  // One list: due-soon deadlines, then the schedule by time. Seeds pinned in
+  // the Today sheet jump to the front; home only ever shows the first few.
+  var rows=dueSoon.map(function(a){return {actId:a.id,emoji:a.emoji,name:esc(a.name),du:dueShort(a),hour:null};})
+    .concat(scheduled.map(function(it){var a=_actById(it.actId);return {actId:it.actId,emoji:it.emoji||(a&&a.emoji)||'',name:esc(it.name||'Untitled'),du:dueShort(a),hour:it.hour};}));
+  rows=rows.filter(function(r){return _isHomePinned(r.actId);}).concat(rows.filter(function(r){return !_isHomePinned(r.actId);}));
+  if(rows.length){
+    html+='<div class="sched-list">';
+    rows.slice(0,TODAY_HOME_MAX).forEach(function(r){
+      html+='<div class="sched-item" data-startid="'+(r.actId||'')+'">'
+          +'<span class="sched-em">'+(r.emoji||'🌱')+'</span>'
+          +'<div style="flex:1;min-width:0;"><div class="sched-name">'+r.name+'</div>'
+          +(r.du?'<div class="sched-meta'+(r.du.overdue?' overdue':'')+'">'+r.du.text+'</div>':'')+'</div>'
+          +(r.hour!=null?'<span class="sched-time">'+_fmtHour12(r.hour)+'</span>':'')
+          +'<button class="sched-start" data-startid="'+(r.actId||'')+'" aria-label="Start '+r.name+'">▶</button>'
           +'</div>';
     });
     html+='</div>';
+    if(rows.length>TODAY_HOME_MAX)html+='<div class="sched-more">+'+(rows.length-TODAY_HOME_MAX)+' more on today\'s list</div>';
   } else {
     // No scheduled items — light-blue empty card
     html+='<div class="sched-empty">'
@@ -5201,6 +5224,8 @@ function renderTodaySection(){
   wrap.querySelectorAll('.sched-item').forEach(function(el){
     el.addEventListener('click',function(){var id=this.dataset.startid;if(id)openActInfo(id,'home');});
   });
+  var more=wrap.querySelector('.sched-more');
+  if(more)more.addEventListener('click',openTodayOverview);
 }
 
 function renderWeekFocus(){
