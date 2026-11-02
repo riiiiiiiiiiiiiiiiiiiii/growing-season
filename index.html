@@ -948,14 +948,14 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
   <div id="s-friends" class="scr">
   <div id="friends-panel">
     <header class="v2-hero">
-      <h1 class="v2-hero-greet">Neighbourhood</h1>
+      <h1 class="v2-hero-greet">Friends</h1>
       <div class="v2-hero-sub">See what the people you follow are tending to.</div>
     </header>
     <div style="padding:0 22px;flex-shrink:0;">
       <div class="sw" style="margin-bottom:12px;"><span class="sic" style="font-size:14px;font-weight:600;">@</span><input class="si" id="fr-search" placeholder="Find by username…"></div>
       <div id="fr-search-result" style="margin-bottom:8px;"></div>
       <div id="fr-seg" class="my-seg" style="display:flex;width:100%;margin-bottom:12px;">
-        <div class="my-seg-btn on" id="fr-tab-friends" data-frtab="friends">Neighbours</div>
+        <div class="my-seg-btn on" id="fr-tab-friends" data-frtab="friends">Friends</div>
         <div class="my-seg-btn" id="fr-tab-feed" data-frtab="feed">Feed</div>
         <div class="my-seg-btn" id="fr-tab-messages" data-frtab="messages">Chats<span id="fr-msg-badge" style="display:none;background:#E53E3E;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;margin-left:4px;vertical-align:middle;"></span></div>
         <div class="my-seg-btn" id="fr-tab-requests" data-frtab="requests">Requests<span id="fr-req-badge" style="display:none;background:#E53E3E;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;margin-left:4px;vertical-align:middle;"></span></div>
@@ -972,7 +972,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
     <button class="nb" id="nb-my"><div class="nb-wrap"><span class="nb-ic">🌾</span></div>Seeds</button>
     <button class="nb" id="nb-garden"><div class="nb-wrap"><span class="nb-ic">🌸</span></div>Garden</button>
     <button class="nb" id="nb-hist"><div class="nb-wrap"><span class="nb-ic">📋</span></div>Logbook</button>
-    <button class="nb" id="nb-friends"><div class="nb-wrap" style="position:relative;"><span class="nb-ic">👥</span><span id="nb-friends-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#E53E3E;color:#fff;border-radius:10px;font-size:9px;min-width:14px;padding:1px 4px;text-align:center;line-height:14px;pointer-events:none;"></span></div>Neighbours</button>
+    <button class="nb" id="nb-friends"><div class="nb-wrap" style="position:relative;"><span class="nb-ic">👥</span><span id="nb-friends-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:#E53E3E;color:#fff;border-radius:10px;font-size:9px;min-width:14px;padding:1px 4px;text-align:center;line-height:14px;pointer-events:none;"></span></div>Friends</button>
   </nav>
 </div>
 
@@ -3552,14 +3552,14 @@ async function pushFeedEvent(type,actName,actEmoji,stage){
 
 async function renderFeed(){
   var body=document.getElementById('fr-body');
-  if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);font-size:14px;">Sign in to see your neighbours\' activity</div>';return;}
+  if(!supaUser){body.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--tx3);font-size:14px;">Sign in to see your friends\' activity</div>';return;}
   body.innerHTML='<div style="text-align:center;padding:24px;color:var(--tx3);font-size:13px;">Loading…</div>';
   try{
     var fRes=await _tq(_supa.from('friendships').select('requester_id,addressee_id').or('requester_id.eq.'+supaUser.id+',addressee_id.eq.'+supaUser.id).eq('status','accepted'));
     if(fRes.error)throw fRes.error;
     var friendIds=(fRes.data||[]).map(function(f){return f.requester_id===supaUser.id?f.addressee_id:f.requester_id;});
     if(!friendIds.length){
-      body.innerHTML='<div style="text-align:center;padding:44px 0;"><div style="font-size:38px;margin-bottom:12px;">🌱</div><div style="color:var(--tx2);font-size:14px;line-height:1.6;">Add neighbours to see their activity here.</div></div>';
+      body.innerHTML='<div style="text-align:center;padding:44px 0;"><div style="font-size:38px;margin-bottom:12px;">🌱</div><div style="color:var(--tx2);font-size:14px;line-height:1.6;">Add friends to see their activity here.</div></div>';
       return;
     }
     var evRes=await _tq(_supa.from('feed_events').select('*').in('user_id',friendIds).order('created_at',{ascending:false}).limit(60));
@@ -3567,11 +3567,11 @@ async function renderFeed(){
     var evs=evRes.data||[];
     body.innerHTML='';
     if(!evs.length){
-      body.innerHTML='<div style="text-align:center;padding:44px 0;"><div style="font-size:38px;margin-bottom:12px;">🌿</div><div style="color:var(--tx2);font-size:14px;line-height:1.6;">Nothing yet — your neighbours have been quiet!</div></div>';
+      body.innerHTML='<div style="text-align:center;padding:44px 0;"><div style="font-size:38px;margin-bottom:12px;">🌿</div><div style="color:var(--tx2);font-size:14px;line-height:1.6;">Nothing yet — your friends have been quiet!</div></div>';
       return;
     }
     evs.forEach(function(ev){
-      var name=ev.username?('@'+esc(ev.username)):'A neighbour';
+      var name=ev.username?('@'+esc(ev.username)):'A friend';
       var em=esc(ev.user_emoji||'🌱');
       var text='';
       if(ev.type==='session')text='grew '+esc(ev.act_emoji)+' '+esc(ev.act_name);
