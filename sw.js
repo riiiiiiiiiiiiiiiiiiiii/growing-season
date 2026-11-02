@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v165';
+const CACHE_VERSION = 'v166';
 const CACHE_NAME = 'gs-' + CACHE_VERSION;
 const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 const PRECACHE = ['./', './index.html', './styles.css', './app.js', './agentation.js', './index-v2.html', './manifest.json', './icon.svg'];

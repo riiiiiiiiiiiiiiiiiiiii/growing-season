@@ -1983,6 +1983,26 @@ function updateHomeNudge(){
   var el=document.getElementById('home-due');if(el)el.innerHTML='';
 }
 
+// Mondays: offer once to go over the week's focus
+function checkMondayFocus(){
+  var now=new Date(),today=_dayKey(now.getTime());
+  if(now.getDay()!==1||!onboarded||!myActs.length||weeklyFocus.askedOn===today)return;
+  var ov=document.getElementById('ed-ov');
+  if(ov.classList.contains('on')||document.querySelector('.ov.on'))return; // don't stack on another sheet
+  weeklyFocus.askedOn=today;sv();
+  var sh=document.getElementById('ed-sh');sh.innerHTML='';
+  var t=document.createElement('div');t.style.cssText='font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:6px;';t.textContent='New week 🌱';sh.appendChild(t);
+  var foc=_focusedActs(),cur=foc.slice(0,4).map(function(a){return a.emoji+' '+esc(a.name);}).join(', ');
+  var sub=document.createElement('div');sub.style.cssText='font-size:14px;color:var(--tx2);line-height:1.5;margin-bottom:20px;';
+  sub.innerHTML='Want to go over your focus for the week?'+(cur?'<br><span style="color:var(--tx3);font-size:13px;">Right now: '+cur+(foc.length>4?'…':'')+'</span>':'');
+  sh.appendChild(sub);
+  var yesB=document.createElement('button');yesB.className='btn btn-p';yesB.style.marginBottom='8px';yesB.textContent='🎯 Go over my focus';
+  yesB.addEventListener('click',function(){ov.classList.remove('on');openFocus();});
+  var noB=document.createElement('button');noB.className='btn btn-s';noB.textContent='Not now';
+  noB.addEventListener('click',function(){ov.classList.remove('on');});
+  sh.appendChild(yesB);sh.appendChild(noB);ov.classList.add('on');
+}
+
 function checkCalPlanned(){
   var now=Date.now();
   var due=_livePlanned().filter(function(ev){if(ev.notified)return false;if(ev.hour==null)return false;var evEnd=ev.date+ev.hour*3600000+(ev.duration||1)*3600000;return evEnd<=now;});
@@ -3894,7 +3914,7 @@ function openFocus(){
 }
 function closeFocus(){document.getElementById('foc-ov').classList.remove('on');}
 function saveFocus(){
-  weeklyFocus={actIds:focusTmp.slice()};
+  weeklyFocus={actIds:focusTmp.slice(),askedOn:weeklyFocus.askedOn};
   if(weeklyFocus.actIds.length>0)myFocusOnly=true;
   checkTrophies();sv();closeFocus();rMy();rHome();
 }
@@ -6006,7 +6026,7 @@ async function _bgRefresh(){
   finally{_bgSyncing=false;}
 }
 document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='visible'){_bgRefresh();checkCalPlanned();}
+  if(document.visibilityState==='visible'){_bgRefresh();checkCalPlanned();checkMondayFocus();}
   else if(document.visibilityState==='hidden'){if(_nbPendingCommit)_nbPendingCommit();_flushSync();}
 });
 // Commit the open notebook page before the sync flush, so backgrounding or
@@ -6076,6 +6096,7 @@ function bootApp(){
     document.getElementById('main-nav').classList.add('on');
     document.getElementById('menu-btn').style.display='flex';
     launch();
+    setTimeout(checkMondayFocus,900);
   }else{
     document.body.classList.add('ob-mode');
     show('s-ob0');rObCats();rObGrid();
