@@ -1992,9 +1992,8 @@ function checkMondayFocus(){
   weeklyFocus.askedOn=today;sv();
   var sh=document.getElementById('ed-sh');sh.innerHTML='';
   var t=document.createElement('div');t.style.cssText='font-family:var(--serif);font-size:20px;font-weight:700;margin-bottom:6px;';t.textContent='New week 🌱';sh.appendChild(t);
-  var foc=_focusedActs(),cur=foc.slice(0,4).map(function(a){return a.emoji+' '+esc(a.name);}).join(', ');
   var sub=document.createElement('div');sub.style.cssText='font-size:14px;color:var(--tx2);line-height:1.5;margin-bottom:20px;';
-  sub.innerHTML='Want to go over your focus for the week?'+(cur?'<br><span style="color:var(--tx3);font-size:13px;">Right now: '+cur+(foc.length>4?'…':'')+'</span>':'');
+  sub.textContent='Want to go over your focus for the week?';
   sh.appendChild(sub);
   var yesB=document.createElement('button');yesB.className='btn btn-p';yesB.style.marginBottom='8px';yesB.textContent='🎯 Go over my focus';
   yesB.addEventListener('click',function(){ov.classList.remove('on');openFocus();});
