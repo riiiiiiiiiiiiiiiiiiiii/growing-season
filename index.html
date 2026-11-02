@@ -355,8 +355,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .my-icon-add{background:var(--co);border:none;border-radius:50%;width:30px;height:30px;font-size:20px;font-weight:700;color:#FFFBF3;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;padding:0;box-shadow:0 2px 8px rgba(180,91,91,.28);transition:transform .15s cubic-bezier(.34,1.4,.64,1),box-shadow .18s ease;}
 .my-icon-add>span{display:block;line-height:1;transform:translateY(-1px);}
 .my-icon-add:active{transform:scale(.92);}
-#my-search-wrap,#hist-search-wrap{max-height:0;opacity:0;overflow:hidden;margin-bottom:0!important;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .22s ease,margin-bottom .28s cubic-bezier(.4,0,.2,1);}
-#my-search-wrap.open,#hist-search-wrap.open{max-height:56px;opacity:1;margin-bottom:12px!important;}
+#my-search-wrap,#hist-search-wrap,#notes-search-wrap{max-height:0;opacity:0;overflow:hidden;margin-bottom:0!important;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .22s ease,margin-bottom .28s cubic-bezier(.4,0,.2,1);}
+#my-search-wrap.open,#hist-search-wrap.open,#notes-search-wrap.open{max-height:56px;opacity:1;margin-bottom:12px!important;}
 .focus-banner{background:var(--col);border:none;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;box-shadow:var(--sh);}
 .focus-banner-text{flex:1;font-size:13px;color:var(--co2);line-height:1.4;}
 .focus-banner-edit{background:var(--co);color:#FFFBF3;border:none;border-radius:14px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;}
@@ -3119,7 +3119,9 @@ function checkCalPlanned(){
 }
 
 
-function openNotes(){rNotesList();document.getElementById('notes-ov').classList.add('on');}
+// Search state lives across the list and editor, reset each time the sheet opens
+var _notesSearch='',_notesSearchOpen=false;
+function openNotes(){_notesSearch='';_notesSearchOpen=false;rNotesList();document.getElementById('notes-ov').classList.add('on');}
 function closeNotes(){if(_nbPendingCommit)_nbPendingCommit();document.getElementById('notes-ov').classList.remove('on');}
 function rNotesList(){
   _nbShutChipMenu();
@@ -3147,7 +3149,7 @@ function rNotesList(){
   body.appendChild(meCard);
   // Activity tabs + list
   var tabRow=document.createElement('div');
-  tabRow.style.cssText='display:flex;gap:8px;padding:8px 3px 12px;';
+  tabRow.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 3px 12px;';
   migrateProjectNotes();
   var _notesTab='all';
   var _tabs=[{id:'all',label:'All activities'},{id:'skill',label:'Skills'},{id:'project',label:'Projects'}].map(function(t){
@@ -3159,7 +3161,28 @@ function rNotesList(){
     });
     tabRow.appendChild(el);return el;
   });
+  var srchBtn=document.createElement('button');srchBtn.className='my-icon-tog'+(_notesSearchOpen?' on':'');
+  srchBtn.setAttribute('aria-label','Search');srchBtn.textContent='🔍';srchBtn.style.marginLeft='auto';
+  tabRow.appendChild(srchBtn);
   body.appendChild(tabRow);
+
+  var srchWrap=document.createElement('div');srchWrap.className='sw'+(_notesSearchOpen?' open':'');srchWrap.id='notes-search-wrap';
+  srchWrap.innerHTML='<span class="sic">🔍</span><input class="si" placeholder="Search notes…" autocomplete="off">';
+  var srchInp=srchWrap.querySelector('input');srchInp.value=_notesSearch;
+  body.appendChild(srchWrap);
+  var _nsT=null;
+  srchInp.addEventListener('input',function(){
+    _notesSearch=this.value;
+    if(_nsT)clearTimeout(_nsT);
+    _nsT=setTimeout(function(){_nsT=null;_smoothList(listWrap,renderNotesList);},120);
+  });
+  srchBtn.addEventListener('click',function(){
+    _notesSearchOpen=!_notesSearchOpen;
+    srchWrap.classList.toggle('open',_notesSearchOpen);
+    srchBtn.classList.toggle('on',_notesSearchOpen);
+    if(_notesSearchOpen)setTimeout(function(){srchInp.focus();},280);
+    else if(_notesSearch){_notesSearch='';srchInp.value='';_smoothList(listWrap,renderNotesList);}
+  });
 
   var listWrap=document.createElement('div');body.appendChild(listWrap);
 
@@ -3170,6 +3193,17 @@ function rNotesList(){
       var emp=document.createElement('p');emp.style.cssText='color:var(--tx2);font-size:14px;text-align:center;padding:16px 0;';emp.textContent='Plant some seeds first to add notes.';listWrap.appendChild(emp);return;
     }
     var filtered=_notesTab==='skill'?all.filter(isSkill):_notesTab==='project'?all.filter(isProject):all;
+    // Search matches the seed's name or anything written in its notes
+    var q=_notesSearch.trim().toLowerCase();
+    if(q){
+      filtered=filtered.filter(function(a){
+        if(a.name.toLowerCase().includes(q))return true;
+        return _getNotePages(a.id).some(function(pg){return (pg.blocks||[]).some(function(b){return b.text&&b.text.toLowerCase().includes(q);});});
+      });
+      if(!filtered.length){
+        var nm=document.createElement('p');nm.style.cssText='color:var(--tx2);font-size:13px;text-align:center;padding:20px 0;';nm.textContent='No notes match “'+_notesSearch.trim()+'”.';listWrap.appendChild(nm);return;
+      }
+    }
     if(!filtered.length){
       var none=document.createElement('p');none.style.cssText='color:var(--tx2);font-size:13px;text-align:center;padding:20px 0;';none.textContent=_notesTab==='project'?'No projects yet.':'No skills yet.';listWrap.appendChild(none);return;
     }
