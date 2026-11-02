@@ -3452,10 +3452,12 @@ function openTodayOverview(){
       var a=_actById(it.actId),du=dueShort(a),onHome=!!homePlan.shownIds[it.actId];
       // Same light row as home's list, plus the pin and remove controls
       var row=document.createElement('div');row.className='sched-item';row.style.cursor='default';
-      row.innerHTML=(it.actId?'<button class="sched-star'+(onHome?' on':'')+'" data-pinid="'+it.actId+'" aria-label="Show on home" aria-pressed="'+onHome+'">'+(onHome?'★':'☆')+'</button>':'<span class="sched-star"></span>')
-        +'<div style="flex:1;min-width:0;"><div style="display:flex;align-items:baseline;gap:6px;min-width:0;"><div class="sched-name">'+esc(it.name||'Untitled')+'</div>'
-        +(dur?'<span class="sched-dur">'+dur+'</span>':'')+'</div>'
-        +((it.hour!=null||du)?'<div class="sched-meta">'+(it.hour!=null?_fmtHour12(it.hour):'')+(it.hour!=null&&du?' · ':'')
+      // The star shares the name's line so it stays level with it, whether or not a meta line follows
+      row.innerHTML='<div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:10px;min-width:0;">'
+        +(it.actId?'<button class="sched-star'+(onHome?' on':'')+'" data-pinid="'+it.actId+'" aria-label="Show on home" aria-pressed="'+onHome+'">'+(onHome?'★':'☆')+'</button>':'<span class="sched-star"></span>')
+        +'<div style="display:flex;align-items:baseline;gap:6px;min-width:0;"><div class="sched-name">'+esc(it.name||'Untitled')+'</div>'
+        +(dur?'<span class="sched-dur">'+dur+'</span>':'')+'</div></div>'
+        +((it.hour!=null||du)?'<div class="sched-meta" style="padding-left:30px;">'+(it.hour!=null?_fmtHour12(it.hour):'')+(it.hour!=null&&du?' · ':'')
           +(du?'<span'+(du.overdue?' style="color:var(--co2);font-weight:600;"':'')+'>'+du.text+'</span>':'')+'</div>':'')+'</div>'
         +'<button class="sched-start" data-startid="'+(it.actId||'')+'" aria-label="Start '+esc(it.name||'')+'">▶</button>'
         +'<button data-schedid="'+it.id+'" data-schedkind="'+it.kind+'" aria-label="'+(it.kind==='routine'?'Skip today':'Remove')+'" title="'+(it.kind==='routine'?'Skip today':'Remove')+'" style="background:none;border:none;color:var(--tx3);font-size:13px;line-height:1;cursor:pointer;padding:6px 2px 6px 4px;flex-shrink:0;">✕</button>';
