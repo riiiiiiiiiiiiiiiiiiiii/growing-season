@@ -3441,8 +3441,7 @@ function openTodayOverview(){
       var a=_actById(it.actId),du=dueShort(a),pinned=_isHomePinned(it.actId);
       // Same light row as home's list, plus the pin and remove controls
       var row=document.createElement('div');row.className='sched-item';row.style.cursor='default';
-      row.innerHTML='<span class="sched-em">'+(it.emoji||(a&&a.emoji)||'🌱')+'</span>'
-        +'<div style="flex:1;min-width:0;"><div class="sched-name">'+esc(it.name||'Untitled')+'</div>'
+      row.innerHTML='<div style="flex:1;min-width:0;"><div class="sched-name">'+esc(it.name||'Untitled')+'</div>'
         +'<div class="sched-meta">'+(it.hour!=null?_fmtHour12(it.hour)+' · ':'')+(it.kind==='routine'?'Routine':'Planned')+dur
         +(du?' · <span'+(du.overdue?' style="color:var(--co2);font-weight:600;"':'')+'>'+du.text+'</span>':'')+'</div></div>'
         +(it.actId?'<button data-pinid="'+it.actId+'" aria-label="Show on home" aria-pressed="'+pinned+'" title="Show on home" style="background:none;border:none;font-size:15px;line-height:1;cursor:pointer;padding:4px 2px;flex-shrink:0;opacity:'+(pinned?'1':'.28')+';filter:'+(pinned?'none':'grayscale(1)')+';">📌</button>':'')
@@ -5203,7 +5202,6 @@ function renderTodaySection(){
     html+='<div class="sched-list">';
     rows.slice(0,TODAY_HOME_MAX).forEach(function(r){
       html+='<div class="sched-item" data-startid="'+(r.actId||'')+'">'
-          +'<span class="sched-em">'+(r.emoji||'🌱')+'</span>'
           +'<div style="flex:1;min-width:0;"><div class="sched-name">'+r.name+'</div>'
           +(r.du?'<div class="sched-meta'+(r.du.overdue?' overdue':'')+'">'+r.du.text+'</div>':'')+'</div>'
           +(r.hour!=null?'<span class="sched-time">'+_fmtHour12(r.hour)+'</span>':'')
