@@ -375,11 +375,14 @@ function _focusedActs(){
 function _seedAlive(actId){return !!actId&&myActs.some(function(a){return a.id===actId;});}
 function _livePlanned(){return (calPlanned||[]).filter(function(ev){return _seedAlive(ev.actId);});}
 // A routine runs on its weekdays, up to its 'until' day if it has one
-// (routines made from a deadline stop there), and not for finished projects.
+// (routines made from a deadline stop there), not on days it was skipped
+// (r.skip, from × in the Today sheet), and not for finished projects.
 function _routineOnDay(r,date){
   var dow=date.getDay()===0?6:date.getDay()-1;
   if(!r.days||r.days.indexOf(dow)<0)return false;
-  if(r.until&&_dayKey(date.getTime())>r.until)return false;
+  var day=_dayKey(date.getTime());
+  if(r.until&&day>r.until)return false;
+  if(r.skip&&r.skip.indexOf(day)>-1)return false;
   var a=myActs.find(function(x){return x.id===r.actId;});
   return !(a&&isFinished(a));
 }
@@ -3455,7 +3458,7 @@ function openTodayOverview(){
         +((it.hour!=null||du)?'<div class="sched-meta">'+(it.hour!=null?_fmtHour12(it.hour):'')+(it.hour!=null&&du?' · ':'')
           +(du?'<span'+(du.overdue?' style="color:var(--co2);font-weight:600;"':'')+'>'+du.text+'</span>':'')+'</div>':'')+'</div>'
         +'<button class="sched-start" data-startid="'+(it.actId||'')+'" aria-label="Start '+esc(it.name||'')+'">▶</button>'
-        +'<button data-schedid="'+it.id+'" data-schedkind="'+it.kind+'" aria-label="Remove" style="background:none;border:none;color:var(--tx3);font-size:13px;line-height:1;cursor:pointer;padding:6px 2px 6px 4px;flex-shrink:0;">✕</button>';
+        +'<button data-schedid="'+it.id+'" data-schedkind="'+it.kind+'" aria-label="'+(it.kind==='routine'?'Skip today':'Remove')+'" title="'+(it.kind==='routine'?'Skip today':'Remove')+'" style="background:none;border:none;color:var(--tx3);font-size:13px;line-height:1;cursor:pointer;padding:6px 2px 6px 4px;flex-shrink:0;">✕</button>';
       sh.appendChild(row);
     });
   }
@@ -3533,15 +3536,23 @@ function openTodayOverview(){
     b.addEventListener('click',function(e){
       e.stopPropagation();
       var id=this.dataset.schedid,kind=this.dataset.schedkind;
+      var refresh=function(){
+        sv();
+        if(document.getElementById('s-home').classList.contains('on'))rHome();
+        if(document.getElementById('ed-ov').classList.contains('on'))openTodayOverview();
+      };
       if(kind==='routine'){
-        if(!confirm('Remove this routine?'))return;
-        calRoutines=calRoutines.filter(function(r){return r.id!==id;});
+        // Skip just today; the routine itself is removed from the calendar's Routines list
+        var r=calRoutines.find(function(x){return x.id===id;});if(!r)return;
+        var today=_dayKey(Date.now());
+        r.skip=(r.skip||[]).filter(function(d){return d>=today;}); // forget past skips
+        if(r.skip.indexOf(today)<0)r.skip.push(today);
+        refresh();
+        showToast('Skipped '+(r.actName||'it')+' for today',function(){r.skip=r.skip.filter(function(d){return d!==today;});refresh();});
       } else {
         calPlanned=calPlanned.filter(function(p){return p.id!==id;});
+        refresh();
       }
-      sv();
-      if(document.getElementById('s-home').classList.contains('on'))rHome();
-      openTodayOverview();
     });
   });
 
