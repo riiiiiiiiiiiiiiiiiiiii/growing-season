@@ -362,6 +362,8 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .notes-act-card:active{transform:scale(.98);}
 .notes-act-em{font-size:26px;flex-shrink:0;}
 .notes-act-name{font-size:15px;font-weight:600;}
+.notes-act-count{font-size:11px;color:var(--gr);font-weight:600;margin-top:3px;}
+.notes-act-group{font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin:6px 4px 8px;}
 .notes-act-preview{font-size:12px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
 .notes-section{margin-bottom:18px;}
 .notes-section-lbl{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
@@ -3134,13 +3136,12 @@ function rNotesList(){
   var meAct={id:'__me__',name:meName,emoji:meEmoji,_personal:true};
   var meSum=noteSummary('__me__');
   var meHas=meSum.count>0;
-  var mePreview=meSum.preview;
   var meCard=document.createElement('div');meCard.className='notes-act-card';
   meCard.style.cssText='background:var(--grl);border-color:var(--grm);';
   meCard.innerHTML='<div class="notes-act-em">'+meEmoji+'</div>'
     +'<div style="flex:1;min-width:0;">'
-      +'<div class="notes-act-name">'+meName+'</div>'
-      +(meHas?'<div class="notes-act-preview">'+esc(mePreview)+'</div>':'<div class="notes-act-preview" style="color:var(--tx3);">Your personal space</div>')
+      +'<div class="notes-act-name">'+esc(meName)+'</div>'
+      +(meHas?'<div class="notes-act-count">'+meSum.count+' page'+(meSum.count===1?'':'s')+'</div>':'<div class="notes-act-preview" style="color:var(--tx3);">Your personal space</div>')
     +'</div>'
     +'<span style="font-size:16px;color:var(--tx3);">›</span>';
   meCard.addEventListener('click',function(){_transitionNotesBody(function(){rNoteEditor(meAct);});});
@@ -3215,17 +3216,34 @@ function rNotesList(){
       if(x.has&&x.last!==y.last)return y.last-x.last;
       return x.i-y.i;
     });
+    // Where the search matched inside the notes, when it wasn't the name
+    function _matchLine(a){
+      if(!q||a.name.toLowerCase().includes(q))return '';
+      var hit='';
+      _getNotePages(a.id).slice().reverse().some(function(pg){
+        return (pg.blocks||[]).some(function(b){if(b.text&&b.text.toLowerCase().includes(q)){hit=b.text.replace(/\s+/g,' ');return true;}});
+      });
+      var at=hit.toLowerCase().indexOf(q);if(at<0)return '';
+      var from=Math.max(0,at-20);
+      return '<div class="notes-act-preview">'+(from?'…':'')+esc(hit.slice(from,at))
+        +'<b style="color:var(--tx);font-weight:600;">'+esc(hit.slice(at,at+q.length))+'</b>'+esc(hit.slice(at+q.length))+'</div>';
+    }
+    var _lastGroup=null;
     rows.forEach(function(r){
       var a=r.a,hasNotes=r.has;
       var cnt=r.sum.count;
+      if(hasNotes!==_lastGroup){
+        _lastGroup=hasNotes;
+        var gh=document.createElement('div');gh.className='notes-act-group';gh.textContent=hasNotes?'Recent':'No notes yet';
+        listWrap.appendChild(gh);
+      }
       var card=document.createElement('div');card.className='notes-act-card';
       if(a._archived)card.style.opacity='.6';
       card.innerHTML='<div class="notes-act-em">'+a.emoji+'</div>'
         +'<div style="flex:1;min-width:0;">'
           +'<div class="notes-act-name">'+esc(a.name)+(a._archived?' <span style="font-size:10px;color:var(--tx3);">(archived)</span>':'')+'</div>'
-          +(hasNotes
-            ?'<div style="font-size:11px;color:var(--gr);font-weight:600;margin-top:3px;">'+cnt+' page'+(cnt===1?'':'s')+'</div>'
-            :'<div class="notes-act-preview" style="color:var(--bg3);">No notes yet</div>')
+          +_matchLine(a)
+          +(hasNotes?'<div class="notes-act-count">'+cnt+' page'+(cnt===1?'':'s')+'</div>':'')
         +'</div>'
         +'<span style="font-size:16px;color:var(--tx3);">›</span>';
       card.addEventListener('click',function(){_transitionNotesBody(function(){rNoteEditor(a);});});
@@ -5604,6 +5622,7 @@ function rHist(){
     var hc=document.createElement('div');hc.className='hc';hc.style.cssText='cursor:pointer;display:flex;align-items:stretch;gap:6px;padding:0;background:none;border:none;box-shadow:none;animation-delay:'+(_hi*36)+'ms;margin-left:8px;margin-right:8px;width:calc(100% - 20px);';_hi++;
     hc.innerHTML='<div class="hc-main" style="flex:1;padding:8px 14px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--card);border:var(--br);border-radius:var(--rad);box-shadow:var(--sh);">'
       +'<div style="flex:1;"><div style="font-size:15px;font-weight:600;color:var(--tx);line-height:1.2;">'+a.name+'</div><div style="font-size:12px;color:var(--tx3);margin-top:2px;">'+dur+'</div></div>'
+      +((s.notes||s.well||s.diff)?'<span style="font-size:13px;color:var(--tx3);flex-shrink:0;" title="Has notes">✎</span>':'')
       +(s.rating?'<span class="hc-r" style="flex-shrink:0;">'+normRating(s.rating)+' ★</span>':'')
       +'</div>'+plantCol;
     (function(sess,act){hc.addEventListener('click',function(){openSessionDetail(sess,act);});})(s,a);
