@@ -246,8 +246,8 @@ function routineForm(o){
     +(o.sub?'<div style="font-size:13px;color:var(--tx2);line-height:1.5;margin-bottom:18px;">'+o.sub+'</div>':'<div style="height:10px;"></div>')
     +'<div style="'+lbl+'">Which days?</div><div id="rf-quick" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>'
     +'<div id="rf-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:20px;"></div>'
-    +'<div style="'+lbl+'">Time <span class="opt">optional</span></div><select id="rf-hour" class="sinp" style="width:100%;padding:8px;font-size:14px;margin-bottom:20px;"></select>'
-    +'<div style="'+lbl+'">Duration <span class="opt">optional</span></div><div id="rf-dur" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>'
+    +'<div style="'+lbl+'">Time</div><select id="rf-hour" class="sinp" style="width:100%;padding:8px;font-size:14px;margin-bottom:20px;"></select>'
+    +'<div style="'+lbl+'">Duration</div><div id="rf-dur" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>'
     +(o.endDate?'<div style="'+lbl+'">Ends <span class="opt">optional</span></div><div style="display:flex;gap:6px;align-items:stretch;margin-bottom:20px;"><div class="dl-field"><div class="sinp dl-txt'+(o.until?'':' empty')+'">'+(o.until?fmtDeadline(o.until):'No end date')+'</div><input type="date" id="rf-until" aria-label="End date" value="'+(o.until||'')+'"></div><button id="rf-until-clear" type="button" style="padding:0 14px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx2);font-size:13px;font-weight:600;cursor:pointer;'+(o.until?'':'display:none;')+'">Clear</button></div>':'')
     +'<div style="display:flex;gap:8px;"><button id="rf-cancel" class="btn btn-s" style="flex:1;margin-top:0;">'+o.cancelLabel+'</button><button id="rf-save" class="btn btn-p" style="flex:1;margin-top:0;">'+o.saveLabel+'</button></div>';
   var sel=(o.days||[]).slice(),dayBtns=[],quick=[];
@@ -1870,7 +1870,7 @@ function _calScheduleForm(dayDate){
   _renderActPicker();
 
   // Time picker (optional)
-  var tLbl=document.createElement('div');tLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';tLbl.innerHTML='Time <span class="opt">optional</span>';sh.appendChild(tLbl);
+  var tLbl=document.createElement('div');tLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';tLbl.innerHTML='Time';sh.appendChild(tLbl);
   var timeRow=document.createElement('div');timeRow.style.cssText='display:flex;gap:8px;margin-bottom:22px;align-items:center;';
   var hourSel=document.createElement('select');hourSel.className='sinp';hourSel.style.cssText='flex:1;padding:8px;font-size:14px;';
   var anyOpt=document.createElement('option');anyOpt.value='-1';anyOpt.textContent='Any time';anyOpt.selected=true;hourSel.appendChild(anyOpt);
@@ -1878,7 +1878,7 @@ function _calScheduleForm(dayDate){
   timeRow.appendChild(hourSel);sh.appendChild(timeRow);
 
   // Duration
-  var dLbl=document.createElement('div');dLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';dLbl.innerHTML='Duration <span class="opt">optional</span>';sh.appendChild(dLbl);
+  var dLbl=document.createElement('div');dLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';dLbl.innerHTML='Duration';sh.appendChild(dLbl);
   var durRow=document.createElement('div');durRow.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;';
   var _dur=1;
   // null = no set duration. Every display site already guards on a falsy
