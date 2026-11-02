@@ -244,8 +244,8 @@ function routineForm(o){
   var lbl='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';
   sh.innerHTML='<div style="font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:6px;">'+o.title+'</div>'
     +(o.sub?'<div style="font-size:13px;color:var(--tx2);line-height:1.5;margin-bottom:18px;">'+o.sub+'</div>':'<div style="height:10px;"></div>')
-    +'<div style="'+lbl+'">Which days?</div><div id="rf-quick" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>'
-    +'<div id="rf-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:20px;"></div>'
+    +(o.noDays?'':'<div style="'+lbl+'">Which days?</div><div id="rf-quick" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>'
+      +'<div id="rf-days" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:20px;"></div>')
     +'<div style="'+lbl+'">Time</div><select id="rf-hour" class="sinp" style="width:100%;padding:8px;font-size:14px;margin-bottom:20px;"></select>'
     +'<div style="'+lbl+'">Duration</div><div id="rf-dur" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;"></div>'
     +(o.endDate?'<div style="'+lbl+'">Ends</div><div style="display:flex;gap:6px;align-items:stretch;margin-bottom:20px;"><div class="dl-field"><div class="sinp dl-txt'+(o.until?'':' empty')+'">'+(o.until?fmtDeadline(o.until):'No end date')+'</div><input type="date" id="rf-until" aria-label="End date" value="'+(o.until||'')+'"></div><button id="rf-until-clear" type="button" style="padding:0 14px;border:1.5px solid var(--bg3);border-radius:var(--rsm);background:var(--bg2);color:var(--tx2);font-size:13px;font-weight:600;cursor:pointer;'+(o.until?'':'display:none;')+'">Clear</button></div>':'')
@@ -255,12 +255,12 @@ function routineForm(o){
     dayBtns.forEach(function(b,i){b.classList.toggle('on',sel.indexOf(i)>-1);});
     quick.forEach(function(q){q.el.classList.toggle('on',q.days.length===sel.length&&q.days.every(function(d){return sel.indexOf(d)>-1;}));});
   }
-  [{l:'Every day',days:[0,1,2,3,4,5,6]},{l:'Weekdays',days:[0,1,2,3,4]},{l:'Weekend',days:[5,6]}].forEach(function(q){
+  if(!o.noDays)[{l:'Every day',days:[0,1,2,3,4,5,6]},{l:'Weekdays',days:[0,1,2,3,4]},{l:'Weekend',days:[5,6]}].forEach(function(q){
     var b=document.createElement('button');b.type='button';b.className='fb';b.style.cssText='font-family:inherit;cursor:pointer;';b.textContent=q.l;
     b.addEventListener('click',function(){var same=q.days.length===sel.length&&q.days.every(function(d){return sel.indexOf(d)>-1;});sel=same?[]:q.days.slice();paint();});
     quick.push({el:b,days:q.days});sh.querySelector('#rf-quick').appendChild(b);
   });
-  ['M','T','W','Th','F','S','S'].forEach(function(dn,i){
+  if(!o.noDays)['M','T','W','Th','F','S','S'].forEach(function(dn,i){
     var b=document.createElement('div');b.className='fb';b.textContent=dn;b.setAttribute('role','button');
     b.setAttribute('aria-label',['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'][i]);
     b.style.cssText='min-width:0;text-align:center;padding-left:0;padding-right:0;cursor:pointer;';
@@ -285,27 +285,46 @@ function routineForm(o){
   }
   sh.querySelector('#rf-cancel').addEventListener('click',o.onCancel);
   sh.querySelector('#rf-save').addEventListener('click',function(){
-    if(!sel.length){showToast('Pick at least one day',null);return;}
+    if(!o.noDays&&!sel.length){showToast('Pick at least one day',null);return;}
     var h=parseInt(hs.value);
     o.onSave({days:sel.slice().sort(),hour:h>=0?h:null,duration:dur,until:ui?(ui.value||null):undefined});
   });
   ov.classList.add('on');
 }
 // ✎ on a routine in the calendar: change its days, time, length or end date
-function editRoutine(r){
+// onDone (optional): where to go after, e.g. back to the Today sheet
+function editRoutine(r,onDone){
   var ov=document.getElementById('ed-ov');
+  var back=function(){if(onDone)onDone();else ov.classList.remove('on');};
   routineForm({
     title:'Edit routine',sub:esc(r.actName),
     days:r.days,hour:r.hour,duration:r.duration===undefined?1:r.duration,endDate:true,until:r.until||'',
     cancelLabel:'Cancel',saveLabel:'Save',
-    onCancel:function(){ov.classList.remove('on');},
+    onCancel:back,
     onSave:function(v){
       r.days=v.days;r.hour=v.hour;r.duration=v.duration;
       if(v.until)r.until=v.until;else delete r.until;
-      sv();ov.classList.remove('on');
+      sv();back();
       if(document.getElementById('cal-ov').classList.contains('on'))renderCalWeek();
       renderTodaySection();updateHomeNudge();
       showToast('Routine updated',null);
+    }
+  });
+}
+// ✎ on a one-off plan: change its time or length
+function editPlanned(ev,onDone){
+  var ov=document.getElementById('ed-ov');
+  var back=function(){if(onDone)onDone();else ov.classList.remove('on');};
+  routineForm({
+    title:'Edit plan',sub:esc(ev.actName),noDays:true,
+    hour:ev.hour,duration:ev.duration===undefined?1:ev.duration,
+    cancelLabel:'Cancel',saveLabel:'Save',
+    onCancel:back,
+    onSave:function(v){
+      ev.hour=v.hour;ev.duration=v.duration;
+      sv();back();
+      renderTodaySection();updateHomeNudge();
+      showToast('Plan updated',null);
     }
   });
 }
@@ -3460,6 +3479,7 @@ function openTodayOverview(){
         +((it.hour!=null||du)?'<div class="sched-meta" style="padding-left:30px;">'+(it.hour!=null?_fmtHour12(it.hour):'')+(it.hour!=null&&du?' · ':'')
           +(du?'<span'+(du.overdue?' style="color:var(--co2);font-weight:600;"':'')+'>'+du.text+'</span>':'')+'</div>':'')+'</div>'
         +'<button class="sched-start" data-startid="'+(it.actId||'')+'" aria-label="Start '+esc(it.name||'')+'">▶</button>'
+        +'<button class="sched-edit" data-editid="'+it.id+'" data-editkind="'+it.kind+'" aria-label="Edit '+(it.kind==='routine'?'routine':'plan')+'" title="Edit">✎</button>'
         +'<button data-schedid="'+it.id+'" data-schedkind="'+it.kind+'" aria-label="'+(it.kind==='routine'?'Skip today':'Remove')+'" title="'+(it.kind==='routine'?'Skip today':'Remove')+'" style="background:none;border:none;color:var(--tx3);font-size:13px;line-height:1;cursor:pointer;padding:6px 2px 6px 4px;flex-shrink:0;">✕</button>';
       sh.appendChild(row);
     });
@@ -3525,6 +3545,15 @@ function openTodayOverview(){
       openTodayOverview();
     });
   });
+  // Wire ✎: edit the routine (all its days) or this one-off plan, then come back here
+  sh.querySelectorAll('button[data-editid]').forEach(function(b){
+    b.addEventListener('click',function(e){
+      e.stopPropagation();
+      var id=this.dataset.editid;
+      if(this.dataset.editkind==='routine'){var r=calRoutines.find(function(x){return x.id===id;});if(r)editRoutine(r,openTodayOverview);}
+      else{var ev=calPlanned.find(function(x){return x.id===id;});if(ev)editPlanned(ev,openTodayOverview);}
+    });
+  });
   // Wire schedule × remove buttons
   sh.querySelectorAll('button[data-schedid]').forEach(function(b){
     b.addEventListener('click',function(e){
@@ -3544,8 +3573,10 @@ function openTodayOverview(){
         refresh();
         showToast('Skipped '+(r.actName||'it')+' for today',function(){r.skip=r.skip.filter(function(d){return d!==today;});refresh();});
       } else {
-        calPlanned=calPlanned.filter(function(p){return p.id!==id;});
+        var idx=calPlanned.findIndex(function(p){return p.id===id;});if(idx<0)return;
+        var gone=calPlanned.splice(idx,1)[0];
         refresh();
+        showToast('Removed '+(gone.actName||'plan'),function(){calPlanned.splice(Math.min(idx,calPlanned.length),0,gone);refresh();});
       }
     });
   });
@@ -5292,6 +5323,16 @@ function renderWeekFocus(){
   wrap.querySelectorAll('.focus-chip').forEach(function(el){
     el.addEventListener('click',function(){openActInfo(this.dataset.startid,'home');});
   });
+  var row=wrap.querySelector('.focus-row');
+  if(row){
+    var edges=function(){
+      var max=row.scrollWidth-row.clientWidth;
+      row.classList.toggle('more-l',row.scrollLeft>2);
+      row.classList.toggle('more-r',max>2&&row.scrollLeft<max-2);
+    };
+    row.addEventListener('scroll',edges,{passive:true});
+    edges();requestAnimationFrame(edges);
+  }
   var hdr=wrap.querySelector('.v2-sec-hdr-clickable');
   if(hdr)hdr.addEventListener('click',openFocus);
 }

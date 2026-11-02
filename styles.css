@@ -56,7 +56,10 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .today-sec{margin:0 16px 23px;}
 .today-hdr{display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:10px;}
 .today-hdr-link{font-size:11px;font-weight:600;color:var(--gr2);cursor:pointer;letter-spacing:.02em;text-transform:none;}
-.focus-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;padding-left:14px;scrollbar-width:none;-webkit-overflow-scrolling:touch;-webkit-mask-image:linear-gradient(to right,transparent 0,#000 18px,#000 calc(100% - 18px),transparent 100%);mask-image:linear-gradient(to right,transparent 0,#000 18px,#000 calc(100% - 18px),transparent 100%);}
+.focus-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;padding-left:14px;scrollbar-width:none;-webkit-overflow-scrolling:touch;--fl:0px;--fr:0px;-webkit-mask-image:linear-gradient(to right,transparent 0,#000 var(--fl),#000 calc(100% - var(--fr)),transparent 100%);mask-image:linear-gradient(to right,transparent 0,#000 var(--fl),#000 calc(100% - var(--fr)),transparent 100%);}
+/* Fade only the side(s) with more chips to scroll to */
+.focus-row.more-l{--fl:32px;}
+.focus-row.more-r{--fr:56px;}
 .focus-row::-webkit-scrollbar{display:none;}
 .focus-chip{flex:0 0 auto;display:flex;align-items:center;gap:7px;background:#FDFEFF;border:1px solid var(--bg3);border-radius:24px;padding:9px 14px;font-size:13px;font-weight:600;color:var(--tx);cursor:pointer;box-shadow:var(--sh);touch-action:manipulation;white-space:nowrap;transition:transform .12s,background .15s;}
 .focus-chip:active{transform:scale(.96);}
@@ -84,6 +87,7 @@ body.session-lock #s-home > *:not(#s-lock){display:none!important;}
 .sched-meta.overdue{color:var(--co2);font-weight:600;}
 .sched-start{width:26px;height:26px;border-radius:50%;background:var(--bg2);color:var(--co);border:var(--br);font-size:9px;line-height:1;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0 0 0 2px;transition:transform .12s ease;}
 .sched-start:active{transform:scale(.92);}
+.sched-edit{background:none;border:none;color:var(--tx3);font-size:14px;line-height:1;cursor:pointer;padding:6px 2px;flex-shrink:0;font-family:inherit;}
 .sched-star{background:none;border:none;padding:0;margin-left:-4px;font-size:17px;line-height:1;width:24px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--tx3);opacity:.45;cursor:pointer;flex-shrink:0;font-family:inherit;}
 .sched-star.on{color:var(--co);opacity:1;}
 .sched-more{font-size:11.5px;font-weight:600;color:var(--tx3);padding:6px 2px 0;cursor:pointer;}
