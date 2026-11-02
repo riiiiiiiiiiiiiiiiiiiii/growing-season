@@ -1896,7 +1896,7 @@ function _calScheduleForm(dayDate){
   var repRow=document.createElement('div');repRow.style.cssText='display:flex;gap:6px;margin-bottom:10px;';
   var onceBtn=document.createElement('div');onceBtn.className='fb on';onceBtn.textContent='One-off';
   var routBtn=document.createElement('div');routBtn.className='fb';routBtn.textContent='Routine';
-  var dayPicker=document.createElement('div');dayPicker.style.cssText='display:none;margin-bottom:16px;';
+  var dayPicker=document.createElement('div');dayPicker.style.cssText='overflow:hidden;height:0;opacity:0;margin-bottom:0;transition:height .3s cubic-bezier(.4,0,.2,1),opacity .22s ease,margin-bottom .3s cubic-bezier(.4,0,.2,1);';
   var dpLbl=document.createElement('div');dpLbl.style.cssText='font-size:11px;font-weight:600;color:var(--tx3);margin-bottom:8px;';dpLbl.textContent='Which days?';dayPicker.appendChild(dpLbl);
   // Quick sets, named the way the calendar already labels a saved routine
   // ("Every day", "Weekdays"), so picking and reading back use one vocabulary.
@@ -1946,8 +1946,19 @@ function _calScheduleForm(dayDate){
     dpRow.appendChild(db);
   });
   dayPicker.appendChild(dpRow);
-  onceBtn.addEventListener('click',function(){_isRoutine=false;onceBtn.classList.add('on');routBtn.classList.remove('on');dayPicker.style.display='none';});
-  routBtn.addEventListener('click',function(){_isRoutine=true;routBtn.classList.add('on');onceBtn.classList.remove('on');dayPicker.style.display='block';});
+  // Slide the day picker open/closed rather than snapping the sheet's height
+  function _showDays(open){
+    var from=dayPicker.offsetHeight;
+    dayPicker.style.height=from+'px';dayPicker.offsetHeight;
+    dayPicker.style.height=(open?dayPicker.scrollHeight:0)+'px';
+    dayPicker.style.opacity=open?'1':'0';
+    dayPicker.style.marginBottom=open?'16px':'0';
+  }
+  dayPicker.addEventListener('transitionend',function(e){
+    if(e.target===dayPicker&&e.propertyName==='height'&&_isRoutine)dayPicker.style.height='auto';
+  });
+  onceBtn.addEventListener('click',function(){if(!_isRoutine)return;_isRoutine=false;onceBtn.classList.add('on');routBtn.classList.remove('on');_showDays(false);});
+  routBtn.addEventListener('click',function(){if(_isRoutine)return;_isRoutine=true;routBtn.classList.add('on');onceBtn.classList.remove('on');_showDays(true);});
   repRow.appendChild(onceBtn);repRow.appendChild(routBtn);sh.appendChild(repRow);sh.appendChild(dayPicker);
 
   var btnRow=document.createElement('div');btnRow.style.cssText='display:flex;gap:8px;margin-top:8px;';
