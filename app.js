@@ -3513,19 +3513,11 @@ function openTodayOverview(){
       e.stopPropagation();
       var id=this.dataset.pinid,a=_actById(id);if(!a)return;
       var plan=_todayHomePlan();
-      // Home's current picks, as seeds from today's schedule
-      var picks=plan.shown.filter(function(r){return !r.due;}).map(function(r){return r.actId;});
       if(plan.shownIds[id]){
-        // Take it off home. Before anything's starred, the other defaults become stars.
-        if(!plan.starMode)picks.forEach(function(pid){var pa=_actById(pid);if(pa&&pid!==id)pa.homePin=true;});
-        delete a.homePin;
+        // Off home; the next one in line takes the spot
+        a.homePin=false;
       } else {
-        if(plan.starMode){
-          if(picks.length>=TODAY_HOME_MAX){showToast('Home holds '+TODAY_HOME_MAX+' — unstar one first',null);return;}
-        } else {
-          // Before anything's starred: keep the top defaults and swap out the last
-          picks.slice(0,TODAY_HOME_MAX-1).forEach(function(pid){var pa=_actById(pid);if(pa)pa.homePin=true;});
-        }
+        if(plan.starredCount>=TODAY_HOME_MAX){showToast('Home holds '+TODAY_HOME_MAX+' — unstar one first',null);return;}
         a.homePin=true;
       }
       sv();
@@ -5210,11 +5202,12 @@ function _getTodayScheduled(){return _getScheduledForDate(new Date());}
 // Home shows only the first few of today's list; seeds pinned in the Today
 // sheet (a.homePin) take those spots first.
 var TODAY_HOME_MAX=3;
-function _isHomePinned(actId){var a=actId&&_actById(actId);return !!(a&&a.homePin);}
-// What home shows from today's list. Once any of today's seeds is starred
-// (a.homePin) home shows the starred ones, topped up with urgent deadlines;
-// until then it shows the first few by time. The Today sheet fills a star for
-// exactly what this returns as shown, so the two always agree.
+function _isHomePinned(actId){var a=actId&&_actById(actId);return !!(a&&a.homePin===true);}
+function _isHomeUnstarred(actId){var a=actId&&_actById(actId);return !!(a&&a.homePin===false);}
+// What home shows from today's list: starred seeds (a.homePin true) first,
+// then the rest in list order to fill the spots, leaving out ones that were
+// unstarred (a.homePin false) unless there's nothing else. The Today sheet
+// fills a star for exactly what this returns as shown, so the two agree.
 function _todayHomePlan(){
   var scheduled=_getTodayScheduled();
   var schedIds={};scheduled.forEach(function(it){if(it.actId)schedIds[it.actId]=true;});
@@ -5224,11 +5217,12 @@ function _todayHomePlan(){
   var rows=dueSoon.map(function(a){return {actId:a.id,name:esc(a.name),du:dueShort(a),hour:null,due:true};})
     .concat(scheduled.map(function(it){var a=_actById(it.actId);return {actId:it.actId,name:esc(it.name||'Untitled'),du:dueShort(a),hour:it.hour};}));
   var starred=rows.filter(function(r){return !r.due&&_isHomePinned(r.actId);});
-  var shown=starred.length
-    ?starred.concat(rows.filter(function(r){return r.due;})).slice(0,TODAY_HOME_MAX)
-    :rows.slice(0,TODAY_HOME_MAX);
+  var rest=rows.filter(function(r){return starred.indexOf(r)<0;});
+  var pick=starred.concat(rest.filter(function(r){return !_isHomeUnstarred(r.actId);}),rest.filter(function(r){return _isHomeUnstarred(r.actId);}))
+    .slice(0,TODAY_HOME_MAX);
+  var shown=rows.filter(function(r){return pick.indexOf(r)>-1;}); // keep list (time) order
   var shownIds={};shown.forEach(function(r){if(r.actId)shownIds[r.actId]=true;});
-  return {scheduled:scheduled,rows:rows,shown:shown,shownIds:shownIds,starMode:starred.length>0};
+  return {scheduled:scheduled,rows:rows,shown:shown,shownIds:shownIds,starredCount:starred.length};
 }
 function renderTodaySection(){
   var wrap=document.getElementById('today-section');
