@@ -5608,7 +5608,7 @@ function rGarden(){
       if(gtabs){
         gtabs.style.display='flex';
         if(!gtabs.children.length){
-          [{id:'focus',label:'In focus'},{id:'all',label:'Full garden'}].forEach(function(t){
+          [{id:'all',label:'Full garden'},{id:'focus',label:'In focus'}].forEach(function(t){
             var btn=document.createElement('div');
             btn.dataset.tabId=t.id;
             btn.className='my-seg-btn';
