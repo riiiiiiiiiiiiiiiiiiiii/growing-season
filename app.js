@@ -5393,7 +5393,7 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
   var cc=(CAT_COLORS[cat]||CAT_COLORS.Creative).split(',');
   var petalLite=cc[0], petalDark=cc[1];
   var STEM='#4C6641', LEAF='#6D8A5F', SOIL='#8A7256';
-  var stemH=[0,h*0.18,h*0.32,h*0.46,h*0.56][s];
+  var stemH=[0,h*0.18,h*0.25,h*0.46,h*0.56][s]; // seedling stays short; its bud adds the height
   var tipY=gy-stemH;
   var curveDir=(ph%3)-1;
   var out='<ellipse cx="'+cx+'" cy="'+(gy+h*0.02).toFixed(1)+'" rx="'+(h*0.22).toFixed(1)+'" ry="'+(h*0.05).toFixed(1)+'" fill="'+SOIL+'"/>';
@@ -5420,76 +5420,96 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
     out+='<ellipse cx="'+(cx-lz2*0.55).toFixed(1)+'" cy="'+ly2.toFixed(1)+'" rx="'+lz2.toFixed(1)+'" ry="'+(lz2*0.42).toFixed(1)+'" fill="'+LEAF+'" transform="rotate(-24 '+(cx-lz2*0.55).toFixed(1)+' '+ly2.toFixed(1)+')"/>';
     out+='<ellipse cx="'+(cx+lz2*0.55).toFixed(1)+'" cy="'+ly2.toFixed(1)+'" rx="'+lz2.toFixed(1)+'" ry="'+(lz2*0.42).toFixed(1)+'" fill="'+LEAF+'" transform="rotate(24 '+(cx+lz2*0.55).toFixed(1)+' '+ly2.toFixed(1)+')"/>';
   }
+  // Petal shapes, drawn in a local frame: 'a' runs from the base out to the
+  // tip along angle ang (degrees, 0 = up), 'p' runs across it
+  function frame(x,y,ang){
+    var r=(ang-90)*Math.PI/180,dx=Math.cos(r),dy=Math.sin(r);
+    return function(a,p){return (x+dx*a-dy*p).toFixed(1)+','+(y+dy*a+dx*p).toFixed(1);};
+  }
+  function roundPetal(x,y,ang,len,wid,fill){
+    var f=frame(x,y,ang);
+    return '<path d="M '+f(0,0)+' C '+f(len*0.25,wid*1.1)+' '+f(len,wid*0.95)+' '+f(len,0)+' C '+f(len,-wid*0.95)+' '+f(len*0.25,-wid*1.1)+' '+f(0,0)+' Z" fill="'+fill+'"/>';
+  }
+  function pointPetal(x,y,ang,len,wid,fill){
+    var f=frame(x,y,ang);
+    return '<path d="M '+f(0,0)+' Q '+f(len*0.45,wid)+' '+f(len,0)+' Q '+f(len*0.45,-wid)+' '+f(0,0)+' Z" fill="'+fill+'"/>';
+  }
+  var BUD='#86A872', SEPAL='#5E7F52';
+  // Two pointed sepals cupping whatever sits on the stem tip
+  function sepals(x,y,size){
+    return pointPetal(x,y,-38,size,size*0.32,SEPAL)+pointPetal(x,y,38,size,size*0.32,SEPAL);
+  }
   if(s===2){
-    var br=h*0.05;
-    out+='<circle cx="'+cx+'" cy="'+(tipY+br*0.3).toFixed(1)+'" r="'+br.toFixed(1)+'" fill="'+petalLite+'"/>';
+    // Seedling: a closed green bud, a sliver of the flower's colour at the tip
+    var bh=h*0.11,bw=h*0.062,by=tipY+h*0.005;
+    out+=roundPetal(cx,by,0,bh,bw,BUD);
+    out+=pointPetal(cx,by-bh*0.72,0,bh*0.36,bw*0.3,petalDark);
+    out+=sepals(cx,by+h*0.004,h*0.0675);
     return out;
   }
   var fY=tipY-h*0.06;
   if(s===3){
+    // Flowering: the petals opening
     var budType=(ph>>2)%3;
     if(budType===0){
-      var bw=h*0.06, bh=h*0.09;
-      out+='<ellipse cx="'+cx+'" cy="'+(fY+bh*0.2).toFixed(1)+'" rx="'+bw.toFixed(1)+'" ry="'+bh.toFixed(1)+'" fill="'+petalDark+'"/>';
-      out+='<ellipse cx="'+(cx-bw*0.2).toFixed(1)+'" cy="'+(fY-bh*0.1).toFixed(1)+'" rx="'+(bw*0.55).toFixed(1)+'" ry="'+(bh*0.55).toFixed(1)+'" fill="'+petalLite+'"/>';
+      // Tulip cup: the two dark outer petals as one rounded cup whose tips
+      // curl in at the top, a broad pale petal in front between them
+      var tl=h*0.1755,tw=h*0.0675,ty=tipY+h*0.005;
+      var P=function(dx,dy){return (cx+tw*dx).toFixed(1)+','+(ty-tl*dy).toFixed(1);};
+      var Pd=function(dx,dy){return P(dx*0.9,dy*0.9);}; // the dark cup sits 10% smaller
+      out+='<path d="M '+Pd(0,0)+' C '+Pd(-1.45,0.15)+' '+Pd(-1.55,0.7)+' '+Pd(-1.2,0.92)+' Q '+Pd(-0.95,1.08)+' '+Pd(-0.66,0.92)+' Q '+Pd(-0.34,0.74)+' '+Pd(0,0.84)
+        +' Q '+Pd(0.34,0.74)+' '+Pd(0.66,0.92)+' Q '+Pd(0.95,1.08)+' '+Pd(1.2,0.92)+' C '+Pd(1.55,0.7)+' '+Pd(1.45,0.15)+' '+Pd(0,0)+' Z" fill="'+petalDark+'"/>';
+      out+='<path d="M '+P(0,0)+' C '+P(-0.8,0.2)+' '+P(-0.66,1.02)+' '+P(0,1.02)+' C '+P(0.66,1.02)+' '+P(0.8,0.2)+' '+P(0,0)+' Z" fill="'+petalLite+'"/>';
+      out+=sepals(cx,ty+h*0.004,h*0.0607);
     } else if(budType===1){
-      var pbw=h*0.055, pbh=h*0.11;
-      out+='<path d="M '+cx+','+(fY-pbh).toFixed(1)+' Q '+(cx+pbw).toFixed(1)+','+(fY-pbh*0.3).toFixed(1)+' '+cx+','+(fY+pbh*0.3).toFixed(1)+' Q '+(cx-pbw).toFixed(1)+','+(fY-pbh*0.3).toFixed(1)+' '+cx+','+(fY-pbh).toFixed(1)+' Z" fill="'+petalDark+'"/>';
-      out+='<path d="M '+cx+','+(fY-pbh*0.85).toFixed(1)+' Q '+(cx+pbw*0.55).toFixed(1)+','+(fY-pbh*0.35).toFixed(1)+' '+cx+','+(fY+pbh*0.1).toFixed(1)+'" fill="'+petalLite+'"/>';
+      // Nodding bell: the stem tip arches over and the bell hangs from it
+      var hx=cx+h*0.0945,hy=tipY-h*0.0405;
+      out+='<path d="M '+cx+','+tipY.toFixed(1)+' Q '+(cx+h*0.0135).toFixed(1)+','+(tipY-h*0.1013).toFixed(1)+' '+hx.toFixed(1)+','+hy.toFixed(1)+'" fill="none" stroke="'+STEM+'" stroke-width="'+swW.toFixed(1)+'" stroke-linecap="round"/>';
+      var bl=h*0.1485,bwd=h*0.0743;
+      // bell body with a scalloped mouth
+      var top=hy+h*0.008,mouth=top+bl;
+      out+='<path d="M '+(hx-bwd*0.35).toFixed(1)+','+top.toFixed(1)+' C '+(hx-bwd*0.55).toFixed(1)+','+(top+bl*0.5).toFixed(1)+' '+(hx-bwd).toFixed(1)+','+(mouth-bl*0.1).toFixed(1)+' '+(hx-bwd).toFixed(1)+','+mouth.toFixed(1)
+        +' Q '+(hx-bwd*0.66).toFixed(1)+','+(mouth-bl*0.16).toFixed(1)+' '+(hx-bwd*0.33).toFixed(1)+','+mouth.toFixed(1)
+        +' Q '+hx.toFixed(1)+','+(mouth-bl*0.16).toFixed(1)+' '+(hx+bwd*0.33).toFixed(1)+','+mouth.toFixed(1)
+        +' Q '+(hx+bwd*0.66).toFixed(1)+','+(mouth-bl*0.16).toFixed(1)+' '+(hx+bwd).toFixed(1)+','+mouth.toFixed(1)
+        +' C '+(hx+bwd).toFixed(1)+','+(mouth-bl*0.1).toFixed(1)+' '+(hx+bwd*0.55).toFixed(1)+','+(top+bl*0.5).toFixed(1)+' '+(hx+bwd*0.35).toFixed(1)+','+top.toFixed(1)+' Z" fill="'+petalDark+'"/>';
+      out+='<path d="M '+(hx-bwd*0.2).toFixed(1)+','+(top+bl*0.15).toFixed(1)+' C '+(hx-bwd*0.35).toFixed(1)+','+(top+bl*0.5).toFixed(1)+' '+(hx-bwd*0.6).toFixed(1)+','+(mouth-bl*0.2).toFixed(1)+' '+(hx-bwd*0.62).toFixed(1)+','+(mouth-bl*0.08).toFixed(1)+'" fill="none" stroke="'+petalLite+'" stroke-width="'+(h*0.0162).toFixed(1)+'" stroke-linecap="round"/>';
+      out+='<circle cx="'+hx.toFixed(1)+'" cy="'+top.toFixed(1)+'" r="'+(h*0.0216).toFixed(1)+'" fill="'+SEPAL+'"/>';
     } else {
-      var cbr=h*0.038;
-      out+='<circle cx="'+cx+'" cy="'+(fY-cbr*0.6).toFixed(1)+'" r="'+cbr.toFixed(1)+'" fill="'+petalDark+'"/>';
-      out+='<circle cx="'+(cx-cbr*1.4).toFixed(1)+'" cy="'+(fY+cbr*0.5).toFixed(1)+'" r="'+(cbr*0.78).toFixed(1)+'" fill="'+petalDark+'"/>';
-      out+='<circle cx="'+(cx+cbr*1.4).toFixed(1)+'" cy="'+(fY+cbr*0.5).toFixed(1)+'" r="'+(cbr*0.78).toFixed(1)+'" fill="'+petalDark+'"/>';
-      out+='<circle cx="'+(cx-cbr*0.2).toFixed(1)+'" cy="'+(fY-cbr*0.9).toFixed(1)+'" r="'+(cbr*0.35).toFixed(1)+'" fill="'+petalLite+'"/>';
+      // Half-open crown: five short petals fanning up out of the sepals
+      var cy0=tipY-h*0.005,cl=h*0.1215,cw=h*0.0405;
+      [-56,56,-28,28,0].forEach(function(an,k){out+=roundPetal(cx,cy0,an,cl*(k===4?1.05:0.92),cw,k%2?petalDark:petalLite);});
+      out+=roundPetal(cx,cy0,0,cl*0.6,cw*0.7,petalDark);
+      out+=sepals(cx,cy0+h*0.004,h*0.0607);
     }
     return out;
   }
+  // In full bloom
+  fY=tipY-h*0.085;
   var species=(ph>>3)%4;
   if(species===0){
-    var petals=7, pr=h*0.10, pl=h*0.09, pw=h*0.055;
-    for(var i=0;i<petals;i++){
-      var ang=(i/petals)*360, rad=(ang-90)*Math.PI/180;
-      var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
-      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl.toFixed(1)+'" ry="'+pw.toFixed(1)+'" fill="'+petalDark+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.7).toFixed(1)+'" ry="'+(pw*0.7).toFixed(1)+'" fill="'+petalLite+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-    }
-    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.055).toFixed(1)+'" fill="#F4C97A"/>';
-    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.025).toFixed(1)+'" fill="#8B5A22"/>';
+    // Daisy: two rings of slim petals, a seeded golden centre
+    for(var i=0;i<12;i++)out+=roundPetal(cx,fY,i*30,h*0.2025,h*0.0324,petalDark);
+    for(var i=0;i<12;i++)out+=roundPetal(cx,fY,i*30+15,h*0.162,h*0.027,petalLite);
+    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.0607).toFixed(1)+'" fill="#E8B24E"/>';
+    for(var i=0;i<8;i++){var dr=(i*45)*Math.PI/180;out+='<circle cx="'+(cx+Math.cos(dr)*h*0.0324).toFixed(1)+'" cy="'+(fY+Math.sin(dr)*h*0.0324).toFixed(1)+'" r="'+(h*0.0081).toFixed(1)+'" fill="#A8702A"/>';}
   } else if(species===1){
-    var petals=8, pr=h*0.085, pl=h*0.11, pw=h*0.032;
-    for(var i=0;i<petals;i++){
-      var ang=(i/petals)*360, rad=(ang-90)*Math.PI/180;
-      var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
-      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl.toFixed(1)+'" ry="'+pw.toFixed(1)+'" fill="'+petalDark+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.65).toFixed(1)+'" ry="'+(pw*0.55).toFixed(1)+'" fill="'+petalLite+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-    }
-    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.04).toFixed(1)+'" fill="#F4C97A"/>';
+    // Cosmos: six broad petals with a pale inner flush, a dark centre ringed with stamens
+    for(var i=0;i<6;i++){var an=i*60+((ph>>5)%20);out+=roundPetal(cx,fY,an,h*0.2025,h*0.06,petalDark)+roundPetal(cx,fY,an,h*0.1215,h*0.0432,petalLite);}
+    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.0486).toFixed(1)+'" fill="#3E2A1E"/>';
+    for(var i=0;i<10;i++){var sr2=(i*36)*Math.PI/180;out+='<circle cx="'+(cx+Math.cos(sr2)*h*0.054).toFixed(1)+'" cy="'+(fY+Math.sin(sr2)*h*0.054).toFixed(1)+'" r="'+(h*0.0095).toFixed(1)+'" fill="#F2C76A"/>';}
   } else if(species===2){
-    var petals=5, pr=h*0.075, pl=h*0.11, pw=h*0.085;
-    for(var i=0;i<petals;i++){
-      var ang=(i/petals)*360+18, rad=(ang-90)*Math.PI/180;
-      var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
-      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+pl.toFixed(1)+'" ry="'+pw.toFixed(1)+'" fill="'+petalDark+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-      out+='<ellipse cx="'+px.toFixed(1)+'" cy="'+py.toFixed(1)+'" rx="'+(pl*0.55).toFixed(1)+'" ry="'+(pw*0.6).toFixed(1)+'" fill="'+petalLite+'" transform="rotate('+ang.toFixed(1)+' '+px.toFixed(1)+' '+py.toFixed(1)+')"/>';
-    }
-    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.045).toFixed(1)+'" fill="#4A3020"/>';
-    out+='<circle cx="'+(cx-h*0.012).toFixed(1)+'" cy="'+(fY-h*0.012).toFixed(1)+'" r="'+(h*0.018).toFixed(1)+'" fill="#7B5A3A"/>';
+    // Rose: an outer ring of rounded petals, a paler inner ring, a curled heart
+    for(var i=0;i<5;i++)out+=roundPetal(cx,fY,i*72+18,h*0.162,h*0.0945,petalDark);
+    for(var i=0;i<5;i++)out+=roundPetal(cx,fY,i*72+54,h*0.108,h*0.0675,petalLite);
+    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.054).toFixed(1)+'" fill="'+petalDark+'"/>';
+    out+='<path d="M '+(cx-h*0.0297).toFixed(1)+','+(fY+h*0.004).toFixed(1)+' A '+(h*0.027).toFixed(1)+' '+(h*0.027).toFixed(1)+' 0 1 1 '+(cx+h*0.0162).toFixed(1)+','+(fY+h*0.0216).toFixed(1)+' A '+(h*0.0149).toFixed(1)+' '+(h*0.0149).toFixed(1)+' 0 1 1 '+(cx+h*0.0027).toFixed(1)+','+(fY-h*0.0081).toFixed(1)+'" fill="none" stroke="'+petalLite+'" stroke-width="'+(h*0.0135).toFixed(1)+'" stroke-linecap="round"/>';
   } else {
-    var petals=5, pr=h*0.085;
-    for(var i=0;i<petals;i++){
-      var ang=(i/petals)*360-90, rad=ang*Math.PI/180;
-      var px=cx+Math.cos(rad)*pr, py=fY+Math.sin(rad)*pr;
-      var pl=h*0.11, pw=h*0.038;
-      var sideAR=(ang+90)*Math.PI/180, sideBR=(ang-90)*Math.PI/180;
-      var p1x=px+Math.cos(rad)*pl, p1y=py+Math.sin(rad)*pl;
-      var p2x=px+Math.cos(sideAR)*pw, p2y=py+Math.sin(sideAR)*pw;
-      var p3x=px+Math.cos(sideBR)*pw, p3y=py+Math.sin(sideBR)*pw;
-      out+='<path d="M '+px.toFixed(1)+','+py.toFixed(1)+' L '+p2x.toFixed(1)+','+p2y.toFixed(1)+' L '+p1x.toFixed(1)+','+p1y.toFixed(1)+' L '+p3x.toFixed(1)+','+p3y.toFixed(1)+' Z" fill="'+petalDark+'"/>';
-      out+='<path d="M '+px.toFixed(1)+','+py.toFixed(1)+' L '+((p2x+p1x)/2).toFixed(1)+','+((p2y+p1y)/2).toFixed(1)+' L '+p1x.toFixed(1)+','+p1y.toFixed(1)+' Z" fill="'+petalLite+'"/>';
-    }
-    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.055).toFixed(1)+'" fill="'+petalLite+'"/>';
-    out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.028).toFixed(1)+'" fill="'+petalDark+'"/>';
+    // Star lily: six pointed petals in two layers, stamens out of the middle
+    for(var i=0;i<3;i++)out+=pointPetal(cx,fY,i*120,h*0.2295,h*0.0675,petalDark);
+    for(var i=0;i<3;i++)out+=pointPetal(cx,fY,i*120+60,h*0.2025,h*0.0607,petalLite);
+    for(var i=0;i<3;i++){var f=frame(cx,fY,i*120+60);out+='<path d="M '+f(h*0.027,0)+' L '+f(h*0.1485,0)+'" stroke="'+petalDark+'" stroke-width="'+(h*0.0081).toFixed(1)+'" stroke-linecap="round" opacity=".55"/>';}
+    for(var i=0;i<5;i++){var st=frame(cx,fY,-50+i*25);out+='<path d="M '+st(0,0)+' L '+st(h*0.0945,0)+'" stroke="'+SEPAL+'" stroke-width="'+(h*0.0081).toFixed(1)+'" stroke-linecap="round"/><circle cx="'+st(h*0.1013,0).split(',')[0]+'" cy="'+st(h*0.1013,0).split(',')[1]+'" r="'+(h*0.0135).toFixed(1)+'" fill="#C9772E"/>';}
   }
   return out;
 }
