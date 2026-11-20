@@ -4667,32 +4667,35 @@ function openSessionDetail(s,a){
         +'<div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">★ '+normRating(s.rating)+'</div><div style="font-size:11px;color:var(--tx3);">Rating</div></div>'
       +'</div>'
       :'<div style="margin-bottom:14px;"><div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">'+dur+'</div><div style="font-size:11px;color:var(--tx3);">Time spent</div></div></div>');
-  // What was written when logging, in one box: the notes with their feeling
-  // tags, then the 'wanting more?' answer drawn as the 1–4 scale it was picked on
+  // What was logged, in two cards: how it felt (feeling tags + the 'wanting
+  // more?' answer on its 1–4 scale), then the notes to read
   var tags=Array.isArray(s.feel)?s.feel:(s.feel?[s.feel]:[]);
-  var secLbl='font-size:10.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;';
-  var sections=[['Field notes',s.notes],['Went well',s.well],['Next time',s.diff]].filter(function(r){return r[1]&&String(r[1]).trim();}).map(function(r){
-    return '<div style="'+secLbl+'">'+r[0]+'</div>'
-      +'<div style="font-size:13px;color:var(--tx);line-height:1.5;white-space:pre-wrap;word-break:break-word;">'+esc(r[1])+'</div>';
-  });
-  // Feeling tags sit with the notes (or alone if nothing was written)
-  if(tags.length){
-    var tagHtml='<div style="display:flex;gap:6px;flex-wrap:wrap;'+(sections.length?'margin-top:9px;':'')+'">'+tags.map(function(t){
-      return '<span style="font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--grl);background:color-mix(in srgb,var(--gr) 14%,var(--bg));color:var(--gr2);">'+esc(t)+'</span>';
-    }).join('')+'</div>';
-    if(sections.length)sections[sections.length-1]+=tagHtml;else sections.push(tagHtml);
-  }
   var momI=MOMENTUM_LABELS.indexOf(s.momentum);
-  if(momI>-1)sections.push('<div style="'+secLbl+'margin-bottom:7px;">Left you wanting more?</div>'
-    +'<div style="display:flex;align-items:center;gap:6px;">'+MOMENTUM_LABELS.map(function(l,i){
-      var on=i===momI;
-      return '<span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;'
-        +(on?'background:var(--gr);color:#fff;border:1.5px solid var(--gr);':'background:transparent;color:var(--tx3);border:1.5px solid var(--bg3);')+'">'+(i+1)+'</span>';
-    }).join('')+'<span style="font-size:13px;font-weight:600;color:var(--gr2);margin-left:6px;">'+esc(s.momentum)+'</span></div>');
+  var card='background:var(--bg2);border-radius:12px;padding:13px 15px;margin-bottom:10px;';
+  var lbl='font-size:12px;font-weight:600;color:var(--tx3);';
   var extra='';
-  if(sections.length)extra='<div style="background:var(--bg2);border-radius:10px;padding:0 14px;margin-bottom:14px;">'+sections.map(function(h,i){
-    return '<div style="padding:11px 0;'+(i<sections.length-1?'border-bottom:.5px solid var(--bg3);':'')+'">'+h+'</div>';
-  }).join('')+'</div>';
+  if(tags.length||momI>-1){
+    extra+='<div style="'+card+'"><div style="'+lbl+'">How it felt</div>';
+    if(tags.length)extra+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;">'+tags.map(function(t){
+      return '<span style="font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:20px;background:var(--bg);color:var(--tx2);border:1px solid var(--bg3);">'+esc(t)+'</span>';
+    }).join('')+'</div>';
+    if(momI>-1)extra+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:'+(tags.length?'12px;padding-top:11px;border-top:.5px solid var(--bg3)':'9px')+';">'
+      +'<span style="font-size:13px;color:var(--tx2);">Wanting more?</span>'
+      +'<span style="display:flex;align-items:center;gap:4px;">'+MOMENTUM_LABELS.map(function(l,i){
+        var on=i===momI;
+        return '<span style="width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;'
+          +(on?'background:var(--gr);color:#fff;border:1.5px solid var(--gr);':'color:var(--tx3);border:1.5px solid var(--bg3);')+'">'+(i+1)+'</span>';
+      }).join('')+'<span style="font-size:13px;font-weight:600;color:var(--gr2);margin-left:5px;">'+esc(s.momentum)+'</span></span></div>';
+    extra+='</div>';
+  }
+  var has=function(v){return v&&String(v).trim();};
+  var body='font-size:14px;color:var(--tx);line-height:1.55;white-space:pre-wrap;word-break:break-word;';
+  var parts=[];
+  if(has(s.notes))parts.push('<div style="'+lbl+'margin-bottom:4px;">Notes</div><div style="'+body+'">'+esc(s.notes)+'</div>');
+  [['Went well',s.well,'var(--gr)'],['Next time',s.diff,'var(--co)']].forEach(function(r){
+    if(has(r[1]))parts.push('<div style="border-left:2.5px solid '+r[2]+';padding-left:10px;"><div style="'+lbl+'margin-bottom:2px;">'+r[0]+'</div><div style="'+body+'font-size:13.5px;">'+esc(r[1])+'</div></div>');
+  });
+  if(parts.length)extra+='<div style="'+card+'margin-bottom:14px;">'+parts.map(function(h,i){return '<div'+(i?' style="margin-top:12px;"':'')+'>'+h+'</div>';}).join('')+'</div>';
   if(extra)sh.insertAdjacentHTML('beforeend',extra);
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-top:8px;';
   var editBtn=document.createElement('button');editBtn.className='btn btn-p';editBtn.style.cssText='flex:1;margin-top:0;';editBtn.textContent='Edit';
