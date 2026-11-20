@@ -241,7 +241,7 @@ function offerDeadlineSchedule(a,onDone){
 // Shared days / time / duration (/ end date) form, shown in the edit sheet
 function routineForm(o){
   var ov=document.getElementById('ed-ov'),sh=document.getElementById('ed-sh');
-  var lbl='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';
+  var lbl='font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;';
   sh.innerHTML='<div style="font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:6px;">'+o.title+'</div>'
     +(o.sub?'<div style="font-size:13px;color:var(--tx2);line-height:1.5;margin-bottom:18px;">'+o.sub+'</div>':'<div style="height:10px;"></div>')
     +(o.noDays?'':'<div style="'+lbl+'">Which days?</div><div id="rf-quick" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"></div>'
@@ -306,7 +306,7 @@ function editRoutine(r,onDone){
       if(v.until)r.until=v.until;else delete r.until;
       sv();back();
       if(document.getElementById('cal-ov').classList.contains('on'))renderCalWeek();
-      renderTodaySection();updateHomeNudge();
+      renderTodaySection();
       showToast('Routine updated',null);
     }
   });
@@ -323,7 +323,7 @@ function editPlanned(ev,onDone){
     onSave:function(v){
       ev.hour=v.hour;ev.duration=v.duration;
       sv();back();
-      renderTodaySection();updateHomeNudge();
+      renderTodaySection();
       showToast('Plan updated',null);
     }
   });
@@ -372,7 +372,6 @@ function applyPalette(){
   CAT_COLORS.Outdoor=g('grl')+','+g('gr2');
   if(document.getElementById('s-home').classList.contains('on'))rHome();
 }
-function getWeekKey(){var d=new Date(),y=d.getFullYear(),s=new Date(y,0,1),w=Math.ceil(((d-s)/864e5+s.getDay()+1)/7);return y+'-W'+w;}
 function isFocused(id){return weeklyFocus.actIds.length===0||weeklyFocus.actIds.indexOf(id)>-1;}
 function hasFocusSet(){return weeklyFocus.actIds.length>0;}
 // Focused seeds in the order the user arranged them in the focus sheet.
@@ -994,25 +993,6 @@ function getDailyQuote(){
 }
 
 // ── HOME ──────────────────────────────────────────────
-function showTodayDetail(todaySess){
-  var sh=document.getElementById('ed-sh');sh.innerHTML='';
-  var title=document.createElement('div');title.style.cssText='font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:4px;';title.textContent='Today';sh.appendChild(title);
-  var todayMins=todaySess.reduce(function(s,x){return s+(x.hours||0)*60+(x.mins||0);},0);
-  var sub=document.createElement('div');sub.style.cssText='font-size:13px;color:var(--tx2);margin-bottom:16px;';sub.textContent=todaySess.length+' session'+(todaySess.length!==1?'s':'')+' · '+(todayMins>=60?Math.floor(todayMins/60)+'h '+(todayMins%60)+'m':todayMins+'m');sh.appendChild(sub);
-  var list=document.createElement('div');list.style.cssText='display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow-y:auto;';
-  todaySess.slice().reverse().forEach(function(s){
-    var act=myActs.find(function(a){return a.id===s.actId;})||{emoji:'?',name:'Unknown'};
-    var mins=(s.hours||0)*60+(s.mins||0);
-    var card=document.createElement('div');card.style.cssText='background:var(--bg2);border:var(--br);border-radius:var(--rsm);padding:10px 12px;';
-    var top=document.createElement('div');top.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:4px;';
-    top.innerHTML='<span style="font-size:20px;">'+act.emoji+'</span><div style="flex:1;font-size:14px;font-weight:600;">'+act.name+'</div><div style="font-size:12px;color:var(--gr);font-weight:600;">'+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m')+'</div>';
-    card.appendChild(top);
-    if(s.note){var note=document.createElement('div');note.style.cssText='font-size:12px;color:var(--tx2);padding-left:28px;';note.textContent=s.note;card.appendChild(note);}
-    list.appendChild(card);
-  });
-  sh.appendChild(list);
-  document.getElementById('ed-ov').classList.add('on');
-}
 
 function rHome(){
   // ── Session lock: when a session is in progress, take over the home
@@ -1105,7 +1085,7 @@ function rHome(){
     var first=sessions.reduce(function(m,s){return s.date<m?s.date:m;},sessions[0].date);
     var days=Math.floor((Date.now()-first)/86400000);
     if(days<1)return;
-    el.innerHTML='<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px;opacity:.8;">Day '+days+'</div>';
+    el.innerHTML='<div style="font-size:12px;font-weight:600;margin-bottom:6px;opacity:.8;">Day '+days+'</div>';
   })();
 
   (function(){
@@ -1144,7 +1124,6 @@ function rHome(){
   // Streak is now inline with greeting; empty the standalone pill container
   var _swEl=document.getElementById('streak-wrap');if(_swEl)_swEl.innerHTML='';
 
-  updateHomeNudge();
 
 
   document.getElementById('home-deco').innerHTML=homeDecoSVG(sk);
@@ -1294,8 +1273,6 @@ function togOb(id){
   if(cnt>0)el.textContent=cnt+' planted';
   document.getElementById('ob-btn').disabled=cnt<1;
 }
-function togInline(id,k,v){var a=myActs.find(function(a){return a.id===id;});if(a){a[k]=v;sv();}rObGrid();}
-function cycLvl(id){var a=myActs.find(function(a){return a.id===id;});if(!a)return;var l=['beginner','intermediate','comfortable'];a.level=l[(l.indexOf(a.level)+1)%l.length];sv();rObGrid();}
 
 var OQ=[
   {id:'goal',title:"What's your main goal?",sub:"How do you think about most of the activities in your seeds?",opts:[
@@ -1399,9 +1376,9 @@ function openProfileEdit(){
     +'<div style="font-family:var(--serif);font-size:17px;font-weight:700;">Edit profile</div>'
     +'</div>'
     +'<div id="pe-account-section"></div>'
-    +'<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Your name</div>'
+    +'<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;">Your name</div>'
     +'<input id="pe-name" class="sinp" placeholder="e.g. Sillyblackcat" style="width:100%;font-size:16px;margin-bottom:18px;" maxlength="30">'
-    +'<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px;">Your emblem</div>'
+    +'<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:10px;">Your emblem</div>'
     +'<div id="pe-em-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:20px;"></div>';
   document.getElementById('pe-back').addEventListener('click',function(){closeEd();setTimeout(openMenuPanel,180);});
   var peNameEl=document.getElementById('pe-name');peNameEl.value=profile.name||'';setTimeout(function(){peNameEl.select();},80);
@@ -1441,7 +1418,7 @@ function openProfileEdit(){
     // Async fetch username and insert account section
     _tq(_supa.from('profiles').select('username').eq('id',supaUser.id).single()).then(function(res){
       var sec=document.getElementById('pe-account-section');if(!sec)return;
-      if(res.data&&res.data.username){sec.innerHTML='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;">Account</div><div style="background:var(--bg2);border-radius:12px;padding:10px 12px;margin-bottom:16px;"><div style="font-size:11px;color:var(--tx3);margin-bottom:2px;">Username</div><div style="font-size:15px;font-weight:600;color:var(--tx);">@'+res.data.username+'</div></div>';}
+      if(res.data&&res.data.username){sec.innerHTML='<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;">Account</div><div style="background:var(--bg2);border-radius:12px;padding:10px 12px;margin-bottom:16px;"><div style="font-size:11px;color:var(--tx3);margin-bottom:2px;">Username</div><div style="font-size:15px;font-weight:600;color:var(--tx);">@'+res.data.username+'</div></div>';}
     }).catch(function(){});
   }
   requestAnimationFrame(function(){document.getElementById('ed-ov').classList.add('on');});
@@ -1545,7 +1522,7 @@ function renderCalWeek(){
     var wkHeader=document.createElement('div');
     wkHeader.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-top:14px;margin-bottom:6px;';
     var wkLabel=document.createElement('div');
-    wkLabel.style.cssText='font-size:11px;font-weight:700;color:'+(isCurrent?'var(--co)':'var(--tx3)')+';text-transform:uppercase;letter-spacing:.6px;';
+    wkLabel.style.cssText='font-size:12px;font-weight:600;color:'+(isCurrent?'var(--co)':'var(--tx3)')+';';
     wkLabel.textContent=(wkOff===0?'This week · ':wkOff===1?'Next week · ':'')+MNAMES[mon.getMonth()]+' '+mon.getDate()+(mon.getMonth()!==sun.getMonth()?' – '+MNAMES[sun.getMonth()]+' '+sun.getDate():'–'+sun.getDate());
     wkHeader.appendChild(wkLabel);
     if(wkSess.length){
@@ -1592,16 +1569,18 @@ function renderCalWeek(){
   var _liveRt=_liveRoutines();
   if(_liveRt.length){
     var rtSec=document.createElement('div');rtSec.style.cssText='margin-top:18px;';
-    var rtHdr=document.createElement('div');rtHdr.style.cssText='font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;';rtHdr.textContent='Routines';rtSec.appendChild(rtHdr);
+    var rtHdr=document.createElement('div');rtHdr.style.cssText='font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:4px;';rtHdr.textContent='Routines';rtSec.appendChild(rtHdr);
     var DNAMES_SHORT=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
     _liveRt.forEach(function(r){
-      var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--bg2);border-radius:10px;margin-bottom:6px;cursor:pointer;';
+      var row=document.createElement('div');row.className='sched-item';row.style.cursor='default';
       var dayStr=r.days.length===7?'Every day':r.days.length===5&&r.days.every(function(d){return d<5;})?'Weekdays':r.days.map(function(d){return DNAMES_SHORT[d];}).join(', ');
       var untilStr=r.until?(_dayKey(Date.now())>r.until?' · ended ':' · until ')+fmtDeadlineShort(r.until):'';
       var _ra=_actById(r.actId)||{};
-      row.innerHTML='<span style="font-size:18px;">'+(_ra.emoji||r.actEmoji)+'</span><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;color:var(--tx);">'+esc(_ra.name||r.actName)+'</div><div style="font-size:11px;color:var(--tx3);">'+dayStr+' · '+_fmtHour(r.hour)+untilStr+'</div></div><button class="rt-edit" aria-label="Edit routine" style="background:none;border:none;cursor:pointer;color:var(--tx3);padding:4px;flex-shrink:0;display:flex;">'+EDIT_PEN_SVG.replace('width="12" height="12"','width="14" height="14"')+'</button><button class="rt-del" aria-label="Remove routine" style="background:none;border:none;font-size:16px;cursor:pointer;color:var(--tx3);padding:2px 4px;flex-shrink:0;">✕</button>';
+      row.innerHTML='<div style="flex:1;min-width:0;"><div class="sched-name">'+esc(_ra.name||r.actName)+'</div><div class="sched-meta">'+dayStr+' · '+_fmtHour(r.hour)+untilStr+'</div></div>'
+        +'<button class="sched-edit rt-edit" aria-label="Edit routine" title="Edit">✎</button>'
+        +'<button class="rt-del" aria-label="Remove routine" title="Remove" style="background:none;border:none;color:var(--tx3);font-size:13px;line-height:1;cursor:pointer;padding:6px 2px 6px 4px;flex-shrink:0;">✕</button>';
       row.querySelector('.rt-edit').addEventListener('click',function(e){e.stopPropagation();editRoutine(r);});
-      row.querySelector('.rt-del').addEventListener('click',function(e){e.stopPropagation();if(!confirm('Remove this routine?'))return;calRoutines=calRoutines.filter(function(x){return x.id!==r.id;});sv();renderCalWeek();updateHomeNudge();});
+      row.querySelector('.rt-del').addEventListener('click',function(e){e.stopPropagation();if(!confirm('Remove this routine?'))return;calRoutines=calRoutines.filter(function(x){return x.id!==r.id;});sv();renderCalWeek();});
       rtSec.appendChild(row);
     });
     body.appendChild(rtSec);
@@ -1669,7 +1648,7 @@ function renderCalWeekDetails(mon,wkSess){
   var catEntries=Object.keys(catMap).map(function(k){return{label:k,v:catMap[k],c:_CAT_DOT[k]||'var(--gr)'};}).sort(function(a,b){return b.v-a.v;});
 
   if(catEntries.length){
-    var catHdr=document.createElement('div');catHdr.style.cssText='font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;';catHdr.textContent='By category';content.appendChild(catHdr);
+    var catHdr=document.createElement('div');catHdr.style.cssText='font-size:12px;font-weight:600;color:var(--co2);margin-bottom:12px;';catHdr.textContent='By category';content.appendChild(catHdr);
     var pieRow=document.createElement('div');pieRow.style.cssText='display:flex;align-items:center;gap:16px;margin-bottom:16px;';
     var pieSVG=document.createElement('div');pieSVG.style.cssText='flex-shrink:0;';
     pieSVG.innerHTML=_drawPieSVG(catEntries,120);
@@ -1689,7 +1668,7 @@ function renderCalWeekDetails(mon,wkSess){
   var actEntries=Object.keys(actMap).map(function(k){var a=myActs.find(function(x){return x.id===k;})||archivedActs.find(function(x){return x.id===k;})||(wkSess.find(function(s){return s.actId===k;})||{});return{emoji:a.emoji||'🌱',name:a.name||'Unknown',cat:a.cat||'',mins:actMap[k].mins,count:actMap[k].count};}).sort(function(a,b){return b.mins-a.mins;});
 
   if(actEntries.length){
-    var actHdr=document.createElement('div');actHdr.style.cssText='font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;';actHdr.textContent='By activity';content.appendChild(actHdr);
+    var actHdr=document.createElement('div');actHdr.style.cssText='font-size:12px;font-weight:600;color:var(--co2);margin-bottom:10px;';actHdr.textContent='By activity';content.appendChild(actHdr);
     actEntries.forEach(function(a){
       var pct=wkMins?Math.round(a.mins/wkMins*100):0;
       var cc=CAT_COLORS[a.cat]?CAT_COLORS[a.cat].split(','):['var(--bg2)','var(--tx)'];
@@ -1737,7 +1716,7 @@ function renderCalDay(dateObj){
   backBtn.textContent='‹';
   backBtn.addEventListener('click',function(){sh.style.cssText='max-width:480px;padding:20px 18px 28px;';_transitionSheet(sh,renderCalWeek);});
   var titleWrap=document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;';
-  if(isToday){var todayLbl=document.createElement('div');todayLbl.style.cssText='font-size:10px;font-weight:700;color:var(--co);text-transform:uppercase;letter-spacing:.8px;';todayLbl.textContent='Today';titleWrap.appendChild(todayLbl);}
+  if(isToday){var todayLbl=document.createElement('div');todayLbl.style.cssText='font-size:12px;font-weight:600;color:var(--co);';todayLbl.textContent='Today';titleWrap.appendChild(todayLbl);}
   var dateLbl=document.createElement('div');dateLbl.style.cssText='font-family:var(--serif);font-size:16px;font-weight:700;color:var(--tx);';
   dateLbl.textContent=DNAMES[_calDayDate.getDay()]+', '+_calDayDate.getDate()+' '+MNAMES[_calDayDate.getMonth()];
   titleWrap.appendChild(dateLbl);
@@ -1766,7 +1745,7 @@ function renderCalDay(dateObj){
   var dayMid=_calDayDate.getTime(),dayEnd=dayMid+86400000;
   var daySess=sessions.filter(function(s){return s.date>=dayMid&&s.date<dayEnd;}).sort(function(a,b){return a.date-b.date;});
 
-  var logHdr=document.createElement('div');logHdr.style.cssText='font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;';logHdr.textContent='Logged';
+  var logHdr=document.createElement('div');logHdr.style.cssText='font-size:12px;font-weight:600;color:var(--co2);margin-bottom:8px;';logHdr.textContent='Logged';
   content.appendChild(logHdr);
 
   if(daySess.length){
@@ -1789,7 +1768,7 @@ function renderCalDay(dateObj){
   var dayRoutines=_liveRoutines().filter(function(r){return _routineOnDay(r,_calDayDate);});
 
   if(dayPlanned.length||dayRoutines.length||true){
-    var schHdr=document.createElement('div');schHdr.style.cssText='font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;margin-top:16px;margin-bottom:8px;';schHdr.textContent='Scheduled';
+    var schHdr=document.createElement('div');schHdr.style.cssText='font-size:12px;font-weight:600;color:var(--co2);margin-top:16px;margin-bottom:8px;';schHdr.textContent='Scheduled';
     content.appendChild(schHdr);
 
     dayRoutines.forEach(function(r){
@@ -1837,7 +1816,7 @@ function _calScheduleForm(dayDate){
   var t=document.createElement('div');t.style.cssText='font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:16px;';t.textContent='Schedule';sh.appendChild(t);
 
   // Activity picker with search (multi-select)
-  var aLbl=document.createElement('div');aLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';aLbl.textContent='Activities';sh.appendChild(aLbl);
+  var aLbl=document.createElement('div');aLbl.style.cssText='font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;';aLbl.textContent='Activities';sh.appendChild(aLbl);
   var _selActs=[];
   // Search and the focus filter share one row — the filter is a compact
   // square toggle so the search field keeps nearly all the width.
@@ -1892,7 +1871,7 @@ function _calScheduleForm(dayDate){
   _renderActPicker();
 
   // Time picker (optional)
-  var tLbl=document.createElement('div');tLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';tLbl.innerHTML='Time';sh.appendChild(tLbl);
+  var tLbl=document.createElement('div');tLbl.style.cssText='font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;';tLbl.innerHTML='Time';sh.appendChild(tLbl);
   var timeRow=document.createElement('div');timeRow.style.cssText='display:flex;gap:8px;margin-bottom:22px;align-items:center;';
   var hourSel=document.createElement('select');hourSel.className='sinp';hourSel.style.cssText='flex:1;padding:8px;font-size:14px;';
   var anyOpt=document.createElement('option');anyOpt.value='-1';anyOpt.textContent='Any time';anyOpt.selected=true;hourSel.appendChild(anyOpt);
@@ -1900,7 +1879,7 @@ function _calScheduleForm(dayDate){
   timeRow.appendChild(hourSel);sh.appendChild(timeRow);
 
   // Duration
-  var dLbl=document.createElement('div');dLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';dLbl.innerHTML='Duration';sh.appendChild(dLbl);
+  var dLbl=document.createElement('div');dLbl.style.cssText='font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;';dLbl.innerHTML='Duration';sh.appendChild(dLbl);
   var durRow=document.createElement('div');durRow.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px;';
   var _dur=1;
   // null = no set duration. Every display site already guards on a falsy
@@ -1913,7 +1892,7 @@ function _calScheduleForm(dayDate){
   });sh.appendChild(durRow);
 
   // Repeat / Routine
-  var rLbl=document.createElement('div');rLbl.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;';rLbl.textContent='Repeat';sh.appendChild(rLbl);
+  var rLbl=document.createElement('div');rLbl.style.cssText='font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;';rLbl.textContent='Repeat';sh.appendChild(rLbl);
   var _isRoutine=false;
   var repRow=document.createElement('div');repRow.style.cssText='display:flex;gap:6px;margin-bottom:10px;';
   var onceBtn=document.createElement('div');onceBtn.className='fb on';onceBtn.textContent='One-off';
@@ -1996,14 +1975,12 @@ function _calScheduleForm(dayDate){
       sv();ov.classList.remove('on');
       if(document.getElementById('cal-ov').classList.contains('on'))renderCalDay(dayDate);
       if(document.getElementById('s-home').classList.contains('on'))rHome();
-      updateHomeNudge();
       showToast(_selActs.length>1?_selActs.length+' routines added':'Routine added: '+_selActs[0].emoji+' '+_selActs[0].name,null);
     } else {
       _selActs.forEach(function(a){calPlanned.push({id:genUUID(),actId:a.id,actName:a.name,actEmoji:a.emoji,cat:a.cat||'',date:_calMidnight(dayDate).getTime(),hour:hour,duration:_dur,notified:false});});
       sv();ov.classList.remove('on');
       if(document.getElementById('cal-ov').classList.contains('on'))renderCalDay(dayDate);
       if(document.getElementById('s-home').classList.contains('on'))rHome();
-      updateHomeNudge();
       showToast(_selActs.length>1?_selActs.length+' activities scheduled':'Scheduled '+_selActs[0].emoji+' '+_selActs[0].name,null);
     }
   });
@@ -2011,10 +1988,6 @@ function _calScheduleForm(dayDate){
 }
 
 
-function updateHomeNudge(){
-  // v2: today's schedule now lives inside 'On today's list' — legacy nudge disabled
-  var el=document.getElementById('home-due');if(el)el.innerHTML='';
-}
 
 // Mondays: offer once to go over the week's focus
 function checkMondayFocus(){
@@ -2562,8 +2535,6 @@ var _activeTimerInt=null;
 function _fmtElapsed(ms){var s=Math.floor(ms/1000);var h=Math.floor(s/3600);var m=Math.floor((s%3600)/60);var sec=s%60;if(h>0)return h+'h '+(m<10?'0':'')+m+'m '+(sec<10?'0':'')+sec+'s';return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;}
 var _frSearchTimer=null;
 
-function openFriends(){nav('friends');}
-function closeFriends(){nav('home');}
 
 function openConvOv(userId,name,un,emoji){
   _convUserId=userId;_convName=name;_convUn=un;_convEmoji=emoji||'🌱';
@@ -2687,7 +2658,7 @@ async function openFriendProfile(fid,p,fshipId){
   actions.appendChild(waveBtn);actions.appendChild(msgBtn);sh.appendChild(actions);
 
   // Gift picker
-  var giftLbl=document.createElement('div');giftLbl.style.cssText='font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;';giftLbl.textContent='Send a gift';sh.appendChild(giftLbl);
+  var giftLbl=document.createElement('div');giftLbl.style.cssText='font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;';giftLbl.textContent='Send a gift';sh.appendChild(giftLbl);
   var gifts=GIFTS;
   var giftRow=document.createElement('div');giftRow.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;';
   gifts.forEach(function(g){
@@ -2735,7 +2706,7 @@ async function renderRequests(){
 
     function mkLabel(text,mt){
       var d=document.createElement('div');
-      d.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;margin:'+(mt||'0')+' 0 10px;';
+      d.style.cssText='font-size:12px;font-weight:600;color:var(--tx3);margin:'+(mt||'0')+' 0 10px;';
       d.textContent=text;return d;
     }
     body.appendChild(mkLabel('Incoming'));
@@ -3452,7 +3423,7 @@ function openTodayOverview(){
 
   function subHdr(text){
     var el=document.createElement('div');
-    el.style.cssText='font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1.2px;margin:14px 0 8px;';
+    el.style.cssText='font-size:12px;font-weight:600;color:var(--tx3);margin:14px 0 8px;';
     el.textContent=text;
     return el;
   }
@@ -3489,17 +3460,15 @@ function openTodayOverview(){
   // ── Logged today ──
   if(todaySess.length){
     sh.appendChild(subHdr('Logged today'));
-    var lWrap=document.createElement('div');
-    lWrap.style.cssText='background:var(--bg2);border-radius:12px;padding:2px 12px;';
-    todaySess.slice().reverse().forEach(function(s,i,arr){
-      var act=myActs.find(function(a){return a.id===s.actId;})||{emoji:'?',name:'Unknown'};
+    // Same light rows as the schedule above
+    todaySess.slice().reverse().forEach(function(s){
+      var act=myActs.find(function(a){return a.id===s.actId;})||{name:s.actName||'Unknown'};
       var mins=(s.hours||0)*60+(s.mins||0);
-      var row=document.createElement('div');
-      row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 0;'+(i<arr.length-1?'border-bottom:.5px solid var(--bg3);':'');
-      row.innerHTML='<span style="font-size:18px;">'+act.emoji+'</span><div style="flex:1;font-size:13px;font-weight:600;">'+act.name+'</div><div style="font-size:12px;color:var(--gr);font-weight:600;">'+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m')+'</div>';
-      lWrap.appendChild(row);
+      var row=document.createElement('div');row.className='sched-item';row.style.cursor='default';
+      row.innerHTML='<div class="sched-name" style="flex:1;min-width:0;">'+esc(act.name)+'</div>'
+        +'<span class="sched-time">'+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m')+'</span>';
+      sh.appendChild(row);
     });
-    sh.appendChild(lWrap);
   }
 
   // Nothing scheduled or logged yet: say what this sheet is for
@@ -3611,7 +3580,7 @@ function openWeeklySummary(preferLast){
   var wkStartDate=new Date(wkStartMs),wkEndDate=new Date(wkEndMs-86400000);
   var dateStr=MNAMES[wkStartDate.getMonth()]+' '+wkStartDate.getDate()+' – '+wkEndDate.getDate();
   var hdr=document.createElement('div');hdr.style.cssText='text-align:center;margin-bottom:20px;';
-  hdr.innerHTML=(showLast?'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--tx3);margin-bottom:5px;">Last week</div>':'')
+  hdr.innerHTML=(showLast?'<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:5px;">Last week</div>':'')
     +'<div style="font-family:var(--serif);font-size:18px;font-weight:700;">'+dateStr+'</div>'
     +(wkSess.length?'':'<div style="font-size:13px;color:var(--tx3);margin-top:8px;">No sessions logged.</div>');
   sh.appendChild(hdr);
@@ -3624,7 +3593,7 @@ function openWeeklySummary(preferLast){
     mkStat(daysActive+'/7');
     sh.appendChild(grid);
     if(topActs.length){
-      var actLbl=document.createElement('div');actLbl.style.cssText='font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--tx3);margin-bottom:8px;';actLbl.textContent='Most grown';sh.appendChild(actLbl);
+      var actLbl=document.createElement('div');actLbl.style.cssText='font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;';actLbl.textContent='Most grown';sh.appendChild(actLbl);
       var actList=document.createElement('div');actList.style.cssText='background:var(--bg2);border-radius:14px;padding:0 14px;margin-bottom:16px;';
       topActs.forEach(function(a,i){var row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 0;'+(i<topActs.length-1?'border-bottom:.5px solid var(--bg3);':'');row.innerHTML='<span style="font-size:18px;">'+a.emoji+'</span><span style="font-size:14px;font-weight:600;color:var(--tx);flex:1;">'+a.name+'</span><span style="font-size:12px;color:var(--tx3);">'+a.count+' session'+(a.count>1?'s':'')+'</span>';actList.appendChild(row);});
       sh.appendChild(actList);
@@ -3966,7 +3935,7 @@ function renderFocusList(query){
   }
   keys.forEach(function(cat){
     var catLbl=document.createElement('div');
-    catLbl.style.cssText='font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 8px;padding-left:2px;';
+    catLbl.style.cssText='font-size:12px;font-weight:600;color:var(--co2);margin:14px 0 8px;padding-left:2px;';
     catLbl.textContent=(CEM[cat]||'🌱')+' '+cat;
     list.appendChild(catLbl);
     groups[cat].forEach(function(a){
@@ -4064,7 +4033,6 @@ function addSwipe(wrap,card,onArchive,onFocus){
     startX=clientX;startY=clientY;dx=0;decided=false;isSwipe=false;
   }
   function onMove(clientX,clientY){
-    if(dragState)return;
     dx=clientX-startX;
     var dy=clientY-startY;
     if(!decided){
@@ -4131,71 +4099,6 @@ function addSwipe(wrap,card,onArchive,onFocus){
     function onMouseUp(){document.removeEventListener('mousemove',onMouseMove);document.removeEventListener('mouseup',onMouseUp);onEnd();}
     document.addEventListener('mousemove',onMouseMove);
     document.addEventListener('mouseup',onMouseUp);
-  });
-}
-
-// ── DRAG TO REORDER ───────────────────────────────────
-var dragState=null;
-function _dragMove(clientY){
-  dragState.ghost.style.top=(clientY-dragState.offsetY)+'px';
-  var wraps=document.querySelectorAll('.mc-wrap[data-drag-cat]');
-  var best=null,bestDist=Infinity;
-  wraps.forEach(function(w){
-    if(w===dragState.wrap||w.dataset.dragCat!==dragState.cat)return;
-    var r=w.getBoundingClientRect(),mid=r.top+r.height/2,dist=Math.abs(clientY-mid);
-    if(dist<bestDist){bestDist=dist;best=w;}
-  });
-  document.querySelectorAll('.mc-wrap.drag-over').forEach(function(x){x.classList.remove('drag-over');});
-  if(best){best.classList.add('drag-over');dragState.targetId=best.dataset.dragId;}
-  else{dragState.targetId=null;}
-}
-function _dragEnd(){
-  dragState.ghost.remove();
-  dragState.wrap.classList.remove('dragging');
-  document.querySelectorAll('.mc-wrap.drag-over').forEach(function(x){x.classList.remove('drag-over');});
-  if(dragState.targetId&&dragState.targetId!==dragState.actId){
-    var fi=myActs.findIndex(function(a){return a.id===dragState.actId;});
-    var ti=myActs.findIndex(function(a){return a.id===dragState.targetId;});
-    if(fi>-1&&ti>-1){var item=myActs.splice(fi,1)[0];myActs.splice(ti,0,item);sv();rMy();}
-  }
-  dragState=null;
-}
-document.addEventListener('touchmove',function(e){
-  if(!dragState||!dragState.isTouch)return;
-  e.preventDefault();
-  _dragMove(e.touches[0].clientY);
-},{passive:false});
-document.addEventListener('touchend',function(){
-  if(!dragState||!dragState.isTouch)return;
-  _dragEnd();
-});
-document.addEventListener('mousemove',function(e){
-  if(!dragState||dragState.isTouch)return;
-  _dragMove(e.clientY);
-});
-document.addEventListener('mouseup',function(){
-  if(!dragState||dragState.isTouch)return;
-  _dragEnd();
-});
-function _startDrag(clientY,card,wrap,actId,cat,isTouch){
-  var rect=card.getBoundingClientRect();
-  var ghost=card.cloneNode(true);
-  ghost.style.cssText='position:fixed;left:'+rect.left+'px;top:'+rect.top+'px;width:'+rect.width+'px;height:'+rect.height+'px;opacity:.9;z-index:9998;pointer-events:none;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.22);background:var(--bg);display:flex;align-items:center;gap:12px;padding:14px;animation:none;';
-  document.body.appendChild(ghost);
-  wrap.classList.add('dragging');
-  dragState={ghost:ghost,wrap:wrap,actId:actId,cat:cat,offsetY:clientY-rect.top,targetId:null,isTouch:isTouch};
-}
-function initDrag(handle,wrap,actId,cat){
-  handle.addEventListener('touchstart',function(e){
-    e.stopPropagation();e.preventDefault();
-    var card=wrap.querySelector('.mc');
-    _startDrag(e.touches[0].clientY,card,wrap,actId,cat,true);
-  },{passive:false});
-  handle.addEventListener('mousedown',function(e){
-    if(dragState)return;
-    e.preventDefault();e.stopPropagation();
-    var card=wrap.querySelector('.mc');
-    _startDrag(e.clientY,card,wrap,actId,cat,false);
   });
 }
 
@@ -4599,7 +4502,7 @@ function rHist(){
     var _isDayOpen=histDayOpen[_dk]!==false;
     var _dayWrap=document.createElement('div');
     var _dayHdr=document.createElement('div');
-    _dayHdr.style.cssText='display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--co2);text-transform:uppercase;letter-spacing:.7px;padding:14px 0 6px;cursor:pointer;user-select:none;';
+    _dayHdr.style.cssText='display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--co2);padding:14px 0 6px;cursor:pointer;user-select:none;';
     _dayHdr.innerHTML='<span>'+dayLabel(_daySess[0].date)+'</span><span class="hist-day-arrow" style="font-size:14px;font-weight:400;display:inline-block;transition:transform .28s cubic-bezier(.4,0,.2,1);transform:rotate('+(_isDayOpen?'90':'0')+'deg);line-height:1;">›</span>';
     var _dayBody=document.createElement('div');_dayBody.className='hist-day-body'+(_isDayOpen?' open':'');
     var _dayInner=document.createElement('div');_dayInner.className='hist-day-inner';
@@ -4772,31 +4675,6 @@ function openSessionEdit(s,a){
 
 // ── EDIT SHEET ────────────────────────────────────────
 var edId=null, edTmp={};
-function openEd(id){
-  edId=id;
-  var a=myActs.find(function(x){return x.id===id;});
-  document.getElementById('ed-title').textContent='Tend: '+a.name;
-  edTmp={name:a.name,emoji:a.emoji,cat:a.cat||CATS[0]};
-
-  document.getElementById('ed-name').value=a.name;
-  document.getElementById('ed-emoji').value=a.emoji;
-
-  var catWrap=document.getElementById('ed-cat');catWrap.innerHTML='';
-  function addEdCat(cat,label,cc){
-    var b=document.createElement('div');b.className='sop'+(edTmp.cat===cat?' on':'');b.textContent=label;
-    if(edTmp.cat===cat){b.style.background=cc[0];b.style.color=cc[1];b.style.borderColor=cc[1];}
-    b.addEventListener('click',function(){
-      edTmp.cat=cat;
-      catWrap.querySelectorAll('.sop').forEach(function(x){x.classList.remove('on');x.style.background='';x.style.color='';x.style.borderColor='';});
-      b.classList.add('on');b.style.background=cc[0];b.style.color=cc[1];b.style.borderColor=cc[1];
-    });
-    catWrap.appendChild(b);
-  }
-  CATS.forEach(function(cat){var cc=CAT_COLORS[cat]?CAT_COLORS[cat].split(','):['var(--bg2)','var(--tx)'];addEdCat(cat,cat,cc);});
-  customCats.forEach(function(cat){addEdCat(cat,'🌱 '+cat,['var(--bg3)','var(--tx)']);});
-
-  document.getElementById('ed-ov').classList.add('on');
-}
 // Shared activity picker (title + search + category pills + card grid).
 // Static shell builds once; filter changes rebuild only the grid inside _resizeSheet,
 // so the sheet height animates and the search input keeps focus.
@@ -5376,7 +5254,7 @@ function showProjectInfo(id){
   html+='</div>';
   // Steps
   html+='<div style="margin-bottom:14px;">';
-  if(tasks.length)html+='<div style="font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Steps ('+doneCount+'/'+tasks.length+(tasks.length>=MAX_TASKS_PER_PROJECT?' · max':'')+')</div>';
+  if(tasks.length)html+='<div style="font-size:12px;font-weight:600;color:var(--tx3);margin-bottom:8px;">Steps ('+doneCount+'/'+tasks.length+(tasks.length>=MAX_TASKS_PER_PROJECT?' · max':'')+')</div>';
   html+='<div id="proj-tasks-list" style="max-height:224px;overflow-y:auto;overscroll-behavior:contain;">'; // 5 steps visible, scroll for the rest
   tasks.forEach(function(t){
     var safeText=(t.text||'').replace(/</g,'&lt;');
@@ -5930,7 +5808,7 @@ function showPlantInfo(id){
   var recent=_sessFor(id).slice().sort(function(a,b){return b.date-a.date;}).slice(0,3);
   if(recent.length){
     var FEELS=['😔','😐','🙂','😊','🌟'];
-    var rHtml='<div style="font-size:12px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Recent sessions</div>';
+    var rHtml='<div style="font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:8px;">Recent sessions</div>';
     recent.forEach(function(s){
       var d=new Date(s.date);var now=new Date();
       var today=now.toDateString()===d.toDateString();
