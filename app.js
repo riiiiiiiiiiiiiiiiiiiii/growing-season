@@ -3255,8 +3255,9 @@ function makeFeelsCategories(wrap,feelsArr){
   }
   render();
 }
+var MOMENTUM_LABELS=['Not really','Somewhat','Definitely',"Can't stop now"];
 function makeMomentumScale(wrap,current,onChange){
-  var labels=['Not really','Somewhat','Definitely',"Can't stop now"];
+  var labels=MOMENTUM_LABELS;
   wrap.innerHTML='';
   var row=document.createElement('div');
   row.style.cssText='display:flex;justify-content:flex-start;align-items:center;gap:12px;';
@@ -4666,23 +4667,32 @@ function openSessionDetail(s,a){
         +'<div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">★ '+normRating(s.rating)+'</div><div style="font-size:11px;color:var(--tx3);">Rating</div></div>'
       +'</div>'
       :'<div style="margin-bottom:14px;"><div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">'+dur+'</div><div style="font-size:11px;color:var(--tx3);">Time spent</div></div></div>');
-  // What was written when logging: feeling tags, then the notes in one box.
-  // The 'wanting more?' answer (s.momentum) isn't shown as a tag.
+  // What was written when logging, in one box: the notes with their feeling
+  // tags, then the 'wanting more?' answer drawn as the 1–4 scale it was picked on
   var tags=Array.isArray(s.feel)?s.feel:(s.feel?[s.feel]:[]);
-  // One box: the written notes, then the feeling tags beneath them
-  var noteRows=[['Field notes',s.notes],['Went well',s.well],['Next time',s.diff]].filter(function(r){return r[1]&&String(r[1]).trim();});
-  var extra='';
-  if(noteRows.length||tags.length){
-    extra+='<div style="background:var(--bg2);border-radius:10px;padding:0 14px;margin-bottom:14px;">'+noteRows.map(function(r,i){
-      return '<div style="padding:11px 0;'+(i<noteRows.length-1?'border-bottom:.5px solid var(--bg3);':'')+'">'
-        +'<div style="font-size:10.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">'+r[0]+'</div>'
-        +'<div style="font-size:13px;color:var(--tx);line-height:1.5;white-space:pre-wrap;word-break:break-word;">'+esc(r[1])+'</div></div>';
-    }).join('');
-    if(tags.length)extra+='<div style="display:flex;gap:6px;flex-wrap:wrap;padding:'+(noteRows.length?'0 0 12px':'12px 0')+';">'+tags.map(function(t){
+  var secLbl='font-size:10.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;';
+  var sections=[['Field notes',s.notes],['Went well',s.well],['Next time',s.diff]].filter(function(r){return r[1]&&String(r[1]).trim();}).map(function(r){
+    return '<div style="'+secLbl+'">'+r[0]+'</div>'
+      +'<div style="font-size:13px;color:var(--tx);line-height:1.5;white-space:pre-wrap;word-break:break-word;">'+esc(r[1])+'</div>';
+  });
+  // Feeling tags sit with the notes (or alone if nothing was written)
+  if(tags.length){
+    var tagHtml='<div style="display:flex;gap:6px;flex-wrap:wrap;'+(sections.length?'margin-top:9px;':'')+'">'+tags.map(function(t){
       return '<span style="font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--grl);background:color-mix(in srgb,var(--gr) 14%,var(--bg));color:var(--gr2);">'+esc(t)+'</span>';
     }).join('')+'</div>';
-    extra+='</div>';
+    if(sections.length)sections[sections.length-1]+=tagHtml;else sections.push(tagHtml);
   }
+  var momI=MOMENTUM_LABELS.indexOf(s.momentum);
+  if(momI>-1)sections.push('<div style="'+secLbl+'margin-bottom:7px;">Left you wanting more?</div>'
+    +'<div style="display:flex;align-items:center;gap:6px;">'+MOMENTUM_LABELS.map(function(l,i){
+      var on=i===momI;
+      return '<span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;'
+        +(on?'background:var(--gr);color:#fff;border:1.5px solid var(--gr);':'background:transparent;color:var(--tx3);border:1.5px solid var(--bg3);')+'">'+(i+1)+'</span>';
+    }).join('')+'<span style="font-size:13px;font-weight:600;color:var(--gr2);margin-left:6px;">'+esc(s.momentum)+'</span></div>');
+  var extra='';
+  if(sections.length)extra='<div style="background:var(--bg2);border-radius:10px;padding:0 14px;margin-bottom:14px;">'+sections.map(function(h,i){
+    return '<div style="padding:11px 0;'+(i<sections.length-1?'border-bottom:.5px solid var(--bg3);':'')+'">'+h+'</div>';
+  }).join('')+'</div>';
   if(extra)sh.insertAdjacentHTML('beforeend',extra);
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-top:8px;';
   var editBtn=document.createElement('button');editBtn.className='btn btn-p';editBtn.style.cssText='flex:1;margin-top:0;';editBtn.textContent='Edit';
