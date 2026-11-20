@@ -4669,16 +4669,20 @@ function openSessionDetail(s,a){
   // What was written when logging: feeling/momentum tags, then the notes in one box
   var feels=Array.isArray(s.feel)?s.feel:(s.feel?[s.feel]:[]);
   var tags=feels.concat(s.momentum?[s.momentum]:[]);
-  var extra='';
-  if(tags.length)extra+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">'+tags.map(function(t){
-    return '<span style="font-size:12px;font-weight:600;padding:5px 11px;border-radius:20px;background:var(--grl);background:color-mix(in srgb,var(--gr) 14%,var(--bg));color:var(--gr2);">'+esc(t)+'</span>';
-  }).join('')+'</div>';
+  // One box: the written notes, then the feeling/momentum tags beneath them
   var noteRows=[['Field notes',s.notes],['Went well',s.well],['Next time',s.diff]].filter(function(r){return r[1]&&String(r[1]).trim();});
-  if(noteRows.length)extra+='<div style="background:var(--bg2);border-radius:10px;padding:0 14px;margin-bottom:14px;">'+noteRows.map(function(r,i){
-    return '<div style="padding:11px 0;'+(i<noteRows.length-1?'border-bottom:.5px solid var(--bg3);':'')+'">'
-      +'<div style="font-size:10.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">'+r[0]+'</div>'
-      +'<div style="font-size:13px;color:var(--tx);line-height:1.5;white-space:pre-wrap;word-break:break-word;">'+esc(r[1])+'</div></div>';
-  }).join('')+'</div>';
+  var extra='';
+  if(noteRows.length||tags.length){
+    extra+='<div style="background:var(--bg2);border-radius:10px;padding:0 14px;margin-bottom:14px;">'+noteRows.map(function(r,i){
+      return '<div style="padding:11px 0;'+(i<noteRows.length-1?'border-bottom:.5px solid var(--bg3);':'')+'">'
+        +'<div style="font-size:10.5px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;">'+r[0]+'</div>'
+        +'<div style="font-size:13px;color:var(--tx);line-height:1.5;white-space:pre-wrap;word-break:break-word;">'+esc(r[1])+'</div></div>';
+    }).join('');
+    if(tags.length)extra+='<div style="display:flex;gap:6px;flex-wrap:wrap;padding:'+(noteRows.length?'0 0 12px':'12px 0')+';">'+tags.map(function(t){
+      return '<span style="font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--grl);background:color-mix(in srgb,var(--gr) 14%,var(--bg));color:var(--gr2);">'+esc(t)+'</span>';
+    }).join('')+'</div>';
+    extra+='</div>';
+  }
   if(extra)sh.insertAdjacentHTML('beforeend',extra);
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-top:8px;';
   var editBtn=document.createElement('button');editBtn.className='btn btn-p';editBtn.style.cssText='flex:1;margin-top:0;';editBtn.textContent='Edit';
