@@ -5779,7 +5779,7 @@ function rGarden(){
     // A short (front) row is centred rather than leaving an empty plot on one side
     var rowOff=(COLS-rowActs.length)*TW/2;
     rowActs.forEach(function(a,ci){
-      var ph=phash(a.id,42+ri*7);
+      var ph=_plantHash(a.id); // from the seed alone, so its shape matches everywhere and never shifts with the row
       var cx=rowOff+ci*TW+TW/2;
       var pgy=gy;
       var _isProj=isProject(a);
