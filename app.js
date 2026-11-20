@@ -5837,9 +5837,11 @@ function rGarden(){
       svg+=grassTuft(8+(ghh%Math.max(1,svgW-16)),gy+3+((ghh>>5)%6),ghh);
     }
 
+    // A short (top) row is centred rather than leaving an empty plot on one side
+    var rowOff=(COLS-rowActs.length)*TW/2;
     rowActs.forEach(function(a,ci){
       var ph=phash(a.id,42+ri*7);
-      var cx=ci*TW+TW/2;
+      var cx=rowOff+ci*TW+TW/2;
       var pgy=gy;
       var _isProj=isProject(a);
       var hrs=getHours(a.id);
