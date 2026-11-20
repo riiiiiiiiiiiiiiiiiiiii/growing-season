@@ -5910,7 +5910,7 @@ function showPlantInfo(id){
     +'<div class="pi-stage">Stage '+stage+'/4 - '+STAGE_LABELS[stage]+'</div>'
     +'<div class="pi-bar"><div class="pi-fill" style="width:'+pct+'%;background:'+clrs[stage]+'"></div></div>'
     +'<div class="pi-lbl"><span>'+Math.round(hrs*10)/10+'h logged</span><span>'+(next?'Next at '+next+'h':'Fully bloomed!')+'</span></div>'
-    +'<div style="font-size:13px;color:var(--tx2);text-align:center;margin-bottom:14px;">'+a.cat+'</div>';
+    +'<div style="height:14px;"></div>';
   var recent=_sessFor(id).slice().sort(function(a,b){return b.date-a.date;}).slice(0,3);
   if(recent.length){
     var FEELS=['😔','😐','🙂','😊','🌟'];
