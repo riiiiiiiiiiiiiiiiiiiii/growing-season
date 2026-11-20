@@ -128,8 +128,7 @@ function isProject(a){return !!(a&&a.kind==='project');}
 function isSkill(a){return !isProject(a);}
 function isFinished(a){return isProject(a)&&!!a.finishedAt;}
 // Seeds list grouping: finished projects leave their category for one 'Finished' group
-var FINISHED_GROUP='__finished__';
-function _seedGroup(a){return isFinished(a)?FINISHED_GROUP:(a.cat||'Other');}
+function _seedGroup(a){return a.cat||'Other';}
 function getProjectTasks(a){return isProject(a)&&Array.isArray(a.tasks)?a.tasks:[];}
 function getProjectDoneCount(a){return getProjectTasks(a).filter(function(t){return t&&t.done;}).length;}
 // Deadline is a local 'YYYY-MM-DD' string, or absent.
@@ -419,6 +418,23 @@ function _restoreSeedRefs(id,removed){
   removed.planned.forEach(function(ev){calPlanned.push(ev);});
   removed.routines.forEach(function(r){calRoutines.push(r);});
   if(removed.focused&&weeklyFocus.actIds.indexOf(id)===-1)weeklyFocus.actIds.push(id);
+}
+// Finished projects live in the archive. Moves one there and returns an
+// undo that puts it back in the packet, unfinished, where it was.
+function _archiveFinished(a){
+  var idx=myActs.indexOf(a);if(idx<0)return null;
+  myActs.splice(idx,1);archivedActs.push(a);_tombstone(a.id,'arch');
+  var refs=_purgeSeedRefs(a.id);
+  return function(){
+    var ai=archivedActs.indexOf(a);if(ai>-1)archivedActs.splice(ai,1);
+    delete a.finishedAt;myActs.splice(Math.min(idx,myActs.length),0,a);_untombstone(a.id);_restoreSeedRefs(a.id,refs);
+  };
+}
+// Projects finished before finishing archived them: move them over once
+function _archiveOldFinished(){
+  var fin=myActs.filter(isFinished);
+  if(!fin.length)return;
+  fin.forEach(_archiveFinished);sv();
 }
 
 // ── COLLECTIONS ───────────────────────────────────────
@@ -995,6 +1011,7 @@ function getDailyQuote(){
 // ── HOME ──────────────────────────────────────────────
 
 function rHome(){
+  _archiveOldFinished();
   // ── Session lock: when a session is in progress, take over the home
   if(active){
     document.body.classList.add('session-lock');
@@ -4126,6 +4143,7 @@ function positionSegThumb(seg){
   if(firstPos){thumb.getBoundingClientRect();thumb.style.transition='';}
 }
 function rMy(){
+  _archiveOldFinished();
   var el=document.getElementById('my-list');
   // Prune focus IDs that no longer exist
   var _validIds=weeklyFocus.actIds.filter(function(id){return myActs.some(function(a){return a.id===id;});});
@@ -4291,9 +4309,7 @@ function _rMyBody(el,allActs){
 
   var groups={};
   myActs.filter(function(a){return !_mySrch||a.name.toLowerCase().includes(_mySrch)||a.emoji.includes(_mySrch);}).forEach(function(a){var c=_seedGroup(a);if(!groups[c])groups[c]=[];groups[c].push(a);});
-  // Finished projects get their own group, always last (collapsed until opened)
-  var _cats=Object.keys(groups).filter(function(c){return c!==FINISHED_GROUP;});
-  if(groups[FINISHED_GROUP])_cats.push(FINISHED_GROUP);
+  var _cats=Object.keys(groups);
   _cats.forEach(function(cat){
     var acts=groups[cat];
     var isOpen=catOpen[cat]===true;
@@ -4301,7 +4317,7 @@ function _rMyBody(el,allActs){
     var hdr=document.createElement('div');hdr.className='cat-hdr';hdr.dataset.cat=cat;
     hdr.setAttribute('role','button');hdr.tabIndex=0;hdr.setAttribute('aria-expanded',isOpen?'true':'false');
     hdr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();hdr.click();}});
-    hdr.innerHTML='<span class="cat-hdr-label">'+(cat===FINISHED_GROUP?'Finished':cat)+'</span>'
+    hdr.innerHTML='<span class="cat-hdr-label">'+cat+'</span>'
       +'<span class="cat-arrow'+(isOpen?' open':'')+'">›</span>'
       +'<span class="cat-hdr-count">'+acts.length+'</span>';
     var body=document.createElement('div');body.className='cat-body'+(isOpen?' open':'');
@@ -4400,7 +4416,7 @@ function showArchivedList(){
     visibleArchived.forEach(function(a,i){
       var row=document.createElement('div');
       row.style.cssText='display:flex;align-items:center;gap:10px;padding:12px 0;'+(i<visibleArchived.length-1?'border-bottom:.5px solid var(--bg3);':'');
-      row.innerHTML='<span style="font-size:22px;">'+(a.emoji||'🌱')+'</span><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--tx);">'+a.name+'</div><div style="font-size:11px;color:var(--tx3);">'+(a.cat||'Uncategorised')+'</div></div>';
+      row.innerHTML='<span style="font-size:22px;">'+(a.emoji||'🌱')+'</span><div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;color:var(--tx);">'+a.name+'</div><div style="font-size:11px;color:var(--tx3);">'+(a.finishedAt?'🌳 Finished '+new Date(a.finishedAt).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):(a.cat||'Uncategorised'))+'</div></div>';
       var btns=document.createElement('div');btns.style.cssText='display:flex;gap:6px;flex-shrink:0;';
       var restoreBtn=document.createElement('button');
       restoreBtn.textContent='Restore';
@@ -4411,7 +4427,7 @@ function showArchivedList(){
       (function(act){
         restoreBtn.addEventListener('click',function(){
           var ai=archivedActs.indexOf(act);
-          if(ai>-1){archivedActs.splice(ai,1);myActs.push(_normalizeSeed(act));_untombstone(act.id);sv();showToast(act.emoji+' '+act.name+' restored',null);showArchivedList();rMy();rHome();}
+          if(ai>-1){archivedActs.splice(ai,1);delete act.finishedAt;myActs.push(_normalizeSeed(act));_untombstone(act.id);sv();showToast(act.emoji+' '+act.name+' restored',null);showArchivedList();rMy();rHome();}
         });
         deleteBtn.addEventListener('click',function(){
           if(!confirm('Delete "'+act.name+'" for good? This cannot be undone.'))return;
@@ -5292,8 +5308,10 @@ function showProjectInfo(id){
   sh.innerHTML=html;
   // Finish: a prominent button once every step is ticked, otherwise a quiet link under Start / Log
   var finish=function(){
-    a.finishedAt=Date.now();sv();rMy();renderTodaySection();showProjectInfo(id);
-    showToast('🌳 '+a.name+' finished',function(){delete a.finishedAt;sv();rMy();renderTodaySection();if(document.getElementById('ed-ov').classList.contains('on'))showProjectInfo(id);});
+    a.finishedAt=Date.now();
+    var undo=_archiveFinished(a);
+    sv();closeEd();rMy();rHome();
+    showToast('🌳 '+a.name+' finished · moved to archive',undo&&function(){undo();sv();rMy();rHome();});
   };
   var allDone=tasks.length>0&&doneCount===tasks.length;
   if(!isFinished(a)){
