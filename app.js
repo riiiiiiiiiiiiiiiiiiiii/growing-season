@@ -5824,10 +5824,11 @@ function rGarden(){
     }
   }
 
-  // Draw rows back-to-front so front row renders on top
-  for(var ri=numRows-1;ri>=0;ri--){
+  // Fill rows from the top (back) down, so a short row ends up at the front.
+  // Back rows are drawn first so the front ones render on top.
+  for(var ri=0;ri<numRows;ri++){
     var rowActs=visibleActs.slice(ri*COLS,(ri+1)*COLS);
-    var gy=svgH-GH-ri*RH;
+    var gy=svgH-GH-(numRows-1-ri)*RH;
 
     // Soft bed shading + grass tufts along the row
     svg+='<ellipse cx="'+(svgW/2)+'" cy="'+(gy+6)+'" rx="'+(svgW*0.55).toFixed(1)+'" ry="8" fill="'+GROUND_BOT+'" opacity="0.15"/>';
@@ -5837,7 +5838,7 @@ function rGarden(){
       svg+=grassTuft(8+(ghh%Math.max(1,svgW-16)),gy+3+((ghh>>5)%6),ghh);
     }
 
-    // A short (top) row is centred rather than leaving an empty plot on one side
+    // A short (front) row is centred rather than leaving an empty plot on one side
     var rowOff=(COLS-rowActs.length)*TW/2;
     rowActs.forEach(function(a,ci){
       var ph=phash(a.id,42+ri*7);
