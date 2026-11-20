@@ -5641,10 +5641,9 @@ function rGarden(){
   var visibleActs=(gardenTab==='focus'&&hasFocusSet())?myActs.filter(function(a){return isFocused(a.id);}):myActs;
 
   // Stats
-  var totalHrs=myActs.reduce(function(t,a){return t+getHours(a.id);},0);
   var bloomCount=myActs.filter(function(a){return getStage(getHours(a.id))>=4;}).length;
   var gc=document.getElementById('garden-count');
-  if(gc){var gParts=[];if(bloomCount&&!hasFocusSet())gParts.push(bloomCount+' blooming');gParts.push(Math.round(totalHrs)+'h grown');gc.textContent=gParts.join(' · ');}
+  if(gc)gc.textContent=(bloomCount&&!hasFocusSet())?bloomCount+' blooming':'';
 
   if(!visibleActs.length){
     document.getElementById('garden-svg-wrap').innerHTML='';
