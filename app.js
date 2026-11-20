@@ -4666,10 +4666,10 @@ function openSessionDetail(s,a){
         +'<div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">★ '+normRating(s.rating)+'</div><div style="font-size:11px;color:var(--tx3);">Rating</div></div>'
       +'</div>'
       :'<div style="margin-bottom:14px;"><div style="background:var(--bg2);border-radius:10px;padding:10px;text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--gr);">'+dur+'</div><div style="font-size:11px;color:var(--tx3);">Time spent</div></div></div>');
-  // What was written when logging: feeling/momentum tags, then the notes in one box
-  var feels=Array.isArray(s.feel)?s.feel:(s.feel?[s.feel]:[]);
-  var tags=feels.concat(s.momentum?[s.momentum]:[]);
-  // One box: the written notes, then the feeling/momentum tags beneath them
+  // What was written when logging: feeling tags, then the notes in one box.
+  // The 'wanting more?' answer (s.momentum) isn't shown as a tag.
+  var tags=Array.isArray(s.feel)?s.feel:(s.feel?[s.feel]:[]);
+  // One box: the written notes, then the feeling tags beneath them
   var noteRows=[['Field notes',s.notes],['Went well',s.well],['Next time',s.diff]].filter(function(r){return r[1]&&String(r[1]).trim();});
   var extra='';
   if(noteRows.length||tags.length){
