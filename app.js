@@ -430,6 +430,7 @@ function _archiveFinished(a){
     delete a.finishedAt;myActs.splice(Math.min(idx,myActs.length),0,a);_untombstone(a.id);_restoreSeedRefs(a.id,refs);
   };
 }
+function _finishedProjects(){return archivedActs.filter(function(a){return !a._terminated&&isFinished(a);});}
 // Projects finished before finishing archived them: move them over once
 function _archiveOldFinished(){
   var fin=myActs.filter(isFinished);
@@ -5255,7 +5256,7 @@ function getTreeStage(hrs){
   return 0;
 }
 function showProjectInfo(id){
-  var a=myActs.find(function(x){return x.id===id;});
+  var a=myActs.find(function(x){return x.id===id;})||_finishedProjects().find(function(x){return x.id===id;});
   if(!a)return;
   var tasks=getProjectTasks(a);
   var doneCount=tasks.filter(function(t){return t.done;}).length;
@@ -5329,7 +5330,14 @@ function showProjectInfo(id){
       finLink.addEventListener('click',finish);sh.appendChild(finLink);
     }
   } else {
-    sh.querySelector('#proj-reopen').addEventListener('click',function(){delete a.finishedAt;sv();rMy();renderTodaySection();showProjectInfo(id);});
+    sh.querySelector('#proj-reopen').addEventListener('click',function(){
+      // Reopening a finished project brings it back out of the archive
+      var ai=archivedActs.indexOf(a);
+      if(ai>-1){archivedActs.splice(ai,1);myActs.push(a);_untombstone(a.id);}
+      delete a.finishedAt;sv();rMy();rHome();
+      if(document.getElementById('s-garden').classList.contains('on'))rGarden();
+      showProjectInfo(id);
+    });
   }
   // Re-render without losing the steps list's scroll position (or jump to the end after adding)
   var rerender=function(toEnd){
@@ -5551,7 +5559,8 @@ function rGarden(){
   }
 
 
-  var visibleActs=(gardenTab==='focus'&&hasFocusSet())?myActs.filter(function(a){return isFocused(a.id);}):myActs;
+  // Full garden keeps finished projects (from the archive) as fruiting trees
+  var visibleActs=(gardenTab==='focus'&&hasFocusSet())?myActs.filter(function(a){return isFocused(a.id);}):myActs.concat(_finishedProjects());
 
   // Stats
   var bloomCount=myActs.filter(function(a){return getStage(getHours(a.id))>=4;}).length;
