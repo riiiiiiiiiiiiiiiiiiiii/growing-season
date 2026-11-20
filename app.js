@@ -5489,7 +5489,7 @@ function drawPlantAt(cx,gy,h,stage,cat,ph){
   var species=(ph>>3)%4;
   if(species===0){
     // Daisy: two rings of slim petals, a seeded golden centre
-    for(var i=0;i<12;i++)out+=roundPetal(cx,fY,i*30,h*0.2025,h*0.0324,petalDark);
+    for(var i=0;i<12;i++)out+=roundPetal(cx,fY,i*30,h*0.1904,h*0.0305,petalDark);
     for(var i=0;i<12;i++)out+=roundPetal(cx,fY,i*30+15,h*0.162,h*0.027,petalLite);
     out+='<circle cx="'+cx+'" cy="'+fY.toFixed(1)+'" r="'+(h*0.0607).toFixed(1)+'" fill="#E8B24E"/>';
     for(var i=0;i<8;i++){var dr=(i*45)*Math.PI/180;out+='<circle cx="'+(cx+Math.cos(dr)*h*0.0324).toFixed(1)+'" cy="'+(fY+Math.sin(dr)*h*0.0324).toFixed(1)+'" r="'+(h*0.0081).toFixed(1)+'" fill="#A8702A"/>';}
@@ -5529,7 +5529,7 @@ function openGardenHelp(){
     {label:'In full bloom',range:'16+ hours'}
   ];
   var rows=info.map(function(s,i){
-    var svg='<svg width="56" height="64" viewBox="0 0 56 64" style="flex-shrink:0;">'+drawPlant(i,56,64,'Creative')+'</svg>';
+    var svg='<svg width="56" height="64" viewBox="0 -6 56 70" style="flex-shrink:0;">'+drawPlant(i,56,64,'Creative')+'</svg>';
     return '<div style="display:flex;align-items:center;gap:14px;padding:11px 0;'+(i<4?'border-bottom:1px solid var(--bg3);':'')+'">'+svg+'<div><div style="font-weight:600;font-size:14px;">'+s.label+'</div><div style="font-size:12px;color:var(--tx3);margin-top:2px;">'+s.range+'</div></div></div>';
   }).join('');
   sh.innerHTML='<div style="font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:14px;">Plant stages</div>'+rows;
