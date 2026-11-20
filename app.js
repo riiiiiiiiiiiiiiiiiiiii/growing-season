@@ -4695,7 +4695,7 @@ function openSessionDetail(s,a){
   [['Went well',s.well],['Next time',s.diff]].forEach(function(r){
     if(has(r[1]))parts.push('<div style="'+lbl+'margin-bottom:4px;">'+r[0]+'</div><div style="'+body+'">'+esc(r[1])+'</div>');
   });
-  if(parts.length)extra+='<div style="'+card+'margin-bottom:14px;">'+parts.map(function(h,i){return '<div'+(i?' style="margin-top:12px;"':'')+'>'+h+'</div>';}).join('')+'</div>';
+  if(parts.length)extra+='<div style="'+card+'margin-bottom:14px;">'+parts.map(function(h,i){return '<div'+(i?' style="margin-top:12px;padding-top:11px;border-top:.5px solid var(--bg3);"':'')+'>'+h+'</div>';}).join('')+'</div>';
   if(extra)sh.insertAdjacentHTML('beforeend',extra);
   var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;margin-top:8px;';
   var editBtn=document.createElement('button');editBtn.className='btn btn-p';editBtn.style.cssText='flex:1;margin-top:0;';editBtn.textContent='Edit';
